@@ -8,7 +8,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 import UnifiedItemForm from '@/components/inventory/UnifiedItemForm';
 import SoldDetailsDialog from '@/components/estate/SoldDetailsDialog';
 import OffersPanel from '@/components/estate/OffersPanel';
-import { Plus, Search, Edit2, Trash2, Package, Globe, AlertCircle, FileText, User, CreditCard, MapPin, PackageCheck } from 'lucide-react';
+import { Plus, Search, Edit2, Trash2, Package, Globe, AlertCircle, FileText, User, CreditCard, MapPin, PackageCheck, FlaskConical } from 'lucide-react';
+import ResearchFlagDialog from '@/components/inventory/ResearchFlagDialog';
 import { Link } from 'react-router-dom';
 import { toast } from 'sonner';
 
@@ -24,6 +25,8 @@ export default function SaleInventory() {
   const [editingItem, setEditingItem] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [researchFilter, setResearchFilter] = useState('all');
+  const [researchDialogItem, setResearchDialogItem] = useState(null);
   const [soldDialogItem, setSoldDialogItem] = useState(null);
 
   useEffect(() => {
@@ -32,7 +35,7 @@ export default function SaleInventory() {
 
   useEffect(() => {
     filterItems();
-  }, [items, searchQuery, statusFilter]);
+  }, [items, searchQuery, statusFilter, researchFilter]);
 
   const loadData = async () => {
     try {
@@ -67,6 +70,10 @@ export default function SaleInventory() {
 
     if (statusFilter !== 'all') {
       filtered = filtered.filter(item => item.status === statusFilter);
+    }
+
+    if (researchFilter === 'flagged') {
+      filtered = filtered.filter(item => item.research_status && item.research_status !== 'CLEAR');
     }
 
     setFilteredItems(filtered);
@@ -244,6 +251,14 @@ export default function SaleInventory() {
               <option value="sold">Sold</option>
               <option value="reserved">Reserved</option>
             </select>
+            <select
+              value={researchFilter}
+              onChange={e => setResearchFilter(e.target.value)}
+              className="px-4 py-2 border border-slate-300 rounded-lg text-sm"
+            >
+              <option value="all">All Research States</option>
+              <option value="flagged">Research Needed (flagged)</option>
+            </select>
           </div>
         </div>
       </div>
@@ -286,6 +301,14 @@ export default function SaleInventory() {
                       <div className="flex gap-2 mt-3 flex-wrap">
                         <Badge variant="secondary">{item.category}</Badge>
                         <Badge className={getStatusColor(item.status)}>{item.status}</Badge>
+                        {item.research_status && item.research_status !== 'CLEAR' && (
+                          <Badge
+                            className="bg-violet-100 text-violet-700 border border-violet-300"
+                            title={item.research_reason || ''}
+                          >
+                            Research: {item.research_status === 'VERIFY' ? 'Verify' : item.research_status === 'SPECIALIST_REVIEW' ? 'Specialist' : 'Needed'}
+                          </Badge>
+                        )}
 
                         {item.sales_channels?.includes('inventory') && (
                           <Badge className="bg-orange-100 text-orange-700 flex items-center gap-1">
@@ -391,6 +414,16 @@ export default function SaleInventory() {
                   <Button
                     size="sm"
                     variant="outline"
+                    onClick={() => setResearchDialogItem(item)}
+                    className={item.research_status && item.research_status !== 'CLEAR' ? 'border-violet-300 text-violet-700' : ''}
+                    title="Flag or resolve research"
+                  >
+                    <FlaskConical className="w-4 h-4" />
+                  </Button>
+
+                  <Button
+                    size="sm"
+                    variant="outline"
                     onClick={() => {
                       setEditingItem(item);
                       setShowForm(true);
@@ -413,6 +446,16 @@ export default function SaleInventory() {
           </div>
         )}
       </div>
+
+      {/* Chapter 3 P1 — research-needed flag */}
+      {researchDialogItem && (
+        <ResearchFlagDialog
+          item={researchDialogItem}
+          open={!!researchDialogItem}
+          onClose={() => setResearchDialogItem(null)}
+          onSaved={() => loadData()}
+        />
+      )}
 
       {/* Chapter 2 P1 — sold details capture */}
       {soldDialogItem && (

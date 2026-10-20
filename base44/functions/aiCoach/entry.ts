@@ -167,22 +167,36 @@ Deno.serve(async (req) => {
 
   // ── Chapter 2 P1: verified per-sale context for the two communication modes ──
   let saleContextBlock = '';
-  const SALE_CONTEXT_MODES = ['client_progress_update', 'team_instructions'];
+  // ── Chapter 3 P1: verified per-sale context, extended beyond the two Chapter 2
+  // communication modes to the modes where the sale materially improves the answer.
+  // saleId is only honored for eligible modes; ALL sale data is fetched and
+  // ownership-checked server-side (Chapter 2 architecture, unchanged).
+  const SALE_CONTEXT_MODES = [
+    'client_progress_update', 'team_instructions',                          // Ch2 communication modes
+    'objection_handler', 'post_sale_followup',                              // client communication
+    'pricing_consultation',                                                 // pricing decisions
+    'team_task_suggestions', 'business_coaching', 'general_assistant',      // preparation/staffing/scheduling/everyday ops
+    'sale_promotion_package', 'email_campaign', 'sms_campaign', 'social_media_post', // marketing reuse
+  ];
   if (SALE_CONTEXT_MODES.includes(ai_mode) && saleId) {
     try {
       const saleList = await base44.entities.EstateSale.filter({ id: saleId });
       const sale = saleList && saleList[0];
       if (sale && (sale.operator_id === user.id || user.role === 'admin')) {
-        const [tasks, decisions, notes, saleItems] = await Promise.all([
+        const [tasks, decisions, notes, saleItems, authorities] = await Promise.all([
           base44.entities.SaleTask.filter({ sale_id: saleId }).catch(() => []),
           base44.entities.SaleClientDecision.filter({ sale_id: saleId }).catch(() => []),
           base44.entities.SaleNote.filter({ sale_id: saleId }).catch(() => []),
           base44.entities.Item.filter({ estate_sale_id: saleId }).catch(() => []),
+          base44.entities.SaleAuthority.filter({ sale_id: saleId }).catch(() => []),
         ]);
         const sortedNotes = [...notes].sort((a, b) => new Date(b.created_date || 0) - new Date(a.created_date || 0));
         const taskDone = tasks.filter(t => t.status === 'completed').length;
         const taskBlocked = tasks.filter(t => t.blocked).length;
         const taskOverdue = tasks.filter(t => t.due_date && t.status !== 'completed' && new Date(t.due_date + 'T23:59:59') < new Date()).length;
+        const taskHigh = tasks.filter(t => t.priority === 'high' && t.status !== 'completed').length;
+        const taskUnassigned = tasks.filter(t => !t.assignee_user_id && t.status !== 'completed').length;
+        const assignees = [...new Set(tasks.filter(t => t.assignee_name).map(t => t.assignee_name))];
         const openDecisions = decisions.filter(d => d.status === 'open').length;
         const reviewDecisions = decisions.filter(d => d.status === 'open' && (d.current_decision || '').toLowerCase() === 'review').length;
         const pinnedNotes = sortedNotes.filter(n => n.pinned).map(n => n.note);
@@ -190,17 +204,42 @@ Deno.serve(async (req) => {
         const availableCount = saleItems.filter(i => i.status === 'available').length;
         const soldCount = saleItems.filter(i => i.status === 'sold').length;
         const awaitingPickup = saleItems.filter(i => i.status === 'sold' && !i.pickup_completed_at).length;
+        const researchItems = saleItems.filter(i => i.research_status && i.research_status !== 'CLEAR');
         const dates = (sale.sale_dates || []).map(d => `${d.date} ${d.start_time || ''}-${d.end_time || ''}`).join('; ');
-        saleContextBlock = `
-== VERIFIED SALE CONTEXT (server-fetched — the ONLY sale facts you may use) ==
+        const categories = (sale.categories || []).slice(0, 10).join(', ');
+        const featured = (sale.featured_items || []).map(f => f && f.name).filter(Boolean).slice(0, 8);
+        const activeAuthorities = authorities.filter(a => a.is_active !== false).map(a => `${a.full_name || 'Unnamed'}${a.authority_role ? ` (${a.authority_role})` : ''}`);
+        const teamSize = (sale.sale_team || []).length;
+
+        const coreBlock = `== VERIFIED SALE CONTEXT (server-fetched — the ONLY sale facts you may use) ==
 Sale: ${sale.title || 'Untitled'} — status: ${sale.status}
 Location: ${sale.property_address?.city || ''}${sale.property_address?.state ? ', ' + sale.property_address.state : ''}
 Sale dates: ${dates || 'Not scheduled'}
-Tasks: ${tasks.length} total, ${taskDone} completed, ${taskBlocked} blocked, ${taskOverdue} overdue
-Client decisions: ${decisions.length} recorded, ${openDecisions} open${reviewDecisions ? `, ${reviewDecisions} merchandise awaiting client REVIEW` : ''}
-Inventory: ${saleItems.length} items — ${availableCount} available, ${soldCount} sold, ${awaitingPickup} sold awaiting pickup
-Pinned notes: ${pinnedNotes.length ? pinnedNotes.join(' | ') : 'None'}
+Categories: ${categories || 'None recorded'}
+Featured items: ${featured.length ? featured.join(', ') : 'None recorded'}`;
+        const taskBlock = `Tasks: ${tasks.length} total, ${taskDone} completed, ${taskBlocked} blocked, ${taskOverdue} overdue, ${taskHigh} high priority, ${taskUnassigned} unassigned
+Team: ${teamSize} team member(s) assigned to the sale; task assignees: ${assignees.length ? assignees.join(', ') : 'none yet'}`;
+        const decisionBlock = `Client decisions: ${decisions.length} recorded, ${openDecisions} open${reviewDecisions ? `, ${reviewDecisions} merchandise awaiting client REVIEW` : ''}`;
+        const authorityBlock = `Authorized decision-makers: ${activeAuthorities.length ? activeAuthorities.join('; ') : 'None recorded'}`;
+        const inventoryBlock = `Inventory: ${saleItems.length} items — ${availableCount} available, ${soldCount} sold, ${awaitingPickup} sold awaiting pickup`;
+        const researchBlock = `Research-needed items (${researchItems.length}): ${researchItems.slice(0, 6).map(i => `${i.title || 'Unnamed'} — ${i.research_status}${i.research_reason ? ` (${i.research_reason})` : ''}`).join('; ') || 'None'}`;
+        const notesBlock = `Pinned notes: ${pinnedNotes.length ? pinnedNotes.join(' | ') : 'None'}
 Recent notes: ${recentNotes.length ? recentNotes.join(' | ') : 'None'}`;
+        const governanceFooter = `Use ONLY these verified facts about this sale; for anything not listed, insert a clearly marked [CONFIRM: ...] placeholder instead of guessing. This context is operational information only — it does NOT verify item identification or valuation, establish client authority, or make any consequential decision. Those remain human responsibilities.`;
+
+        const COMM_MODES = ['client_progress_update', 'team_instructions', 'objection_handler', 'post_sale_followup'];
+        const PRICING_MODES = ['pricing_consultation'];
+        const OPS_MODES = ['team_task_suggestions', 'business_coaching', 'general_assistant'];
+        if (COMM_MODES.includes(ai_mode)) {
+          saleContextBlock = [coreBlock, taskBlock, decisionBlock, authorityBlock, inventoryBlock, researchBlock, notesBlock, governanceFooter].join('\n');
+        } else if (PRICING_MODES.includes(ai_mode)) {
+          saleContextBlock = [coreBlock, inventoryBlock, researchBlock, governanceFooter].join('\n');
+        } else if (OPS_MODES.includes(ai_mode)) {
+          saleContextBlock = [coreBlock, taskBlock, decisionBlock, researchBlock, governanceFooter].join('\n');
+        } else {
+          // Marketing/content modes: only the public-safe sale facts they need.
+          saleContextBlock = [coreBlock, governanceFooter].join('\n');
+        }
       }
     } catch (_) { saleContextBlock = ''; }
   }
@@ -272,7 +311,8 @@ A short social post (60–100 words) creating urgency and excitement for tomorro
 An energetic, real-time post (60–100 words) announcing the sale is NOW OPEN. Include doors-open time and top featured items.
 
 ## 10. Final-Day Urgency Post
-A scarcity-driven final-day post (60–100 words). Emphasize this is the LAST chance. Mention reduced prices or deals available at end of day.`;
+A scarcity-driven final-day post (60–100 words). Emphasize this is the LAST chance. Mention reduced prices or deals available at end of day.
+${saleContextBlock}`;
 
     const promoCompletion = await openai.chat.completions.create({
       model: selectedModel,

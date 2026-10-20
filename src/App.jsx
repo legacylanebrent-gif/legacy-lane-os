@@ -186,6 +186,9 @@ import WebsiteManager from './pages/WebsiteManager';
 import ClientWebsiteManager from './pages/ClientWebsiteManager';
 import WebsiteInviteAccept from './pages/WebsiteInviteAccept';
 import PilotLaunchCenter from './pages/PilotLaunchCenter';
+import OperatorCalendar from './pages/OperatorCalendar';
+import OperatorWorkload from './pages/OperatorWorkload';
+import OperatorSkills from './pages/OperatorSkills';
 
 // Life Transition SEO Engine — Phase 2
 import ProbateHubV2 from './pages/life-transition/ProbateHubV2';
@@ -353,6 +356,9 @@ const AuthenticatedApp = () => {
       <Route path="/ClientWebsiteManager" element={<LayoutWrapper currentPageName="ClientWebsiteManager"><ClientWebsiteManager /></LayoutWrapper>} />
       <Route path="/website-invite" element={<WebsiteInviteAccept />} />
       <Route path="/PilotLaunchCenter" element={<LayoutWrapper currentPageName="PilotLaunchCenter"><PilotLaunchCenter /></LayoutWrapper>} />
+      <Route path="/OperatorCalendar" element={<LayoutWrapper currentPageName="OperatorCalendar"><OperatorCalendar /></LayoutWrapper>} />
+      <Route path="/OperatorWorkload" element={<LayoutWrapper currentPageName="OperatorWorkload"><OperatorWorkload /></LayoutWrapper>} />
+      <Route path="/OperatorSkills" element={<LayoutWrapper currentPageName="OperatorSkills"><OperatorSkills /></LayoutWrapper>} />
 
       {/* ── Operator Website Template #1 (Phase 3D.1) ── */}
       <Route path="/site" element={<OperatorSitePage pageType="home" />} />

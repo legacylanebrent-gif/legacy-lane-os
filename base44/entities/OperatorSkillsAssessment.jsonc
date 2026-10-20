@@ -1,0 +1,153 @@
+{
+  "name": "OperatorSkillsAssessment",
+  "type": "object",
+  "description": "Chapter 3 P1 \u2014 lightweight operator BUSINESS self-assessment across 11 skill categories, plus the operator-edited personal development plan (LEARN IT / SYSTEMIZE IT / DELEGATE IT / FIND A SPECIALIST per weak area). NOT a personality test and NOT a scientific or diagnostic instrument \u2014 a structured self-rating the operator retakes over time. One record per completed assessment (history is the record list).",
+  "properties": {
+    "operator_id": {
+      "type": "string",
+      "description": "Estate Sale Company Owner user ID (RLS anchor)."
+    },
+    "answers": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "category": {
+            "type": "string",
+            "description": "One of the 11 assessment categories."
+          },
+          "question": {
+            "type": "string"
+          },
+          "score": {
+            "type": "integer",
+            "description": "Self-rating 1-5."
+          }
+        },
+        "default": []
+      },
+      "default": [],
+      "description": "Raw answers as submitted."
+    },
+    "category_scores": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "number"
+      },
+      "default": {},
+      "description": "Category key to 0-100 score (mean of the category's three 1-5 ratings)."
+    },
+    "overall_score": {
+      "type": "number",
+      "description": "Mean of category scores (0-100)."
+    },
+    "strengths": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Category names scoring 80+."
+    },
+    "development_areas": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Category names that are development priorities (lowest-scoring below 80)."
+    },
+    "summary": {
+      "type": "string",
+      "description": "Plain, non-diagnostic summary text."
+    },
+    "development_plan": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "category": {
+            "type": "string"
+          },
+          "weakness": {
+            "type": "string",
+            "description": "The specific weak area the operator wants to work on (free text)."
+          },
+          "strategies": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "learn",
+                "systemize",
+                "delegate",
+                "specialist"
+              ]
+            },
+            "default": [],
+            "description": "LEARN IT / SYSTEMIZE IT / DELEGATE IT / FIND A SPECIALIST \u2014 multiple strategies allowed."
+          },
+          "note": {
+            "type": "string"
+          }
+        },
+        "default": []
+      },
+      "default": [],
+      "description": "Operator-edited plan. Each entry links to EXISTING EstateSalen systems via the UI (SaleTasks, ManageTeam, VendorManagement, training, AI Coach) \u2014 never fake links."
+    }
+  },
+  "required": [
+    "operator_id"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.operator_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "$or": [
+        {
+          "data.operator_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.operator_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.operator_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

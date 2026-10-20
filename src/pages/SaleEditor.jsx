@@ -8,6 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import CommunicationsPanel from '@/components/saleops/CommunicationsPanel';
 import SaleNotesPanel from '@/components/saleops/SaleNotesPanel';
 import ReferralSourceCard from '@/components/saleops/ReferralSourceCard';
 import { Badge } from '@/components/ui/badge';
@@ -33,15 +34,7 @@ import ImageImportModal from '@/components/estate/ImageImportModal';
 import DeepSearchProgressModal from '@/components/estate/DeepSearchProgressModal';
 import SaleTeamSection from '@/components/estate/SaleTeamSection';
 
-const SALE_STATUSES = ['draft', 'upcoming', 'active', 'completed', 'archived'];
-
-const formatTimeAMPM = (timeStr) => {
-  if (!timeStr) return '';
-  const [h, m] = timeStr.split(':').map(Number);
-  const ampm = h >= 12 ? 'PM' : 'AM';
-  const hour = h % 12 || 12;
-  return `${hour}:${String(m).padStart(2, '0')} ${ampm}`;
-};
+import { SALE_STATUSES, formatTimeAMPM } from '@/components/estate/saleEditorShared';
 
 export default function SaleEditor() {
   const navigate = useNavigate();
@@ -1462,9 +1455,10 @@ Be practical and realistic for an estate sale context.`,
 
       <div className="max-w-5xl mx-auto px-4 lg:px-6 py-8 space-y-6 w-full overflow-x-hidden">
         <Tabs defaultValue="info" className="space-y-6">
-          <TabsList className="w-full max-w-md mx-auto">
+          <TabsList className="w-full max-w-xl mx-auto">
             <TabsTrigger value="info" className="flex-1 text-base font-semibold">Sale Info</TabsTrigger>
             <TabsTrigger value="images" className="flex-1 text-base font-semibold">Images</TabsTrigger>
+            <TabsTrigger value="communications" className="flex-1 text-base font-semibold">Communications</TabsTrigger>
           </TabsList>
 
           <TabsContent value="info" className="space-y-6 mt-0">
@@ -2488,6 +2482,13 @@ Return ONLY the description text, no extra commentary.`
             </Tabs>
           </CardContent>
         </Card>
+          </TabsContent>
+
+          {/* Chapter 3 P1 — sale-scoped client communication log (canonical CRM Activity records) */}
+          <TabsContent value="communications" className="space-y-6 mt-0">
+        {saleId ? <CommunicationsPanel saleId={saleId} /> : (
+          <p className="text-sm text-slate-500 text-center py-8">Save the sale first to log communications.</p>
+        )}
           </TabsContent>
         </Tabs>
       </div>

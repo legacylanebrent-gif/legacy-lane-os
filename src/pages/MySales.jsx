@@ -12,8 +12,8 @@ import BuyoutModal from '@/components/estate/BuyoutModal';
 import BuyerMatchModal from '@/components/estate/BuyerMatchModal';
 import SaleExpensesModal from '@/components/expenses/SaleExpensesModal';
 import { 
-        Plus, Search, Calendar, MapPin, Eye, Heart, DollarSign, 
-        Package, Edit, TrendingUp, Star, Briefcase, Trash, FileText, BarChart3, Megaphone, Download, Globe, Users, Receipt, Sparkles, ChevronDown, ChevronUp, BookOpen, Pin, UserCheck, Rocket, Building2, ClipboardCheck, ListChecks
+        Plus, Search, Calendar, MapPin, Eye, Heart, DollarSign,
+        Package, Edit, TrendingUp, Star, Briefcase, Trash, FileText, BarChart3, Megaphone, Download, Globe, Users, Receipt, Sparkles, ChevronDown, ChevronUp, BookOpen, Pin, UserCheck, Rocket, Building2, ClipboardCheck, ListChecks, CalendarDays, ClipboardList
       } from 'lucide-react';
 import SocialCampaignModal from '@/components/social/SocialCampaignModal';
 import LiquidationProgressModal from '@/components/estate/LiquidationProgressModal';
@@ -414,6 +414,30 @@ export default function MySales() {
           <p className="text-sm md:text-base text-slate-600">Manage your estate sale listings and track performance</p>
         </div>
         <div className="flex gap-2 md:self-start flex-wrap">
+          <Button
+            variant="outline"
+            onClick={() => navigate('/OperatorCalendar')}
+            className="border-slate-300 text-slate-700 hover:bg-slate-50"
+          >
+            <CalendarDays className="w-4 h-4 mr-2" />
+            Calendar
+          </Button>
+          <Button
+            variant="outline"
+            onClick={() => navigate('/OperatorWorkload')}
+            className="border-slate-300 text-slate-700 hover:bg-slate-50"
+          >
+            <ClipboardList className="w-4 h-4 mr-2" />
+            Workload
+          </Button>
+          <Button
+            variant="outline"
+            onClick={() => navigate('/OperatorSkills')}
+            className="border-slate-300 text-slate-700 hover:bg-slate-50"
+          >
+            <Star className="w-4 h-4 mr-2" />
+            Skills Assessment
+          </Button>
           <Button
             variant="outline"
             onClick={() => navigate(createPageUrl('MySalesGuide'))}

@@ -3,7 +3,8 @@
   "type": "object",
   "properties": {
     "contact_id": {
-      "type": "string"
+      "type": "string",
+      "description": "Linked Contact when the communication/activity involves a known contact. Optional for sale-scoped communications with ad-hoc recipients."
     },
     "deal_id": {
       "type": "string"
@@ -15,19 +16,44 @@
       "type": "string",
       "description": "User who logged the activity"
     },
+    "sale_id": {
+      "type": "string",
+      "description": "Chapter 3 P1 \u2014 EstateSale this communication/activity belongs to. Enables the sale-scoped client communication log on the canonical CRM record (no separate communication entity)."
+    },
+    "operator_id": {
+      "type": "string",
+      "description": "Chapter 3 P1 \u2014 EstateSale.operator_id projection for sale-scoped communications, so the sale owner (and admins) can see team-logged communication history."
+    },
     "activity_type": {
       "type": "string",
       "enum": [
         "call",
         "email",
+        "sms",
         "meeting",
+        "in_person",
+        "voicemail",
+        "client_update",
         "note",
         "task",
-        "sms",
         "postcard",
         "site_visit",
-        "property_showing"
-      ]
+        "property_showing",
+        "other"
+      ],
+      "description": "What kind of communication/activity occurred. Communication channels (call/email/sms/meeting/in_person/voicemail/client_update) double as the channel for sale-scoped communication records."
+    },
+    "direction": {
+      "type": "string",
+      "enum": [
+        "inbound",
+        "outbound"
+      ],
+      "description": "Chapter 3 P1 \u2014 direction of the communication (who initiated). Absent for non-communication activity types."
+    },
+    "recipient_name": {
+      "type": "string",
+      "description": "Chapter 3 P1 \u2014 display name of the recipient/participant when no Contact record is linked. People are never duplicated into Contact just to log a communication."
     },
     "subject": {
       "type": "string"
@@ -50,7 +76,8 @@
     },
     "completed_date": {
       "type": "string",
-      "format": "date-time"
+      "format": "date-time",
+      "description": "When the communication/activity occurred (used as occurred_at for communication records)."
     },
     "duration_minutes": {
       "type": "integer"
@@ -67,8 +94,66 @@
     }
   },
   "required": [
-    "contact_id",
     "user_id",
     "activity_type"
-  ]
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.user_id": "{{user.id}}"
+        },
+        {
+          "data.operator_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "$or": [
+        {
+          "data.user_id": "{{user.id}}"
+        },
+        {
+          "data.operator_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.user_id": "{{user.id}}"
+        },
+        {
+          "data.operator_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
 }

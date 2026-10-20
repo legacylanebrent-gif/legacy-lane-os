@@ -338,6 +338,35 @@
       "type": "string",
       "format": "date-time",
       "description": "When the operator last renewed this item for another 14 days"
+    },
+    "research_status": {
+      "type": "string",
+      "enum": [
+        "CLEAR",
+        "RESEARCH_NEEDED",
+        "VERIFY",
+        "SPECIALIST_REVIEW"
+      ],
+      "default": "CLEAR",
+      "description": "Chapter 3 P1 \u2014 research attention state. Flags questionable or potentially valuable merchandise for another look instead of pricing to keep moving. INDEPENDENT of Item.status, SaleClientDecision, price and availability \u2014 human-controlled only; AI may suggest but never set it."
+    },
+    "research_reason": {
+      "type": "string",
+      "description": "Chapter 3 P1 \u2014 why the item needs another look (e.g. 'Possible sterling.', 'Signature needs verification.', 'Maker unknown.', 'Value may justify specialist.')."
+    },
+    "research_flagged_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the flag was set."
+    },
+    "research_resolved_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the research question was resolved/cleared."
+    },
+    "research_resolution": {
+      "type": "string",
+      "description": "How the research question was resolved (what was learned/decided)."
     }
   },
   "required": [
