@@ -16,7 +16,7 @@ export default function DecisionsPanel({ sale, user, authorities, decisions, onC
   const [showAuthStep, setShowAuthStep] = useState(false);
   const [changeTarget, setChangeTarget] = useState(null);
   const [historyTarget, setHistoryTarget] = useState(null);
-  const [form, setForm] = useState({ decision_type: 'general', subject: '', current_decision: '' });
+  const [form, setForm] = useState({ decision_type: 'general', subject: '', current_decision: '', charge_amount: '' });
   const [saving, setSaving] = useState(false);
 
   const general = decisions.filter(d => d.decision_type !== 'merchandise');
@@ -36,6 +36,9 @@ export default function DecisionsPanel({ sale, user, authorities, decisions, onC
         decision_type: form.decision_type,
         subject: form.subject.trim(),
         current_decision: form.current_decision.trim(),
+        ...(form.decision_type === 'financial' && form.current_decision.trim().toLowerCase() === 'authorized'
+          ? { charge_amount: Number(form.charge_amount) || 0 }
+          : {}),
         status: 'open',
         history: [entry],
         authorized_by: authority?.id || '',
@@ -48,7 +51,7 @@ export default function DecisionsPanel({ sale, user, authorities, decisions, onC
       });
       setShowNew(false);
       setShowAuthStep(false);
-      setForm({ decision_type: 'general', subject: '', current_decision: '' });
+      setForm({ decision_type: 'general', subject: '', current_decision: '', charge_amount: '' });
       onChanged();
     } catch (e) {
       console.error(e);
@@ -127,6 +130,12 @@ export default function DecisionsPanel({ sale, user, authorities, decisions, onC
                 </div>
                 <p className="font-semibold text-slate-900 mt-1.5">{d.subject}</p>
                 <p className="text-sm text-slate-700 mt-0.5">Current: <strong>{d.current_decision}</strong></p>
+                {d.decision_type === 'financial' && d.charge_amount > 0 && (
+                  <p className={`text-sm font-medium mt-0.5 ${d.current_decision === 'authorized' ? 'text-amber-700' : 'text-slate-500'}`}>
+                    Authorized service charge: ${Number(d.charge_amount).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    {d.current_decision !== 'authorized' ? ' (inactive — not charged)' : ''}
+                  </p>
+                )}
                 <p className="text-xs text-slate-500 mt-1">
                   Authorized by {d.authorized_by_name || 'unknown'} · {fmtDateTime(d.decided_at)} · via {d.source?.replace('_', ' ')}
                 </p>
@@ -165,10 +174,23 @@ export default function DecisionsPanel({ sale, user, authorities, decisions, onC
               </div>
               <div><Label>Subject *</Label><Input value={form.subject} onChange={e => setForm(f => ({ ...f, subject: e.target.value }))} placeholder="e.g. Jewelry handling, pickup date change" /></div>
               <div><Label>Decision / instruction *</Label><Input value={form.current_decision} onChange={e => setForm(f => ({ ...f, current_decision: e.target.value }))} placeholder="What did they instruct?" /></div>
+              {form.decision_type === 'financial' && (
+                <div>
+                  <Label>Authorized charge amount</Label>
+                  <Input type="number" min="0" step="0.01" value={form.charge_amount} onChange={e => setForm(f => ({ ...f, charge_amount: e.target.value }))} placeholder="e.g. 250.00" />
+                  <p className="text-xs text-slate-500 mt-1">
+                    Only for client-AUTHORIZED service charges (e.g. extra cleanout work, special hauling). It flows to the settlement statement only while this decision remains authorized.
+                  </p>
+                </div>
+              )}
               <div className="flex justify-end gap-2 pt-1">
                 <Button variant="outline" onClick={() => setShowNew(false)}>Cancel</Button>
                 <Button onClick={() => {
                   if (!form.subject.trim() || !form.current_decision.trim()) { alert('Subject and decision are required'); return; }
+                  if (form.decision_type === 'financial' && form.current_decision.trim().toLowerCase() === 'authorized' && !(Number(form.charge_amount) > 0)) {
+                    alert('Enter the authorized charge amount (greater than zero)');
+                    return;
+                  }
                   setShowAuthStep(true);
                 }}>Continue</Button>
               </div>

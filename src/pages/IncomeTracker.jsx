@@ -106,14 +106,16 @@ export default function IncomeTracker() {
         saleCommissionRates[sale.id] = sale.commission_rate || 0.40; // Default to 40% if not set
       });
       
-      // Group transactions by sale and sum company_amount using actual commission rate
+      // Group transactions by sale and compute the company share from the sale's actual
+      // commission rate. Legacy Transaction.company_amount assumed a fixed split — never
+      // trusted; authoritative company revenue derives from settlement/closeout.
       const saleIncomeMap = {};
       transactions.forEach(txn => {
         if (!saleIncomeMap[txn.sale_id]) {
           saleIncomeMap[txn.sale_id] = 0;
         }
-        const commissionRate = saleCommissionRates[txn.sale_id] || 0.40;
-        saleIncomeMap[txn.sale_id] += txn.company_amount || (txn.total * commissionRate);
+        const commissionRate = saleCommissionRates[txn.sale_id] ?? 0.40;
+        saleIncomeMap[txn.sale_id] += (txn.total || 0) * commissionRate;
       });
 
       // Create automated income entries from worksheet transactions
@@ -129,7 +131,7 @@ export default function IncomeTracker() {
             source: address ? `${sale.title}\n${address}` : sale.title,
             amount: saleIncomeMap[sale.id],
             category: 'estate_sale',
-            description: `Commission from estate sale worksheet`,
+            description: `Commission estimate from sale transactions (final settlement is authoritative)`,
             reference_id: sale.id,
             is_automated: true
           };
