@@ -12,6 +12,15 @@ import ToneAdjustmentPanel from './ToneAdjustmentPanel';
 import VoicePreferencesModal from './VoicePreferencesModal';
 import GuidedContentFlow from './GuidedContentFlow';
 
+// Chapter 2 P1 — sale context pointer for context-aware communication modes.
+// The backend re-fetches all sale data server-side; only the ID is passed.
+const getSaleIdFromUrl = () => {
+  try {
+    const params = new URLSearchParams(window.location.search);
+    return params.get('saleId') || params.get('id') || null;
+  } catch (_) { return null; }
+};
+
 const MODEL_OPTIONS = [
   { value: 'gpt-4o', label: 'GPT-4o', badge: 'Smart' },
   { value: 'gpt-4o-mini', label: 'GPT-4o Mini', badge: 'Fast' },
@@ -280,6 +289,7 @@ export default function AICoachPanel({ user, onClose, currentPathname }) {
           model,
           ai_mode: activeMode.key,
           voice_preferences: voicePreferences,
+          saleId: getSaleIdFromUrl(),
         });
         setMessages(prev => {
           const updated = [...prev];

@@ -6,7 +6,9 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import UnifiedItemForm from '@/components/inventory/UnifiedItemForm';
-import { Plus, Search, Edit2, Trash2, Package, Globe, AlertCircle, FileText } from 'lucide-react';
+import SoldDetailsDialog from '@/components/estate/SoldDetailsDialog';
+import OffersPanel from '@/components/estate/OffersPanel';
+import { Plus, Search, Edit2, Trash2, Package, Globe, AlertCircle, FileText, User, CreditCard, MapPin, PackageCheck } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { toast } from 'sonner';
 
@@ -22,6 +24,7 @@ export default function SaleInventory() {
   const [editingItem, setEditingItem] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [soldDialogItem, setSoldDialogItem] = useState(null);
 
   useEffect(() => {
     loadData();
@@ -82,6 +85,8 @@ export default function SaleInventory() {
   };
 
   const handleStatusChange = async (item, newStatus) => {
+    // Chapter 2 P1 — capture buyer/payment/pickup details when marking sold
+    if (newStatus === 'sold') { setSoldDialogItem(item); return; }
     try {
       const updates = { status: newStatus };
       if (newStatus === 'sold') {
@@ -98,6 +103,35 @@ export default function SaleInventory() {
       }
       await base44.entities.Item.update(item.id, updates);
       toast.success(`Item marked as ${newStatus}`);
+      loadData();
+    } catch (error) {
+      toast.error('Error updating item: ' + error.message);
+    }
+  };
+
+  const applySoldDetails = async (item, details) => {
+    try {
+      const updates = { status: 'sold', sold_date: new Date().toISOString() };
+      if (sale?.sale_dates?.length > 0) {
+        const today = new Date();
+        const saleStart = new Date(sale.sale_dates[0].date + 'T00:00:00');
+        const saleEnd = new Date(sale.sale_dates[sale.sale_dates.length - 1].date + 'T23:59:59');
+        if (today < saleStart) updates.sale_phase = 'pre_sale';
+        else if (today > saleEnd) updates.sale_phase = 'post_sale';
+        else updates.sale_phase = 'during_sale';
+      }
+      if (details) {
+        updates.buyer_name = details.buyer_name || '';
+        updates.buyer_contact = details.buyer_contact || '';
+        updates.payment_method_used = details.payment_method_used || '';
+        updates.payment_notes = details.payment_notes || '';
+        if (details.pickup_instructions) {
+          updates.pickup_location = { ...(item.pickup_location || {}), instructions: details.pickup_instructions };
+        }
+      }
+      await base44.entities.Item.update(item.id, updates);
+      toast.success(details ? 'Item marked as sold with details' : 'Item marked as sold');
+      setSoldDialogItem(null);
       loadData();
     } catch (error) {
       toast.error('Error updating item: ' + error.message);
@@ -225,6 +259,8 @@ export default function SaleInventory() {
 
       {/* Content */}
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <OffersPanel saleId={saleId} items={items} />
+
         {filteredItems.length === 0 ? (
           <div className="text-center py-16">
             <Package className="w-16 h-16 mx-auto text-slate-300 mb-4" />
@@ -283,6 +319,32 @@ export default function SaleInventory() {
                           <Badge className="bg-purple-50 text-purple-600 text-xs">Post-Sale OK</Badge>
                         )}
                       </div>
+
+                      {item.status === 'sold' && (
+                        <div className="mt-3 grid gap-1 text-xs text-slate-600 border-t border-slate-100 pt-2">
+                          <span className="flex items-center gap-1.5">
+                            <User className="w-3.5 h-3.5 text-slate-400" />
+                            {item.buyer_name || 'Buyer not recorded'}
+                          </span>
+                          <span className="flex items-center gap-1.5">
+                            <CreditCard className="w-3.5 h-3.5 text-slate-400" />
+                            {item.payment_method_used
+                              ? `Paid via ${item.payment_method_used.replace('_', ' ')}`
+                              : 'No payment recorded'}
+                          </span>
+                          {item.pickup_location?.instructions && (
+                            <span className="flex items-center gap-1.5">
+                              <MapPin className="w-3.5 h-3.5 text-slate-400" />
+                              Pickup: {item.pickup_location.instructions}
+                            </span>
+                          )}
+                          <span className="flex items-center gap-1.5">
+                            {item.pickup_completed_at
+                              ? <><PackageCheck className="w-3.5 h-3.5 text-green-500" /> Picked up</>
+                              : <span className="text-amber-600">Awaiting pickup</span>}
+                          </span>
+                        </div>
+                      )}
                     </div>
 
                     <div className="text-right">
@@ -351,6 +413,16 @@ export default function SaleInventory() {
           </div>
         )}
       </div>
+
+      {/* Chapter 2 P1 — sold details capture */}
+      {soldDialogItem && (
+        <SoldDetailsDialog
+          open={!!soldDialogItem}
+          item={soldDialogItem}
+          onClose={() => setSoldDialogItem(null)}
+          onConfirm={details => applySoldDetails(soldDialogItem, details)}
+        />
+      )}
 
       {/* Item Form Modal */}
       {showForm && (

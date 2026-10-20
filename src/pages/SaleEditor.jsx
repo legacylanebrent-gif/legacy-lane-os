@@ -8,6 +8,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import SaleNotesPanel from '@/components/saleops/SaleNotesPanel';
+import ReferralSourceCard from '@/components/saleops/ReferralSourceCard';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
@@ -1800,6 +1802,10 @@ Return ONLY the description text, no extra commentary.`
             </CardContent>
           </Card>
         )}
+
+        {/* Chapter 2 P1 — referral source projection + operational notes */}
+        <ReferralSourceCard saleId={saleId} />
+        <SaleNotesPanel saleId={saleId} />
 
         {/* Footer */}
         <div className="flex flex-col gap-2 sm:flex-row sm:justify-end pb-8">

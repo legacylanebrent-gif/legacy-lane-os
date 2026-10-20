@@ -265,6 +265,28 @@
     "parking_info": {
       "type": "string"
     },
+    "referral_source_type": {
+      "type": "string",
+      "enum": [
+        "real_estate_agent",
+        "attorney",
+        "senior_move_manager",
+        "professional_organizer",
+        "estate_sale_company",
+        "past_client",
+        "buyer_customer",
+        "friend_family",
+        "online_search",
+        "social_media",
+        "website",
+        "other"
+      ],
+      "description": "Chapter 2 P1 \u2014 PROJECTION of the structured referral source from the linked SaleConversionPipeline deal (copied when the deal is linked to this sale). Display/source attribution only; the pipeline deal remains the capture point."
+    },
+    "referral_source_name": {
+      "type": "string",
+      "description": "Chapter 2 P1 \u2014 PROJECTION of the referrer name from the linked SaleConversionPipeline deal."
+    },
     "national_featured": {
       "type": "boolean",
       "default": false

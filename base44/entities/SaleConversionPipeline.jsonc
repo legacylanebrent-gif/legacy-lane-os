@@ -66,6 +66,36 @@
     "notes": {
       "type": "string"
     },
+    "referral_source_type": {
+      "type": "string",
+      "enum": [
+        "real_estate_agent",
+        "attorney",
+        "senior_move_manager",
+        "professional_organizer",
+        "estate_sale_company",
+        "past_client",
+        "buyer_customer",
+        "friend_family",
+        "online_search",
+        "social_media",
+        "website",
+        "other"
+      ],
+      "description": "Chapter 2 P1 \u2014 structured source attribution: what kind of source introduced this seller opportunity. This is source tracking on the operator's own pipeline; it is NOT the agent/operator Referral Exchange."
+    },
+    "referral_source_name": {
+      "type": "string",
+      "description": "Chapter 2 P1 \u2014 name of the referring person or source (e.g. the agent, attorney, move manager, or past client)."
+    },
+    "referral_source_contact_id": {
+      "type": "string",
+      "description": "Chapter 2 P1 \u2014 optional link to an existing Contact record for the referrer. Prefer linking over duplicating people; a Contact record is never required to record a simple source."
+    },
+    "referral_source_notes": {
+      "type": "string",
+      "description": "Chapter 2 P1 \u2014 optional context about the referral source."
+    },
     "consultation_date": {
       "type": "string",
       "format": "date-time"

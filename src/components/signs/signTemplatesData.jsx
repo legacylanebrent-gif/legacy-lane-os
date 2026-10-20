@@ -42,6 +42,13 @@ export const SIGN_TEMPLATES = [
   { id: 'view-bid-item', name: 'View or Bid on this Item', category: 'general', content: '' },
   { id: 'washer-dryer', name: 'Washer Dryer', category: 'general', content: '' },
   { id: 'were-here-walk-in', name: "We're Here Walk In", category: 'general', content: '' },
+  { id: 'sold', name: 'SOLD', category: 'general', content: '' },
+  { id: 'sold-awaiting-pickup', name: 'Sold - Awaiting Pickup', category: 'general', content: '' },
+  { id: 'item-sold-do-not-remove', name: 'Item Sold - Do Not Remove', category: 'general', content: '' },
+  { id: 'pickup-instructions', name: 'Pickup Instructions', category: 'general', content: '' },
+  { id: 'pickup-area', name: 'Pickup Area', category: 'directional', content: '' },
+  { id: 'checkout', name: 'Checkout', category: 'payment', content: '' },
+  { id: 'please-see-cashier', name: 'Please See Cashier', category: 'payment', content: '' },
 
   // ── Directional Signs ──
   { id: 'enter-here', name: 'Enter Here', category: 'directional', content: '' },

@@ -298,6 +298,19 @@ export const MODE_GROUPS = [
           tip: 'Most happy clients don\'t leave reviews because no one asked. I\'ll write the perfect ask.',
         },
       },
+      {
+        key: 'client_progress_update',
+        label: 'Client Progress Update',
+        icon: UserCheck,
+        color: 'text-cyan-300',
+        placeholder: 'Draft a progress update for this sale\'s client — I\'ll use the sale\'s real records.',
+        welcome: {
+          title: 'Client Progress Update',
+          subtitle: 'A warm, factual progress update drafted from this sale\'s real records — you review before sending.',
+          deliverables: ['Email-ready draft with subject line', 'Short text-message version', 'Placeholders for anything unverified'],
+          tip: 'Open this from the sale\'s page (Sale Editor or Inventory) so I can use its real dates, tasks, and decisions. I only use facts on file.',
+        },
+      },
     ],
   },
   {
@@ -364,6 +377,19 @@ export const MODE_GROUPS = [
         },
       },
       {
+        key: 'team_instructions',
+        label: 'Team Briefing',
+        icon: Users,
+        color: 'text-sky-300',
+        placeholder: 'Draft a concise crew briefing for this sale — tasks, dates, notes, and cautions.',
+        welcome: {
+          title: 'Team / Employee Instructions',
+          subtitle: 'A concise crew briefing drafted from the sale\'s real records — you review before distributing.',
+          deliverables: ['Scannable bullet briefing (under 250 words)', 'Dates, remaining work, and blocked items', 'REVIEW-item cautions for the crew', '[CONFIRM] placeholders for anything unknown'],
+          tip: 'Open this from the sale\'s page so I can use its real tasks, notes, and decisions. Nothing is sent automatically.',
+        },
+      },
+      {
         key: 'general_assistant',
         label: 'General Assistant',
         icon: MessageSquare,
@@ -403,6 +429,14 @@ export const MODE_STARTERS = {
     'Can you guarantee how much the sale will make?',
     'What happens to unsold items?',
     'Why shouldn\'t I just donate everything?',
+  ],
+  client_progress_update: [
+    'Draft a progress update for this sale\'s client',
+    'Write a warm progress update based on this sale\'s real records',
+  ],
+  team_instructions: [
+    'Draft a crew briefing for this sale',
+    'Write team instructions from this sale\'s tasks and notes',
   ],
   weekly_growth_plan: [
     'Build my growth plan for this week',

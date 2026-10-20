@@ -19,7 +19,14 @@ const SIGN_TEMPLATES = [
   { id: 'sale_starts', label: 'Sale Starts At' },
   { id: 'parking_here', label: 'Parking Here' },
   { id: 'no_parking', label: 'No Parking Here' },
-  { id: 'doors_open', label: 'Doors Open At' }
+  { id: 'doors_open', label: 'Doors Open At' },
+  { id: 'sold', label: 'SOLD' },
+  { id: 'sold_awaiting_pickup', label: 'Sold — Awaiting Pickup' },
+  { id: 'sold_do_not_remove', label: 'Item Sold — Do Not Remove' },
+  { id: 'pickup_area', label: 'Pickup Area' },
+  { id: 'pickup_instructions', label: 'Pickup Instructions' },
+  { id: 'checkout', label: 'Checkout' },
+  { id: 'see_cashier', label: 'Please See Cashier' }
 ];
 
 export default function SignTemplateModal({ open, onClose, sale, operator }) {
@@ -197,6 +204,55 @@ export default function SignTemplateModal({ open, onClose, sale, operator }) {
           </div>
         );
       
+      case 'sold':
+        return (
+          <h1 className="text-8xl font-bold text-red-600 text-center tracking-widest">SOLD</h1>
+        );
+
+      case 'sold_awaiting_pickup':
+        return (
+          <div className="text-center space-y-6">
+            <h1 className="text-8xl font-bold text-red-600">SOLD</h1>
+            <h2 className="text-4xl font-semibold text-slate-900">AWAITING PICKUP — DO NOT REMOVE</h2>
+          </div>
+        );
+
+      case 'sold_do_not_remove':
+        return (
+          <div className="text-center space-y-6">
+            <h1 className="text-7xl font-bold text-red-600">ITEM SOLD</h1>
+            <h2 className="text-4xl font-semibold text-slate-900">DO NOT REMOVE</h2>
+          </div>
+        );
+
+      case 'pickup_area':
+        return (
+          <h1 className="text-7xl font-bold text-blue-600 text-center">PICKUP AREA</h1>
+        );
+
+      case 'pickup_instructions':
+        return (
+          <div className="text-center w-full px-8 space-y-8">
+            <h1 className="text-5xl font-bold text-slate-900">PICKUP INSTRUCTIONS</h1>
+            {[...Array(6)].map((_, i) => (
+              <div key={i} className="border-b-2 border-slate-300 w-full" />
+            ))}
+          </div>
+        );
+
+      case 'checkout':
+        return (
+          <h1 className="text-8xl font-bold text-green-600 text-center tracking-widest">CHECKOUT</h1>
+        );
+
+      case 'see_cashier':
+        return (
+          <div className="text-center space-y-4">
+            <h1 className="text-7xl font-bold text-slate-900">PLEASE SEE CASHIER</h1>
+            <p className="text-3xl text-slate-600">to complete your purchase</p>
+          </div>
+        );
+
       default:
         return null;
     }

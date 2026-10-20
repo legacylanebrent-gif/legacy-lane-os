@@ -14,7 +14,7 @@ import {
   Plus, MapPin, Phone, Mail, Calendar, DollarSign, Sparkles,
   ChevronRight, CheckCircle2, Circle, Clock, Loader2, ArrowRight,
   User, FileText, AlertCircle, X, Edit2, CalendarDays, TrendingUp,
-  Search, RefreshCw, Home, Unlink
+  Search, RefreshCw, Home, Unlink, Handshake
 } from 'lucide-react';
 import { format, addDays, parseISO, isToday, isTomorrow, isPast } from 'date-fns';
 
@@ -39,6 +39,22 @@ const SALE_STATUS_TO_STAGE = {
   completed: 'completed',
   archived: 'completed',
 };
+
+// Chapter 2 P1 — structured source attribution vocabulary (NOT the agent/operator Referral Exchange)
+const REFERRAL_SOURCE_TYPES = [
+  { value: 'real_estate_agent', label: 'Real Estate Agent' },
+  { value: 'attorney', label: 'Attorney' },
+  { value: 'senior_move_manager', label: 'Senior Move Manager' },
+  { value: 'professional_organizer', label: 'Professional Organizer' },
+  { value: 'estate_sale_company', label: 'Estate Sale Company' },
+  { value: 'past_client', label: 'Past Client' },
+  { value: 'buyer_customer', label: 'Buyer / Customer' },
+  { value: 'friend_family', label: 'Friend / Family' },
+  { value: 'online_search', label: 'Online Search' },
+  { value: 'social_media', label: 'Social Media' },
+  { value: 'website', label: 'Website' },
+  { value: 'other', label: 'Other' },
+];
 
 const TASK_CATEGORIES = [
   { key: 'Pre-Consultation', color: 'bg-slate-100 text-slate-700' },
@@ -151,10 +167,23 @@ export default function SaleConversionPipeline() {
   const handleLinkSale = async (dealId, saleId) => {
     const sale = sales.find(s => s.id === saleId);
     if (!sale) return;
+    const deal = deals.find(d => d.id === dealId);
     const newStage = SALE_STATUS_TO_STAGE[sale.status];
     const updateData = { estate_sale_id: saleId };
     if (newStage) updateData.stage = newStage;
     await base44.entities.SaleConversionPipeline.update(dealId, updateData);
+    // Chapter 2 P1 — project the referral source onto the linked sale so it is visible from the project
+    if (deal?.referral_source_type) {
+      try {
+        await base44.entities.EstateSale.update(saleId, {
+          referral_source_type: deal.referral_source_type,
+          referral_source_name: deal.referral_source_name || '',
+        });
+        setSales(prev => prev.map(s => s.id === saleId
+          ? { ...s, referral_source_type: deal.referral_source_type, referral_source_name: deal.referral_source_name || '' }
+          : s));
+      } catch (e) { console.error('Referral source projection failed:', e); }
+    }
     setDeals(prev => prev.map(d => d.id === dealId ? { ...d, ...updateData, estate_sale_id: saleId } : d));
     setSelectedDeal(prev => prev?.id === dealId ? { ...prev, ...updateData, estate_sale_id: saleId } : prev);
   };
@@ -688,8 +717,32 @@ function DealDetail({ deal, setDeal, onSave, saving, onStageChange, onGenerateTi
   const [saleSearch, setSaleSearch] = useState('');
   const [saleResults, setSaleResults] = useState([]);
   const [showSaleResults, setShowSaleResults] = useState(false);
+  const [contacts, setContacts] = useState([]);
+  const [referralSaving, setReferralSaving] = useState(false);
   const stage = STAGE_MAP[deal.stage];
   const f = (k, v) => setDeal(prev => ({ ...prev, [k]: v }));
+
+  useEffect(() => {
+    base44.entities.Contact.filter({}, '-created_date', 100)
+      .then(data => setContacts(data || []))
+      .catch(() => {});
+  }, []);
+
+  const saveReferralSource = async () => {
+    setReferralSaving(true);
+    try {
+      await base44.entities.SaleConversionPipeline.update(deal.id, {
+        referral_source_type: deal.referral_source_type || null,
+        referral_source_name: deal.referral_source_name || null,
+        referral_source_contact_id: deal.referral_source_contact_id || null,
+        referral_source_notes: deal.referral_source_notes || null,
+      });
+    } catch (e) {
+      alert('Failed to save referral source');
+    } finally {
+      setReferralSaving(false);
+    }
+  };
 
   const linkedSale = deal.estate_sale_id ? (sales || []).find(s => s.id === deal.estate_sale_id) : null;
 
@@ -751,6 +804,62 @@ function DealDetail({ deal, setDeal, onSave, saving, onStageChange, onGenerateTi
             {deal.client_phone && <div className="flex items-center gap-2 text-sm"><Phone className="w-4 h-4 text-slate-400"/><a href={`tel:${deal.client_phone}`} className="text-cyan-600">{deal.client_phone}</a></div>}
             {deal.estimated_value && <div className="flex items-center gap-2 text-sm"><DollarSign className="w-4 h-4 text-green-500"/><span className="font-semibold text-green-700">${Number(deal.estimated_value).toLocaleString()} estimated · {deal.commission_rate}% comm.</span></div>}
             {deal.situation && <div className="flex items-center gap-2 text-sm"><User className="w-4 h-4 text-slate-400"/><span className="capitalize">{deal.situation}</span></div>}
+          </div>
+
+          {/* Chapter 2 P1 — Referral Source */}
+          <div className="border border-slate-200 rounded-lg p-4 space-y-3 bg-slate-50">
+            <p className="text-sm font-semibold text-slate-700 flex items-center gap-2">
+              <Handshake className="w-4 h-4 text-orange-500" /> Referral Source
+            </p>
+            <div className="grid sm:grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <label className="text-xs text-slate-500">Source type</label>
+                <select
+                  value={deal.referral_source_type || ''}
+                  onChange={e => f('referral_source_type', e.target.value || null)}
+                  className="w-full h-9 px-3 rounded-md border border-input bg-white text-sm"
+                >
+                  <option value="">None recorded</option>
+                  {REFERRAL_SOURCE_TYPES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
+                </select>
+              </div>
+              <div className="space-y-1">
+                <label className="text-xs text-slate-500">Referrer name</label>
+                <input
+                  value={deal.referral_source_name || ''}
+                  onChange={e => f('referral_source_name', e.target.value)}
+                  placeholder="Who introduced this seller?"
+                  className="w-full h-9 px-3 rounded-md border border-input bg-white text-sm"
+                />
+              </div>
+              <div className="space-y-1">
+                <label className="text-xs text-slate-500">Link to contact (optional)</label>
+                <select
+                  value={deal.referral_source_contact_id || ''}
+                  onChange={e => f('referral_source_contact_id', e.target.value || null)}
+                  className="w-full h-9 px-3 rounded-md border border-input bg-white text-sm"
+                >
+                  <option value="">No contact link</option>
+                  {contacts.map(c => (
+                    <option key={c.id} value={c.id}>
+                      {[c.first_name, c.last_name].filter(Boolean).join(' ') || c.email || 'Contact'}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="space-y-1">
+                <label className="text-xs text-slate-500">Notes</label>
+                <input
+                  value={deal.referral_source_notes || ''}
+                  onChange={e => f('referral_source_notes', e.target.value)}
+                  placeholder="Optional context"
+                  className="w-full h-9 px-3 rounded-md border border-input bg-white text-sm"
+                />
+              </div>
+            </div>
+            <Button size="sm" onClick={saveReferralSource} disabled={referralSaving} className="bg-orange-600 hover:bg-orange-700">
+              {referralSaving ? 'Saving…' : 'Save Referral Source'}
+            </Button>
           </div>
 
           {/* Linked Estate Sale */}

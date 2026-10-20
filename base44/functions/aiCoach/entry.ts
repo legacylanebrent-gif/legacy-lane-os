@@ -138,9 +138,10 @@ Deno.serve(async (req) => {
     }, { status: 403 });
   }
 
-  const { messages, model, ai_mode, voice_preferences } = await req.json();
+  const { messages, model, ai_mode, voice_preferences, saleId } = await req.json();
   // NOTE: any "context" from the frontend is intentionally discarded here.
-  // All context is fetched below using the authenticated user.id.
+  // All context is fetched below using the authenticated user.id. (saleId is an ID
+  // pointer only — the sale data below is fetched and ownership-checked server-side.)
   const selectedModel = model || DEFAULT_MODEL;
 
   // ── Rule 2: Credits are always fetched for the authenticated user only ──
@@ -163,6 +164,46 @@ Deno.serve(async (req) => {
     totalSales = recentSales.length;
     totalRevenue = recentSales.reduce((s, sale) => s + (sale.actual_revenue || 0), 0);
   } catch (_) {}
+
+  // ── Chapter 2 P1: verified per-sale context for the two communication modes ──
+  let saleContextBlock = '';
+  const SALE_CONTEXT_MODES = ['client_progress_update', 'team_instructions'];
+  if (SALE_CONTEXT_MODES.includes(ai_mode) && saleId) {
+    try {
+      const saleList = await base44.entities.EstateSale.filter({ id: saleId });
+      const sale = saleList && saleList[0];
+      if (sale && (sale.operator_id === user.id || user.role === 'admin')) {
+        const [tasks, decisions, notes, saleItems] = await Promise.all([
+          base44.entities.SaleTask.filter({ sale_id: saleId }).catch(() => []),
+          base44.entities.SaleClientDecision.filter({ sale_id: saleId }).catch(() => []),
+          base44.entities.SaleNote.filter({ sale_id: saleId }).catch(() => []),
+          base44.entities.Item.filter({ estate_sale_id: saleId }).catch(() => []),
+        ]);
+        const sortedNotes = [...notes].sort((a, b) => new Date(b.created_date || 0) - new Date(a.created_date || 0));
+        const taskDone = tasks.filter(t => t.status === 'completed').length;
+        const taskBlocked = tasks.filter(t => t.blocked).length;
+        const taskOverdue = tasks.filter(t => t.due_date && t.status !== 'completed' && new Date(t.due_date + 'T23:59:59') < new Date()).length;
+        const openDecisions = decisions.filter(d => d.status === 'open').length;
+        const reviewDecisions = decisions.filter(d => d.status === 'open' && (d.current_decision || '').toLowerCase() === 'review').length;
+        const pinnedNotes = sortedNotes.filter(n => n.pinned).map(n => n.note);
+        const recentNotes = sortedNotes.slice(0, 8).map(n => n.note);
+        const availableCount = saleItems.filter(i => i.status === 'available').length;
+        const soldCount = saleItems.filter(i => i.status === 'sold').length;
+        const awaitingPickup = saleItems.filter(i => i.status === 'sold' && !i.pickup_completed_at).length;
+        const dates = (sale.sale_dates || []).map(d => `${d.date} ${d.start_time || ''}-${d.end_time || ''}`).join('; ');
+        saleContextBlock = `
+== VERIFIED SALE CONTEXT (server-fetched — the ONLY sale facts you may use) ==
+Sale: ${sale.title || 'Untitled'} — status: ${sale.status}
+Location: ${sale.property_address?.city || ''}${sale.property_address?.state ? ', ' + sale.property_address.state : ''}
+Sale dates: ${dates || 'Not scheduled'}
+Tasks: ${tasks.length} total, ${taskDone} completed, ${taskBlocked} blocked, ${taskOverdue} overdue
+Client decisions: ${decisions.length} recorded, ${openDecisions} open${reviewDecisions ? `, ${reviewDecisions} merchandise awaiting client REVIEW` : ''}
+Inventory: ${saleItems.length} items — ${availableCount} available, ${soldCount} sold, ${awaitingPickup} sold awaiting pickup
+Pinned notes: ${pinnedNotes.length ? pinnedNotes.join(' | ') : 'None'}
+Recent notes: ${recentNotes.length ? recentNotes.join(' | ') : 'None'}`;
+      }
+    } catch (_) { saleContextBlock = ''; }
+  }
 
   // ── Rule 3: AI memory is read directly from the authenticated user record ──
   const companyName = user.company_name || user.full_name;
@@ -597,6 +638,17 @@ Provide: (1) The optimal ask timing (within 48 hours of sale closing), (2) Word-
 Overcome hesitation: most happy clients don't leave reviews because they're never asked directly. Train the Estate Sale Company Owner to ask with confidence.
 Goal: minimum 2 new reviews per sale completed.`,
 
+    client_progress_update: `You are in Client Progress Update mode. Draft a warm, professional progress update the Estate Sale Company Owner can send to their client (the seller or their family).
+Use ONLY the verified sale context provided — real dates, task progress, decisions, and inventory counts. NEVER invent progress, numbers, or promises.
+If a needed fact is not in the context, insert a clearly marked placeholder like [CONFIRM BEFORE SENDING: ...] instead of guessing.
+Output: (1) an email-ready draft (150–250 words) with a subject line, (2) a 2–3 sentence text-message version.
+This is a DRAFT for human review. End with a one-line reminder to review and personalize before sending. Never claim anything was sent.`,
+
+    team_instructions: `You are in Team Briefing mode. Draft a concise, actionable briefing for the Estate Sale Company Owner's crew using the verified sale context provided.
+Cover (where the context supports it): sale dates/times, what is done vs. remaining, blocked work, merchandise awaiting client REVIEW that affects crew handling, sold items awaiting pickup, and pinned/recent operational notes.
+Keep it under 250 words, scannable short bullets, and free of sensitive client personal or financial detail the crew does not need.
+NEVER invent facts — if something is unknown, write [CONFIRM: ...]. This is a DRAFT for human review before distribution. Nothing is sent automatically.`,
+
     // ── OPERATIONS & BUSINESS ────────────────────────────────────────────────
     business_coaching: `You are in Business Coaching Mode. You are a world-class estate sale business coach with deep expertise in lead generation, referral networks, revenue growth, team building, and territory domination.
 
@@ -754,6 +806,7 @@ You are not a generic chatbot. You are personalized to the logged-in Estate Sale
 
 == CURRENT MODE ==
 ${currentModeInstruction}
+${saleContextBlock}
 
 == OPERATOR PROFILE ==
 Name: ${user.full_name || 'Operator'}
