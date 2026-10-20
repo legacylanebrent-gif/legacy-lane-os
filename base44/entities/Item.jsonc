@@ -54,6 +54,18 @@
       "type": "string",
       "description": "If from estate sale"
     },
+    "operator_id": {
+      "type": "string",
+      "description": "EstateSale.operator_id projection for sale inventory (RLS anchor); equals the seller for personal/marketplace items. Derived from the sale at creation."
+    },
+    "sale_team_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "READ-SCOPE PROJECTION of EstateSale.sale_team for RLS. The sale remains the source of truth."
+    },
     "storage_location_id": {
       "type": "string"
     },
@@ -120,34 +132,538 @@
     "pre_sale_allowed": {
       "type": "boolean",
       "default": false,
-      "description": "Estate Sale Company Owner has enabled pre-sale selling for this item"
+      "description": "Estate Sale Company Owner has enabled pre-sale selling for this item",
+      "rls": {
+        "read": {
+          "$or": [
+            {
+              "$and": [
+                {
+                  "user_condition": {
+                    "role": "user"
+                  }
+                },
+                {
+                  "created_by_id": "{{user.id}}"
+                }
+              ]
+            },
+            {
+              "$and": [
+                {
+                  "user_condition": {
+                    "role": "user"
+                  }
+                },
+                {
+                  "data.seller_id": "{{user.id}}"
+                }
+              ]
+            },
+            {
+              "$and": [
+                {
+                  "user_condition": {
+                    "role": "user"
+                  }
+                },
+                {
+                  "data.operator_id": "{{user.id}}"
+                }
+              ]
+            },
+            {
+              "$and": [
+                {
+                  "user_condition": {
+                    "role": "user"
+                  }
+                },
+                {
+                  "data.sale_team_ids": {
+                    "$in": [
+                      "{{user.id}}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "user_condition": {
+                "role": "admin"
+              }
+            }
+          ]
+        }
+      }
     },
     "post_sale_allowed": {
       "type": "boolean",
       "default": false,
-      "description": "Estate Sale Company Owner has enabled post-sale selling for this item"
+      "description": "Estate Sale Company Owner has enabled post-sale selling for this item",
+      "rls": {
+        "read": {
+          "$or": [
+            {
+              "$and": [
+                {
+                  "user_condition": {
+                    "role": "user"
+                  }
+                },
+                {
+                  "created_by_id": "{{user.id}}"
+                }
+              ]
+            },
+            {
+              "$and": [
+                {
+                  "user_condition": {
+                    "role": "user"
+                  }
+                },
+                {
+                  "data.seller_id": "{{user.id}}"
+                }
+              ]
+            },
+            {
+              "$and": [
+                {
+                  "user_condition": {
+                    "role": "user"
+                  }
+                },
+                {
+                  "data.operator_id": "{{user.id}}"
+                }
+              ]
+            },
+            {
+              "$and": [
+                {
+                  "user_condition": {
+                    "role": "user"
+                  }
+                },
+                {
+                  "data.sale_team_ids": {
+                    "$in": [
+                      "{{user.id}}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "user_condition": {
+                "role": "admin"
+              }
+            }
+          ]
+        }
+      }
     },
     "sold_date": {
       "type": "string",
       "format": "date-time",
-      "description": "Timestamp when item was sold"
+      "description": "Timestamp when item was sold",
+      "rls": {
+        "read": {
+          "$or": [
+            {
+              "$and": [
+                {
+                  "user_condition": {
+                    "role": "user"
+                  }
+                },
+                {
+                  "created_by_id": "{{user.id}}"
+                }
+              ]
+            },
+            {
+              "$and": [
+                {
+                  "user_condition": {
+                    "role": "user"
+                  }
+                },
+                {
+                  "data.seller_id": "{{user.id}}"
+                }
+              ]
+            },
+            {
+              "$and": [
+                {
+                  "user_condition": {
+                    "role": "user"
+                  }
+                },
+                {
+                  "data.operator_id": "{{user.id}}"
+                }
+              ]
+            },
+            {
+              "$and": [
+                {
+                  "user_condition": {
+                    "role": "user"
+                  }
+                },
+                {
+                  "data.sale_team_ids": {
+                    "$in": [
+                      "{{user.id}}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "user_condition": {
+                "role": "admin"
+              }
+            }
+          ]
+        }
+      }
     },
     "buyer_name": {
-      "type": "string"
+      "type": "string",
+      "rls": {
+        "read": {
+          "$or": [
+            {
+              "$and": [
+                {
+                  "user_condition": {
+                    "role": "user"
+                  }
+                },
+                {
+                  "created_by_id": "{{user.id}}"
+                }
+              ]
+            },
+            {
+              "$and": [
+                {
+                  "user_condition": {
+                    "role": "user"
+                  }
+                },
+                {
+                  "data.seller_id": "{{user.id}}"
+                }
+              ]
+            },
+            {
+              "$and": [
+                {
+                  "user_condition": {
+                    "role": "user"
+                  }
+                },
+                {
+                  "data.operator_id": "{{user.id}}"
+                }
+              ]
+            },
+            {
+              "$and": [
+                {
+                  "user_condition": {
+                    "role": "user"
+                  }
+                },
+                {
+                  "data.sale_team_ids": {
+                    "$in": [
+                      "{{user.id}}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "user_condition": {
+                "role": "admin"
+              }
+            }
+          ]
+        }
+      }
     },
     "buyer_contact": {
-      "type": "string"
+      "type": "string",
+      "rls": {
+        "read": {
+          "$or": [
+            {
+              "$and": [
+                {
+                  "user_condition": {
+                    "role": "user"
+                  }
+                },
+                {
+                  "created_by_id": "{{user.id}}"
+                }
+              ]
+            },
+            {
+              "$and": [
+                {
+                  "user_condition": {
+                    "role": "user"
+                  }
+                },
+                {
+                  "data.seller_id": "{{user.id}}"
+                }
+              ]
+            },
+            {
+              "$and": [
+                {
+                  "user_condition": {
+                    "role": "user"
+                  }
+                },
+                {
+                  "data.operator_id": "{{user.id}}"
+                }
+              ]
+            },
+            {
+              "$and": [
+                {
+                  "user_condition": {
+                    "role": "user"
+                  }
+                },
+                {
+                  "data.sale_team_ids": {
+                    "$in": [
+                      "{{user.id}}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "user_condition": {
+                "role": "admin"
+              }
+            }
+          ]
+        }
+      }
     },
     "payment_method_used": {
-      "type": "string"
+      "type": "string",
+      "rls": {
+        "read": {
+          "$or": [
+            {
+              "$and": [
+                {
+                  "user_condition": {
+                    "role": "user"
+                  }
+                },
+                {
+                  "created_by_id": "{{user.id}}"
+                }
+              ]
+            },
+            {
+              "$and": [
+                {
+                  "user_condition": {
+                    "role": "user"
+                  }
+                },
+                {
+                  "data.seller_id": "{{user.id}}"
+                }
+              ]
+            },
+            {
+              "$and": [
+                {
+                  "user_condition": {
+                    "role": "user"
+                  }
+                },
+                {
+                  "data.operator_id": "{{user.id}}"
+                }
+              ]
+            },
+            {
+              "$and": [
+                {
+                  "user_condition": {
+                    "role": "user"
+                  }
+                },
+                {
+                  "data.sale_team_ids": {
+                    "$in": [
+                      "{{user.id}}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "user_condition": {
+                "role": "admin"
+              }
+            }
+          ]
+        }
+      }
     },
     "payment_notes": {
-      "type": "string"
+      "type": "string",
+      "rls": {
+        "read": {
+          "$or": [
+            {
+              "$and": [
+                {
+                  "user_condition": {
+                    "role": "user"
+                  }
+                },
+                {
+                  "created_by_id": "{{user.id}}"
+                }
+              ]
+            },
+            {
+              "$and": [
+                {
+                  "user_condition": {
+                    "role": "user"
+                  }
+                },
+                {
+                  "data.seller_id": "{{user.id}}"
+                }
+              ]
+            },
+            {
+              "$and": [
+                {
+                  "user_condition": {
+                    "role": "user"
+                  }
+                },
+                {
+                  "data.operator_id": "{{user.id}}"
+                }
+              ]
+            },
+            {
+              "$and": [
+                {
+                  "user_condition": {
+                    "role": "user"
+                  }
+                },
+                {
+                  "data.sale_team_ids": {
+                    "$in": [
+                      "{{user.id}}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "user_condition": {
+                "role": "admin"
+              }
+            }
+          ]
+        }
+      }
     },
     "pickup_completed_at": {
       "type": "string",
       "format": "date-time",
-      "description": "When sold merchandise was picked up / released to the buyer (guided closeout tracking). Absent = pickup still pending. Independent of selling status."
+      "description": "When sold merchandise was picked up / released to the buyer (guided closeout tracking). Absent = pickup still pending. Independent of selling status.",
+      "rls": {
+        "read": {
+          "$or": [
+            {
+              "$and": [
+                {
+                  "user_condition": {
+                    "role": "user"
+                  }
+                },
+                {
+                  "created_by_id": "{{user.id}}"
+                }
+              ]
+            },
+            {
+              "$and": [
+                {
+                  "user_condition": {
+                    "role": "user"
+                  }
+                },
+                {
+                  "data.seller_id": "{{user.id}}"
+                }
+              ]
+            },
+            {
+              "$and": [
+                {
+                  "user_condition": {
+                    "role": "user"
+                  }
+                },
+                {
+                  "data.operator_id": "{{user.id}}"
+                }
+              ]
+            },
+            {
+              "$and": [
+                {
+                  "user_condition": {
+                    "role": "user"
+                  }
+                },
+                {
+                  "data.sale_team_ids": {
+                    "$in": [
+                      "{{user.id}}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "user_condition": {
+                "role": "admin"
+              }
+            }
+          ]
+        }
+      }
     },
     "included_in_settlement": {
       "type": "boolean",
@@ -155,10 +671,136 @@
       "description": "Has this item been included in a client settlement statement"
     },
     "sku": {
-      "type": "string"
+      "type": "string",
+      "rls": {
+        "read": {
+          "$or": [
+            {
+              "$and": [
+                {
+                  "user_condition": {
+                    "role": "user"
+                  }
+                },
+                {
+                  "created_by_id": "{{user.id}}"
+                }
+              ]
+            },
+            {
+              "$and": [
+                {
+                  "user_condition": {
+                    "role": "user"
+                  }
+                },
+                {
+                  "data.seller_id": "{{user.id}}"
+                }
+              ]
+            },
+            {
+              "$and": [
+                {
+                  "user_condition": {
+                    "role": "user"
+                  }
+                },
+                {
+                  "data.operator_id": "{{user.id}}"
+                }
+              ]
+            },
+            {
+              "$and": [
+                {
+                  "user_condition": {
+                    "role": "user"
+                  }
+                },
+                {
+                  "data.sale_team_ids": {
+                    "$in": [
+                      "{{user.id}}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "user_condition": {
+                "role": "admin"
+              }
+            }
+          ]
+        }
+      }
     },
     "barcode": {
-      "type": "string"
+      "type": "string",
+      "rls": {
+        "read": {
+          "$or": [
+            {
+              "$and": [
+                {
+                  "user_condition": {
+                    "role": "user"
+                  }
+                },
+                {
+                  "created_by_id": "{{user.id}}"
+                }
+              ]
+            },
+            {
+              "$and": [
+                {
+                  "user_condition": {
+                    "role": "user"
+                  }
+                },
+                {
+                  "data.seller_id": "{{user.id}}"
+                }
+              ]
+            },
+            {
+              "$and": [
+                {
+                  "user_condition": {
+                    "role": "user"
+                  }
+                },
+                {
+                  "data.operator_id": "{{user.id}}"
+                }
+              ]
+            },
+            {
+              "$and": [
+                {
+                  "user_condition": {
+                    "role": "user"
+                  }
+                },
+                {
+                  "data.sale_team_ids": {
+                    "$in": [
+                      "{{user.id}}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "user_condition": {
+                "role": "admin"
+              }
+            }
+          ]
+        }
+      }
     },
     "dimensions": {
       "type": "object",
@@ -322,22 +964,274 @@
     },
     "last_synced_at": {
       "type": "string",
-      "format": "date-time"
+      "format": "date-time",
+      "rls": {
+        "read": {
+          "$or": [
+            {
+              "$and": [
+                {
+                  "user_condition": {
+                    "role": "user"
+                  }
+                },
+                {
+                  "created_by_id": "{{user.id}}"
+                }
+              ]
+            },
+            {
+              "$and": [
+                {
+                  "user_condition": {
+                    "role": "user"
+                  }
+                },
+                {
+                  "data.seller_id": "{{user.id}}"
+                }
+              ]
+            },
+            {
+              "$and": [
+                {
+                  "user_condition": {
+                    "role": "user"
+                  }
+                },
+                {
+                  "data.operator_id": "{{user.id}}"
+                }
+              ]
+            },
+            {
+              "$and": [
+                {
+                  "user_condition": {
+                    "role": "user"
+                  }
+                },
+                {
+                  "data.sale_team_ids": {
+                    "$in": [
+                      "{{user.id}}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "user_condition": {
+                "role": "admin"
+              }
+            }
+          ]
+        }
+      }
     },
     "inventory_reminder_sent_at": {
       "type": "string",
       "format": "date-time",
-      "description": "When the 14-day inventory reminder was last sent for this item"
+      "description": "When the 14-day inventory reminder was last sent for this item",
+      "rls": {
+        "read": {
+          "$or": [
+            {
+              "$and": [
+                {
+                  "user_condition": {
+                    "role": "user"
+                  }
+                },
+                {
+                  "created_by_id": "{{user.id}}"
+                }
+              ]
+            },
+            {
+              "$and": [
+                {
+                  "user_condition": {
+                    "role": "user"
+                  }
+                },
+                {
+                  "data.seller_id": "{{user.id}}"
+                }
+              ]
+            },
+            {
+              "$and": [
+                {
+                  "user_condition": {
+                    "role": "user"
+                  }
+                },
+                {
+                  "data.operator_id": "{{user.id}}"
+                }
+              ]
+            },
+            {
+              "$and": [
+                {
+                  "user_condition": {
+                    "role": "user"
+                  }
+                },
+                {
+                  "data.sale_team_ids": {
+                    "$in": [
+                      "{{user.id}}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "user_condition": {
+                "role": "admin"
+              }
+            }
+          ]
+        }
+      }
     },
     "inventory_reminder_count": {
       "type": "integer",
       "default": 0,
-      "description": "Number of times the 14-day reminder has been sent"
+      "description": "Number of times the 14-day reminder has been sent",
+      "rls": {
+        "read": {
+          "$or": [
+            {
+              "$and": [
+                {
+                  "user_condition": {
+                    "role": "user"
+                  }
+                },
+                {
+                  "created_by_id": "{{user.id}}"
+                }
+              ]
+            },
+            {
+              "$and": [
+                {
+                  "user_condition": {
+                    "role": "user"
+                  }
+                },
+                {
+                  "data.seller_id": "{{user.id}}"
+                }
+              ]
+            },
+            {
+              "$and": [
+                {
+                  "user_condition": {
+                    "role": "user"
+                  }
+                },
+                {
+                  "data.operator_id": "{{user.id}}"
+                }
+              ]
+            },
+            {
+              "$and": [
+                {
+                  "user_condition": {
+                    "role": "user"
+                  }
+                },
+                {
+                  "data.sale_team_ids": {
+                    "$in": [
+                      "{{user.id}}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "user_condition": {
+                "role": "admin"
+              }
+            }
+          ]
+        }
+      }
     },
     "inventory_renewed_at": {
       "type": "string",
       "format": "date-time",
-      "description": "When the operator last renewed this item for another 14 days"
+      "description": "When the operator last renewed this item for another 14 days",
+      "rls": {
+        "read": {
+          "$or": [
+            {
+              "$and": [
+                {
+                  "user_condition": {
+                    "role": "user"
+                  }
+                },
+                {
+                  "created_by_id": "{{user.id}}"
+                }
+              ]
+            },
+            {
+              "$and": [
+                {
+                  "user_condition": {
+                    "role": "user"
+                  }
+                },
+                {
+                  "data.seller_id": "{{user.id}}"
+                }
+              ]
+            },
+            {
+              "$and": [
+                {
+                  "user_condition": {
+                    "role": "user"
+                  }
+                },
+                {
+                  "data.operator_id": "{{user.id}}"
+                }
+              ]
+            },
+            {
+              "$and": [
+                {
+                  "user_condition": {
+                    "role": "user"
+                  }
+                },
+                {
+                  "data.sale_team_ids": {
+                    "$in": [
+                      "{{user.id}}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "user_condition": {
+                "role": "admin"
+              }
+            }
+          ]
+        }
+      }
     },
     "research_status": {
       "type": "string",
@@ -348,30 +1242,550 @@
         "SPECIALIST_REVIEW"
       ],
       "default": "CLEAR",
-      "description": "Chapter 3 P1 \u2014 research attention state. Flags questionable or potentially valuable merchandise for another look instead of pricing to keep moving. INDEPENDENT of Item.status, SaleClientDecision, price and availability \u2014 human-controlled only; AI may suggest but never set it."
+      "description": "Chapter 3 P1 \u2014 research attention state. Flags questionable or potentially valuable merchandise for another look instead of pricing to keep moving. INDEPENDENT of Item.status, SaleClientDecision, price and availability \u2014 human-controlled only; AI may suggest but never set it.",
+      "rls": {
+        "read": {
+          "$or": [
+            {
+              "$and": [
+                {
+                  "user_condition": {
+                    "role": "user"
+                  }
+                },
+                {
+                  "created_by_id": "{{user.id}}"
+                }
+              ]
+            },
+            {
+              "$and": [
+                {
+                  "user_condition": {
+                    "role": "user"
+                  }
+                },
+                {
+                  "data.seller_id": "{{user.id}}"
+                }
+              ]
+            },
+            {
+              "$and": [
+                {
+                  "user_condition": {
+                    "role": "user"
+                  }
+                },
+                {
+                  "data.operator_id": "{{user.id}}"
+                }
+              ]
+            },
+            {
+              "$and": [
+                {
+                  "user_condition": {
+                    "role": "user"
+                  }
+                },
+                {
+                  "data.sale_team_ids": {
+                    "$in": [
+                      "{{user.id}}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "user_condition": {
+                "role": "admin"
+              }
+            }
+          ]
+        }
+      }
     },
     "research_reason": {
       "type": "string",
-      "description": "Chapter 3 P1 \u2014 why the item needs another look (e.g. 'Possible sterling.', 'Signature needs verification.', 'Maker unknown.', 'Value may justify specialist.')."
+      "description": "Chapter 3 P1 \u2014 why the item needs another look (e.g. 'Possible sterling.', 'Signature needs verification.', 'Maker unknown.', 'Value may justify specialist.').",
+      "rls": {
+        "read": {
+          "$or": [
+            {
+              "$and": [
+                {
+                  "user_condition": {
+                    "role": "user"
+                  }
+                },
+                {
+                  "created_by_id": "{{user.id}}"
+                }
+              ]
+            },
+            {
+              "$and": [
+                {
+                  "user_condition": {
+                    "role": "user"
+                  }
+                },
+                {
+                  "data.seller_id": "{{user.id}}"
+                }
+              ]
+            },
+            {
+              "$and": [
+                {
+                  "user_condition": {
+                    "role": "user"
+                  }
+                },
+                {
+                  "data.operator_id": "{{user.id}}"
+                }
+              ]
+            },
+            {
+              "$and": [
+                {
+                  "user_condition": {
+                    "role": "user"
+                  }
+                },
+                {
+                  "data.sale_team_ids": {
+                    "$in": [
+                      "{{user.id}}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "user_condition": {
+                "role": "admin"
+              }
+            }
+          ]
+        }
+      }
     },
     "research_flagged_at": {
       "type": "string",
       "format": "date-time",
-      "description": "When the flag was set."
+      "description": "When the flag was set.",
+      "rls": {
+        "read": {
+          "$or": [
+            {
+              "$and": [
+                {
+                  "user_condition": {
+                    "role": "user"
+                  }
+                },
+                {
+                  "created_by_id": "{{user.id}}"
+                }
+              ]
+            },
+            {
+              "$and": [
+                {
+                  "user_condition": {
+                    "role": "user"
+                  }
+                },
+                {
+                  "data.seller_id": "{{user.id}}"
+                }
+              ]
+            },
+            {
+              "$and": [
+                {
+                  "user_condition": {
+                    "role": "user"
+                  }
+                },
+                {
+                  "data.operator_id": "{{user.id}}"
+                }
+              ]
+            },
+            {
+              "$and": [
+                {
+                  "user_condition": {
+                    "role": "user"
+                  }
+                },
+                {
+                  "data.sale_team_ids": {
+                    "$in": [
+                      "{{user.id}}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "user_condition": {
+                "role": "admin"
+              }
+            }
+          ]
+        }
+      }
     },
     "research_resolved_at": {
       "type": "string",
       "format": "date-time",
-      "description": "When the research question was resolved/cleared."
+      "description": "When the research question was resolved/cleared.",
+      "rls": {
+        "read": {
+          "$or": [
+            {
+              "$and": [
+                {
+                  "user_condition": {
+                    "role": "user"
+                  }
+                },
+                {
+                  "created_by_id": "{{user.id}}"
+                }
+              ]
+            },
+            {
+              "$and": [
+                {
+                  "user_condition": {
+                    "role": "user"
+                  }
+                },
+                {
+                  "data.seller_id": "{{user.id}}"
+                }
+              ]
+            },
+            {
+              "$and": [
+                {
+                  "user_condition": {
+                    "role": "user"
+                  }
+                },
+                {
+                  "data.operator_id": "{{user.id}}"
+                }
+              ]
+            },
+            {
+              "$and": [
+                {
+                  "user_condition": {
+                    "role": "user"
+                  }
+                },
+                {
+                  "data.sale_team_ids": {
+                    "$in": [
+                      "{{user.id}}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "user_condition": {
+                "role": "admin"
+              }
+            }
+          ]
+        }
+      }
     },
     "research_resolution": {
       "type": "string",
-      "description": "How the research question was resolved (what was learned/decided)."
+      "description": "How the research question was resolved (what was learned/decided).",
+      "rls": {
+        "read": {
+          "$or": [
+            {
+              "$and": [
+                {
+                  "user_condition": {
+                    "role": "user"
+                  }
+                },
+                {
+                  "created_by_id": "{{user.id}}"
+                }
+              ]
+            },
+            {
+              "$and": [
+                {
+                  "user_condition": {
+                    "role": "user"
+                  }
+                },
+                {
+                  "data.seller_id": "{{user.id}}"
+                }
+              ]
+            },
+            {
+              "$and": [
+                {
+                  "user_condition": {
+                    "role": "user"
+                  }
+                },
+                {
+                  "data.operator_id": "{{user.id}}"
+                }
+              ]
+            },
+            {
+              "$and": [
+                {
+                  "user_condition": {
+                    "role": "user"
+                  }
+                },
+                {
+                  "data.sale_team_ids": {
+                    "$in": [
+                      "{{user.id}}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "user_condition": {
+                "role": "admin"
+              }
+            }
+          ]
+        }
+      }
     }
   },
   "required": [
     "title",
     "seller_id",
     "price"
-  ]
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "$and": [
+            {
+              "user_condition": {
+                "role": "user"
+              }
+            },
+            {
+              "created_by_id": "{{user.id}}"
+            }
+          ]
+        },
+        {
+          "$and": [
+            {
+              "user_condition": {
+                "role": "user"
+              }
+            },
+            {
+              "data.seller_id": "{{user.id}}"
+            }
+          ]
+        },
+        {
+          "$and": [
+            {
+              "user_condition": {
+                "role": "user"
+              }
+            },
+            {
+              "data.operator_id": "{{user.id}}"
+            }
+          ]
+        },
+        {
+          "$and": [
+            {
+              "user_condition": {
+                "role": "user"
+              }
+            },
+            {
+              "data.sale_team_ids": {
+                "$in": [
+                  "{{user.id}}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "data.sales_channels": "marketplace"
+        }
+      ]
+    },
+    "create": {
+      "$or": [
+        {
+          "$and": [
+            {
+              "user_condition": {
+                "role": "user"
+              }
+            },
+            {
+              "data.seller_id": "{{user.id}}"
+            }
+          ]
+        },
+        {
+          "$and": [
+            {
+              "user_condition": {
+                "role": "user"
+              }
+            },
+            {
+              "data.operator_id": "{{user.id}}"
+            }
+          ]
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "$and": [
+            {
+              "user_condition": {
+                "role": "user"
+              }
+            },
+            {
+              "created_by_id": "{{user.id}}"
+            }
+          ]
+        },
+        {
+          "$and": [
+            {
+              "user_condition": {
+                "role": "user"
+              }
+            },
+            {
+              "data.seller_id": "{{user.id}}"
+            }
+          ]
+        },
+        {
+          "$and": [
+            {
+              "user_condition": {
+                "role": "user"
+              }
+            },
+            {
+              "data.operator_id": "{{user.id}}"
+            }
+          ]
+        },
+        {
+          "$and": [
+            {
+              "user_condition": {
+                "role": "user"
+              }
+            },
+            {
+              "data.sale_team_ids": {
+                "$in": [
+                  "{{user.id}}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "$and": [
+            {
+              "user_condition": {
+                "role": "user"
+              }
+            },
+            {
+              "created_by_id": "{{user.id}}"
+            }
+          ]
+        },
+        {
+          "$and": [
+            {
+              "user_condition": {
+                "role": "user"
+              }
+            },
+            {
+              "data.seller_id": "{{user.id}}"
+            }
+          ]
+        },
+        {
+          "$and": [
+            {
+              "user_condition": {
+                "role": "user"
+              }
+            },
+            {
+              "data.operator_id": "{{user.id}}"
+            }
+          ]
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
 }

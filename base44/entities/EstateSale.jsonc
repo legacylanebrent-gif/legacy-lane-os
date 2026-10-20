@@ -78,12 +78,114 @@
     },
     "distance_miles": {
       "type": "number",
-      "description": "Chapter 5 P1 \u2014 operational distance snapshot from the operator's operating base to this sale location, captured at save time when both geocodes exist. Null = UNKNOWN; the system never invents 0-mile precision. Not recalculated when the operating base changes \u2014 only on an explicit save of this sale (its snapshot records the distance as known at that time)."
+      "description": "Chapter 5 P1 \u2014 operational distance snapshot from the operator's operating base to this sale location, captured at save time when both geocodes exist. Null = UNKNOWN; the system never invents 0-mile precision. Not recalculated when the operating base changes \u2014 only on an explicit save of this sale (its snapshot records the distance as known at that time).",
+      "rls": {
+        "read": {
+          "$or": [
+            {
+              "$and": [
+                {
+                  "user_condition": {
+                    "role": "user"
+                  }
+                },
+                {
+                  "created_by_id": "{{user.id}}"
+                }
+              ]
+            },
+            {
+              "$and": [
+                {
+                  "user_condition": {
+                    "role": "user"
+                  }
+                },
+                {
+                  "data.operator_id": "{{user.id}}"
+                }
+              ]
+            },
+            {
+              "$and": [
+                {
+                  "user_condition": {
+                    "role": "user"
+                  }
+                },
+                {
+                  "data.sale_team": {
+                    "$in": [
+                      "{{user.id}}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "user_condition": {
+                "role": "admin"
+              }
+            }
+          ]
+        }
+      }
     },
     "distance_calculated_at": {
       "type": "string",
       "format": "date-time",
-      "description": "Chapter 5 P1 \u2014 when the distance snapshot was captured."
+      "description": "Chapter 5 P1 \u2014 when the distance snapshot was captured.",
+      "rls": {
+        "read": {
+          "$or": [
+            {
+              "$and": [
+                {
+                  "user_condition": {
+                    "role": "user"
+                  }
+                },
+                {
+                  "created_by_id": "{{user.id}}"
+                }
+              ]
+            },
+            {
+              "$and": [
+                {
+                  "user_condition": {
+                    "role": "user"
+                  }
+                },
+                {
+                  "data.operator_id": "{{user.id}}"
+                }
+              ]
+            },
+            {
+              "$and": [
+                {
+                  "user_condition": {
+                    "role": "user"
+                  }
+                },
+                {
+                  "data.sale_team": {
+                    "$in": [
+                      "{{user.id}}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "user_condition": {
+                "role": "admin"
+              }
+            }
+          ]
+        }
+      }
     },
     "site_assessment": {
       "type": "object",
@@ -190,7 +292,58 @@
           "description": "Any other operational factor that affects the work."
         }
       },
-      "default": {}
+      "default": {},
+      "rls": {
+        "read": {
+          "$or": [
+            {
+              "$and": [
+                {
+                  "user_condition": {
+                    "role": "user"
+                  }
+                },
+                {
+                  "created_by_id": "{{user.id}}"
+                }
+              ]
+            },
+            {
+              "$and": [
+                {
+                  "user_condition": {
+                    "role": "user"
+                  }
+                },
+                {
+                  "data.operator_id": "{{user.id}}"
+                }
+              ]
+            },
+            {
+              "$and": [
+                {
+                  "user_condition": {
+                    "role": "user"
+                  }
+                },
+                {
+                  "data.sale_team": {
+                    "$in": [
+                      "{{user.id}}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "user_condition": {
+                "role": "admin"
+              }
+            }
+          ]
+        }
+      }
     },
     "sale_dates": {
       "type": "array",
@@ -220,7 +373,8 @@
         "completed",
         "archived"
       ],
-      "default": "draft"
+      "default": "draft",
+      "description": "Type-agnostic public/operational sale state. draft is PRIVATE (operator/team/admin only); upcoming/active/completed are the deliberate public listing states; archived is private again."
     },
     "images": {
       "type": "array",
@@ -342,15 +496,168 @@
     },
     "actual_revenue": {
       "type": "number",
-      "default": 0
+      "default": 0,
+      "rls": {
+        "read": {
+          "$or": [
+            {
+              "$and": [
+                {
+                  "user_condition": {
+                    "role": "user"
+                  }
+                },
+                {
+                  "created_by_id": "{{user.id}}"
+                }
+              ]
+            },
+            {
+              "$and": [
+                {
+                  "user_condition": {
+                    "role": "user"
+                  }
+                },
+                {
+                  "data.operator_id": "{{user.id}}"
+                }
+              ]
+            },
+            {
+              "$and": [
+                {
+                  "user_condition": {
+                    "role": "user"
+                  }
+                },
+                {
+                  "data.sale_team": {
+                    "$in": [
+                      "{{user.id}}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "user_condition": {
+                "role": "admin"
+              }
+            }
+          ]
+        }
+      }
     },
     "commission_rate": {
       "type": "number",
-      "description": "Percentage"
+      "description": "Percentage",
+      "rls": {
+        "read": {
+          "$or": [
+            {
+              "$and": [
+                {
+                  "user_condition": {
+                    "role": "user"
+                  }
+                },
+                {
+                  "created_by_id": "{{user.id}}"
+                }
+              ]
+            },
+            {
+              "$and": [
+                {
+                  "user_condition": {
+                    "role": "user"
+                  }
+                },
+                {
+                  "data.operator_id": "{{user.id}}"
+                }
+              ]
+            },
+            {
+              "$and": [
+                {
+                  "user_condition": {
+                    "role": "user"
+                  }
+                },
+                {
+                  "data.sale_team": {
+                    "$in": [
+                      "{{user.id}}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "user_condition": {
+                "role": "admin"
+              }
+            }
+          ]
+        }
+      }
     },
     "commission_earned": {
       "type": "number",
-      "default": 0
+      "default": 0,
+      "rls": {
+        "read": {
+          "$or": [
+            {
+              "$and": [
+                {
+                  "user_condition": {
+                    "role": "user"
+                  }
+                },
+                {
+                  "created_by_id": "{{user.id}}"
+                }
+              ]
+            },
+            {
+              "$and": [
+                {
+                  "user_condition": {
+                    "role": "user"
+                  }
+                },
+                {
+                  "data.operator_id": "{{user.id}}"
+                }
+              ]
+            },
+            {
+              "$and": [
+                {
+                  "user_condition": {
+                    "role": "user"
+                  }
+                },
+                {
+                  "data.sale_team": {
+                    "$in": [
+                      "{{user.id}}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "user_condition": {
+                "role": "admin"
+              }
+            }
+          ]
+        }
+      }
     },
     "views": {
       "type": "integer",
@@ -397,11 +704,113 @@
         "website",
         "other"
       ],
-      "description": "Chapter 2 P1 \u2014 PROJECTION of the structured referral source from the linked SaleConversionPipeline deal (copied when the deal is linked to this sale). Display/source attribution only; the pipeline deal remains the capture point."
+      "description": "Chapter 2 P1 \u2014 PROJECTION of the structured referral source from the linked SaleConversionPipeline deal (copied when the deal is linked to this sale). Display/source attribution only; the pipeline deal remains the capture point.",
+      "rls": {
+        "read": {
+          "$or": [
+            {
+              "$and": [
+                {
+                  "user_condition": {
+                    "role": "user"
+                  }
+                },
+                {
+                  "created_by_id": "{{user.id}}"
+                }
+              ]
+            },
+            {
+              "$and": [
+                {
+                  "user_condition": {
+                    "role": "user"
+                  }
+                },
+                {
+                  "data.operator_id": "{{user.id}}"
+                }
+              ]
+            },
+            {
+              "$and": [
+                {
+                  "user_condition": {
+                    "role": "user"
+                  }
+                },
+                {
+                  "data.sale_team": {
+                    "$in": [
+                      "{{user.id}}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "user_condition": {
+                "role": "admin"
+              }
+            }
+          ]
+        }
+      }
     },
     "referral_source_name": {
       "type": "string",
-      "description": "Chapter 2 P1 \u2014 PROJECTION of the referrer name from the linked SaleConversionPipeline deal."
+      "description": "Chapter 2 P1 \u2014 PROJECTION of the referrer name from the linked SaleConversionPipeline deal.",
+      "rls": {
+        "read": {
+          "$or": [
+            {
+              "$and": [
+                {
+                  "user_condition": {
+                    "role": "user"
+                  }
+                },
+                {
+                  "created_by_id": "{{user.id}}"
+                }
+              ]
+            },
+            {
+              "$and": [
+                {
+                  "user_condition": {
+                    "role": "user"
+                  }
+                },
+                {
+                  "data.operator_id": "{{user.id}}"
+                }
+              ]
+            },
+            {
+              "$and": [
+                {
+                  "user_condition": {
+                    "role": "user"
+                  }
+                },
+                {
+                  "data.sale_team": {
+                    "$in": [
+                      "{{user.id}}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "user_condition": {
+                "role": "admin"
+              }
+            }
+          ]
+        }
+      }
     },
     "national_featured": {
       "type": "boolean",
@@ -414,21 +823,276 @@
     "local_featured_until": {
       "type": "string",
       "format": "date-time",
-      "description": "Expiry timestamp for local featured status (set to 30 days from activation)"
+      "description": "Expiry timestamp for local featured status (set to 30 days from activation)",
+      "rls": {
+        "read": {
+          "$or": [
+            {
+              "$and": [
+                {
+                  "user_condition": {
+                    "role": "user"
+                  }
+                },
+                {
+                  "created_by_id": "{{user.id}}"
+                }
+              ]
+            },
+            {
+              "$and": [
+                {
+                  "user_condition": {
+                    "role": "user"
+                  }
+                },
+                {
+                  "data.operator_id": "{{user.id}}"
+                }
+              ]
+            },
+            {
+              "$and": [
+                {
+                  "user_condition": {
+                    "role": "user"
+                  }
+                },
+                {
+                  "data.sale_team": {
+                    "$in": [
+                      "{{user.id}}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "user_condition": {
+                "role": "admin"
+              }
+            }
+          ]
+        }
+      }
     },
     "national_featured_price": {
-      "type": "number"
+      "type": "number",
+      "rls": {
+        "read": {
+          "$or": [
+            {
+              "$and": [
+                {
+                  "user_condition": {
+                    "role": "user"
+                  }
+                },
+                {
+                  "created_by_id": "{{user.id}}"
+                }
+              ]
+            },
+            {
+              "$and": [
+                {
+                  "user_condition": {
+                    "role": "user"
+                  }
+                },
+                {
+                  "data.operator_id": "{{user.id}}"
+                }
+              ]
+            },
+            {
+              "$and": [
+                {
+                  "user_condition": {
+                    "role": "user"
+                  }
+                },
+                {
+                  "data.sale_team": {
+                    "$in": [
+                      "{{user.id}}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "user_condition": {
+                "role": "admin"
+              }
+            }
+          ]
+        }
+      }
     },
     "local_featured_price": {
-      "type": "number"
+      "type": "number",
+      "rls": {
+        "read": {
+          "$or": [
+            {
+              "$and": [
+                {
+                  "user_condition": {
+                    "role": "user"
+                  }
+                },
+                {
+                  "created_by_id": "{{user.id}}"
+                }
+              ]
+            },
+            {
+              "$and": [
+                {
+                  "user_condition": {
+                    "role": "user"
+                  }
+                },
+                {
+                  "data.operator_id": "{{user.id}}"
+                }
+              ]
+            },
+            {
+              "$and": [
+                {
+                  "user_condition": {
+                    "role": "user"
+                  }
+                },
+                {
+                  "data.sale_team": {
+                    "$in": [
+                      "{{user.id}}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "user_condition": {
+                "role": "admin"
+              }
+            }
+          ]
+        }
+      }
     },
     "email_campaign_price": {
       "type": "number",
-      "description": "Price paid for email campaign"
+      "description": "Price paid for email campaign",
+      "rls": {
+        "read": {
+          "$or": [
+            {
+              "$and": [
+                {
+                  "user_condition": {
+                    "role": "user"
+                  }
+                },
+                {
+                  "created_by_id": "{{user.id}}"
+                }
+              ]
+            },
+            {
+              "$and": [
+                {
+                  "user_condition": {
+                    "role": "user"
+                  }
+                },
+                {
+                  "data.operator_id": "{{user.id}}"
+                }
+              ]
+            },
+            {
+              "$and": [
+                {
+                  "user_condition": {
+                    "role": "user"
+                  }
+                },
+                {
+                  "data.sale_team": {
+                    "$in": [
+                      "{{user.id}}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "user_condition": {
+                "role": "admin"
+              }
+            }
+          ]
+        }
+      }
     },
     "sms_campaign_price": {
       "type": "number",
-      "description": "Price paid for SMS campaign"
+      "description": "Price paid for SMS campaign",
+      "rls": {
+        "read": {
+          "$or": [
+            {
+              "$and": [
+                {
+                  "user_condition": {
+                    "role": "user"
+                  }
+                },
+                {
+                  "created_by_id": "{{user.id}}"
+                }
+              ]
+            },
+            {
+              "$and": [
+                {
+                  "user_condition": {
+                    "role": "user"
+                  }
+                },
+                {
+                  "data.operator_id": "{{user.id}}"
+                }
+              ]
+            },
+            {
+              "$and": [
+                {
+                  "user_condition": {
+                    "role": "user"
+                  }
+                },
+                {
+                  "data.sale_team": {
+                    "$in": [
+                      "{{user.id}}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "user_condition": {
+                "role": "admin"
+              }
+            }
+          ]
+        }
+      }
     },
     "early_sign_in_enabled": {
       "type": "boolean",
@@ -511,7 +1175,58 @@
         "type": "string"
       },
       "default": [],
-      "description": "User IDs of team members assigned to manage this sale"
+      "description": "User IDs of team members assigned to manage this sale",
+      "rls": {
+        "read": {
+          "$or": [
+            {
+              "$and": [
+                {
+                  "user_condition": {
+                    "role": "user"
+                  }
+                },
+                {
+                  "created_by_id": "{{user.id}}"
+                }
+              ]
+            },
+            {
+              "$and": [
+                {
+                  "user_condition": {
+                    "role": "user"
+                  }
+                },
+                {
+                  "data.operator_id": "{{user.id}}"
+                }
+              ]
+            },
+            {
+              "$and": [
+                {
+                  "user_condition": {
+                    "role": "user"
+                  }
+                },
+                {
+                  "data.sale_team": {
+                    "$in": [
+                      "{{user.id}}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "user_condition": {
+                "role": "admin"
+              }
+            }
+          ]
+        }
+      }
     },
     "seo_title": {
       "type": "string",
@@ -562,5 +1277,168 @@
     "title",
     "operator_id",
     "property_address"
-  ]
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "$and": [
+            {
+              "user_condition": {
+                "role": "user"
+              }
+            },
+            {
+              "created_by_id": "{{user.id}}"
+            }
+          ]
+        },
+        {
+          "$and": [
+            {
+              "user_condition": {
+                "role": "user"
+              }
+            },
+            {
+              "data.operator_id": "{{user.id}}"
+            }
+          ]
+        },
+        {
+          "$and": [
+            {
+              "user_condition": {
+                "role": "user"
+              }
+            },
+            {
+              "data.sale_team": {
+                "$in": [
+                  "{{user.id}}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "data.status": {
+            "$in": [
+              "upcoming",
+              "active",
+              "completed"
+            ]
+          }
+        }
+      ]
+    },
+    "create": {
+      "$or": [
+        {
+          "$and": [
+            {
+              "user_condition": {
+                "role": "user"
+              }
+            },
+            {
+              "data.operator_id": "{{user.id}}"
+            }
+          ]
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "$and": [
+            {
+              "user_condition": {
+                "role": "user"
+              }
+            },
+            {
+              "created_by_id": "{{user.id}}"
+            }
+          ]
+        },
+        {
+          "$and": [
+            {
+              "user_condition": {
+                "role": "user"
+              }
+            },
+            {
+              "data.operator_id": "{{user.id}}"
+            }
+          ]
+        },
+        {
+          "$and": [
+            {
+              "user_condition": {
+                "role": "user"
+              }
+            },
+            {
+              "data.sale_team": {
+                "$in": [
+                  "{{user.id}}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "$and": [
+            {
+              "user_condition": {
+                "role": "user"
+              }
+            },
+            {
+              "created_by_id": "{{user.id}}"
+            }
+          ]
+        },
+        {
+          "$and": [
+            {
+              "user_condition": {
+                "role": "user"
+              }
+            },
+            {
+              "data.operator_id": "{{user.id}}"
+            }
+          ]
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
 }

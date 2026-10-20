@@ -6,6 +6,18 @@
       "type": "string",
       "description": "Estate sale ID"
     },
+    "operator_id": {
+      "type": "string",
+      "description": "EstateSale.operator_id projection \u2014 sale owner (RLS anchor). Derived from the sale at creation. Absent for consumer self-reported purchase records (sale_id 'user_purchase')."
+    },
+    "sale_team_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "READ-SCOPE PROJECTION of EstateSale.sale_team for RLS. The sale remains the source of truth."
+    },
     "item_name": {
       "type": "string"
     },
@@ -56,7 +68,44 @@
     "read": {
       "$or": [
         {
-          "created_by_id": "{{user.id}}"
+          "$and": [
+            {
+              "user_condition": {
+                "role": "user"
+              }
+            },
+            {
+              "created_by_id": "{{user.id}}"
+            }
+          ]
+        },
+        {
+          "$and": [
+            {
+              "user_condition": {
+                "role": "user"
+              }
+            },
+            {
+              "data.operator_id": "{{user.id}}"
+            }
+          ]
+        },
+        {
+          "$and": [
+            {
+              "user_condition": {
+                "role": "user"
+              }
+            },
+            {
+              "data.sale_team_ids": {
+                "$in": [
+                  "{{user.id}}"
+                ]
+              }
+            }
+          ]
         },
         {
           "user_condition": {
@@ -68,7 +117,9 @@
     "create": {
       "$or": [
         {
-          "created_by_id": "{{user.id}}"
+          "user_condition": {
+            "role": "user"
+          }
         },
         {
           "user_condition": {
@@ -80,7 +131,28 @@
     "update": {
       "$or": [
         {
-          "created_by_id": "{{user.id}}"
+          "$and": [
+            {
+              "user_condition": {
+                "role": "user"
+              }
+            },
+            {
+              "created_by_id": "{{user.id}}"
+            }
+          ]
+        },
+        {
+          "$and": [
+            {
+              "user_condition": {
+                "role": "user"
+              }
+            },
+            {
+              "data.operator_id": "{{user.id}}"
+            }
+          ]
         },
         {
           "user_condition": {
@@ -90,9 +162,37 @@
       ]
     },
     "delete": {
-      "user_condition": {
-        "role": "admin"
-      }
+      "$or": [
+        {
+          "$and": [
+            {
+              "user_condition": {
+                "role": "user"
+              }
+            },
+            {
+              "created_by_id": "{{user.id}}"
+            }
+          ]
+        },
+        {
+          "$and": [
+            {
+              "user_condition": {
+                "role": "user"
+              }
+            },
+            {
+              "data.operator_id": "{{user.id}}"
+            }
+          ]
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
     }
   }
 }
