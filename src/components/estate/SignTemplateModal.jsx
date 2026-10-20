@@ -335,8 +335,8 @@ export default function SignTemplateModal({ open, onClose, sale, operator }) {
                   {operator?.company_name && (
                     <p className="font-semibold text-slate-900 text-sm">{operator.company_name}</p>
                   )}
-                  {operator?.company_address && (
-                    <p className="text-xs text-slate-700">{operator.company_address}</p>
+                  {companyAddressText && (
+                    <p className="text-xs text-slate-700">{companyAddressText}</p>
                   )}
                   {operator?.phone && (
                     <p className="text-xs text-slate-700">{formatPhone(operator.phone)}</p>
