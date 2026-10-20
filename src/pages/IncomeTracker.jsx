@@ -103,7 +103,10 @@ export default function IncomeTracker() {
       // Create a map of sale IDs to their commission rates
       const saleCommissionRates = {};
       estateSales.forEach(sale => {
-        saleCommissionRates[sale.id] = sale.commission_rate || 0.40; // Default to 40% if not set
+        // Commission rate is stored as a PERCENT (e.g. 30 = 30%). Normalize to a
+        // fraction before applying; a missing rate defaults to 40%.
+        const raw = sale.commission_rate == null ? 40 : Number(sale.commission_rate);
+        saleCommissionRates[sale.id] = raw > 1 ? raw / 100 : raw;
       });
       
       // Group transactions by sale and compute the company share from the sale's actual
