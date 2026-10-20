@@ -1,7 +1,7 @@
 {
   "name": "SaleClientDecision",
   "type": "object",
-  "description": "Chapter 1 P1 \u2014 canonical sale-scoped client decision record with change history. Answers WHO authorized it, WHEN, WHAT they instructed, HOW it was received, and WHETHER it later changed. KEEP/SELL/REVIEW merchandise decisions are decision_type 'merchandise' on this same architecture \u2014 there is no second merchandise-decision system. Item.status (selling/transaction state) remains fully independent of these records.",
+  "description": "Chapter 1 P1 \u2014 canonical sale-scoped client decision record with change history. Answers WHO authorized it, WHEN, WHAT they instructed, HOW it was received, and WHETHER it later changed. KEEP/SELL/REVIEW merchandise decisions are decision_type 'merchandise' on this same architecture \u2014 there is no second merchandise-decision system. Item.status (selling/transaction state) remains fully independent of these records. Chapter 4 P1: decision_type 'financial' with current_decision 'authorized' and charge_amount > 0 records a client-AUTHORIZED ADDITIONAL SERVICE CHARGE that flows to the settlement statement \u2014 there is no separate charge-approval entity.",
   "properties": {
     "sale_id": {
       "type": "string",
@@ -35,7 +35,7 @@
         "other"
       ],
       "default": "general",
-      "description": "What kind of matter this decision governs. 'merchandise' = KEEP/SELL/REVIEW."
+      "description": "What kind of matter this decision governs. 'merchandise' = KEEP/SELL/REVIEW. 'financial' + current_decision 'authorized' = client-authorized additional service charge (Chapter 4 P1)."
     },
     "subject": {
       "type": "string",
@@ -45,13 +45,13 @@
       "type": "string",
       "description": "Canonical Item this merchandise decision attaches to (decision_type 'merchandise' only). Item selling status is never modified by this record."
     },
-    "image_index": {
-      "type": "integer",
-      "description": "Index into EstateSale.images when the decision was made against a property photo before formal Item creation."
+    "charge_amount": {
+      "type": "number",
+      "description": "Chapter 4 P1 \u2014 for decision_type 'financial' with current_decision 'authorized': the dollar amount of the client-authorized additional service charge (e.g. extra cleanout work, special hauling, extra disposal, chargeable staffing). Flows to the settlement statement ONLY while current_decision is 'authorized'; a changed/revoked decision drops the charge automatically. Never a merchandise price."
     },
     "current_decision": {
       "type": "string",
-      "description": "The CONTROLLING instruction. For merchandise: 'keep' | 'sell' | 'review'. Free text for other types."
+      "description": "The CONTROLLING instruction. For merchandise: 'keep' | 'sell' | 'review'. For financial service charges: 'authorized' | 'declined' (or free text for other financial matters). Free text for other types."
     },
     "status": {
       "type": "string",

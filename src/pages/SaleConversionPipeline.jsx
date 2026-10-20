@@ -17,6 +17,7 @@ import {
   Search, RefreshCw, Home, Unlink, Handshake
 } from 'lucide-react';
 import { format, addDays, parseISO, isToday, isTomorrow, isPast } from 'date-fns';
+import DealEconomicsPanel from '@/components/saleops/DealEconomicsPanel';
 
 // ─── Stage config ────────────────────────────────────────────────────────────
 const STAGES = [
@@ -247,6 +248,13 @@ export default function SaleConversionPipeline() {
       await loadData();
     } catch (e) { alert('Failed to save'); }
     finally { setSaving(false); }
+  };
+
+  // Chapter 4 P1 — persist pre-sale economics onto the deal (single write path).
+  const handleUpdateEconomics = async (fields) => {
+    await base44.entities.SaleConversionPipeline.update(selectedDeal.id, fields);
+    setSelectedDeal(prev => ({ ...prev, ...fields }));
+    setDeals(prev => prev.map(d => d.id === selectedDeal.id ? { ...d, ...fields } : d));
   };
 
   const handleUpdateTask = async (taskIdx, field, value) => {
@@ -556,6 +564,8 @@ Include 18-24 tasks covering every stage. Order them chronologically by due_date
               sales={sales}
               onLinkSale={(saleId) => handleLinkSale(selectedDeal.id, saleId, selectedDeal)}
               onUnlinkSale={() => handleUnlinkSale(selectedDeal.id)}
+              onUpdateEconomics={handleUpdateEconomics}
+              allDeals={deals}
             />
           </DialogContent>
         </Dialog>
@@ -713,7 +723,7 @@ function NewDealForm({ form, setForm, onSave, onCancel, saving, existingDeals })
 }
 
 // ─── Deal Detail Modal ────────────────────────────────────────────────────────
-function DealDetail({ deal, setDeal, onSave, saving, onStageChange, onGenerateTimeline, generatingTimeline, onUpdateTask, editingTaskId, setEditingTaskId, sales, onLinkSale, onUnlinkSale }) {
+function DealDetail({ deal, setDeal, onSave, saving, onStageChange, onGenerateTimeline, generatingTimeline, onUpdateTask, editingTaskId, setEditingTaskId, sales, onLinkSale, onUnlinkSale, onUpdateEconomics, allDeals }) {
   const [detailTab, setDetailTab] = useState('overview');
   const [saleSearch, setSaleSearch] = useState('');
   const [saleResults, setSaleResults] = useState([]);
@@ -796,6 +806,7 @@ function DealDetail({ deal, setDeal, onSave, saving, onStageChange, onGenerateTi
           <TabsTrigger value="timeline">
             AI Timeline {tasks.length > 0 && <span className="ml-1 bg-orange-100 text-orange-700 text-[10px] px-1.5 rounded-full">{taskDone}/{tasks.length}</span>}
           </TabsTrigger>
+          <TabsTrigger value="economics">Economics</TabsTrigger>
         </TabsList>
 
         {/* OVERVIEW */}
@@ -1060,6 +1071,11 @@ function DealDetail({ deal, setDeal, onSave, saving, onStageChange, onGenerateTi
               </div>
             </div>
           ))}
+        </TabsContent>
+
+        {/* Chapter 4 P1 — Pre-Sale Economics Calculator + Acceptance Scorecard */}
+        <TabsContent value="economics" className="mt-3">
+          <DealEconomicsPanel deal={deal} onPersist={onUpdateEconomics} allDeals={allDeals} />
         </TabsContent>
       </Tabs>
     </div>

@@ -11,6 +11,8 @@ import {
   Users, DollarSign, Landmark, ClipboardCheck, ListChecks, Loader2
 } from 'lucide-react';
 import { asArray, fmtDateTime } from '@/components/saleops/saleDecisionModel';
+import { actualSaleEconomics } from '@/components/saleops/saleEconomicsModel';
+import SaleEconomicsPanel from '@/components/saleops/SaleEconomicsPanel';
 
 // Chapter 1 P1 — Guided Closeout: an ORCHESTRATION surface over the existing
 // canonical closeout systems (Item, Donation, Cleanout, buyout, Expense,
@@ -50,7 +52,7 @@ export default function SaleCloseout() {
       const sale = saleData[0];
       setSale(sale);
 
-      const [itemsRes, decisionsRes, tasksRes, expensesRes, dealsRes, donationsRes, cleanoutsRes] = await Promise.all([
+      const [itemsRes, decisionsRes, tasksRes, expensesRes, dealsRes, donationsRes, cleanoutsRes, laborRes] = await Promise.all([
         base44.entities.Item.filter({ estate_sale_id: sale.id }),
         base44.entities.SaleClientDecision.filter({ sale_id: sale.id }),
         base44.entities.SaleTask.filter({ sale_id: sale.id }),
@@ -58,6 +60,7 @@ export default function SaleCloseout() {
         base44.entities.SaleConversionPipeline.filter({ estate_sale_id: sale.id }),
         base44.entities.Donation.filter({ operator_id: sale.operator_id }),
         base44.entities.Cleanout.filter({ operator_id: sale.operator_id }),
+        base44.entities.LaborEntry.filter({ sale_id: sale.id }),
       ]);
       const items = asArray(itemsRes);
       const decisions = asArray(decisionsRes);
@@ -66,6 +69,7 @@ export default function SaleCloseout() {
       const deals = asArray(dealsRes);
       const donations = asArray(donationsRes);
       const cleanouts = asArray(cleanoutsRes);
+      const laborEntries = asArray(laborRes);
 
       // Match donation/cleanout records to this sale by property address (city or zip).
       const addr = sale.property_address || {};
@@ -76,7 +80,7 @@ export default function SaleCloseout() {
       const saleDonations = donations.filter(addressMatch);
       const saleCleanouts = cleanouts.filter(addressMatch);
 
-      setData({ items, decisions, tasks, expenses, deals, saleDonations, saleCleanouts, sale });
+      setData({ items, decisions, tasks, expenses, deals, saleDonations, saleCleanouts, laborEntries, sale });
     } catch (e) {
       console.error('Error loading closeout data:', e);
     } finally {
@@ -96,7 +100,7 @@ export default function SaleCloseout() {
   }
   if (!sale || !data) return <div className="p-8 text-slate-500">Could not load closeout data.</div>;
 
-  const { items, decisions, tasks, expenses, deals, saleDonations, saleCleanouts } = data;
+  const { items, decisions, tasks, expenses, deals, saleDonations, saleCleanouts, laborEntries } = data;
   const isPickedUp = (i) => !!i.pickup_completed_at || pickedUpIds.includes(i.id);
 
   // 1 — Sold merchandise
@@ -114,15 +118,18 @@ export default function SaleCloseout() {
   const reviewOpen = merchDecisions.filter(d => d.current_decision === 'review' && d.status === 'open');
   const openGeneral = decisions.filter(d => d.decision_type !== 'merchandise' && d.status === 'open');
 
-  // 4 — Financials (read-only reconciliation view from existing records)
-  const expenseTotal = expenses.reduce((s, e) => s + (e.amount || 0), 0);
+  // 4 — Financials (Chapter 4 P1 canonical economics model: gross ≠ company revenue;
+  //     fee = MAX(commission, minimum); company revenue adds authorized service charges only)
+  const financialDecisions = decisions.filter(d => d.decision_type === 'financial');
+  const deal = deals[0];
+  const econ = actualSaleEconomics({ items, deal, financialDecisions, expenses, laborEntries });
+  const expenseTotal = econ.expenses.total;
 
   // 5 — Settlement (existing SaleConversionPipeline / SettlementStatement logic)
-  const deal = deals[0];
-  const gross = soldItems.reduce((s, i) => s + (i.sold_price || i.price || 0), 0);
+  const gross = econ.gross;
   const rate = deal?.commission_rate ?? 35;
-  const commission = gross * (rate / 100);
-  const netDueToClient = gross - commission;
+  const commission = econ.fee.commission;
+  const netDueToClient = econ.netDueToClient;
   const paid = deal?.total_paid_to_client || 0;
   const remaining = netDueToClient - paid;
   let settlementState = 'No settlement deal record';
@@ -212,9 +219,12 @@ export default function SaleCloseout() {
     {
       n: 4, title: 'Reconcile Financials', icon: DollarSign, state: step4,
       lines: [
-        `Sold revenue: ${money(gross)}`,
-        `Commission (${rate}%): ${money(commission)}`,
-        `Expenses recorded for this sale: ${expenses.length} (${money(expenseTotal)})`,
+        `Gross merchandise sales: ${money(gross)}`,
+        `Company fee applied: ${money(econ.fee.applied)}${econ.fee.minimumApplied ? ' (contract minimum)' : ` (${rate}%)`}`,
+        `Authorized service charges: ${econ.charges.length} (${money(econ.serviceRevenue)})`,
+        `Direct expenses recorded: ${expenses.length} (${money(expenseTotal)})`,
+        `Cash labor cost: ${money(econ.cashLaborTotal)} · Owner time: ${econ.ownerHours.toFixed(1)} hrs (not cash)`,
+        `Sale contribution: ${money(econ.contribution)} (not net profit)`,
       ],
     },
     {
@@ -366,6 +376,16 @@ export default function SaleCloseout() {
           );
         })}
       </div>
+
+      {/* Chapter 4 P1 — internal sale economics (company money only; never client-facing) */}
+      <SaleEconomicsPanel
+        sale={sale}
+        items={items}
+        expenses={expenses}
+        deal={deals[0]}
+        laborEntries={laborEntries}
+        financialDecisions={financialDecisions}
+      />
 
       {/* Project close */}
       <Card className={blockers.length ? 'border-red-300' : 'border-green-300'}>

@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
+import { companyFee, authorizedServiceCharges, serviceChargesTotal, money } from '@/components/saleops/saleEconomicsModel';
 
 const PHASE_COLORS = {
   pre_sale: 'bg-blue-100 text-blue-700',
@@ -32,6 +33,7 @@ export default function SettlementStatement() {
   const [deal, setDeal] = useState(null);
   const [sale, setSale] = useState(null);
   const [items, setItems] = useState([]);
+  const [financialDecisions, setFinancialDecisions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [deals, setDeals] = useState([]);
   const [selectedDealId, setSelectedDealId] = useState(dealId || '');
@@ -86,6 +88,16 @@ export default function SettlementStatement() {
         ? await base44.entities.Item.filter({ estate_sale_id: d.estate_sale_id, status: 'sold' })
         : [];
       setItems(soldItems || []);
+
+      // Chapter 4 P1 — client-authorized additional service charges for this sale
+      let charges = [];
+      if (d.estate_sale_id) {
+        try {
+          const decRes = await base44.entities.SaleClientDecision.filter({ sale_id: d.estate_sale_id });
+          charges = (decRes || []).filter(x => x.decision_type === 'financial');
+        } catch (e) { console.error('Service charge load failed', e); }
+      }
+      setFinancialDecisions(charges);
     } catch (e) {
       toast.error('Error loading deal');
     } finally {
@@ -93,10 +105,17 @@ export default function SettlementStatement() {
     }
   };
 
+  // Chapter 4 P1 — canonical settlement math: gross ≠ company revenue; fee = MAX(commission, minimum);
+  // company revenue adds ONLY client-authorized service charges; client proceeds = gross − company revenue.
   const commissionRate = deal?.commission_rate || 35;
   const totalRevenue = items.reduce((s, i) => s + (i.sold_price || i.price || 0), 0);
-  const commissionAmount = totalRevenue * (commissionRate / 100);
-  const netDueToClient = totalRevenue - commissionAmount;
+  const fee = companyFee({ gross: totalRevenue, commissionRate, minimumFee: deal?.minimum_fee });
+  const commissionAmount = fee.commission;
+  const companyFeeApplied = fee.applied;
+  const serviceCharges = authorizedServiceCharges(financialDecisions);
+  const chargesTotal = serviceChargesTotal(financialDecisions);
+  const companyRevenue = companyFeeApplied + chargesTotal;
+  const netDueToClient = totalRevenue - companyRevenue;
   const totalPaid = deal?.total_paid_to_client || 0;
   const remainingBalance = netDueToClient - totalPaid;
 
@@ -149,7 +168,23 @@ export default function SettlementStatement() {
       settlement_finalized: true,
       settlement_finalized_date: format(new Date(), 'yyyy-MM-dd'),
       stage: 'completed',
+      actual_revenue: totalRevenue,
     });
+    // Chapter 4 P1 — SINGLE canonical writer: persist finalized sale financial truth.
+    // actual_revenue = canonical gross merchandise sales; commission_earned = company revenue
+    // (fee applied + authorized service charges). Nothing else writes these fields.
+    const saleId = sale?.id || deal.estate_sale_id;
+    if (saleId) {
+      try {
+        await base44.entities.EstateSale.update(saleId, {
+          actual_revenue: totalRevenue,
+          commission_earned: companyRevenue,
+        });
+      } catch (e) {
+        console.error('Canonical revenue persistence failed', e);
+        toast.error('Settlement finalized, but recording the sale financials failed — reopen and re-finalize to retry.');
+      }
+    }
     toast.success('Settlement finalized');
     await loadDealData(deal.id);
   };
@@ -277,10 +312,19 @@ export default function SettlementStatement() {
               <Card className="border-2 border-orange-200">
                 <CardContent className="p-4 text-center">
                   <TrendingUp className="w-6 h-6 text-orange-500 mx-auto mb-1" />
-                  <p className="text-2xl font-bold text-orange-600">${commissionAmount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
-                  <p className="text-xs text-slate-500 mt-1">Commission ({commissionRate}%)</p>
+                  <p className="text-2xl font-bold text-orange-600">${companyFeeApplied.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                  <p className="text-xs text-slate-500 mt-1">Company Fee {fee.minimumApplied ? '(Contract Minimum)' : `(${commissionRate}%)`}</p>
                 </CardContent>
               </Card>
+              {chargesTotal > 0 && (
+                <Card className="border-2 border-purple-200">
+                  <CardContent className="p-4 text-center">
+                    <DollarSign className="w-6 h-6 text-purple-500 mx-auto mb-1" />
+                    <p className="text-2xl font-bold text-purple-600">${chargesTotal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                    <p className="text-xs text-slate-500 mt-1">Authorized Additional Services</p>
+                  </CardContent>
+                </Card>
+              )}
               <Card className="border-2 border-green-200">
                 <CardContent className="p-4 text-center">
                   <CheckCircle className="w-6 h-6 text-green-500 mx-auto mb-1" />
@@ -298,6 +342,55 @@ export default function SettlementStatement() {
                 </CardContent>
               </Card>
             </div>
+
+            {/* Chapter 4 P1 — minimum fee explanation (never hide the adjustment) */}
+            {fee.minimum > 0 && (
+              <Card className={fee.minimumApplied ? 'border-amber-300 bg-amber-50' : ''}>
+                <CardHeader className="pb-2"><CardTitle className="text-base">Company Fee</CardTitle></CardHeader>
+                <CardContent className="text-sm space-y-1">
+                  <div className="flex justify-between"><span className="text-slate-500">Gross merchandise sales</span><span className="font-semibold">{money(totalRevenue)}</span></div>
+                  <div className="flex justify-between"><span className="text-slate-500">Commission at {commissionRate}%</span><span>{money(commissionAmount)}</span></div>
+                  <div className="flex justify-between"><span className="text-slate-500">Contract minimum fee</span><span>{money(fee.minimum)}</span></div>
+                  <div className="flex justify-between border-t border-slate-200 pt-1"><span className="font-semibold text-slate-700">Company fee applied</span><span className="font-semibold">{money(companyFeeApplied)}</span></div>
+                  {fee.minimumApplied && (
+                    <p className="text-xs text-amber-700 pt-1">
+                      Your agreement includes a minimum company fee of {money(fee.minimum)}. Because the calculated commission ({money(commissionAmount)}) is lower, the contract minimum of {money(fee.minimum)} applies.
+                    </p>
+                  )}
+                  {!fee.minimumApplied && (
+                    <p className="text-xs text-slate-500 pt-1">The calculated commission exceeds the contract minimum, so the standard commission applies.</p>
+                  )}
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Chapter 4 P1 — client-authorized additional service charges (distinct from merchandise gross) */}
+            {serviceCharges.length > 0 && (
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-base flex items-center justify-between">
+                    <span>Authorized Additional Services</span>
+                    <span className="text-sm font-semibold text-purple-600">Total: ${chargesTotal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  {serviceCharges.map(c => (
+                    <div key={c.id} className="flex items-center justify-between bg-purple-50 rounded-lg px-4 py-3">
+                      <div>
+                        <p className="font-semibold text-slate-800">{c.subject}</p>
+                        <p className="text-xs text-slate-500">
+                          Authorized by {c.authorized_by_name || 'client'}{c.decided_at ? ` · ${format(new Date(c.decided_at), 'MMM d, yyyy')}` : ''}
+                        </p>
+                      </div>
+                      <p className="font-semibold text-purple-700">{money(c.charge_amount)}</p>
+                    </div>
+                  ))}
+                  <p className="text-xs text-slate-500">
+                    These client-authorized services are billed in addition to the merchandise commission. Net due to client = gross merchandise sales − company fee − authorized services.
+                  </p>
+                </CardContent>
+              </Card>
+            )}
 
             {/* Revenue by Phase */}
             {(deal.pre_sale_selling_enabled || deal.post_sale_selling_enabled) && (
@@ -450,8 +543,13 @@ export default function SettlementStatement() {
                             </td>
                           </tr>
                         </tfoot>
-                      </table>
-                    </div>
+                        </table>
+                        {fee.minimumApplied && (
+                        <p className="text-xs text-amber-700 mt-2">
+                          Per-item client shares are shown at the {commissionRate}% commission rate for reference. Because the contract minimum fee applies, the final amounts due derive from the totals above, not the per-item reference figures.
+                        </p>
+                        )}
+                        </div>
                   )}
                 </CardContent>
               )}

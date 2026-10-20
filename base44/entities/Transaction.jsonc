@@ -39,11 +39,11 @@
     },
     "seller_amount": {
       "type": "number",
-      "description": "80% to seller"
+      "description": "LEGACY \u2014 client share of proceeds at the applicable agreement commission rate. Earlier records assumed a fixed 80/20 split; the authoritative split is settlement-derived (see SettlementStatement), never this field."
     },
     "company_amount": {
       "type": "number",
-      "description": "20% to company"
+      "description": "LEGACY \u2014 company share of proceeds at the applicable agreement commission rate. Earlier records assumed a fixed 20% split; authoritative company revenue derives from settlement/closeout, never from a fixed split."
     }
   },
   "required": [

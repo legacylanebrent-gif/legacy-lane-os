@@ -9,6 +9,8 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import CommunicationsPanel from '@/components/saleops/CommunicationsPanel';
+import LaborEntriesPanel from '@/components/saleops/LaborEntriesPanel';
+import SaleSkipGuideModal from '@/components/estate/SaleSkipGuideModal';
 import SaleNotesPanel from '@/components/saleops/SaleNotesPanel';
 import ReferralSourceCard from '@/components/saleops/ReferralSourceCard';
 import { Badge } from '@/components/ui/badge';
@@ -1410,47 +1412,11 @@ Be practical and realistic for an estate sale context.`,
           </div>
         )}
 
-        {/* Step 1 Skip Guide Modal */}
-        {showSkipGuideModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-            <div className="bg-white rounded-xl shadow-2xl max-w-md w-full p-6 space-y-4">
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-full bg-slate-800 text-white flex items-center justify-center text-sm font-bold flex-shrink-0">1</div>
-                <h2 className="text-lg font-bold text-slate-900">Flag Photos to Skip</h2>
-              </div>
-              <p className="text-slate-600 text-sm leading-relaxed">
-                Before running any AI searches, scroll through your photos and press <strong className="text-red-600">⊘ Don't Search</strong> on any image that:
-              </p>
-              <ul className="space-y-2 text-sm text-slate-700">
-                <li className="flex items-start gap-2">
-                  <span className="text-red-500 mt-0.5 flex-shrink-0">•</span>
-                  <span><strong>Close-up or detail shot</strong> — zoomed in on a pattern, mark, or label (not the full item)</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-red-500 mt-0.5 flex-shrink-0">•</span>
-                  <span><strong>Duplicate photo</strong> — same item photographed from a different angle</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-red-500 mt-0.5 flex-shrink-0">•</span>
-                  <span><strong>Multi-item scene</strong> — a shelf, table, or pile of many different things that can't be identified as one item</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-red-500 mt-0.5 flex-shrink-0">•</span>
-                  <span><strong>Non-searchable image</strong> — blurry, room overview, or anything unlikely to return a useful price</span>
-                </li>
-              </ul>
-              <p className="text-xs text-slate-500 bg-slate-50 rounded-lg p-3">
-                💡 Skipped photos are excluded from Steps 2 & 3, saving API credits and keeping results clean.
-              </p>
-              <button
-                onClick={() => { setShowSkipGuideModal(false); setStep1Completed(true); }}
-                className="w-full py-2.5 bg-slate-800 text-white rounded-lg font-medium hover:bg-slate-700 transition-colors"
-                >
-                Got it — I'll scroll through and flag them
-                </button>
-            </div>
-          </div>
-        )}
+        {/* Step 1 Skip Guide Modal (extracted component) */}
+        <SaleSkipGuideModal
+          open={showSkipGuideModal}
+          onGotIt={() => { setShowSkipGuideModal(false); setStep1Completed(true); }}
+        />
         </>
 
       <div className="max-w-5xl mx-auto px-4 lg:px-6 py-8 space-y-6 w-full overflow-x-hidden">
@@ -1459,6 +1425,7 @@ Be practical and realistic for an estate sale context.`,
             <TabsTrigger value="info" className="flex-1 text-base font-semibold">Sale Info</TabsTrigger>
             <TabsTrigger value="images" className="flex-1 text-base font-semibold">Images</TabsTrigger>
             <TabsTrigger value="communications" className="flex-1 text-base font-semibold">Communications</TabsTrigger>
+            <TabsTrigger value="labor" className="flex-1 text-base font-semibold">Labor</TabsTrigger>
           </TabsList>
 
           <TabsContent value="info" className="space-y-6 mt-0">
@@ -2488,6 +2455,13 @@ Return ONLY the description text, no extra commentary.`
           <TabsContent value="communications" className="space-y-6 mt-0">
         {saleId ? <CommunicationsPanel saleId={saleId} /> : (
           <p className="text-sm text-slate-500 text-center py-8">Save the sale first to log communications.</p>
+        )}
+          </TabsContent>
+
+          {/* Chapter 4 P1 — canonical LaborEntry hours tracking for this sale */}
+          <TabsContent value="labor" className="space-y-6 mt-0">
+        {saleId ? <LaborEntriesPanel saleId={saleId} /> : (
+          <p className="text-sm text-slate-500 text-center py-8">Save the sale first to track labor hours.</p>
         )}
           </TabsContent>
         </Tabs>

@@ -1,6 +1,7 @@
 {
   "name": "SaleConversionPipeline",
   "type": "object",
+  "description": "Canonical PRE-SALE opportunity record and, once linked, the settlement/commission agreement record. Chapter 4 P1 adds the pre-sale economics block: contractual minimum fee, expected additional service revenue, category-level estimated labor, estimated direct costs, and the operator's internal minimum-revenue/minimum-contribution thresholds. Projected figures are estimates for evaluation only \u2014 authoritative actuals derive from settlement/closeout.",
   "properties": {
     "operator_id": {
       "type": "string",
@@ -57,11 +58,80 @@
       ]
     },
     "estimated_value": {
-      "type": "number"
+      "type": "number",
+      "description": "Chapter 4 P1 \u2014 projected GROSS merchandise sales for this sale (pre-sale estimate). Gross is client merchandise proceeds, NOT company revenue."
     },
     "commission_rate": {
       "type": "number",
-      "default": 35
+      "default": 35,
+      "description": "Contract commission rate (percent of gross merchandise sales)."
+    },
+    "minimum_fee": {
+      "type": "number",
+      "description": "Chapter 4 P1 \u2014 contractual MINIMUM company fee. Company fee due = MAX(calculated commission, this minimum). Distinct from the operator's internal minimum-revenue threshold (min_company_revenue_threshold)."
+    },
+    "expected_service_revenue": {
+      "type": "number",
+      "description": "Chapter 4 P1 \u2014 anticipated ADDITIONAL authorized service revenue for this sale (chargeable services beyond the commission), pre-sale estimate only. Actual service revenue comes only from client-authorized SaleClientDecision 'financial' charges."
+    },
+    "estimated_advertising": {
+      "type": "number",
+      "description": "Chapter 4 P1 \u2014 projected advertising direct cost for this sale."
+    },
+    "estimated_supplies": {
+      "type": "number",
+      "description": "Chapter 4 P1 \u2014 projected supplies/materials direct cost."
+    },
+    "estimated_transportation": {
+      "type": "number",
+      "description": "Chapter 4 P1 \u2014 projected transportation/fuel/mileage direct cost."
+    },
+    "estimated_processing": {
+      "type": "number",
+      "description": "Chapter 4 P1 \u2014 projected card/POS processing fee cost."
+    },
+    "estimated_other_costs": {
+      "type": "number",
+      "description": "Chapter 4 P1 \u2014 projected other direct costs (dumpster, rentals, outside services, etc.)."
+    },
+    "labor_estimates": {
+      "type": "array",
+      "default": [],
+      "description": "Chapter 4 P1 \u2014 category-level projected labor for this sale. Estimated hours and estimated cash labor cost; compared against actual LaborEntry hours at closeout.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "category": {
+            "type": "string",
+            "enum": [
+              "preparation",
+              "research",
+              "staging",
+              "sale_day",
+              "pickup",
+              "closeout",
+              "travel",
+              "other"
+            ]
+          },
+          "hours": {
+            "type": "number",
+            "description": "Estimated hours."
+          },
+          "rate": {
+            "type": "number",
+            "description": "Estimated hourly cash rate."
+          }
+        }
+      }
+    },
+    "min_company_revenue_threshold": {
+      "type": "number",
+      "description": "Chapter 4 P1 \u2014 operator's INTERNAL minimum acceptable company revenue for taking this sale (acceptance scorecard input). Not the client contract minimum fee."
+    },
+    "min_contribution_threshold": {
+      "type": "number",
+      "description": "Chapter 4 P1 \u2014 operator's INTERNAL minimum acceptable sale contribution for taking this sale (acceptance scorecard input)."
     },
     "notes": {
       "type": "string"
@@ -169,7 +239,8 @@
       "type": "string"
     },
     "actual_revenue": {
-      "type": "number"
+      "type": "number",
+      "description": "Deal-level actual revenue snapshot written by the settlement/closeout writer (mirrors EstateSale fields; EstateSale remains the canonical sale record)."
     },
     "total_paid_to_client": {
       "type": "number",

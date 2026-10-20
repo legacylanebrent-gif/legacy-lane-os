@@ -6,36 +6,43 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Badge } from '@/components/ui/badge';
-import { Car, Receipt, ChevronRight, X, Loader2, CheckCircle2, Plus } from 'lucide-react';
+import { Car, Receipt, ChevronRight, Loader2, CheckCircle2, Plus } from 'lucide-react';
+
+// Chapter 4 P1 — sale expenses write to the CANONICAL sale-scoped Expense entity
+// (sale_id + category + amount + date). BusinessExpense remains COMPANY OVERHEAD only.
+// The legacy path (BusinessExpense with a sale id in a text tag) is retired.
 
 const CATEGORY_OPTIONS = [
   { value: 'advertising_marketing', label: 'Advertising & Marketing' },
-  { value: 'auto_expenses', label: 'Auto & Vehicle' },
-  { value: 'equipment_tools', label: 'Equipment & Tools' },
-  { value: 'internet_phone', label: 'Internet & Phone' },
-  { value: 'meals_entertainment', label: 'Meals & Entertainment' },
-  { value: 'office_supplies', label: 'Office Supplies' },
-  { value: 'repairs_maintenance', label: 'Repairs & Maintenance' },
-  { value: 'software_subscriptions', label: 'Software & Subscriptions' },
-  { value: 'travel', label: 'Travel' },
-  { value: 'utilities', label: 'Utilities' },
-  { value: 'wages_payroll', label: 'Wages & Payroll' },
-  { value: 'other', label: 'Other' }
+  { value: 'signage_banners', label: 'Signage & Banners' },
+  { value: 'supplies_materials', label: 'Supplies & Materials' },
+  { value: 'labor_wages', label: 'Labor / Wages (no hours tracked)' },
+  { value: 'transportation_fuel', label: 'Transportation & Fuel' },
+  { value: 'processing_fees', label: 'Card / Processing Fees' },
+  { value: 'professional_services', label: 'Outside / Professional Services' },
+  { value: 'cleaning_services', label: 'Cleaning Services' },
+  { value: 'dumpster_disposal', label: 'Dumpster & Disposal' },
+  { value: 'equipment_rental', label: 'Equipment Rental' },
+  { value: 'photography', label: 'Photography' },
+  { value: 'staging_setup', label: 'Staging & Setup' },
+  { value: 'meals_entertainment', label: 'Meals (Sale Day Crew)' },
+  { value: 'permits_licenses', label: 'Permits & Licenses' },
+  { value: 'other', label: 'Other Direct Expense' },
 ];
 
-// Common sale-specific expense suggestions
+const CATEGORY_LABEL = (v) => CATEGORY_OPTIONS.find(c => c.value === v)?.label || v;
+
+// Common sale-specific expense suggestions (mapped to canonical Expense categories)
 const SUGGESTED_EXPENSES = [
-  { label: 'Signage / Signs', category: 'advertising_marketing', amount: '' },
-  { label: 'Advertising (Facebook/Nextdoor)', category: 'advertising_marketing', amount: '' },
-  { label: 'Supplies (tables, stickers, bags)', category: 'office_supplies', amount: '' },
-  { label: 'Staff / Helper Wages', category: 'wages_payroll', amount: '' },
-  { label: 'Cleaning Supplies', category: 'repairs_maintenance', amount: '' },
-  { label: 'Dumpster Rental', category: 'other', amount: '' },
-  { label: 'Meals (Sale Day)', category: 'meals_entertainment', amount: '' },
+  { label: 'Signage / Signs', category: 'signage_banners' },
+  { label: 'Advertising (Facebook/Nextdoor)', category: 'advertising_marketing' },
+  { label: 'Supplies (tables, stickers, bags)', category: 'supplies_materials' },
+  { label: 'Staff / Helper Wages', category: 'labor_wages' },
+  { label: 'Cleaning Supplies', category: 'supplies_materials' },
+  { label: 'Dumpster Rental', category: 'dumpster_disposal' },
+  { label: 'Card Processing Fees', category: 'processing_fees' },
+  { label: 'Meals (Sale Day)', category: 'meals_entertainment' },
 ];
-
-const IRS_RATE = 0.70;
 
 function SuggestedRow({ suggestion, isSaved, saving, onSave }) {
   const [amt, setAmt] = useState('');
@@ -43,7 +50,7 @@ function SuggestedRow({ suggestion, isSaved, saving, onSave }) {
     <div className="flex items-center gap-2 p-2.5 border border-slate-200 rounded-lg bg-slate-50">
       <div className="flex-1 min-w-0">
         <p className="text-sm font-medium text-slate-800 truncate">{suggestion.label}</p>
-        <p className="text-xs text-slate-400">{CATEGORY_OPTIONS.find(c => c.value === suggestion.category)?.label}</p>
+        <p className="text-xs text-slate-400">{CATEGORY_LABEL(suggestion.category)}</p>
       </div>
       {isSaved ? (
         <CheckCircle2 className="w-5 h-5 text-green-500 flex-shrink-0" />
@@ -77,7 +84,7 @@ function ChooseView({ onChoose }) {
           </div>
           <div>
             <p className="font-semibold text-slate-900">Log a Sale Expense</p>
-            <p className="text-xs text-slate-500">Add an expense (supplies, ads, wages, etc.) linked to this specific sale</p>
+            <p className="text-xs text-slate-500">Add a direct cost (supplies, ads, wages, processing…) linked to this specific sale</p>
           </div>
           <ChevronRight className="w-4 h-4 text-slate-400 ml-auto" />
         </button>
@@ -90,7 +97,7 @@ function ChooseView({ onChoose }) {
           </div>
           <div>
             <p className="font-semibold text-slate-900">Log Mileage</p>
-            <p className="text-xs text-slate-500">Track round trips to the sale address — auto-calculates total miles & deduction</p>
+            <p className="text-xs text-slate-500">Track round trips to the sale address — auto-calculates total miles & cost</p>
           </div>
           <ChevronRight className="w-4 h-4 text-slate-400 ml-auto" />
         </button>
@@ -99,39 +106,36 @@ function ChooseView({ onChoose }) {
   );
 }
 
-// ─── View: expense form ───────────────────────────────────────────────────────
-function ExpenseView({ sale, user, onSaved, onBack }) {
+// ─── View: expense form (canonical Expense) ───────────────────────────────────
+function ExpenseView({ sale, onSaved, onBack }) {
   const [mode, setMode] = useState('suggest'); // 'suggest' | 'custom'
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState([]);
   const [uploadingReceipt, setUploadingReceipt] = useState(false);
 
   const [form, setForm] = useState({
-    expense_date: new Date().toISOString().split('T')[0],
-    vendor_name: '',
+    date: new Date().toISOString().split('T')[0],
+    vendor: '',
     amount: '',
     category: 'other',
     description: '',
     payment_method: 'credit_card',
     receipt_url: '',
-    tax_deductible: true,
-    business_use_percentage: 100
+    is_reimbursable: false,
   });
 
   const handleSuggestedSave = async (suggestion) => {
     if (!suggestion.amount) return alert('Please enter an amount for: ' + suggestion.label);
     setSaving(true);
     try {
-      await base44.entities.BusinessExpense.create({
-        expense_date: new Date().toISOString().split('T')[0],
-        vendor_name: suggestion.label,
-        amount: parseFloat(suggestion.amount),
+      await base44.entities.Expense.create({
+        sale_id: sale.id,
         category: suggestion.category,
+        amount: parseFloat(suggestion.amount),
+        date: new Date().toISOString().split('T')[0],
+        vendor: suggestion.label,
         description: `Sale expense for: ${sale.title}`,
         payment_method: 'credit_card',
-        tax_deductible: true,
-        business_use_percentage: 100,
-        tags: ['sale-expense', sale.id]
       });
       setSaved(prev => [...prev, suggestion.label]);
     } catch (e) {
@@ -143,16 +147,21 @@ function ExpenseView({ sale, user, onSaved, onBack }) {
 
   const handleCustomSave = async (e) => {
     e.preventDefault();
+    if (!form.amount) return alert('Enter an amount');
     setSaving(true);
     try {
-      await base44.entities.BusinessExpense.create({
-        ...form,
+      await base44.entities.Expense.create({
+        sale_id: sale.id,
+        category: form.category,
         amount: parseFloat(form.amount),
-        business_use_percentage: parseFloat(form.business_use_percentage),
+        date: form.date,
+        vendor: form.vendor || '',
         description: form.description || `Sale expense for: ${sale.title}`,
-        tags: ['sale-expense', sale.id]
+        payment_method: form.payment_method,
+        receipt_url: form.receipt_url || undefined,
+        is_reimbursable: !!form.is_reimbursable,
       });
-      onSaved('Expense saved!');
+      onSaved('Expense saved to this sale!');
     } catch (e) {
       alert('Failed to save expense');
     } finally {
@@ -165,8 +174,8 @@ function ExpenseView({ sale, user, onSaved, onBack }) {
     if (!file) return;
     setUploadingReceipt(true);
     try {
-      const { file_url } = await base44.integrations.Core.UploadFile({ file });
-      setForm(prev => ({ ...prev, receipt_url: file_url }));
+      const { file_uri } = await base44.integrations.Core.UploadPrivateFile({ file });
+      setForm(prev => ({ ...prev, receipt_url: file_uri }));
     } catch {
       alert('Failed to upload receipt');
     } finally {
@@ -213,7 +222,7 @@ function ExpenseView({ sale, user, onSaved, onBack }) {
           <div className="grid grid-cols-2 gap-3">
             <div>
               <Label>Date *</Label>
-              <Input type="date" value={form.expense_date} onChange={e => setForm(p => ({ ...p, expense_date: e.target.value }))} required />
+              <Input type="date" value={form.date} onChange={e => setForm(p => ({ ...p, date: e.target.value }))} required />
             </div>
             <div>
               <Label>Amount *</Label>
@@ -222,7 +231,7 @@ function ExpenseView({ sale, user, onSaved, onBack }) {
           </div>
           <div>
             <Label>Vendor / Description *</Label>
-            <Input placeholder="e.g., Home Depot, Facebook Ads" value={form.vendor_name} onChange={e => setForm(p => ({ ...p, vendor_name: e.target.value }))} required />
+            <Input placeholder="e.g., Home Depot, Facebook Ads" value={form.vendor} onChange={e => setForm(p => ({ ...p, vendor: e.target.value }))} required />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
@@ -243,7 +252,7 @@ function ExpenseView({ sale, user, onSaved, onBack }) {
                   <SelectItem value="credit_card">Credit Card</SelectItem>
                   <SelectItem value="debit_card">Debit Card</SelectItem>
                   <SelectItem value="check">Check</SelectItem>
-                  <SelectItem value="bank_transfer">Bank Transfer</SelectItem>
+                  <SelectItem value="company_card">Company Card</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -255,8 +264,8 @@ function ExpenseView({ sale, user, onSaved, onBack }) {
           <div>
             <Label>Receipt (optional)</Label>
             <Input type="file" onChange={handleReceiptUpload} disabled={uploadingReceipt} />
-            {uploadingReceipt && <p className="text-xs text-slate-500 mt-1">Uploading...</p>}
-            {form.receipt_url && <p className="text-xs text-green-600 mt-1">✓ Receipt uploaded</p>}
+            {uploadingReceipt && <p className="text-xs text-slate-500 mt-1">Uploading…</p>}
+            {form.receipt_url && <p className="text-xs text-green-600 mt-1">✓ Receipt uploaded (stored privately)</p>}
           </div>
           <div className="flex gap-2 justify-end pt-2 border-t">
             <Button type="button" variant="outline" onClick={onBack}>Back</Button>
@@ -270,7 +279,7 @@ function ExpenseView({ sale, user, onSaved, onBack }) {
   );
 }
 
-// ─── View: mileage form ───────────────────────────────────────────────────────
+// ─── View: mileage form (canonical Expense, transportation_fuel) ───────────────
 function MileageView({ sale, user, onSaved, onBack }) {
   const [saving, setSaving] = useState(false);
   const [calculatingDistance, setCalculatingDistance] = useState(false);
@@ -292,14 +301,13 @@ function MileageView({ sale, user, onSaved, onBack }) {
   };
 
   const [form, setForm] = useState({
-    expense_date: new Date().toISOString().split('T')[0],
+    date: new Date().toISOString().split('T')[0],
     home_address: '',
     round_trips: 1,
     rate_per_mile: '0.70',
-    purpose: 'Estate sale preparation and setup'
+    purpose: 'Estate sale preparation and setup',
   });
 
-  // When user picks address type, pre-fill the address field
   const handleAddressTypeSelect = (type) => {
     setAddressType(type);
     setForm(p => ({ ...p, home_address: getStartingAddress(type) }));
@@ -318,14 +326,12 @@ function MileageView({ sale, user, onSaved, onBack }) {
     }
   };
 
-  // Auto-fetch distance when home_address is filled in
   useEffect(() => {
     if (!form.home_address || !saleAddress) return;
     clearTimeout(timerRef.current);
     timerRef.current = setTimeout(() => fetchDistance(form.home_address, saleAddress), 800);
   }, [form.home_address]);
 
-  // Show address type picker first
   if (!addressType) {
     return (
       <div className="space-y-4 py-2">
@@ -371,7 +377,7 @@ function MileageView({ sale, user, onSaved, onBack }) {
   }
 
   const totalMiles = onewayMiles ? (onewayMiles * 2 * parseFloat(form.round_trips || 1)).toFixed(1) : null;
-  const totalDeduction = totalMiles ? (parseFloat(totalMiles) * parseFloat(form.rate_per_mile)).toFixed(2) : null;
+  const totalCost = totalMiles ? (parseFloat(totalMiles) * parseFloat(form.rate_per_mile)).toFixed(2) : null;
 
   const handleSave = async (e) => {
     e.preventDefault();
@@ -381,25 +387,18 @@ function MileageView({ sale, user, onSaved, onBack }) {
       const miles = totalMiles || (parseFloat(form.round_trips || 1) * 2 * 10); // fallback if no calc
       const amount = parseFloat(miles) * parseFloat(form.rate_per_mile);
 
-      await base44.entities.BusinessExpense.create({
-        expense_date: form.expense_date,
-        vendor_name: 'Vehicle Mileage — ' + (sale?.property_address?.city || 'Sale'),
+      await base44.entities.Expense.create({
+        sale_id: sale.id,
+        category: 'transportation_fuel',
         amount,
-        category: 'auto_expenses',
-        description: `${form.round_trips} round trip(s) from home to sale address\nFrom: ${form.home_address}\nTo: ${saleAddress}\n${miles} total miles @ $${form.rate_per_mile}/mile\nPurpose: ${form.purpose}`,
+        date: form.date,
+        vendor: 'Vehicle Mileage — ' + (sale?.property_address?.city || 'Sale'),
+        description: `${form.round_trips} round trip(s) to sale address · ${miles} total miles @ $${form.rate_per_mile}/mile\nPurpose: ${form.purpose}`,
         payment_method: 'cash',
-        tax_deductible: true,
-        business_use_percentage: 100,
-        tags: ['mileage', 'sale-expense', 'round-trip', sale.id]
       });
 
-      // Save address to user profile for future use
-      if (form.home_address && !user?.business_address) {
-        await base44.auth.updateMe({ business_address: form.home_address, business_street: form.home_address });
-      }
-
-      onSaved('Mileage saved!');
-    } catch (e) {
+      onSaved('Mileage saved to this sale!');
+    } catch (e2) {
       alert('Failed to save mileage');
     } finally {
       setSaving(false);
@@ -438,7 +437,7 @@ function MileageView({ sale, user, onSaved, onBack }) {
 
       <div>
         <Label>Date *</Label>
-        <Input type="date" value={form.expense_date} onChange={e => setForm(p => ({ ...p, expense_date: e.target.value }))} required />
+        <Input type="date" value={form.date} onChange={e => setForm(p => ({ ...p, date: e.target.value }))} required />
       </div>
 
       <div>
@@ -462,7 +461,7 @@ function MileageView({ sale, user, onSaved, onBack }) {
       </div>
 
       <div>
-        <Label>IRS Rate per Mile</Label>
+        <Label>Rate per Mile ($)</Label>
         <Input type="number" step="0.01" value={form.rate_per_mile} onChange={e => setForm(p => ({ ...p, rate_per_mile: e.target.value }))} />
         <p className="text-xs text-slate-400 mt-1">2025 IRS standard rate: $0.70/mile</p>
       </div>
@@ -472,17 +471,16 @@ function MileageView({ sale, user, onSaved, onBack }) {
         <Textarea rows={2} value={form.purpose} onChange={e => setForm(p => ({ ...p, purpose: e.target.value }))} />
       </div>
 
-      {/* Summary */}
       {form.round_trips && form.rate_per_mile && (
         <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg space-y-1">
           <div className="flex justify-between text-sm text-slate-700">
             <span>Total Miles:</span>
             <strong>{totalMiles || `${parseInt(form.round_trips || 1) * 2} × one-way miles`}</strong>
           </div>
-          {totalDeduction && (
+          {totalCost && (
             <div className="flex justify-between text-lg font-bold text-blue-700 border-t border-blue-200 pt-1 mt-1">
-              <span>Total Deduction:</span>
-              <span>${totalDeduction}</span>
+              <span>Total Mileage Cost:</span>
+              <span>${totalCost}</span>
             </div>
           )}
           {!onewayMiles && (
@@ -544,7 +542,7 @@ export default function SaleExpensesModal({ open, onClose, sale, user }) {
         )}
 
         {!successMsg && view === 'choose' && <ChooseView onChoose={setView} />}
-        {!successMsg && view === 'expense' && <ExpenseView sale={sale} user={user} onSaved={handleSaved} onBack={() => setView('choose')} />}
+        {!successMsg && view === 'expense' && <ExpenseView sale={sale} onSaved={handleSaved} onBack={() => setView('choose')} />}
         {!successMsg && view === 'mileage' && <MileageView sale={sale} user={user} onSaved={handleSaved} onBack={() => setView('choose')} />}
       </DialogContent>
     </Dialog>

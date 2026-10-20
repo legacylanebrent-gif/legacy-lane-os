@@ -1,0 +1,148 @@
+{
+  "name": "LaborEntry",
+  "type": "object",
+  "description": "Chapter 4 P1 \u2014 canonical labor-hour entry for a sale. An OPERATIONAL dimension (hours worked), NOT an expense line: cash labor cost is always DERIVED (hours x rate for paid/non-owner entries), never stored here. Owner time is tracked as hours only and is never silently counted as cash cost. Distinct from Expense (a cost line) by design \u2014 do not merge them.",
+  "properties": {
+    "sale_id": {
+      "type": "string",
+      "description": "EstateSale this labor entry belongs to."
+    },
+    "operator_id": {
+      "type": "string",
+      "description": "EstateSale.operator_id projection \u2014 sale owner (RLS anchor). Derived from the sale at creation."
+    },
+    "sale_team_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "READ-SCOPE PROJECTION of EstateSale.sale_team for RLS. The sale remains the source of truth."
+    },
+    "user_id": {
+      "type": "string",
+      "description": "Platform user ID of the worker when they are a platform team member. Null for the owner or a named helper."
+    },
+    "member_name": {
+      "type": "string",
+      "description": "Display name of the worker (owner, team member, or non-platform helper)."
+    },
+    "work_category": {
+      "type": "string",
+      "enum": [
+        "preparation",
+        "research",
+        "staging",
+        "sale_day",
+        "pickup",
+        "closeout",
+        "travel",
+        "other"
+      ],
+      "description": "What kind of work the hours were spent on."
+    },
+    "entry_date": {
+      "type": "string",
+      "format": "date",
+      "description": "The date the work happened."
+    },
+    "hours": {
+      "type": "number",
+      "description": "Decimal hours worked."
+    },
+    "hourly_rate": {
+      "type": "number",
+      "description": "Hourly cash wage for paid labor. Null for owner time or unpaid help \u2014 cash cost is derived only when both hours and rate exist."
+    },
+    "is_owner_time": {
+      "type": "boolean",
+      "default": false,
+      "description": "Owner's own time. Reported as an ECONOMIC resource in hours \u2014 never included in cash labor cost."
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "sale_id",
+    "work_category",
+    "entry_date",
+    "hours"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "data.operator_id": "{{user.id}}"
+        },
+        {
+          "data.sale_team_ids": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "$or": [
+        {
+          "data.operator_id": "{{user.id}}"
+        },
+        {
+          "data.sale_team_ids": {
+            "$in": [
+              "{{user.id}}"
+            ]
+          }
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "data.operator_id": "{{user.id}}"
+        },
+        {
+          "data.sale_team_ids": {
+            "$in": [
+              "{{user.id}}"
+            ]
+          }
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "data.operator_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

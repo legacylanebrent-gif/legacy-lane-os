@@ -18,6 +18,7 @@
         "meals_entertainment",
         "permits_licenses",
         "photography",
+        "processing_fees",
         "professional_services",
         "security",
         "signage_banners",
@@ -27,7 +28,7 @@
         "utilities",
         "other"
       ],
-      "description": "Expense category"
+      "description": "Expense category. Sale-scoped DIRECT sale cost (advertising, supplies, transport, processing, labor wages where hours are not tracked in LaborEntry, outside/professional services, other). Company OVERHEAD belongs on BusinessExpense, not here. processing_fees = Chapter 4 P1 card/POS processing costs for this sale."
     },
     "amount": {
       "type": "number",
@@ -60,7 +61,7 @@
     },
     "receipt_url": {
       "type": "string",
-      "description": "Receipt image URL"
+      "description": "Receipt image (private storage URI; view via signed URL)"
     },
     "is_reimbursable": {
       "type": "boolean",
