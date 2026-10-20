@@ -159,7 +159,6 @@ export default function OperatorSkills() {
       const strengths = ASSESSMENT.filter(c => category_scores[c.key] >= 80).map(c => c.label);
       const byScore = [...ASSESSMENT].sort((a, b) => category_scores[a.key] - category_scores[b.key]);
       let devCats = byScore.filter(c => category_scores[c.key] < 80);
-      if (devCats.length === 0) devCats = byScore.slice(0, 3);
       const devAreas = devCats.map(c => c.label);
       const devKeys = devCats.map(c => c.key);
       const answersLog = ASSESSMENT.flatMap((c, ci) =>
