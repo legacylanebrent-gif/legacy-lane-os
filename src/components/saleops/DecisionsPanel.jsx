@@ -13,6 +13,7 @@ import { DECISION_TYPES, decisionTypeLabel, buildHistoryEntry, fmtDateTime } fro
 
 export default function DecisionsPanel({ sale, user, authorities, decisions, onChanged }) {
   const [showNew, setShowNew] = useState(false);
+  const [showAuthStep, setShowAuthStep] = useState(false);
   const [changeTarget, setChangeTarget] = useState(null);
   const [historyTarget, setHistoryTarget] = useState(null);
   const [form, setForm] = useState({ decision_type: 'general', subject: '', current_decision: '' });
@@ -46,6 +47,7 @@ export default function DecisionsPanel({ sale, user, authorities, decisions, onC
         recorded_by_name: user?.full_name || '',
       });
       setShowNew(false);
+      setShowAuthStep(false);
       setForm({ decision_type: 'general', subject: '', current_decision: '' });
       onChanged();
     } catch (e) {
@@ -145,28 +147,37 @@ export default function DecisionsPanel({ sale, user, authorities, decisions, onC
         </Card>
       ))}
 
-      <Dialog open={showNew} onOpenChange={setShowNew}>
-        <DialogContent className="max-w-md">
-          <DialogHeader><DialogTitle>Record Client Decision</DialogTitle></DialogHeader>
-          <div className="space-y-3">
-            <div>
-              <Label>Decision type</Label>
-              <Select value={form.decision_type} onValueChange={v => setForm(f => ({ ...f, decision_type: v }))}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  {DECISION_TYPES.filter(t => t.key !== 'merchandise').map(t => (
-                    <SelectItem key={t.key} value={t.key}>{t.label}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+      {showNew && !showAuthStep && (
+        <Dialog open={showNew} onOpenChange={o => { if (!o) setShowNew(false); }}>
+          <DialogContent className="max-w-md">
+            <DialogHeader><DialogTitle>Record Client Decision</DialogTitle></DialogHeader>
+            <div className="space-y-3">
+              <div>
+                <Label>Decision type</Label>
+                <Select value={form.decision_type} onValueChange={v => setForm(f => ({ ...f, decision_type: v }))}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    {DECISION_TYPES.filter(t => t.key !== 'merchandise').map(t => (
+                      <SelectItem key={t.key} value={t.key}>{t.label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div><Label>Subject *</Label><Input value={form.subject} onChange={e => setForm(f => ({ ...f, subject: e.target.value }))} placeholder="e.g. Jewelry handling, pickup date change" /></div>
+              <div><Label>Decision / instruction *</Label><Input value={form.current_decision} onChange={e => setForm(f => ({ ...f, current_decision: e.target.value }))} placeholder="What did they instruct?" /></div>
+              <div className="flex justify-end gap-2 pt-1">
+                <Button variant="outline" onClick={() => setShowNew(false)}>Cancel</Button>
+                <Button onClick={() => {
+                  if (!form.subject.trim() || !form.current_decision.trim()) { alert('Subject and decision are required'); return; }
+                  setShowAuthStep(true);
+                }}>Continue</Button>
+              </div>
             </div>
-            <div><Label>Subject *</Label><Input value={form.subject} onChange={e => setForm(f => ({ ...f, subject: e.target.value }))} placeholder="e.g. Jewelry handling, pickup date change" /></div>
-            <div><Label>Decision / instruction *</Label><Input value={form.current_decision} onChange={e => setForm(f => ({ ...f, current_decision: e.target.value }))} placeholder="What did they instruct?" /></div>
-          </div>
-        </DialogContent>
-      </Dialog>
-      {showNew && (
-        <DecisionChangeDialog open={showNew} onClose={() => setShowNew(false)} onSubmit={createDecision}
+          </DialogContent>
+        </Dialog>
+      )}
+      {showNew && showAuthStep && (
+        <DecisionChangeDialog open={true} onClose={() => setShowAuthStep(false)} onSubmit={createDecision}
           authorities={authorities} mode="create" />
       )}
       {changeTarget && (
