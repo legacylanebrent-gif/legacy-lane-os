@@ -125,6 +125,24 @@
         "unknown"
       ],
       "default": "not_submitted"
+    },
+    "would_take_ten_more": {
+      "type": "string",
+      "enum": [
+        "YES",
+        "MAYBE",
+        "NO"
+      ],
+      "description": "Chapter 5 P1 \u2014 owner post-sale reflection: would you want ten more sales like this one? Operator-owned judgment on the canonical recap record; AI may analyze it later but never overwrites it. Feeds future Ideal Sale Profile / market intelligence."
+    },
+    "would_take_ten_more_why": {
+      "type": "string",
+      "description": "Chapter 5 P1 \u2014 the operator's free-text reason (excellent client, strong merchandise, too much labor, poor parking, great referral source, etc.). Never hard-coded conclusions."
+    },
+    "would_take_ten_more_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the reflection was last saved."
     }
   },
   "required": [

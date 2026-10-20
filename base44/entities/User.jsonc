@@ -19,6 +19,31 @@
       "default": false,
       "description": "When checked, falls back to the user's personal phone as business number if no business phone is set."
     },
+    "operating_base": {
+      "type": "object",
+      "description": "Chapter 5 P1 \u2014 INTERNAL operating-base geocode used for business-distance snapshots (distance_miles on deals/sales). Reuses the profile business address as its anchor; only the geocode plus provenance is stored here. Never publicly displayed.",
+      "properties": {
+        "lat": {
+          "type": "number"
+        },
+        "lng": {
+          "type": "number"
+        },
+        "address_source": {
+          "type": "string",
+          "description": "Which profile address this geocode came from (business_address)."
+        },
+        "geocoded_zip": {
+          "type": "string",
+          "description": "ZIP the geocode was resolved from; refreshes only when it changes."
+        },
+        "geocoded_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "default": {}
+    },
     "pending_checkout_id": {
       "type": "string",
       "description": "Wix Payments checkout session ID for an in-progress subscription upgrade. Cleared when the webhook confirms payment."
@@ -106,7 +131,7 @@
     },
     "identitySyncError": {
       "type": "string",
-      "description": "Last error message from identity resolution, if any"
+      "description": "Last error message from identity resolution, if any."
     },
     "centralIdentityVersion": {
       "type": "string",

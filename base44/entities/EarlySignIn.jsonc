@@ -22,6 +22,10 @@
       "type": "string",
       "description": "Name of the user who signed"
     },
+    "user_id": {
+      "type": "string",
+      "description": "Chapter 5 P1 \u2014 canonical platform User ID of the signer when authenticated. The historical name/email fields remain for display; user_id is the join key for buyer history. Null is legitimate for genuinely anonymous guest flows."
+    },
     "signed_at": {
       "type": "string",
       "format": "date-time",

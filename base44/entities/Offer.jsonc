@@ -26,6 +26,10 @@
       "type": "string",
       "description": "Buyer's email"
     },
+    "user_id": {
+      "type": "string",
+      "description": "Chapter 5 P1 \u2014 canonical platform User ID of the buyer when the offer comes from (or is later claimed by) an authenticated user. Offers are operator-recorded on behalf of buyers, so this is commonly null; it is never inferred from a similar email/phone. Name/phone/email remain for display and operations."
+    },
     "notes": {
       "type": "string",
       "description": "Additional notes"

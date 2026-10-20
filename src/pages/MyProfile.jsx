@@ -248,6 +248,22 @@ export default function MyProfile() {
       const wasPhoneEmpty = !user?.phone && !user?.phone_number;
       await base44.auth.updateMe({ ...form, notification_settings: notifications });
 
+      // Chapter 5 P1 — refresh the internal operating-base geocode when the business ZIP
+      // changes. Internal distance-calculation anchor only; never displayed publicly.
+      // A geocode failure never blocks the profile save.
+      const baseZip = form.business_address_zip;
+      if (baseZip && baseZip !== user?.operating_base?.geocoded_zip) {
+        try {
+          const res = await base44.functions.invoke('geocodeZip', { zip: baseZip });
+          const geo = res?.data || res;
+          if (geo && geo.lat != null) {
+            const operating_base = { lat: geo.lat, lng: geo.lng, address_source: 'business_address', geocoded_zip: baseZip, geocoded_at: new Date().toISOString() };
+            await base44.auth.updateMe({ operating_base });
+            setUser(prev => ({ ...prev, operating_base }));
+          }
+        } catch (e) { console.error('Operating base geocode failed:', e); }
+      }
+
       // Sync local user state so conditional rendering reflects saved changes immediately
       setUser(prev => ({ ...prev, ...form, notification_settings: notifications }));
 
@@ -823,7 +839,7 @@ export default function MyProfile() {
                 </div>
                 <div className="pt-2 border-t">
                   <Label className="text-slate-600 text-xs uppercase tracking-wide mb-1 block">Business Address</Label>
-                  <p className="text-xs text-slate-400 mb-3">Street address is optional — city, state, and ZIP are used for Google Maps linking.</p>
+                  <p className="text-xs text-slate-400 mb-3">Street address is optional — city, state, and ZIP are used for Google Maps linking. Your business ZIP also sets your internal operating base for distance snapshots — never shown publicly.</p>
                   <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
                     <div className="md:col-span-4"><Input value={form.business_address_street} onChange={e => setForm(p => ({ ...p, business_address_street: e.target.value }))} placeholder="Street Address" /></div>
                     <div className="md:col-span-2"><Input value={form.business_address_city} onChange={e => setForm(p => ({ ...p, business_address_city: e.target.value }))} placeholder="City" /></div>

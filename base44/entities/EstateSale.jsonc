@@ -76,6 +76,122 @@
       },
       "description": "Geographic coordinates"
     },
+    "distance_miles": {
+      "type": "number",
+      "description": "Chapter 5 P1 \u2014 operational distance snapshot from the operator's operating base to this sale location, captured at save time when both geocodes exist. Null = UNKNOWN; the system never invents 0-mile precision. Not recalculated when the operating base changes \u2014 only on an explicit save of this sale (its snapshot records the distance as known at that time)."
+    },
+    "distance_calculated_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Chapter 5 P1 \u2014 when the distance snapshot was captured."
+    },
+    "site_assessment": {
+      "type": "object",
+      "description": "Chapter 5 P1 \u2014 CANONICAL operational site assessment: practical property factors that affect the work, sale economics, and sale-day operations. This is the single editable copy (no second property/site entity, no deal-side duplicate). Captured at consultation/site visit via the sale editor. It is an operational assessment, NOT a home inspection and NOT the investor-oriented Property entity. Unknown defaults are honest: the system never guesses site conditions.",
+      "properties": {
+        "property_type": {
+          "type": "string",
+          "description": "Operator's shorthand for the property (single-family home, condo, apartment building, estate property, storage unit, commercial space...)."
+        },
+        "approx_size": {
+          "type": "string",
+          "description": "Approximate size sense (e.g. 2-bedroom, ~3000 sq ft, small condo, packed 3-story house)."
+        },
+        "stairs_levels": {
+          "type": "string",
+          "enum": [
+            "single_level",
+            "one_flight",
+            "multiple_flights",
+            "unknown"
+          ],
+          "default": "unknown"
+        },
+        "elevator": {
+          "type": "string",
+          "enum": [
+            "yes",
+            "no",
+            "unknown"
+          ],
+          "default": "unknown"
+        },
+        "parking": {
+          "type": "string",
+          "enum": [
+            "easy",
+            "limited",
+            "difficult",
+            "unknown"
+          ],
+          "default": "unknown"
+        },
+        "gated_access": {
+          "type": "string",
+          "enum": [
+            "no",
+            "gated",
+            "controlled_entry",
+            "unknown"
+          ],
+          "default": "unknown"
+        },
+        "community_restrictions": {
+          "type": "string",
+          "enum": [
+            "none",
+            "some",
+            "significant",
+            "unknown"
+          ],
+          "default": "unknown",
+          "description": "HOA / community restrictions affecting signage, hours, traffic, or the sale itself. This field IS the Chapter 5 community-restrictions checklist \u2014 there is no second checklist system."
+        },
+        "loading_access": {
+          "type": "string",
+          "enum": [
+            "easy",
+            "limited",
+            "difficult",
+            "unknown"
+          ],
+          "default": "unknown"
+        },
+        "merchandise_volume": {
+          "type": "string",
+          "enum": [
+            "light",
+            "moderate",
+            "heavy",
+            "unknown"
+          ],
+          "default": "unknown"
+        },
+        "storage_areas": {
+          "type": "string",
+          "description": "Garage, outbuildings, attic, basement, sheds, off-site storage \u2014 where contents live beyond the main living space."
+        },
+        "pickup_constraints": {
+          "type": "string",
+          "enum": [
+            "none",
+            "limited",
+            "difficult",
+            "unknown"
+          ],
+          "default": "unknown"
+        },
+        "sale_day_restrictions": {
+          "type": "string",
+          "description": "HOA rules, permitted time windows, noise/sign restrictions, traffic constraints, and other sale-day conditions."
+        },
+        "notes": {
+          "type": "string",
+          "description": "Any other operational factor that affects the work."
+        }
+      },
+      "default": {}
+    },
     "sale_dates": {
       "type": "array",
       "items": {

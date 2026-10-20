@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { format, addDays, parseISO, isToday, isTomorrow, isPast } from 'date-fns';
 import DealEconomicsPanel from '@/components/saleops/DealEconomicsPanel';
+import ClientFitPanel from '@/components/saleops/ClientFitPanel';
 
 // ─── Stage config ────────────────────────────────────────────────────────────
 const STAGES = [
@@ -173,6 +174,11 @@ export default function SaleConversionPipeline() {
     const newStage = SALE_STATUS_TO_STAGE[sale.status];
     const updateData = { estate_sale_id: saleId };
     if (newStage) updateData.stage = newStage;
+    // Chapter 5 P1 — project the sale's distance snapshot onto the deal at acceptance
+    if (sale.distance_miles != null) {
+      updateData.distance_miles = sale.distance_miles;
+      updateData.distance_calculated_at = sale.distance_calculated_at || new Date().toISOString();
+    }
     await base44.entities.SaleConversionPipeline.update(dealId, updateData);
     // Chapter 2 P1 — project the referral source onto the linked sale so it is visible from the project
     if (deal?.referral_source_type) {
@@ -807,6 +813,7 @@ function DealDetail({ deal, setDeal, onSave, saving, onStageChange, onGenerateTi
             AI Timeline {tasks.length > 0 && <span className="ml-1 bg-orange-100 text-orange-700 text-[10px] px-1.5 rounded-full">{taskDone}/{tasks.length}</span>}
           </TabsTrigger>
           <TabsTrigger value="economics">Economics</TabsTrigger>
+          <TabsTrigger value="clientfit">Client Fit</TabsTrigger>
         </TabsList>
 
         {/* OVERVIEW */}
@@ -1075,7 +1082,12 @@ function DealDetail({ deal, setDeal, onSave, saving, onStageChange, onGenerateTi
 
         {/* Chapter 4 P1 — Pre-Sale Economics Calculator + Acceptance Scorecard */}
         <TabsContent value="economics" className="mt-3">
-          <DealEconomicsPanel deal={deal} onPersist={onUpdateEconomics} allDeals={allDeals} />
+          <DealEconomicsPanel deal={deal} onPersist={onUpdateEconomics} allDeals={allDeals} linkedSale={linkedSale} />
+        </TabsContent>
+
+        {/* Chapter 5 P1 — structured client-fit assessment (advisory scorecard input) */}
+        <TabsContent value="clientfit" className="mt-3">
+          <ClientFitPanel deal={deal} onPersist={onUpdateEconomics} />
         </TabsContent>
       </Tabs>
     </div>

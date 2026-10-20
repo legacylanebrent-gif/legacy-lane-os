@@ -18,6 +18,10 @@
       "type": "string",
       "description": "Invitee phone"
     },
+    "user_id": {
+      "type": "string",
+      "description": "Chapter 5 P1 \u2014 canonical platform User ID of the invitee when known. Invites are operator-entered on behalf of third parties, so this is usually null until a buyer-side RSVP flow can capture the authenticated identity. Never auto-filled by email resemblance alone."
+    },
     "status": {
       "type": "string",
       "enum": [

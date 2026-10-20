@@ -13,6 +13,7 @@ import {
 import { asArray, fmtDateTime } from '@/components/saleops/saleDecisionModel';
 import { actualSaleEconomics } from '@/components/saleops/saleEconomicsModel';
 import SaleEconomicsPanel from '@/components/saleops/SaleEconomicsPanel';
+import TenMoreReflection from '@/components/saleops/TenMoreReflection';
 
 // Chapter 1 P1 — Guided Closeout: an ORCHESTRATION surface over the existing
 // canonical closeout systems (Item, Donation, Cleanout, buyout, Expense,
@@ -386,6 +387,9 @@ export default function SaleCloseout() {
         laborEntries={laborEntries}
         financialDecisions={financialDecisions}
       />
+
+      {/* Chapter 5 P1 — "Would you want ten more?" owner reflection (canonical home: SaleRecap) */}
+      <TenMoreReflection sale={sale} />
 
       {/* Project close */}
       <Card className={blockers.length ? 'border-red-300' : 'border-green-300'}>

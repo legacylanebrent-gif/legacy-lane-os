@@ -1,7 +1,7 @@
 {
   "name": "SaleConversionPipeline",
   "type": "object",
-  "description": "Canonical PRE-SALE opportunity record and, once linked, the settlement/commission agreement record. Chapter 4 P1 adds the pre-sale economics block: contractual minimum fee, expected additional service revenue, category-level estimated labor, estimated direct costs, and the operator's internal minimum-revenue/minimum-contribution thresholds. Projected figures are estimates for evaluation only \u2014 authoritative actuals derive from settlement/closeout.",
+  "description": "Canonical PRE-SALE opportunity record and, once linked, the settlement/commission agreement record. Chapter 4 P1 adds the pre-sale economics block: contractual minimum fee, expected additional service revenue, category-level estimated labor, estimated direct costs, and the operator's internal minimum-revenue/minimum-contribution thresholds. Projected figures are estimates for evaluation only \u2014 authoritative actuals derive from settlement/closeout. Chapter 5 P1 adds the operational distance snapshot (distance_miles, projected from the linked EstateSale when the sale already carries one) and the structured client-fit assessment that feeds the Sale Acceptance Scorecard as advisory, explainable input.",
   "properties": {
     "operator_id": {
       "type": "string",
@@ -56,6 +56,106 @@
         "foreclosure",
         "standard"
       ]
+    },
+    "distance_miles": {
+      "type": "number",
+      "description": "Chapter 5 P1 \u2014 operational distance snapshot from the operator's operating base to this project at the time it was captured (projected from the linked EstateSale's own snapshot when linked). Null = UNKNOWN; the system never invents 0-mile precision. Historical snapshots are not silently recalculated when the operating base changes."
+    },
+    "distance_calculated_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Chapter 5 P1 \u2014 when the distance snapshot was captured."
+    },
+    "client_fit": {
+      "type": "object",
+      "description": "Chapter 5 P1 \u2014 structured client-fit assessment: OBSERVABLE PROJECT CONDITIONS (not personality, psychology, or character judgments). Advisory input to the existing Sale Acceptance Scorecard; it never auto-accepts or auto-rejects a client. Each dimension is rated good/caution/concern/unknown (unknown until assessed).",
+      "properties": {
+        "communication": {
+          "type": "string",
+          "enum": [
+            "good",
+            "caution",
+            "concern",
+            "unknown"
+          ],
+          "default": "unknown"
+        },
+        "authority_clarity": {
+          "type": "string",
+          "enum": [
+            "good",
+            "caution",
+            "concern",
+            "unknown"
+          ],
+          "default": "unknown"
+        },
+        "expectation_realism": {
+          "type": "string",
+          "enum": [
+            "good",
+            "caution",
+            "concern",
+            "unknown"
+          ],
+          "default": "unknown"
+        },
+        "deadline_realism": {
+          "type": "string",
+          "enum": [
+            "good",
+            "caution",
+            "concern",
+            "unknown"
+          ],
+          "default": "unknown"
+        },
+        "responsiveness": {
+          "type": "string",
+          "enum": [
+            "good",
+            "caution",
+            "concern",
+            "unknown"
+          ],
+          "default": "unknown"
+        },
+        "family_complexity": {
+          "type": "string",
+          "enum": [
+            "good",
+            "caution",
+            "concern",
+            "unknown"
+          ],
+          "default": "unknown"
+        },
+        "scope_stability": {
+          "type": "string",
+          "enum": [
+            "good",
+            "caution",
+            "concern",
+            "unknown"
+          ],
+          "default": "unknown"
+        },
+        "property_access": {
+          "type": "string",
+          "enum": [
+            "good",
+            "caution",
+            "concern",
+            "unknown"
+          ],
+          "default": "unknown"
+        },
+        "notes": {
+          "type": "string",
+          "description": "Optional context where it matters. Not required for every dimension."
+        }
+      },
+      "default": {}
     },
     "estimated_value": {
       "type": "number",

@@ -35,6 +35,9 @@ import BuyoutEventSection from '@/components/estate/BuyoutEventSection';
 import ImageImportModal from '@/components/estate/ImageImportModal';
 import DeepSearchProgressModal from '@/components/estate/DeepSearchProgressModal';
 import SaleTeamSection from '@/components/estate/SaleTeamSection';
+import SiteAssessmentSection from '@/components/saleops/SiteAssessmentSection';
+import SaleEditorFooter from '@/components/estate/SaleEditorFooter';
+import { applyDistanceSnapshot } from '@/components/saleops/distanceSnapshot';
 
 import { SALE_STATUSES, formatTimeAMPM } from '@/components/estate/saleEditorShared';
 
@@ -104,6 +107,7 @@ export default function SaleEditor() {
   const saleIdRef = useRef(null);
   const runBatchRef = useRef(null);
   const formDataRef = useRef(null);
+  const originalLocationRef = useRef(null);
 
   const [formData, setFormData] = useState({
     title: '',
@@ -120,7 +124,9 @@ export default function SaleEditor() {
     payment_methods: [],
     buyout_config: null,
     promoted_to_all_users: false,
-    sale_team: []
+    sale_team: [],
+    site_assessment: {},
+    distance_miles: null
   });
 
   // Keep saleIdRef in sync so auto-save closure has latest value
@@ -186,9 +192,11 @@ export default function SaleEditor() {
           buyout_config: latest.sale_type === 'buyout_or_cleanout' ? latest.buyout_config : null,
           promoted_to_all_users: latest.sale_type === 'five_and_under_sale',
           sale_team: latest.sale_team,
+          site_assessment: latest.site_assessment || {},
           national_featured: featuredNationally,
           local_featured: featuredLocally,
         };
+        applyDistanceSnapshot(saveData, latest.location, user.operating_base, latest.distance_miles ?? null, originalLocationRef.current);
         const currentSaleId = saleIdRef.current;
         if (currentSaleId) {
           await base44.entities.EstateSale.update(currentSaleId, saveData);
@@ -245,6 +253,7 @@ export default function SaleEditor() {
       if (!saleData) throw new Error('Sale not found');
 
       setOriginalStatus(saleData.status || 'draft');
+      originalLocationRef.current = saleData.location || null;
       setFormData({
         title: saleData.title || '',
         description: saleData.description || '',
@@ -252,6 +261,8 @@ export default function SaleEditor() {
         status: saleData.status || 'draft',
         property_address: saleData.property_address || { street: '', city: '', state: '', zip: '' },
         location: saleData.location || null,
+        site_assessment: saleData.site_assessment || {},
+        distance_miles: saleData.distance_miles ?? null,
         sale_dates: saleData.sale_dates || [],
         images: (saleData.images || []).map(img => {
           const imageObj = typeof img === 'string' ? { url: img, name: '', description: '' } : img;
@@ -408,9 +419,11 @@ export default function SaleEditor() {
           buyout_config: formData.sale_type === 'buyout_or_cleanout' ? formData.buyout_config : null,
           promoted_to_all_users: formData.sale_type === 'five_and_under_sale',
           sale_team: formData.sale_team,
+          site_assessment: formData.site_assessment || {},
           national_featured: featuredNationally,
           local_featured: featuredLocally,
         };
+        applyDistanceSnapshot(saveData, formData.location, user.operating_base, formData.distance_miles ?? null, originalLocationRef.current);
         if (saleId) {
           await base44.entities.EstateSale.update(saleId, saveData);
         } else {
@@ -478,6 +491,7 @@ export default function SaleEditor() {
           formatted_address: `${formData.property_address.street}, ${formData.property_address.city}, ${formData.property_address.state} ${formData.property_address.zip}`
         },
         location: formData.location,
+        site_assessment: formData.site_assessment || {},
         sale_dates: formData.sale_dates,
         // NOTE: images are NOT included here — they are saved directly on each mutation
         // (upload, toggle skip, serp search, batch). Including them here would overwrite
@@ -493,6 +507,7 @@ export default function SaleEditor() {
           operator_id: saleId ? undefined : user.id,
           operator_name: saleId ? undefined : user.full_name,
       };
+      applyDistanceSnapshot(saveData, formData.location, user.operating_base, formData.distance_miles ?? null, originalLocationRef.current);
       if (saleId) {
         await base44.entities.EstateSale.update(saleId, saveData);
       } else {
@@ -1768,20 +1783,14 @@ Return ONLY the description text, no extra commentary.`
         <ReferralSourceCard saleId={saleId} />
         <SaleNotesPanel saleId={saleId} />
 
+        {/* Chapter 5 P1 — canonical operational site assessment */}
+        <SiteAssessmentSection
+          value={formData.site_assessment}
+          onChange={(v) => setFormData(p => ({ ...p, site_assessment: v }))}
+        />
+
         {/* Footer */}
-        <div className="flex flex-col gap-2 sm:flex-row sm:justify-end pb-8">
-          <Button onClick={() => handleSave(true)} disabled={saving} className="w-full sm:w-auto bg-orange-600 hover:bg-orange-700 order-1">
-            {saving ? 'Saving...' : 'Save & Close'}
-          </Button>
-          <Button onClick={handlePublish} disabled={saving} className="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white order-2">
-            <Rocket className="w-4 h-4 mr-2" />
-            {saving ? 'Publishing...' : 'Publish Sale'}
-          </Button>
-          <Button variant="outline" onClick={() => handleSave(false)} disabled={saving} className="w-full sm:w-auto order-3">
-            {saving ? 'Saving...' : 'Save'}
-          </Button>
-          <Button variant="outline" onClick={() => navigate(createPageUrl('MySales'))} className="w-full sm:w-auto order-4">Cancel</Button>
-        </div>
+        <SaleEditorFooter saving={saving} onHandleSave={handleSave} onPublish={handlePublish} />
           </TabsContent>
 
           <TabsContent value="images" className="space-y-6 mt-0">

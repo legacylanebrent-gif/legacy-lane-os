@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Loader2, Save, Calculator, CalendarDays, Users, Info, TriangleAlert } from 'lucide-react';
 import { LABOR_CATEGORIES, projectedDealEconomics, money } from './saleEconomicsModel';
+import { CLIENT_FIT_DIMENSIONS } from './ClientFitPanel';
 
 // Chapter 4 P1 — Pre-Sale Economics Calculator + Sale Acceptance Scorecard.
 // Deterministic calculation only. Scenario and comparison modeling are local (never persisted;
@@ -40,7 +41,7 @@ function ResultRow({ label, value, strong, tone, hint }) {
 
 const normLabor = (rows) => (Array.isArray(rows) ? rows : []).map(r => ({ category: r.category, hours: r.hours ?? '', rate: r.rate ?? '' }));
 
-export default function DealEconomicsPanel({ deal, onPersist, allDeals }) {
+export default function DealEconomicsPanel({ deal, onPersist, allDeals, linkedSale }) {
   const [saving, setSaving] = useState(false);
   const [inputs, setInputs] = useState({
     estimated_value: deal?.estimated_value ?? '',
@@ -111,6 +112,30 @@ export default function DealEconomicsPanel({ deal, onPersist, allDeals }) {
     return { count: others.length, others };
   }, [deal, allDeals]);
 
+  // Chapter 5 P1 — advisory inputs: client fit (deal), distance (deal snapshot or
+  // the linked sale's snapshot), site complexity (canonical EstateSale site assessment).
+  // These NEVER change the deterministic financial rating; they add explainable reasons.
+  const advisory = useMemo(() => {
+    const cf = deal?.client_fit || {};
+    const flagged = CLIENT_FIT_DIMENSIONS
+      .filter(d => cf[d.key] === 'caution' || cf[d.key] === 'concern')
+      .map(d => ({ label: d.label, level: cf[d.key] }));
+    const cfWorst = flagged.some(f => f.level === 'concern') ? 'CONCERN'
+      : flagged.length ? 'CAUTION'
+        : CLIENT_FIT_DIMENSIONS.some(d => cf[d.key] === 'good') ? 'CLEAR' : 'NOT ASSESSED';
+    const site = linkedSale?.site_assessment || {};
+    const siteFlags = [];
+    if (site.gated_access === 'gated' || site.gated_access === 'controlled_entry') siteFlags.push('gated/controlled access');
+    if (site.community_restrictions === 'some' || site.community_restrictions === 'significant') siteFlags.push(`${site.community_restrictions} community restrictions`);
+    if (site.parking === 'limited' || site.parking === 'difficult') siteFlags.push(`${site.parking} parking`);
+    if (site.loading_access === 'limited' || site.loading_access === 'difficult') siteFlags.push(`${site.loading_access} loading/removal access`);
+    if (site.merchandise_volume === 'heavy') siteFlags.push('heavy merchandise volume');
+    if (site.pickup_constraints === 'limited' || site.pickup_constraints === 'difficult') siteFlags.push(`${site.pickup_constraints} pickup constraints`);
+    if (site.stairs_levels === 'multiple_flights') siteFlags.push('multiple flights of stairs');
+    const distance = deal?.distance_miles ?? linkedSale?.distance_miles ?? null;
+    return { cfWorst, flagged, distance, siteFlags };
+  }, [deal, linkedSale]);
+
   // Acceptance scorecard — deterministic, advisory only.
   const scorecard = useMemo(() => {
     const reasons = [];
@@ -140,8 +165,18 @@ export default function DealEconomicsPanel({ deal, onPersist, allDeals }) {
       reasons.push('The projection holds, but the conservative scenario erodes a meaningful share of it.');
     }
     if (overlap.count == null) reasons.push('Set the estimated sale dates on the Dates tab to include calendar overlap in this assessment.');
+    // Chapter 5 P1 advisory inputs — explainable, never auto-accept/reject.
+    if (advisory.flagged.length) {
+      reasons.push(`Advisory — client fit ${advisory.cfWorst}: ${advisory.flagged.map(f => `${f.label}${f.level === 'concern' ? ' (concern)' : ''}`).join(', ')}.`);
+    }
+    if (advisory.distance != null) {
+      reasons.push(`Advisory — distance from operating base: ${advisory.distance} miles (informational; no distance threshold configured).`);
+    }
+    if (advisory.siteFlags.length) {
+      reasons.push(`Advisory — site complexity: ${advisory.siteFlags.join('; ')}.`);
+    }
     return { rating, reasons };
-  }, [base, scenarioResult, overlap]);
+  }, [base, scenarioResult, overlap, advisory]);
 
   const save = async () => {
     setSaving(true);
@@ -368,6 +403,13 @@ export default function DealEconomicsPanel({ deal, onPersist, allDeals }) {
         <CardContent className="space-y-3">
           <div className="flex items-center gap-3 flex-wrap">
             <Badge className={`${ratingTone} border text-sm px-3 py-1`}>{scorecard.rating}</Badge>
+            {advisory.cfWorst !== 'NOT ASSESSED' && (
+              <Badge className={`border text-sm px-3 py-1 ${
+                advisory.cfWorst === 'CONCERN' ? 'bg-red-100 text-red-700 border-red-300'
+                  : advisory.cfWorst === 'CAUTION' ? 'bg-amber-100 text-amber-700 border-amber-300'
+                    : 'bg-green-100 text-green-700 border-green-300'
+              }`}>CLIENT FIT — {advisory.cfWorst}</Badge>
+            )}
             <span className="text-xs text-slate-500">Advisory only — you make the decision. This is not a guarantee of profitability.</span>
           </div>
           <ul className="text-sm text-slate-600 list-disc list-inside space-y-0.5">
@@ -386,7 +428,7 @@ export default function DealEconomicsPanel({ deal, onPersist, allDeals }) {
             </div>
             <div className="bg-slate-50 border border-slate-200 rounded-md p-2.5">
               <p className="flex items-center gap-1.5 font-medium text-slate-700"><Users className="w-3.5 h-3.5" /> Cross-sale workload</p>
-              <p className="text-slate-500 mt-0.5">Estimated labor: {base.estHours.toFixed(1)} hours · travel burden requires an address and is not estimated here.</p>
+              <p className="text-slate-500 mt-0.5">Estimated labor: {base.estHours.toFixed(1)} hours · distance from operating base: {advisory.distance != null ? `${advisory.distance} mi` : 'UNKNOWN'}.</p>
               <Link to="/OperatorWorkload" className="text-cyan-700 underline">Open workload planner →</Link>
             </div>
           </div>

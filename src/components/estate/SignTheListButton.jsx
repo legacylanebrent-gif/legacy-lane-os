@@ -108,6 +108,7 @@ export default function SignTheListButton({ saleId, saleTitle, saleDates, user, 
         sale_title: saleTitle,
         sale_date: dayToSign,
         user_email: user.email,
+        user_id: user.id,
         user_name: user.full_name || user.email,
         signed_at: new Date().toISOString(),
       });
