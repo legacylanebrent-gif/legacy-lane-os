@@ -13,7 +13,7 @@ import BuyerMatchModal from '@/components/estate/BuyerMatchModal';
 import SaleExpensesModal from '@/components/expenses/SaleExpensesModal';
 import { 
         Plus, Search, Calendar, MapPin, Eye, Heart, DollarSign, 
-        Package, Edit, TrendingUp, Star, Briefcase, Trash, FileText, BarChart3, Megaphone, Download, Globe, Users, Receipt, Sparkles, ChevronDown, ChevronUp, BookOpen, Pin, UserCheck, Rocket, Building2
+        Package, Edit, TrendingUp, Star, Briefcase, Trash, FileText, BarChart3, Megaphone, Download, Globe, Users, Receipt, Sparkles, ChevronDown, ChevronUp, BookOpen, Pin, UserCheck, Rocket, Building2, ClipboardCheck, ListChecks
       } from 'lucide-react';
 import SocialCampaignModal from '@/components/social/SocialCampaignModal';
 import LiquidationProgressModal from '@/components/estate/LiquidationProgressModal';
@@ -685,6 +685,8 @@ export default function MySales() {
                            <Button variant="outline" size="sm" onClick={() => { setExpensesSale(sale); setShowExpensesModal(true); }} className={`${btnClass} border-emerald-600 hover:bg-emerald-50`}><Receipt className="w-3 h-3 mr-1 flex-shrink-0" />Expenses</Button>
                            {!isCompleted && (<Button variant="outline" size="sm" asChild className={`${btnClass} border-pink-500 hover:bg-pink-50`}><Link to={createPageUrl('SaleMarketingCampaigns') + '?saleId=' + sale.id}><Megaphone className="w-3 h-3 mr-1 flex-shrink-0" />Marketing</Link></Button>)}
                            <Button variant="outline" size="sm" asChild className={`${btnClass} border-blue-600 hover:bg-blue-50`}><Link to={createPageUrl('SaleContracts') + '?saleId=' + sale.id}><FileText className="w-3 h-3 mr-1 flex-shrink-0" />Contracts</Link></Button>
+                           <Button variant="outline" size="sm" asChild className={`${btnClass} border-violet-600 hover:bg-violet-50`}><Link to={'/SaleClientDecisions?saleId=' + sale.id}><ClipboardCheck className="w-3 h-3 mr-1 flex-shrink-0" />Decisions</Link></Button>
+                           <Button variant="outline" size="sm" asChild className={`${btnClass} border-emerald-700 hover:bg-emerald-50`}><Link to={'/SaleCloseout?saleId=' + sale.id}><ListChecks className="w-3 h-3 mr-1 flex-shrink-0" />Closeout</Link></Button>
                            {!isCompleted && (<Button variant="outline" size="sm" asChild className={`${btnClass} border-indigo-500 hover:bg-indigo-50`}><Link to={createPageUrl('EarlySignIn') + '?saleId=' + sale.id}><Users className="w-3 h-3 mr-1 flex-shrink-0" />Early Sign In</Link></Button>)}
                            {!isCompleted && (<Button variant="outline" size="sm" onClick={() => { setSocialSale(sale); setShowSocialModal(true); }} className={`${btnClass} border-purple-500 hover:bg-purple-50`}><Sparkles className="w-3 h-3 mr-1 flex-shrink-0" />Social Posts</Button>)}
                          </div>
@@ -762,6 +764,8 @@ export default function MySales() {
                                 <Button variant="outline" size="sm" asChild className="h-7 text-xs border-slate-400 text-black hover:bg-slate-50 px-2"><Link to={createPageUrl('SaleExport') + '?saleId=' + sale.id}><Download className="w-3 h-3 mr-1" />Export</Link></Button>
                                 <Button variant="outline" size="sm" onClick={() => { setExpensesSale(sale); setShowExpensesModal(true); }} className="h-7 text-xs border-emerald-500 text-black hover:bg-emerald-50 px-2"><Receipt className="w-3 h-3 mr-1" />Expenses</Button>
                                 <Button variant="outline" size="sm" asChild className="h-7 text-xs border-blue-500 text-black hover:bg-blue-50 px-2"><Link to={createPageUrl('SaleContracts') + '?saleId=' + sale.id}><FileText className="w-3 h-3 mr-1" />Contracts</Link></Button>
+                                <Button variant="outline" size="sm" asChild className="h-7 text-xs border-violet-600 text-black hover:bg-violet-50 px-2"><Link to={'/SaleClientDecisions?saleId=' + sale.id}><ClipboardCheck className="w-3 h-3 mr-1" />Decisions</Link></Button>
+                                <Button variant="outline" size="sm" asChild className="h-7 text-xs border-emerald-700 text-black hover:bg-emerald-50 px-2"><Link to={'/SaleCloseout?saleId=' + sale.id}><ListChecks className="w-3 h-3 mr-1" />Closeout</Link></Button>
                                 <Button variant="outline" size="sm" asChild className="h-7 text-xs border-purple-500 text-black hover:bg-purple-50 px-2"><Link to={`/ResellerPackupEventEditor?saleId=${sale.id}`}><Package className="w-3 h-3 mr-1" />Reseller Event</Link></Button>
                                 {isProOrElite && (<Button variant="outline" size="sm" onClick={() => handleCreateCleanout(sale)} className="h-7 text-xs border-cyan-600 text-cyan-700 hover:bg-cyan-50 px-2"><Building2 className="w-3 h-3 mr-1" />Cleanout</Button>)}
                                 {isProOrElite && (<Button variant="outline" size="sm" onClick={() => handleCreateDonation(sale)} className="h-7 text-xs border-pink-600 text-pink-700 hover:bg-pink-50 px-2"><Heart className="w-3 h-3 mr-1" />Donation</Button>)}

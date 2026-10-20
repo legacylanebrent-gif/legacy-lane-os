@@ -1,0 +1,173 @@
+{
+  "name": "SaleTask",
+  "type": "object",
+  "description": "Chapter 1 P1 \u2014 persisted operator task for the canonical SaleTasks workflow (15-step template). Adds accountability to the existing task system: assignee, due date, blocked state, priority, attention flag, and completion audit. NOT a parallel task-management application \u2014 SaleTasks (page) remains the single task surface.",
+  "properties": {
+    "sale_id": {
+      "type": "string",
+      "description": "EstateSale this task belongs to."
+    },
+    "operator_id": {
+      "type": "string",
+      "description": "EstateSale.operator_id projection \u2014 sale owner (RLS anchor). Derived from the sale at creation."
+    },
+    "sale_team_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "READ-SCOPE PROJECTION of EstateSale.sale_team for RLS. The sale remains the source of truth."
+    },
+    "name": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "category": {
+      "type": "string",
+      "description": "Task category (Planning, Preparation, Marketing, Execution, Post-Sale)."
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "not_started",
+        "in_progress",
+        "completed"
+      ],
+      "default": "not_started",
+      "description": "Canonical SaleTasks statuses \u2014 unchanged."
+    },
+    "priority": {
+      "type": "string",
+      "enum": [
+        "low",
+        "medium",
+        "high"
+      ],
+      "default": "medium"
+    },
+    "assignee_user_id": {
+      "type": "string",
+      "description": "User ID of the responsible person (operator or sale_team member). Empty = unassigned."
+    },
+    "assignee_name": {
+      "type": "string",
+      "description": "Assignee display-name snapshot at assignment time."
+    },
+    "due_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "blocked": {
+      "type": "boolean",
+      "default": false,
+      "description": "Separate blocked flag \u2014 intentionally NOT a status, so not_started/in_progress/completed stay intact."
+    },
+    "blocked_reason": {
+      "type": "string"
+    },
+    "attention": {
+      "type": "boolean",
+      "default": false,
+      "description": "Operator-set escalation/attention flag."
+    },
+    "attention_reason": {
+      "type": "string"
+    },
+    "completed_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the task was completed (historical accountability)."
+    },
+    "completed_by": {
+      "type": "string",
+      "description": "User ID that completed the task."
+    },
+    "completed_by_name": {
+      "type": "string"
+    },
+    "sort_order": {
+      "type": "integer",
+      "default": 0
+    }
+  },
+  "required": [
+    "sale_id",
+    "name"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "data.operator_id": "{{user.id}}"
+        },
+        {
+          "data.sale_team_ids": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "$or": [
+        {
+          "data.operator_id": "{{user.id}}"
+        },
+        {
+          "data.sale_team_ids": {
+            "$in": [
+              "{{user.id}}"
+            ]
+          }
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "data.operator_id": "{{user.id}}"
+        },
+        {
+          "data.sale_team_ids": {
+            "$in": [
+              "{{user.id}}"
+            ]
+          }
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.operator_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

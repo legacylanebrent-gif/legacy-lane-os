@@ -1,0 +1,180 @@
+{
+  "name": "SaleAuthority",
+  "type": "object",
+  "description": "Chapter 1 P1 \u2014 sale-scoped authorized decision-maker record. An OPERATIONAL authority record (who can instruct what on this sale), distinct from communication history and portal access. Never a legal conclusion: the operator records authority based on the information and documentation available to them; AI may never determine authority.",
+  "properties": {
+    "sale_id": {
+      "type": "string",
+      "description": "EstateSale this authority belongs to."
+    },
+    "operator_id": {
+      "type": "string",
+      "description": "EstateSale.operator_id projection \u2014 sale owner (RLS anchor). Derived from the sale at creation."
+    },
+    "company_id": {
+      "type": "string",
+      "description": "EstateSale.company_id projection when present."
+    },
+    "sale_team_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "READ-SCOPE PROJECTION of EstateSale.sale_team for RLS. The sale remains the source of truth."
+    },
+    "full_name": {
+      "type": "string",
+      "description": "Authorized person's name."
+    },
+    "email": {
+      "type": "string"
+    },
+    "phone": {
+      "type": "string"
+    },
+    "relationship": {
+      "type": "string",
+      "description": "Relationship to the client/estate (e.g. Executor, Son of owner, Family attorney, Friend helping)."
+    },
+    "authority_role": {
+      "type": "string",
+      "description": "Operator's role label for this person (e.g. Primary executor, Co-executor, Power of attorney)."
+    },
+    "authority_scopes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "general_project",
+          "merchandise_decisions",
+          "pricing_approval",
+          "disposition",
+          "financial_settlement",
+          "property_access",
+          "other"
+        ]
+      },
+      "default": [
+        "general_project"
+      ],
+      "description": "What this person may authorize on this sale."
+    },
+    "is_primary": {
+      "type": "boolean",
+      "default": false,
+      "description": "Primary controlling decision-maker for the sale."
+    },
+    "effective_from": {
+      "type": "string",
+      "format": "date",
+      "description": "When this authority became effective."
+    },
+    "effective_until": {
+      "type": "string",
+      "format": "date",
+      "description": "Expiration if applicable."
+    },
+    "source": {
+      "type": "string",
+      "description": "How authority was established (e.g. signed contract, letters testamentary, client confirmation call)."
+    },
+    "evidence_ref": {
+      "type": "string",
+      "description": "Reference to supporting document (contract ID, uploaded file URI, note reference)."
+    },
+    "notes": {
+      "type": "string"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true,
+      "description": "Deactivated authority retains full history; inactive records can no longer authorize new decisions."
+    },
+    "deactivated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "deactivated_by": {
+      "type": "string",
+      "description": "User ID that deactivated this authority (audit)."
+    }
+  },
+  "required": [
+    "sale_id",
+    "full_name"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "data.operator_id": "{{user.id}}"
+        },
+        {
+          "data.sale_team_ids": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "$or": [
+        {
+          "data.operator_id": "{{user.id}}"
+        },
+        {
+          "data.sale_team_ids": {
+            "$in": [
+              "{{user.id}}"
+            ]
+          }
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "data.operator_id": "{{user.id}}"
+        },
+        {
+          "data.sale_team_ids": {
+            "$in": [
+              "{{user.id}}"
+            ]
+          }
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.operator_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

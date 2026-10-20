@@ -141,6 +141,14 @@
     "payment_method_used": {
       "type": "string"
     },
+    "payment_notes": {
+      "type": "string"
+    },
+    "pickup_completed_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When sold merchandise was picked up / released to the buyer (guided closeout tracking). Absent = pickup still pending. Independent of selling status."
+    },
     "included_in_settlement": {
       "type": "boolean",
       "default": false,
@@ -242,9 +250,6 @@
         ]
       },
       "default": []
-    },
-    "payment_notes": {
-      "type": "string"
     },
     "views": {
       "type": "integer",

@@ -1,0 +1,223 @@
+{
+  "name": "SaleClientDecision",
+  "type": "object",
+  "description": "Chapter 1 P1 \u2014 canonical sale-scoped client decision record with change history. Answers WHO authorized it, WHEN, WHAT they instructed, HOW it was received, and WHETHER it later changed. KEEP/SELL/REVIEW merchandise decisions are decision_type 'merchandise' on this same architecture \u2014 there is no second merchandise-decision system. Item.status (selling/transaction state) remains fully independent of these records.",
+  "properties": {
+    "sale_id": {
+      "type": "string",
+      "description": "EstateSale this decision belongs to."
+    },
+    "operator_id": {
+      "type": "string",
+      "description": "EstateSale.operator_id projection \u2014 sale owner (RLS anchor). Derived from the sale at creation."
+    },
+    "company_id": {
+      "type": "string",
+      "description": "EstateSale.company_id projection when present."
+    },
+    "sale_team_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "READ-SCOPE PROJECTION of EstateSale.sale_team for RLS. The sale remains the source of truth."
+    },
+    "decision_type": {
+      "type": "string",
+      "enum": [
+        "general",
+        "merchandise",
+        "pricing",
+        "disposition",
+        "financial",
+        "property_access",
+        "other"
+      ],
+      "default": "general",
+      "description": "What kind of matter this decision governs. 'merchandise' = KEEP/SELL/REVIEW."
+    },
+    "subject": {
+      "type": "string",
+      "description": "What the decision is about (description of the matter, item, or question)."
+    },
+    "item_id": {
+      "type": "string",
+      "description": "Canonical Item this merchandise decision attaches to (decision_type 'merchandise' only). Item selling status is never modified by this record."
+    },
+    "image_index": {
+      "type": "integer",
+      "description": "Index into EstateSale.images when the decision was made against a property photo before formal Item creation."
+    },
+    "current_decision": {
+      "type": "string",
+      "description": "The CONTROLLING instruction. For merchandise: 'keep' | 'sell' | 'review'. Free text for other types."
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "open",
+        "resolved"
+      ],
+      "default": "open",
+      "description": "Open = attention remains needed (e.g. REVIEW merchandise awaiting a client decision). Resolved = the matter is settled; the controlling decision and full history remain visible."
+    },
+    "history": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "decision": {
+            "type": "string"
+          },
+          "authorized_by": {
+            "type": "string",
+            "description": "SaleAuthority ID."
+          },
+          "authorized_by_name": {
+            "type": "string",
+            "description": "Authority display-name snapshot at decision time."
+          },
+          "decided_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "source": {
+            "type": "string",
+            "description": "How the instruction was received (phone, email, in_person, text, contract, other)."
+          },
+          "reason": {
+            "type": "string",
+            "description": "Why the decision changed, when it did."
+          },
+          "notes": {
+            "type": "string"
+          },
+          "recorded_by": {
+            "type": "string"
+          },
+          "recorded_by_name": {
+            "type": "string"
+          }
+        },
+        "default": []
+      },
+      "default": [],
+      "description": "Chronological decision history. The LAST entry is the current controlling decision; earlier entries are never overwritten."
+    },
+    "authorized_by": {
+      "type": "string",
+      "description": "SaleAuthority ID of the decision-maker for the current controlling decision (mirrors last history entry)."
+    },
+    "authorized_by_name": {
+      "type": "string"
+    },
+    "decided_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "source": {
+      "type": "string",
+      "description": "How the current instruction was received."
+    },
+    "evidence_ref": {
+      "type": "string",
+      "description": "Optional reference to supporting evidence/attachment."
+    },
+    "notes": {
+      "type": "string"
+    },
+    "recorded_by": {
+      "type": "string",
+      "description": "EstateSalen user who recorded the current decision."
+    },
+    "recorded_by_name": {
+      "type": "string"
+    },
+    "resolved_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "resolved_note": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "sale_id",
+    "subject",
+    "current_decision"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "data.operator_id": "{{user.id}}"
+        },
+        {
+          "data.sale_team_ids": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "$or": [
+        {
+          "data.operator_id": "{{user.id}}"
+        },
+        {
+          "data.sale_team_ids": {
+            "$in": [
+              "{{user.id}}"
+            ]
+          }
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "data.operator_id": "{{user.id}}"
+        },
+        {
+          "data.sale_team_ids": {
+            "$in": [
+              "{{user.id}}"
+            ]
+          }
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.operator_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

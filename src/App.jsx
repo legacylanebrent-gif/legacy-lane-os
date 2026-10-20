@@ -177,6 +177,8 @@ import AdminIdentityMonitor from './pages/AdminIdentityMonitor';
 import AdminLinks from './pages/AdminLinks';
 import PunchList from './pages/PunchList';
 import SalePublication from './pages/SalePublication';
+import SaleClientDecisions from './pages/SaleClientDecisions';
+import SaleCloseout from './pages/SaleCloseout';
 import WebsiteRuntimeProbe from './pages/WebsiteRuntimeProbe';
 import OperatorSitePage from './pages/OperatorSitePage';
 import AdminBusinessBuilder from './pages/AdminBusinessBuilder';
@@ -343,6 +345,8 @@ const AuthenticatedApp = () => {
       <Route path="/AdminLinks" element={<LayoutWrapper currentPageName="AdminLinks"><AdminLinks /></LayoutWrapper>} />
       <Route path="/PunchList" element={<LayoutWrapper currentPageName="PunchList"><PunchList /></LayoutWrapper>} />
       <Route path="/SalePublication" element={<LayoutWrapper currentPageName="SalePublication"><SalePublication /></LayoutWrapper>} />
+      <Route path="/SaleClientDecisions" element={<LayoutWrapper currentPageName="SaleClientDecisions"><SaleClientDecisions /></LayoutWrapper>} />
+      <Route path="/SaleCloseout" element={<LayoutWrapper currentPageName="SaleCloseout"><SaleCloseout /></LayoutWrapper>} />
       <Route path="/website-runtime" element={<WebsiteRuntimeProbe />} />
       <Route path="/AdminBusinessBuilder" element={<LayoutWrapper currentPageName="AdminBusinessBuilder"><AdminBusinessBuilder /></LayoutWrapper>} />
       <Route path="/WebsiteManager" element={<LayoutWrapper currentPageName="WebsiteManager"><WebsiteManager /></LayoutWrapper>} />
