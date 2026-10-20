@@ -33,6 +33,15 @@ export default function SignTemplateModal({ open, onClose, sale, operator }) {
   const templateRef = useRef(null);
   const [selectedTemplate, setSelectedTemplate] = useState('main');
 
+  // Operator address may be stored as an object (street/city/state/zip) — normalize
+  // to a display string before rendering; rendering the object crashes React.
+  const companyAddressText = (() => {
+    const ca = operator?.company_address;
+    if (!ca) return '';
+    if (typeof ca === 'string') return ca;
+    return [ca.street, ca.city, ca.state, ca.zip].filter(Boolean).join(', ');
+  })();
+
   const handlePrint = () => {
     window.print();
   };
