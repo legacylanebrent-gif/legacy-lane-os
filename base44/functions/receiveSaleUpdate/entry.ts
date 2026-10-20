@@ -109,8 +109,12 @@ Deno.serve(async (req) => {
 
     // If sold, record a transaction
     if ((event === 'item_sold' || status === 'sold') && item.estate_sale_id) {
+      const saleRows = await base44.asServiceRole.entities.EstateSale.filter({ id: item.estate_sale_id });
+      const sale = saleRows[0];
       await base44.asServiceRole.entities.Transaction.create({
         sale_id: item.estate_sale_id,
+        operator_id: sale?.operator_id,
+        sale_team_ids: sale?.sale_team || [],
         item_name: item.title,
         quantity: 1,
         price: sale_price || item.price || 0,

@@ -442,6 +442,7 @@ ${labeledItems.map((item, i) => `${i + 1}. ${item.name} - $${item.suggested_used
 
                         await base44.entities.Offer.create({
                           sale_id: sale?.id,
+                          operator_id: sale?.operator_id,
                           item_name: `Buyout Offer - ${labeledItems.length} Items`,
                           offer_amount: getOfferAmount(),
                           full_name: 'Estate Buyout',

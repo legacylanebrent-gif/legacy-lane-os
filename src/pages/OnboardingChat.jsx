@@ -406,16 +406,18 @@ export default function OnboardingChat() {
     setSaving(true);
     setInviteError('');
     try {
-      const invites = await base44.entities.PendingTeamInvite.filter({
-        invite_code: inviteCode.trim().toUpperCase(),
-        status: 'pending'
-      }, '-created_date', 1);
-      if (invites.length === 0) {
-        setInviteError('Invite code not found. Please check and try again.');
+      // P0 security — invite records are RLS-protected; redemption goes through
+      // the redeemTeamInvite server function (the code is the check).
+      const response = await base44.functions.invoke('redeemTeamInvite', {
+        invite_code: inviteCode.trim()
+      });
+      const data = response.data || {};
+      if (!data.found) {
+        setInviteError(data.error || 'Invite code not found. Please check and try again.');
         setSaving(false);
         return;
       }
-      setInviteLookup(invites[0]);
+      setInviteLookup(data.invite);
     } catch (e) {
       console.error('Invite lookup failed:', e);
       setInviteError('Something went wrong. Please try again.');
@@ -436,11 +438,8 @@ export default function OnboardingChat() {
         onboarding_completed: true,
       });
 
-      // Mark invite as accepted
-      await base44.entities.PendingTeamInvite.update(invite.id, {
-        status: 'accepted',
-        invited_user_id: user.id,
-      });
+      // Invite acceptance (status + invited_user_id) is recorded server-side by
+      // redeemTeamInvite at code lookup time — no direct collection write here.
 
       navigate(createPageUrl('Dashboard'));
     } catch (e) {

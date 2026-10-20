@@ -103,6 +103,9 @@ export default function SaleEditor() {
   const pointerIdRef = useRef(null);
   const pdfCancelRef = useRef(false);
   const autoSaveTimer = useRef(null);
+  // P0 security — original sale team at load; used to detect team changes and
+  // keep sale_team_ids projections on sale child records in sync.
+  const originalTeamRef = useRef([]);
   const isInitialLoad = useRef(true);
   const saleIdRef = useRef(null);
   const runBatchRef = useRef(null);
@@ -278,6 +281,7 @@ export default function SaleEditor() {
         national_featured: saleData.national_featured || false,
         sale_team: saleData.sale_team || []
       });
+      originalTeamRef.current = saleData.sale_team || [];
       setFeaturedNationally(saleData.national_featured || false);
       setFeaturedLocally(saleData.local_featured || false);
       setImageThumbnails(saleData.image_thumbnails || {});
@@ -510,6 +514,21 @@ export default function SaleEditor() {
       applyDistanceSnapshot(saveData, formData.location, user.operating_base, formData.distance_miles ?? null, originalLocationRef.current);
       if (saleId) {
         await base44.entities.EstateSale.update(saleId, saveData);
+        // P0 security — when the sale team changes, sync the sale_team_ids
+        // projections on sale children so team access follows assignment.
+        // The sale remains the source of truth for membership.
+        const newTeam = formData.sale_team || [];
+        if (JSON.stringify(newTeam) !== JSON.stringify(originalTeamRef.current)) {
+          originalTeamRef.current = newTeam;
+          try {
+            const teamUpdate = { $set: { sale_team_ids: newTeam } };
+            await base44.entities.Item.updateMany({ estate_sale_id: saleId }, teamUpdate);
+            await base44.entities.Transaction.updateMany({ sale_id: saleId }, teamUpdate);
+            await base44.entities.Expense.updateMany({ sale_id: saleId }, teamUpdate);
+          } catch (projErr) {
+            console.warn('Team projection sync skipped:', projErr);
+          }
+        }
       } else {
         const newSale = await base44.entities.EstateSale.create(saveData);
         setSaleId(newSale.id);

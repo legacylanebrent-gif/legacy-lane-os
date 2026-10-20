@@ -110,8 +110,10 @@ Deno.serve(async (req) => {
 
     // Save to SaleItemPricing entity if sale_id provided
     if (sale_id && results.length > 0) {
+      const saleRows = await base44.asServiceRole.entities.EstateSale.filter({ id: sale_id });
       await base44.asServiceRole.entities.SaleItemPricing.create({
         sale_id,
+        operator_id: saleRows[0]?.operator_id,
         image_url,
         item_title: results[0]?.title || knowledgeGraph?.title || 'Unidentified Item',
         price_min: priceMin,

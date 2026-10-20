@@ -60,10 +60,11 @@ export default function BulkReceiptScanner({ open, onClose, onSaved }) {
   const scanItem = async (item) => {
     updateItem(item.id, { status: 'scanning' });
     try {
-      const { file_url } = await base44.integrations.Core.UploadFile({ file: item.file });
+      const { file_uri } = await base44.integrations.Core.UploadPrivateFile({ file: item.file });
+      const { signed_url } = await base44.integrations.Core.CreateFileSignedUrl({ file_uri });
 
       const result = await base44.integrations.Core.ExtractDataFromUploadedFile({
-        file_url,
+        file_url: signed_url,
         json_schema: {
           type: 'object',
           properties: {
@@ -89,7 +90,7 @@ export default function BulkReceiptScanner({ open, onClose, onSaved }) {
             expense_date: result.output.date || new Date().toISOString().split('T')[0],
             description: result.output.description || '',
             category: result.output.category || 'other',
-            receipt_url: (await base44.integrations.Core.UploadFile({ file: item.file })).file_url,
+            receipt_url: file_uri,
           },
         });
       } else {

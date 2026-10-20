@@ -75,10 +75,11 @@ export default function BulkScanModal({ open, onClose, onSaved }) {
   const processEntry = async (entry) => {
     updateEntry(entry.id, { status: 'scanning' });
     try {
-      const { file_url } = await base44.integrations.Core.UploadFile({ file: entry.file });
+      const { file_uri } = await base44.integrations.Core.UploadPrivateFile({ file: entry.file });
+      const { signed_url } = await base44.integrations.Core.CreateFileSignedUrl({ file_uri });
 
       const result = await base44.integrations.Core.ExtractDataFromUploadedFile({
-        file_url,
+        file_url: signed_url,
         json_schema: {
           type: 'object',
           properties: {
@@ -99,7 +100,7 @@ export default function BulkScanModal({ open, onClose, onSaved }) {
         const out = result.output;
         updateEntry(entry.id, {
           status: 'done',
-          receipt_url: file_url,
+          receipt_url: file_uri,
           vendor_name: out.vendor_name || '',
           amount: out.amount != null ? String(out.amount) : '',
           expense_date: out.date || new Date().toISOString().split('T')[0],
@@ -107,7 +108,7 @@ export default function BulkScanModal({ open, onClose, onSaved }) {
           description: out.description || '',
         });
       } else {
-        updateEntry(entry.id, { status: 'error', receipt_url: file_url, error: 'Could not extract data' });
+        updateEntry(entry.id, { status: 'error', receipt_url: file_uri, error: 'Could not extract data' });
       }
     } catch (err) {
       updateEntry(entry.id, { status: 'error', error: err.message || 'Failed to process' });

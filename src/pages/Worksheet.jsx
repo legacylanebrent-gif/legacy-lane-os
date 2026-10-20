@@ -97,6 +97,8 @@ export default function Worksheet() {
 
       const newTransaction = {
         sale_id: saleId,
+        operator_id: sale?.operator_id,
+        sale_team_ids: sale?.sale_team || [],
         item_name: itemName,
         quantity: quantity,
         total: parseFloat(price) * quantity,
@@ -138,6 +140,8 @@ export default function Worksheet() {
 
       const bundleTransaction = {
         sale_id: saleId,
+        operator_id: sale?.operator_id,
+        sale_team_ids: sale?.sale_team || [],
         item_name: bundleName,
         quantity: 1,
         total: parseFloat(bundlePrice),
@@ -241,6 +245,8 @@ export default function Worksheet() {
             for (const item of cart.items || []) {
               await base44.entities.Transaction.create({
                 sale_id: saleId,
+                operator_id: sale?.operator_id,
+                sale_team_ids: sale?.sale_team || [],
                 item_name: item.item_title || item.name || 'Cart Item',
                 quantity: item.quantity || 1,
                 total: (item.price || 0) * (item.quantity || 1),

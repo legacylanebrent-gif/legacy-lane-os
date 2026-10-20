@@ -45,6 +45,7 @@ export default function VIPEventManager({ event }) {
     try {
       await base44.entities.VIPInvite.create({
         event_id: event.id,
+        operator_id: event.operator_id,
         name: newInvite.name,
         email: newInvite.email,
         phone: newInvite.phone,

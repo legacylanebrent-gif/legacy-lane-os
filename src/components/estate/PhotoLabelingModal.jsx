@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
+import useSaleScope from '@/hooks/useSaleScope';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -9,6 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { Sparkles, Check, X, Package } from 'lucide-react';
 
 export default function PhotoLabelingModal({ open, onClose, image, imageIndex, saleId, onApprove }) {
+  const saleScope = useSaleScope(saleId);
   const [analyzing, setAnalyzing] = useState(false);
   const [suggestions, setSuggestions] = useState(null);
   const [editedName, setEditedName] = useState('');
@@ -331,6 +333,8 @@ Be specific and practical. Focus on the main item in the photo that matches "${e
         price: editedUsedPrice ? parseFloat(editedUsedPrice) : null,
         estate_sale_id: saleId,
         seller_id: (await base44.auth.me()).id,
+        operator_id: saleScope?.operatorId,
+        sale_team_ids: saleScope?.teamIds || [],
         images: [imageUrl],
         status: 'available',
         category: selectedCategories[0] || 'estate_items',

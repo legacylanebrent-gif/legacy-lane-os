@@ -130,6 +130,8 @@ function ExpenseView({ sale, onSaved, onBack }) {
     try {
       await base44.entities.Expense.create({
         sale_id: sale.id,
+        operator_id: sale.operator_id,
+        sale_team_ids: sale.sale_team || [],
         category: suggestion.category,
         amount: parseFloat(suggestion.amount),
         date: new Date().toISOString().split('T')[0],
@@ -152,6 +154,8 @@ function ExpenseView({ sale, onSaved, onBack }) {
     try {
       await base44.entities.Expense.create({
         sale_id: sale.id,
+        operator_id: sale.operator_id,
+        sale_team_ids: sale.sale_team || [],
         category: form.category,
         amount: parseFloat(form.amount),
         date: form.date,
@@ -389,6 +393,8 @@ function MileageView({ sale, user, onSaved, onBack }) {
 
       await base44.entities.Expense.create({
         sale_id: sale.id,
+        operator_id: sale.operator_id,
+        sale_team_ids: sale.sale_team || [],
         category: 'transportation_fuel',
         amount,
         date: form.date,

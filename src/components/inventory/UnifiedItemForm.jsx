@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
+import useSaleScope from '@/hooks/useSaleScope';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -85,6 +86,7 @@ export default function UnifiedItemForm({
   onClose,
   onSaved,
 }) {
+  const saleScope = useSaleScope(saleId);
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -155,6 +157,8 @@ export default function UnifiedItemForm({
       } else {
         const user = await base44.auth.me();
         payload.seller_id = user.id;
+        payload.operator_id = saleScope?.operatorId || user.id;
+        payload.sale_team_ids = saleScope?.teamIds || [];
         payload.seller_name = user.full_name;
         await base44.entities.Item.create(payload);
         toast.success('Item created successfully');

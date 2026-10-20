@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
+import useSaleScope from '@/hooks/useSaleScope';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -18,6 +19,7 @@ const AVAILABLE_PAGES = [
 ];
 
 export default function SaleClientPermissionsModal({ open, onClose, saleId }) {
+  const saleScope = useSaleScope(saleId);
   const [clients, setClients] = useState([]);
   const [connections, setConnections] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -65,6 +67,7 @@ export default function SaleClientPermissionsModal({ open, onClose, saleId }) {
       
       await base44.entities.SaleClientPermission.create({
         sale_id: saleId,
+        operator_id: saleScope?.operatorId,
         client_user_id: connection.connected_user_id,
         client_name: connection.connected_user_name,
         client_email: connection.connected_user_email,

@@ -51,7 +51,7 @@ function getAvailableSaleDays(saleDates) {
   });
 }
 
-export default function SignTheListButton({ saleId, saleTitle, saleDates, user, onSuccess, earlySignInEnabled = true }) {
+export default function SignTheListButton({ saleId, saleTitle, saleDates, user, onSuccess, earlySignInEnabled = true, operatorId }) {
   const [signing, setSigning] = useState(false);
   const [checking, setChecking] = useState(true);
   const [availableDays, setAvailableDays] = useState([]);
@@ -105,6 +105,7 @@ export default function SignTheListButton({ saleId, saleTitle, saleDates, user, 
 
       await base44.entities.EarlySignIn.create({
         sale_id: saleId,
+        operator_id: operatorId || undefined,
         sale_title: saleTitle,
         sale_date: dayToSign,
         user_email: user.email,

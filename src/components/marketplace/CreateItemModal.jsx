@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
+import useSaleScope from '@/hooks/useSaleScope';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -66,6 +67,7 @@ const EMPTY_FORM = {
 };
 
 export default function CreateItemModal({ open, onClose, onSuccess, item, saleId }) {
+  const saleScope = useSaleScope(saleId);
   const [loading, setLoading] = useState(false);
   const [categorySpecs, setCategorySpecs] = useState({});
   const [images, setImages] = useState([]);
@@ -209,6 +211,8 @@ export default function CreateItemModal({ open, onClose, onSuccess, item, saleId
         const created = await base44.entities.Item.create({
           ...itemPayload,
           seller_id: user.id,
+          operator_id: saleScope?.operatorId || user.id,
+          sale_team_ids: saleScope?.teamIds || [],
           seller_name: user.full_name,
           estate_sale_id: saleId || null,
           status: 'available',

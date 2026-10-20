@@ -168,8 +168,8 @@ export default function MyBusinessExpenses() {
 
     setUploadingReceipt(true);
     try {
-      const { file_url } = await base44.integrations.Core.UploadFile({ file });
-      setFormData({ ...formData, receipt_url: file_url });
+      const { file_uri } = await base44.integrations.Core.UploadPrivateFile({ file });
+      setFormData({ ...formData, receipt_url: file_uri });
     } catch (error) {
       console.error('Error uploading receipt:', error);
       alert('Failed to upload receipt');
@@ -184,10 +184,11 @@ export default function MyBusinessExpenses() {
 
     setScanningReceipt(true);
     try {
-      const { file_url } = await base44.integrations.Core.UploadFile({ file });
-      
+      const { file_uri } = await base44.integrations.Core.UploadPrivateFile({ file });
+      const { signed_url } = await base44.integrations.Core.CreateFileSignedUrl({ file_uri });
+
       const result = await base44.integrations.Core.ExtractDataFromUploadedFile({
-        file_url,
+        file_url: signed_url,
         json_schema: {
           type: 'object',
           properties: {
@@ -206,7 +207,7 @@ export default function MyBusinessExpenses() {
           amount: result.output.amount || '',
           expense_date: result.output.date || formData.expense_date,
           description: result.output.description || '',
-          receipt_url: file_url
+          receipt_url: file_uri
         });
         setShowScanModal(false);
         setShowAddModal(true);
@@ -753,11 +754,24 @@ export default function MyBusinessExpenses() {
                       </td>
                       <td className="p-3 text-center">
                         {expense.receipt_url && (
-                          <a href={expense.receipt_url} target="_blank" rel="noopener noreferrer">
-                            <Button variant="ghost" size="sm">
-                              <Receipt className="w-4 h-4" />
-                            </Button>
-                          </a>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={async () => {
+                              try {
+                                if (/^https?:\/\//.test(expense.receipt_url)) {
+                                  window.open(expense.receipt_url, '_blank');
+                                  return;
+                                }
+                                const { signed_url } = await base44.integrations.Core.CreateFileSignedUrl({ file_uri: expense.receipt_url });
+                                window.open(signed_url, '_blank');
+                              } catch (err) {
+                                console.error('Error opening receipt:', err);
+                              }
+                            }}
+                          >
+                            <Receipt className="w-4 h-4" />
+                          </Button>
                         )}
                       </td>
                     </tr>

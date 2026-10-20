@@ -1045,6 +1045,7 @@ export default function EstateSaleDetail() {
                 <div className="space-y-2 mt-4">
                   <SignTheListButton
                     saleId={sale.id}
+                    operatorId={sale.operator_id}
                     saleTitle={sale.title}
                     saleDates={sale.sale_dates}
                     user={currentUser}

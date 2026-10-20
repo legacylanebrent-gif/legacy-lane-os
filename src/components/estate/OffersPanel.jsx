@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
+import useSaleScope from '@/hooks/useSaleScope';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -20,6 +21,7 @@ const STATUS_STYLES = {
 // Reuses the existing Offer entity (also used by buyout events). No auctions, no deletion —
 // accepted/rejected offers stay in history.
 export default function OffersPanel({ saleId, items = [] }) {
+  const saleScope = useSaleScope(saleId);
   const [offers, setOffers] = useState([]);
   const [open, setOpen] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -48,6 +50,7 @@ export default function OffersPanel({ saleId, items = [] }) {
     try {
       await base44.entities.Offer.create({
         sale_id: saleId,
+        operator_id: saleScope?.operatorId,
         item_name: item.title,
         offer_amount: parseFloat(form.offer_amount),
         full_name: form.full_name,
