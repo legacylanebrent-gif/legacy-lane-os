@@ -41,14 +41,13 @@ export default function PartnerReferral() {
         setChecking(false);
       }
     })();
-  }, []);
+  }, [token]);
 
   const submit = async (e) => {
     e.preventDefault();
     setError("");
     setSubmitting(true);
     try {
-      const token = new URLSearchParams(window.location.search).get("prf") || "";
       const res = await base44.functions.invoke("submitPartnerReferredInquiry", {
         token,
         first_name: form.first_name,
