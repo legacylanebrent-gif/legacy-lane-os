@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import { asArray, fmtDateTime } from '@/components/saleops/saleDecisionModel';
 import { actualSaleEconomics } from '@/components/saleops/saleEconomicsModel';
+import { postSaleAuthorizationWarning } from '@/components/agreements/agreementModel';
 import SaleEconomicsPanel from '@/components/saleops/SaleEconomicsPanel';
 import TenMoreReflection from '@/components/saleops/TenMoreReflection';
 
@@ -53,7 +54,7 @@ export default function SaleCloseout() {
       const sale = saleData[0];
       setSale(sale);
 
-      const [itemsRes, decisionsRes, tasksRes, expensesRes, dealsRes, donationsRes, cleanoutsRes, laborRes, equipRes] = await Promise.all([
+      const [itemsRes, decisionsRes, tasksRes, expensesRes, dealsRes, donationsRes, cleanoutsRes, laborRes, equipRes, scopeRes] = await Promise.all([
         base44.entities.Item.filter({ estate_sale_id: sale.id }),
         base44.entities.SaleClientDecision.filter({ sale_id: sale.id }),
         base44.entities.SaleTask.filter({ sale_id: sale.id }),
@@ -63,6 +64,7 @@ export default function SaleCloseout() {
         base44.entities.Cleanout.filter({ operator_id: sale.operator_id }),
         base44.entities.LaborEntry.filter({ sale_id: sale.id }),
         base44.entities.SaleEquipmentAssignment.filter({ sale_id: sale.id }),
+        base44.entities.SaleScope.filter({ sale_id: sale.id, status: 'ACTIVE' }),
       ]);
       const items = asArray(itemsRes);
       const decisions = asArray(decisionsRes);
@@ -82,8 +84,9 @@ export default function SaleCloseout() {
       };
       const saleDonations = donations.filter(addressMatch);
       const saleCleanouts = cleanouts.filter(addressMatch);
+      const scope = asArray(scopeRes)[0] || null;
 
-      setData({ items, decisions, tasks, expenses, deals, saleDonations, saleCleanouts, laborEntries, equipmentAssignments, sale });
+      setData({ items, decisions, tasks, expenses, deals, saleDonations, saleCleanouts, laborEntries, equipmentAssignments, sale, scope });
     } catch (e) {
       console.error('Error loading closeout data:', e);
     } finally {
@@ -103,7 +106,7 @@ export default function SaleCloseout() {
   }
   if (!sale || !data) return <div className="p-8 text-slate-500">Could not load closeout data.</div>;
 
-  const { items, decisions, tasks, expenses, deals, saleDonations, saleCleanouts, laborEntries, equipmentAssignments } = data;
+  const { items, decisions, tasks, expenses, deals, saleDonations, saleCleanouts, laborEntries, equipmentAssignments, scope } = data;
   const isPickedUp = (i) => !!i.pickup_completed_at || pickedUpIds.includes(i.id);
 
   // 1 — Sold merchandise
@@ -174,6 +177,8 @@ export default function SaleCloseout() {
   if (openGeneral.length > 0) warnings.push(`${openGeneral.length} open client decision(s)`);
   if (openTasks.length > 0) warnings.push(`${openTasks.length} open task(s)${blockedTasks.length ? `, ${blockedTasks.length} blocked` : ''}`);
   if (unresolvedEquipment.length > 0) warnings.push(`EQUIPMENT STILL UNRESOLVED: ${unresolvedEquipment.length} company asset(s) with no pack-out ending — open Sale Equipment (My Sales) to record returns`);
+  const psaWarning = postSaleAuthorizationWarning(scope, { donations: saleDonations, cleanouts: saleCleanouts });
+  if (psaWarning) warnings.push(psaWarning);
   if (step5 === 'warning' && deal && !deal.settlement_finalized) warnings.push('Settlement payouts look complete — finalize the settlement record');
 
   const markPickedUp = async (item) => {

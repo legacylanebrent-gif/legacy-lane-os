@@ -1,7 +1,7 @@
 {
   "name": "SaleConversionPipeline",
   "type": "object",
-  "description": "Canonical PRE-SALE opportunity record and, once linked, the settlement/commission agreement record. Chapter 4 P1 adds the pre-sale economics block: contractual minimum fee, expected additional service revenue, category-level estimated labor, estimated direct costs, and the operator's internal minimum-revenue/minimum-contribution thresholds. Projected figures are estimates for evaluation only \u2014 authoritative actuals derive from settlement/closeout. Chapter 5 P1 adds the operational distance snapshot (distance_miles, projected from the linked EstateSale when the sale already carries one) and the structured client-fit assessment that feeds the Sale Acceptance Scorecard as advisory, explainable input.",
+  "description": "Canonical PRE-SALE opportunity record and, once linked, the settlement/commission agreement record. Chapter 4 P1 adds the pre-sale economics block: contractual minimum fee, expected additional service revenue, category-level estimated labor, estimated direct costs, and the operator's internal minimum-revenue/minimum-contribution thresholds. Projected figures are estimates for evaluation only \u2014 authoritative actuals derive from settlement/closeout. Chapter 5 P1 adds the operational distance snapshot (distance_miles, projected from the linked EstateSale when the sale already carries one) and the structured client-fit assessment that feeds the Sale Acceptance Scorecard as advisory, explainable input. Chapter 9 P1 adds the client-facing estimated sale RANGE (low/high \u2014 never auto-invented from a single estimate), the owner-time flag on projected labor rows, and ACCEPTED COMMERCIAL TERMS metadata: the deal remains the ONE settlement-facing source of commercial truth, and commercial_terms_accepted_at records when the client accepted it \u2014 the accepted_terms_snapshot preserves exactly what was accepted so later deal edits never rewrite accepted history.",
   "properties": {
     "operator_id": {
       "type": "string",
@@ -159,7 +159,15 @@
     },
     "estimated_value": {
       "type": "number",
-      "description": "Chapter 4 P1 \u2014 projected GROSS merchandise sales for this sale (pre-sale estimate). Gross is client merchandise proceeds, NOT company revenue."
+      "description": "Chapter 4 P1 \u2014 projected GROSS merchandise sales for this sale (pre-sale estimate). Gross is client merchandise proceeds, NOT company revenue. Chapter 9 P1: serves as the current working estimate / midpoint; the client-facing RANGE lives in estimated_value_low/high when the operator supplies it."
+    },
+    "estimated_value_low": {
+      "type": "number",
+      "description": "Chapter 9 P1 \u2014 LOW end of the client-facing estimated sale range. Optional and operator-supplied only: the system NEVER invents a range from a single estimate. Null = range UNKNOWN until the operator supplies it. AN ESTIMATE IS A PLANNING TOOL, NOT A PROMISE."
+    },
+    "estimated_value_high": {
+      "type": "number",
+      "description": "Chapter 9 P1 \u2014 HIGH end of the client-facing estimated sale range. Optional and operator-supplied only; null = range UNKNOWN."
     },
     "commission_rate": {
       "type": "number",
@@ -197,7 +205,7 @@
     "labor_estimates": {
       "type": "array",
       "default": [],
-      "description": "Chapter 4 P1 \u2014 category-level projected labor for this sale. Estimated hours and estimated cash labor cost; compared against actual LaborEntry hours at closeout.",
+      "description": "Chapter 4 P1 \u2014 category-level projected labor for this sale. Estimated hours and estimated cash labor cost; compared against actual LaborEntry hours at closeout. Chapter 9 P1 adds is_owner_time: projected OWNER hours display separately and are NEVER counted as projected cash labor expense.",
       "items": {
         "type": "object",
         "properties": {
@@ -220,7 +228,12 @@
           },
           "rate": {
             "type": "number",
-            "description": "Estimated hourly cash rate."
+            "description": "Estimated hourly cash rate. Ignored for cash cost when is_owner_time is true \u2014 owner time is reported in hours only."
+          },
+          "is_owner_time": {
+            "type": "boolean",
+            "default": false,
+            "description": "Chapter 9 P1 \u2014 this row is the OWNER'S OWN projected time. Hours display separately; the row never counts as projected cash labor cost (matching the Chapter 4 LaborEntry owner-time doctrine)."
           }
         }
       }
@@ -232,6 +245,46 @@
     "min_contribution_threshold": {
       "type": "number",
       "description": "Chapter 4 P1 \u2014 operator's INTERNAL minimum acceptable sale contribution for taking this sale (acceptance scorecard input)."
+    },
+    "commercial_terms_accepted_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Chapter 9 P1 \u2014 when the client ACCEPTED the commercial terms. Null = terms proposed/projected but NOT YET ACCEPTED. Acceptance is operator-recorded from an accepted SaleProposal; this metadata marks the transition from projected to accepted without moving financial truth off this deal."
+    },
+    "commercial_terms_accepted_by": {
+      "type": "string",
+      "description": "Chapter 9 P1 \u2014 name of the client authority who accepted the terms (operator-recorded)."
+    },
+    "commercial_terms_acceptance_source": {
+      "type": "string",
+      "description": "Chapter 9 P1 \u2014 how acceptance was received (phone, email, in_person, signed proposal, other)."
+    },
+    "accepted_proposal_id": {
+      "type": "string",
+      "description": "Chapter 9 P1 \u2014 the ACCEPTED SaleProposal whose terms the client accepted (provenance)."
+    },
+    "accepted_terms_snapshot": {
+      "type": "object",
+      "description": "Chapter 9 P1 \u2014 structured snapshot of the commercial terms as ACCEPTED (commission_rate, minimum_fee, estimated range). Preserves WHAT THE CLIENT ACCEPTED at acceptance time \u2014 later edits to the deal's working/projected fields never rewrite this. Settlement reads the deal's canonical fields; this snapshot is the accepted-history record.",
+      "properties": {
+        "commission_rate": {
+          "type": "number"
+        },
+        "minimum_fee": {
+          "type": "number"
+        },
+        "estimated_value_low": {
+          "type": "number"
+        },
+        "estimated_value_high": {
+          "type": "number"
+        },
+        "accepted_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "default": {}
     },
     "notes": {
       "type": "string"

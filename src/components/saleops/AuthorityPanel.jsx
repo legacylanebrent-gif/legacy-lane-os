@@ -15,6 +15,7 @@ const EMPTY = {
   full_name: '', email: '', phone: '', relationship: '', authority_role: '',
   authority_scopes: ['general_project'], is_primary: false,
   effective_from: '', effective_until: '', source: '', evidence_ref: '', notes: '',
+  verification_status: 'UNRESOLVED', verification_notes: '',
 };
 
 export default function AuthorityPanel({ sale, user, authorities, onChanged }) {
@@ -36,6 +37,7 @@ export default function AuthorityPanel({ sale, user, authorities, onChanged }) {
       is_primary: !!a.is_primary, effective_from: a.effective_from || '',
       effective_until: a.effective_until || '', source: a.source || '',
       evidence_ref: a.evidence_ref || '', notes: a.notes || '',
+      verification_status: a.verification_status || 'UNRESOLVED', verification_notes: a.verification_notes || '',
     });
     setShowDialog(true);
   };
@@ -113,6 +115,9 @@ export default function AuthorityPanel({ sale, user, authorities, onChanged }) {
                   <span className="font-semibold text-slate-900">{a.full_name}</span>
                   {a.is_primary && <Badge className="bg-cyan-100 text-cyan-700">PRIMARY</Badge>}
                   {a.authority_role && <Badge variant="outline">{a.authority_role}</Badge>}
+                  <Badge className={(a.verification_status || 'UNRESOLVED') === 'VERIFIED' ? 'bg-green-100 text-green-700 border-green-300' : 'bg-amber-100 text-amber-800 border-amber-300'}>
+                    {(a.verification_status || 'UNRESOLVED') === 'VERIFIED' ? 'VERIFIED' : 'AUTHORITY NEEDS REVIEW'}
+                  </Badge>
                 </div>
                 <p className="text-sm text-slate-600 mt-0.5">{a.relationship || 'Relationship not recorded'}</p>
                 <div className="flex flex-wrap gap-1.5 mt-2">
@@ -191,6 +196,19 @@ export default function AuthorityPanel({ sale, user, authorities, onChanged }) {
             </div>
             <div><Label>Source / how verified</Label><Input value={form.source} onChange={e => setForm(f => ({ ...f, source: e.target.value }))} placeholder="Signed contract, letters testamentary, client call…" /></div>
             <div><Label>Evidence reference</Label><Input value={form.evidence_ref} onChange={e => setForm(f => ({ ...f, evidence_ref: e.target.value }))} placeholder="Contract ID, document reference…" /></div>
+            <div>
+              <Label>Authority status (operational — not a legal conclusion)</Label>
+              <Select value={form.verification_status} onValueChange={v => setForm(f => ({ ...f, verification_status: v }))}>
+                <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="VERIFIED">VERIFIED — basis established</SelectItem>
+                  <SelectItem value="UNRESOLVED">UNRESOLVED — needs review</SelectItem>
+                  <SelectItem value="DISPUTED">DISPUTED — needs review</SelectItem>
+                </SelectContent>
+              </Select>
+              <p className="text-[11px] text-slate-400 mt-1">UNRESOLVED / DISPUTED surface an "AUTHORITY NEEDS REVIEW" operational warning. Never a claim that authority is invalid.</p>
+            </div>
+            <div><Label>Verification notes</Label><Input value={form.verification_notes} onChange={e => setForm(f => ({ ...f, verification_notes: e.target.value }))} placeholder="What was seen, what is still unclear…" /></div>
             <div><Label>Notes</Label><Textarea rows={2} value={form.notes} onChange={e => setForm(f => ({ ...f, notes: e.target.value }))} /></div>
             <div className="flex justify-end gap-2 pt-2">
               <Button variant="outline" onClick={() => setShowDialog(false)}>Cancel</Button>

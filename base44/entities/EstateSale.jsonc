@@ -189,7 +189,7 @@
     },
     "site_assessment": {
       "type": "object",
-      "description": "Chapter 5 P1 \u2014 CANONICAL operational site assessment: practical property factors that affect the work, sale economics, and sale-day operations. This is the single editable copy (no second property/site entity, no deal-side duplicate). Captured at consultation/site visit via the sale editor. It is an operational assessment, NOT a home inspection and NOT the investor-oriented Property entity. Unknown defaults are honest: the system never guesses site conditions.",
+      "description": "Chapter 5 P1 \u2014 CANONICAL operational site assessment: practical property factors that affect the work, sale economics, and sale-day operations. This is the single editable copy (no second property/site entity, no deal-side duplicate). Captured at consultation/site visit via the sale editor. It is an operational assessment, NOT a home inspection and NOT the investor-oriented Property entity. Unknown defaults are honest: the system never guesses site conditions. Chapter 9 P1 adds access_details \u2014 the practical PRIVATE access plan (key/access method, alarm considerations, gate access, pets, association requirements, contractors, occupied/restricted areas, access windows).",
       "properties": {
         "property_type": {
           "type": "string",
@@ -286,6 +286,53 @@
         "sale_day_restrictions": {
           "type": "string",
           "description": "HOA rules, permitted time windows, noise/sign restrictions, traffic constraints, and other sale-day conditions."
+        },
+        "access_details": {
+          "type": "object",
+          "description": "Chapter 9 P1 \u2014 the practical property ACCESS PLAN for preparation and sale-day work: key/access method, alarm considerations, gate access, pets, association requirements, contractors, occupied areas, restricted rooms, access windows. HIGHLY SENSITIVE and PRIVATE: alarm codes, gate codes, and key locations must never be projected to proposals, agreements, public pages, Marketing Kit, case studies, or any AI context that does not need them. Client documents may reference RESPONSIBILITY for access without embedding codes or key locations (the agreement merge variable is access RESPONSIBILITIES only).",
+          "properties": {
+            "key_access_method": {
+              "type": "string",
+              "description": "How the team gets in \u2014 the RESPONSIBILITY/METHOD record (e.g. 'client meets at 9am', 'lockbox on rear rail', 'agent holds keys'). Avoid recording codes here when responsibilities suffice."
+            },
+            "alarm_considerations": {
+              "type": "string",
+              "description": "PRIVATE operational note \u2014 alarm system behavior, disarming responsibility, monitoring-company considerations. Never projected into client documents by default."
+            },
+            "gate_access": {
+              "type": "string",
+              "description": "PRIVATE \u2014 gate/entry procedures. Codes stay here, never in proposals, agreements, public pages, or marketing."
+            },
+            "pets": {
+              "type": "string",
+              "description": "Pets on site and handling expectations during preparation and sale days."
+            },
+            "association_requirements": {
+              "type": "string",
+              "description": "Concrete association/HOA access requirements beyond the site_assessment summary (check-in, insurance certificate, vendor rules)."
+            },
+            "contractors": {
+              "type": "string",
+              "description": "Outside contractors expected on site (cleanout, movers, specialists) and access arrangements."
+            },
+            "occupied_areas": {
+              "type": "string",
+              "description": "Areas still occupied or off-limits for the family's personal use during preparation."
+            },
+            "restricted_rooms": {
+              "type": "string",
+              "description": "Rooms/areas where work is restricted, postponed, or requires explicit client presence."
+            },
+            "access_windows": {
+              "type": "string",
+              "description": "Permitted working hours / access windows agreed with the client or association."
+            },
+            "notes": {
+              "type": "string",
+              "description": "Any other access-plan context."
+            }
+          },
+          "default": {}
         },
         "notes": {
           "type": "string",

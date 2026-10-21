@@ -1,0 +1,195 @@
+{
+  "name": "SaleAgreement",
+  "type": "object",
+  "description": "Chapter 9 P0/P1 \u2014 the VERSIONED sale agreement record: the operator's own approved company template (a BusinessDocument, category AGREEMENT) merged with structured project facts, snapshotted immutably at finalization. States: DRAFT (editable) \u2192 READY (finalized snapshot) \u2192 EXECUTED (operator records that it was signed, optionally uploading the signed copy). A finalized/executed record is a HISTORICAL SNAPSHOT, not a live-editable record: later changes to services, scope, commission, minimum, sale dates, company template, access plan, or post-sale plan NEVER rewrite it \u2014 later changes flow through SaleClientDecision, SaleScope version history, authorized additional services, or an intentional new version (SUPERSEDED). VOIDED keeps truth with a reason. EstateSalen populates operator-approved template variables only \u2014 it never authors or alters legal language, never claims a template is attorney-approved unless the operator says so, and never validates signatures; EXECUTED means the operator recorded the signing. Private: agreement content, signed files, and terms are never projected to public pages, Marketing Kit, case studies, or buyer-facing surfaces.",
+  "properties": {
+    "operator_id": {
+      "type": "string",
+      "description": "EstateSale.operator_id projection \u2014 sale owner (RLS anchor)."
+    },
+    "sale_id": {
+      "type": "string",
+      "description": "EstateSale this agreement belongs to."
+    },
+    "deal_id": {
+      "type": "string",
+      "description": "Linked SaleConversionPipeline deal whose accepted commercial terms this agreement snapshots."
+    },
+    "company_id": {
+      "type": "string",
+      "description": "EstateSale.company_id projection when present."
+    },
+    "sale_team_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "READ-SCOPE PROJECTION of EstateSale.sale_team for RLS. The sale remains the source of truth."
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "DRAFT",
+        "READY",
+        "EXECUTED",
+        "SUPERSEDED",
+        "VOIDED"
+      ],
+      "default": "DRAFT",
+      "description": "DRAFT = editable working copy. READY = finalized snapshot (content frozen; changes require an intentional new version). EXECUTED = operator recorded signing; the snapshot and signed file are immutable history. SUPERSEDED = replaced by a newer version (kept for truth). VOIDED = withdrawn with reason (kept for truth). No legal semantics: EstateSalen does not adjudicate validity."
+    },
+    "version": {
+      "type": "integer",
+      "default": 1,
+      "description": "Increments per intentional new version (supersede)."
+    },
+    "proposal_id": {
+      "type": "string",
+      "description": "The ACCEPTED SaleProposal this agreement was built from (provenance of what the client accepted)."
+    },
+    "template_document_id": {
+      "type": "string",
+      "description": "BusinessDocument (category AGREEMENT) holding the operator's approved company template."
+    },
+    "template_version": {
+      "type": "integer",
+      "description": "BusinessDocument.version at build time \u2014 preserves exactly which template version was used, so later template changes never rewrite history."
+    },
+    "template_title": {
+      "type": "string",
+      "description": "Display snapshot of the template title at build time."
+    },
+    "merged_values": {
+      "type": "object",
+      "description": "Structured populated values at finalize time \u2014 the database truth behind the rendered document (client, property, dates, commission, minimum, scope summary, discount approach, post-sale plan, access RESPONSIBILITIES, exclusions, payment expectations). Settlement reads the DEAL, never this PDF text.",
+      "default": {}
+    },
+    "body_text": {
+      "type": "string",
+      "description": "Rendered agreement text at finalize time \u2014 the immutable snapshot. PDF generation derives from THIS, never from live records."
+    },
+    "finalized_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the snapshot was frozen (DRAFT \u2192 READY)."
+    },
+    "executed_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the operator recorded the agreement as signed/executed."
+    },
+    "executed_by_name": {
+      "type": "string",
+      "description": "Operator-recorded signer/executor name (operator records the execution; EstateSalen does not validate signatures)."
+    },
+    "signed_file_uri": {
+      "type": "string",
+      "description": "PRIVATE storage URI of the uploaded signed copy (UploadPrivateFile). Never a public URL; viewed through a short-lived signed URL only. A new upload must go to a new version \u2014 prior executed copies are never overwritten."
+    },
+    "signed_file_name": {
+      "type": "string"
+    },
+    "signed_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "superseded_by": {
+      "type": "string",
+      "description": "SaleAgreement id of the intentional replacement version."
+    },
+    "superseded_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "voided_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "void_reason": {
+      "type": "string"
+    },
+    "scope_version": {
+      "type": "integer",
+      "description": "SaleScope.version at build time (provenance of the agreed scope the agreement captured)."
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "operator_id",
+    "sale_id"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.operator_id": "{{user.id}}"
+        },
+        {
+          "data.sale_team_ids": {
+            "$in": [
+              "{{user.id}}"
+            ]
+          }
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "$or": [
+        {
+          "data.operator_id": "{{user.id}}"
+        },
+        {
+          "data.sale_team_ids": {
+            "$in": [
+              "{{user.id}}"
+            ]
+          }
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.operator_id": "{{user.id}}"
+        },
+        {
+          "data.sale_team_ids": {
+            "$in": [
+              "{{user.id}}"
+            ]
+          }
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.operator_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

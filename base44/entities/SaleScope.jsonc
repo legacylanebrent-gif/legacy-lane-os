@@ -1,7 +1,7 @@
 {
   "name": "SaleScope",
   "type": "object",
-  "description": "Chapter 7 P1 \u2014 the ONE canonical AGREED SCOPE for a sale: WHAT THIS CLIENT HIRED US TO DO. Structured operational truth that supports (and never replaces) the signed agreement/contract. Distinctions enforced by design: OperatorService = what the company generally offers; SaleScope (this entity) = what this particular client hired the company to perform; SaleTask = work required to deliver the scope; SaleClientDecision = client instruction/change/authorization; BusinessDocument/contract = legal evidence of the agreement. Mid-sale scope changes are authorized through SaleClientDecision \u2014 never by silently rewriting this record: each save appends the prior version to history and earlier versions are never overwritten. The website shows the operator's general services and must never automatically claim sale-specific scope.",
+  "description": "Chapter 7 P1 \u2014 the ONE canonical AGREED SCOPE for a sale: WHAT THIS CLIENT HIRED US TO DO. Structured operational truth that supports (and never replaces) the signed agreement/contract. Distinctions enforced by design: OperatorService = what the company generally offers; SaleScope (this entity) = what this particular client hired the company to perform; SaleTask = work required to deliver the scope; SaleClientDecision = client instruction/change/authorization; BusinessDocument/contract = legal evidence of the agreement. Mid-sale scope changes are authorized through SaleClientDecision \u2014 never by silently rewriting this record: each save appends the prior version to history and earlier versions are never overwritten. The website shows the operator's general services and must never automatically claim sale-specific scope. Chapter 9 P1 adds the client-facing discount approach and the pre-sale post-sale plan to this record (one scope record \u2014 no second strategy entity, no disposition engine).",
   "properties": {
     "sale_id": {
       "type": "string",
@@ -77,6 +77,51 @@
     "client_expectations": {
       "type": "string",
       "description": "Important client expectations/understandings recorded honestly, including uncertainty. An estimate must not quietly become a guarantee."
+    },
+    "discount_approach": {
+      "type": "string",
+      "description": "Chapter 9 P1 \u2014 the operator-approved, client-facing discount approach for this engagement (e.g. 'No automatic discount schedule committed', 'Day 2 discounts may be considered', or a specific approved schedule). Free text the operator owns; AI never invents it. The canonical source the proposal and agreement draw from \u2014 there is no separate DiscountStrategy entity."
+    },
+    "post_sale_plan": {
+      "type": "object",
+      "description": "Chapter 9 P1 \u2014 the agreed DEFAULT PLAN for merchandise remaining after the sale, decided pre-sale. Chapter 9 level only: documenting what was agreed \u2014 NOT the Chapter 22 disposition engine. A plan NEVER implies authority on its own: an actionable outcome (DONATE / CLEANOUT / BUYOUT / SPECIALIST / OTHER) requires recorded authorization or it surfaces an operational warning. NO POST-SALE ACTION SHOULD BE INFERRED FROM SILENCE.",
+      "properties": {
+        "default_outcome": {
+          "type": "string",
+          "enum": [
+            "CLIENT_RETAINS",
+            "DONATE",
+            "CLEANOUT",
+            "BUYOUT",
+            "SPECIALIST",
+            "OTHER_SELLING_METHOD",
+            "DECISION_REQUIRED"
+          ],
+          "description": "Default plan for remaining merchandise. DECISION_REQUIRED is an honest unresolved state \u2014 it stays unresolved until a decision is recorded."
+        },
+        "notes": {
+          "type": "string",
+          "description": "Plan details in the operator's words."
+        },
+        "authorized_by_name": {
+          "type": "string",
+          "description": "Name of the client authority who authorized this plan (if an actionable outcome was authorized)."
+        },
+        "authorization_source": {
+          "type": "string",
+          "description": "How the plan was authorized (phone, email, signed proposal, in-person\u2026)."
+        },
+        "authority_id": {
+          "type": "string",
+          "description": "Optional SaleAuthority reference for the authorizing person."
+        },
+        "authorized_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "When the plan was authorized."
+        }
+      },
+      "default": {}
     },
     "effective_date": {
       "type": "string",

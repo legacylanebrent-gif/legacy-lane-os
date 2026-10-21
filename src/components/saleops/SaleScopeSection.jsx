@@ -19,6 +19,7 @@ export default function SaleScopeSection({ saleId }) {
   const [saving, setSaving] = useState(false);
   const [catalog, setCatalog] = useState([]);
   const [scope, setScope] = useState(null);
+  const [authorities, setAuthorities] = useState([]);
   const [showHistory, setShowHistory] = useState(false);
 
   useEffect(() => {
@@ -26,13 +27,15 @@ export default function SaleScopeSection({ saleId }) {
     (async () => {
       try {
         const user = await base44.auth.me();
-        const [cat, existing] = await Promise.all([
+        const [cat, existing, auths] = await Promise.all([
           base44.entities.OperatorService.filter({ operator_id: user.id, enabled: true }),
           base44.entities.SaleScope.filter({ sale_id: saleId }),
+          base44.entities.SaleAuthority.filter({ sale_id: saleId, is_active: true }),
         ]);
         if (cancelled) return;
         cat.sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
         setCatalog(cat);
+        setAuthorities(Array.isArray(auths) ? auths : (auths.items || []));
         setScope(existing.length ? existing[0] : null);
       } catch (e) {
         if (!cancelled) setScope(null);
@@ -57,6 +60,8 @@ export default function SaleScopeSection({ saleId }) {
           notes: s.scope_notes || '',
         })),
         included_work: '', excluded_work: '', special_commitments: '', client_expectations: '',
+        discount_approach: '',
+        post_sale_plan: { default_outcome: '', notes: '', authorized_by_name: '', authorization_source: '', authorized_at: '' },
         effective_date: '', agreement_reference: '',
       });
     }
@@ -70,6 +75,8 @@ export default function SaleScopeSection({ saleId }) {
         excluded_work: scope.excluded_work || '',
         special_commitments: scope.special_commitments || '',
         client_expectations: scope.client_expectations || '',
+        discount_approach: scope.discount_approach || '',
+        post_sale_plan: scope.post_sale_plan || { default_outcome: '', notes: '', authorized_by_name: '', authorization_source: '', authorized_at: '' },
         effective_date: (scope.effective_date || '').slice(0, 10),
         agreement_reference: scope.agreement_reference || '',
       });
@@ -108,6 +115,8 @@ export default function SaleScopeSection({ saleId }) {
             excluded_work: scope.excluded_work || '',
             special_commitments: scope.special_commitments || '',
             client_expectations: scope.client_expectations || '',
+            discount_approach: scope.discount_approach || '',
+            post_sale_plan: scope.post_sale_plan || {},
           },
           changed_at: new Date().toISOString(),
           changed_by: user.full_name || user.email,
@@ -119,6 +128,8 @@ export default function SaleScopeSection({ saleId }) {
           excluded_work: draft.excluded_work,
           special_commitments: draft.special_commitments,
           client_expectations: draft.client_expectations,
+          discount_approach: draft.discount_approach,
+          post_sale_plan: draft.post_sale_plan,
           effective_date: draft.effective_date || undefined,
           agreement_reference: draft.agreement_reference || undefined,
           version: (scope.version || 1) + 1,
@@ -135,6 +146,8 @@ export default function SaleScopeSection({ saleId }) {
           excluded_work: draft.excluded_work,
           special_commitments: draft.special_commitments,
           client_expectations: draft.client_expectations,
+          discount_approach: draft.discount_approach,
+          post_sale_plan: draft.post_sale_plan,
           effective_date: draft.effective_date || undefined,
           agreement_reference: draft.agreement_reference || undefined,
           status: 'ACTIVE',
@@ -206,6 +219,65 @@ export default function SaleScopeSection({ saleId }) {
             <Label>Client expectations (honest, no guarantees)</Label>
             <Textarea rows={2} value={draft.client_expectations} onChange={e => setField('client_expectations', e.target.value)} placeholder="An estimate is not a guarantee — record it that way." />
           </div>
+        </div>
+
+        <div className="border rounded-md p-3 space-y-3 bg-slate-50/60">
+          <p className="text-xs font-semibold text-slate-600">Chapter 9 — Discount approach & post-sale plan</p>
+          <div className="grid md:grid-cols-2 gap-3">
+            <div>
+              <Label>Discount approach (client-facing)</Label>
+              <Textarea rows={2} value={draft.discount_approach} onChange={e => setField('discount_approach', e.target.value)} placeholder="e.g. No automatic discount schedule committed; day-2 discounts may be considered…" />
+            </div>
+            <div className="space-y-2">
+              <div>
+                <Label>Default plan for remaining merchandise</Label>
+                <select
+                  value={draft.post_sale_plan?.default_outcome || ''}
+                  onChange={e => setField('post_sale_plan', { ...draft.post_sale_plan, default_outcome: e.target.value })}
+                  className="w-full mt-1 h-9 px-2 rounded-md border border-input bg-white text-sm"
+                >
+                  <option value="">Not recorded — UNKNOWN</option>
+                  <option value="CLIENT_RETAINS">Client retains remaining merchandise</option>
+                  <option value="DONATE">Donation</option>
+                  <option value="CLEANOUT">Cleanout</option>
+                  <option value="BUYOUT">Buyout</option>
+                  <option value="SPECIALIST">Specialist handling</option>
+                  <option value="OTHER_SELLING_METHOD">Other selling method</option>
+                  <option value="DECISION_REQUIRED">Client decision still required</option>
+                </select>
+              </div>
+              <div>
+                <Label>Plan notes</Label>
+                <Input value={draft.post_sale_plan?.notes || ''} onChange={e => setField('post_sale_plan', { ...draft.post_sale_plan, notes: e.target.value })} placeholder="Plan details…" />
+              </div>
+            </div>
+            <div>
+              <Label>Authorized by (name — an actionable plan needs authorization)</Label>
+              <Input
+                value={draft.post_sale_plan?.authorized_by_name || ''}
+                onChange={e => setField('post_sale_plan', { ...draft.post_sale_plan, authorized_by_name: e.target.value })}
+                placeholder="Who authorized this plan…"
+                list="scope-authority-options"
+              />
+              <datalist id="scope-authority-options">
+                {authorities.map(a => <option key={a.id} value={a.full_name} />)}
+              </datalist>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label>Authorization source</Label>
+                <Input value={draft.post_sale_plan?.authorization_source || ''} onChange={e => setField('post_sale_plan', { ...draft.post_sale_plan, authorization_source: e.target.value })} placeholder="Phone, email, signed proposal…" />
+              </div>
+              <div>
+                <Label>Authorized on</Label>
+                <Input type="date" value={(draft.post_sale_plan?.authorized_at || '').slice(0, 10)} onChange={e => setField('post_sale_plan', { ...draft.post_sale_plan, authorized_at: e.target.value ? new Date(e.target.value).toISOString() : '' })} />
+              </div>
+            </div>
+          </div>
+          <p className="text-[11px] text-slate-500">A plan never implies authority: DONATE / CLEANOUT / BUYOUT / SPECIALIST / OTHER without a recorded authorizer surfaces a warning — no post-sale action is inferred from silence. DECISION REQUIRED stays honestly unresolved.</p>
+        </div>
+
+        <div className="grid md:grid-cols-2 gap-3">
           <div>
             <Label>Effective date</Label>
             <Input type="date" value={draft.effective_date} onChange={e => setField('effective_date', e.target.value)} />

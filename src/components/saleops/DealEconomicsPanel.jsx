@@ -39,12 +39,14 @@ function ResultRow({ label, value, strong, tone, hint }) {
   );
 }
 
-const normLabor = (rows) => (Array.isArray(rows) ? rows : []).map(r => ({ category: r.category, hours: r.hours ?? '', rate: r.rate ?? '' }));
+const normLabor = (rows) => (Array.isArray(rows) ? rows : []).map(r => ({ category: r.category, hours: r.hours ?? '', rate: r.rate ?? '', is_owner_time: !!r.is_owner_time }));
 
 export default function DealEconomicsPanel({ deal, onPersist, allDeals, linkedSale }) {
   const [saving, setSaving] = useState(false);
   const [inputs, setInputs] = useState({
     estimated_value: deal?.estimated_value ?? '',
+    estimated_value_low: deal?.estimated_value_low ?? '',
+    estimated_value_high: deal?.estimated_value_high ?? '',
     commission_rate: deal?.commission_rate ?? 35,
     minimum_fee: deal?.minimum_fee ?? '',
     expected_service_revenue: deal?.expected_service_revenue ?? '',
@@ -183,6 +185,8 @@ export default function DealEconomicsPanel({ deal, onPersist, allDeals, linkedSa
     try {
       await onPersist({
         estimated_value: toNum(inputs.estimated_value),
+        estimated_value_low: toNum(inputs.estimated_value_low) || null,
+        estimated_value_high: toNum(inputs.estimated_value_high) || null,
         commission_rate: toNum(inputs.commission_rate) ?? 35,
         minimum_fee: toNum(inputs.minimum_fee),
         expected_service_revenue: toNum(inputs.expected_service_revenue),
@@ -195,7 +199,7 @@ export default function DealEconomicsPanel({ deal, onPersist, allDeals, linkedSa
         min_contribution_threshold: toNum(inputs.min_contribution_threshold),
         labor_estimates: laborRows
           .filter(r => Number(r.hours) > 0)
-          .map(r => ({ category: r.category, hours: Number(r.hours) || 0, rate: Number(r.rate) || 0 })),
+          .map(r => ({ category: r.category, hours: Number(r.hours) || 0, rate: Number(r.rate) || 0, is_owner_time: !!r.is_owner_time })),
       });
     } catch (e) {
       alert('Could not save economics');
@@ -214,6 +218,11 @@ export default function DealEconomicsPanel({ deal, onPersist, allDeals, linkedSa
 
   return (
     <div className="space-y-4">
+      {deal?.commercial_terms_accepted_at && (
+        <div className="text-xs bg-green-50 border border-green-200 text-green-800 rounded-md p-2">
+          Commercial terms ACCEPTED {new Date(deal.commercial_terms_accepted_at).toLocaleDateString()}{deal.commercial_terms_accepted_by ? ` by ${deal.commercial_terms_accepted_by}` : ''} — recorded from an accepted proposal. Changing these fields no longer changes what the client accepted; that history is preserved on the deal.
+        </div>
+      )}
       <div className="flex items-center justify-between flex-wrap gap-2">
         <div>
           <p className="text-sm font-semibold text-slate-800 flex items-center gap-2"><Calculator className="w-4 h-4 text-orange-500" /> Pre-Sale Economics</p>
@@ -229,6 +238,8 @@ export default function DealEconomicsPanel({ deal, onPersist, allDeals, linkedSa
         <CardHeader className="pb-2"><CardTitle className="text-sm">Contract Terms & Projected Revenue</CardTitle></CardHeader>
         <CardContent className="grid sm:grid-cols-3 gap-3">
           <Field label="Projected gross merchandise sales ($)" value={inputs.estimated_value} onChange={v => setInputs(p => ({ ...p, estimated_value: v }))} prefix="$" hint="Client merchandise proceeds, not company revenue" />
+          <Field label="Estimated range — LOW ($)" value={inputs.estimated_value_low} onChange={v => setInputs(p => ({ ...p, estimated_value_low: v }))} prefix="$" hint="Optional client-facing range" />
+          <Field label="Estimated range — HIGH ($)" value={inputs.estimated_value_high} onChange={v => setInputs(p => ({ ...p, estimated_value_high: v }))} prefix="$" hint="Operator-supplied only — never invented from a single estimate" />
           <Field label="Commission rate (%)" value={inputs.commission_rate} onChange={v => setInputs(p => ({ ...p, commission_rate: v }))} />
           <Field label="Contract minimum fee ($)" value={inputs.minimum_fee} onChange={v => setInputs(p => ({ ...p, minimum_fee: v }))} prefix="$" hint="Applied as MAX(commission, minimum)" />
           <Field label="Expected additional service revenue ($)" value={inputs.expected_service_revenue} onChange={v => setInputs(p => ({ ...p, expected_service_revenue: v }))} prefix="$" hint="Only client-authorized charges count at settlement" />
@@ -241,7 +252,7 @@ export default function DealEconomicsPanel({ deal, onPersist, allDeals, linkedSa
         <CardContent className="space-y-2">
           {laborRows.map((row, i) => (
             <div key={i} className="grid grid-cols-12 gap-2 items-end">
-              <div className="col-span-5">
+              <div className="col-span-4">
                 {i === 0 && <Label className="text-xs">Category</Label>}
                 <select
                   value={row.category}
@@ -255,9 +266,16 @@ export default function DealEconomicsPanel({ deal, onPersist, allDeals, linkedSa
                 {i === 0 && <Label className="text-xs">Est. hours</Label>}
                 <Input type="number" step="0.5" min="0" value={row.hours} onChange={e => setLaborRows(rows => rows.map((r, idx) => idx === i ? { ...r, hours: e.target.value } : r))} />
               </div>
-              <div className="col-span-3">
+              <div className="col-span-2">
                 {i === 0 && <Label className="text-xs">Est. rate ($/hr)</Label>}
                 <Input type="number" step="0.01" min="0" value={row.rate} onChange={e => setLaborRows(rows => rows.map((r, idx) => idx === i ? { ...r, rate: e.target.value } : r))} />
+              </div>
+              <div className="col-span-2">
+                {i === 0 && <Label className="text-xs">Owner time</Label>}
+                <label className="flex items-center gap-1.5 h-9 text-xs text-slate-600">
+                  <input type="checkbox" checked={!!row.is_owner_time} onChange={e => setLaborRows(rows => rows.map((r, idx) => idx === i ? { ...r, is_owner_time: e.target.checked } : r))} />
+                  not cash
+                </label>
               </div>
               <div className="col-span-1">
                 {i === 0 && <Label className="text-xs">&nbsp;</Label>}
@@ -265,9 +283,10 @@ export default function DealEconomicsPanel({ deal, onPersist, allDeals, linkedSa
               </div>
             </div>
           ))}
-          <Button size="sm" variant="outline" onClick={() => setLaborRows(rows => [...rows, { category: 'sale_day', hours: '', rate: '' }])}>+ Add category</Button>
-          <div className="flex gap-4 text-xs text-slate-500 pt-1">
-            <span>Estimated hours: <strong className="text-slate-700">{base.estHours.toFixed(1)}</strong></span>
+          <Button size="sm" variant="outline" onClick={() => setLaborRows(rows => [...rows, { category: 'sale_day', hours: '', rate: '', is_owner_time: false }])}>+ Add category</Button>
+          <div className="flex flex-wrap gap-4 text-xs text-slate-500 pt-1">
+            <span>Cash hours: <strong className="text-slate-700">{base.estHours.toFixed(1)}</strong></span>
+            {base.estOwnerHours > 0 && <span>Owner time: <strong className="text-slate-700">{base.estOwnerHours.toFixed(1)} hrs</strong> (reported separately — never cash cost)</span>}
             <span>Estimated labor cost: <strong className="text-slate-700">{money(base.estLaborCost)}</strong></span>
           </div>
         </CardContent>
@@ -299,6 +318,7 @@ export default function DealEconomicsPanel({ deal, onPersist, allDeals, linkedSa
           )}
           <ResultRow label="Projected company revenue" value={money(base.companyRevenue)} strong hint="Fee applied + expected authorized services" />
           <ResultRow label="Projected cash labor cost" value={money(base.estLaborCost)} />
+          {base.estOwnerHours > 0 && <ResultRow label="Projected owner time" value={`${base.estOwnerHours.toFixed(1)} hrs (not cash)`} />}
           <ResultRow label="Projected direct cost" value={money(base.directCosts)} />
           <div className="border-t border-cyan-200 pt-1.5">
             <ResultRow label="Projected sale contribution" value={money(base.contribution)} strong tone={base.contribution >= 0 ? 'text-green-700' : 'text-red-600'} hint="Company revenue − direct costs. Not accounting net profit (no overhead, no owner time)." />

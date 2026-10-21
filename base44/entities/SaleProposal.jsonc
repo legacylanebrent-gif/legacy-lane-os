@@ -1,0 +1,317 @@
+{
+  "name": "SaleProposal",
+  "type": "object",
+  "description": "Chapter 9 P1 \u2014 the canonical record of WHAT WE PROPOSED TO THIS CLIENT ON A SPECIFIC DATE. A time-stamped SNAPSHOT of canonical truth (client, property, recommended services, scope summary, sale dates, estimated range, compensation, additional services, sale strategy, discount approach, post-sale plan) captured at build time. It is NOT current operational truth \u2014 live records may change after finalization without rewriting this \u2014 and it is NOT the agreement and NOT settlement. Accepting a proposal writes acceptance metadata back to the canonical SaleConversionPipeline deal; the DEAL remains the settlement-facing source of commercial terms. No SENT state: EstateSalen does not deliver proposals \u2014 the operator presents them. Private operator/client information: never projected to public pages, Marketing Kit, case studies, or buyer-facing surfaces.",
+  "properties": {
+    "operator_id": {
+      "type": "string",
+      "description": "EstateSale.operator_id projection \u2014 sale owner (RLS anchor)."
+    },
+    "sale_id": {
+      "type": "string",
+      "description": "EstateSale this proposal belongs to."
+    },
+    "deal_id": {
+      "type": "string",
+      "description": "Linked SaleConversionPipeline deal providing the commercial terms."
+    },
+    "company_id": {
+      "type": "string",
+      "description": "EstateSale.company_id projection when present."
+    },
+    "sale_team_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "READ-SCOPE PROJECTION of EstateSale.sale_team for RLS. The sale remains the source of truth."
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "DRAFT",
+        "FINALIZED",
+        "ACCEPTED",
+        "DECLINED",
+        "SUPERSEDED"
+      ],
+      "default": "DRAFT",
+      "description": "DRAFT = editable. FINALIZED = snapshot preserved at this version (the PDF derives from the snapshot, never from live records). ACCEPTED = the client accepted on accepted_at; acceptance writes commercial-terms metadata to the deal. DECLINED / SUPERSEDED preserve history. Accepting a newer proposal supersedes the previously accepted one."
+    },
+    "version": {
+      "type": "integer",
+      "default": 1,
+      "description": "Increments per new proposal for this sale. Reprinting a finalized version always reproduces THAT version's snapshot."
+    },
+    "snapshot": {
+      "type": "object",
+      "description": "Proposed content frozen at finalize time (client, property, overview, recommended services, scope summary, sale dates, estimated range, compensation, additional services, sale strategy, discount approach, post-sale plan, next steps). Unknown fields remain unresolved \u2014 never fabricated.",
+      "properties": {
+        "overview": {
+          "type": "string"
+        },
+        "client": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "email": {
+              "type": "string"
+            },
+            "phone": {
+              "type": "string"
+            }
+          }
+        },
+        "property": {
+          "type": "object",
+          "properties": {
+            "street": {
+              "type": "string"
+            },
+            "city": {
+              "type": "string"
+            },
+            "state": {
+              "type": "string"
+            },
+            "zip": {
+              "type": "string"
+            }
+          }
+        },
+        "recommended_services": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "scope_summary": {
+          "type": "object",
+          "properties": {
+            "included": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "excluded": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "optional": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "sale_dates": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "date": {
+                "type": "string"
+              },
+              "start_time": {
+                "type": "string"
+              },
+              "end_time": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "estimated_range": {
+          "type": "object",
+          "description": "LOW/HIGH client-facing range when the operator supplied one; a single working estimate is honest alone. AN ESTIMATE IS A PLANNING TOOL, NOT A PROMISE.",
+          "properties": {
+            "low": {
+              "type": "number"
+            },
+            "high": {
+              "type": "number"
+            },
+            "working_estimate": {
+              "type": "number"
+            }
+          }
+        },
+        "compensation": {
+          "type": "object",
+          "properties": {
+            "commission_rate": {
+              "type": "number"
+            },
+            "minimum_fee": {
+              "type": "number"
+            }
+          }
+        },
+        "additional_services": {
+          "type": "array",
+          "description": "Proposed optional/additional services with charge policy. Accepting the proposal accepts the BASE terms only \u2014 later additional services remain authorization-driven through SaleClientDecision.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              },
+              "charge_policy": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "sale_strategy": {
+          "type": "string"
+        },
+        "discount_approach": {
+          "type": "string"
+        },
+        "post_sale_plan": {
+          "type": "object",
+          "properties": {
+            "default_outcome": {
+              "type": "string"
+            },
+            "notes": {
+              "type": "string"
+            }
+          }
+        },
+        "next_steps": {
+          "type": "string"
+        },
+        "estimate_note": {
+          "type": "string"
+        }
+      },
+      "default": {}
+    },
+    "finalized_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When this version's snapshot was frozen."
+    },
+    "accepted_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "accepted_by": {
+      "type": "string",
+      "description": "Name of the client decision-maker who accepted (operator-recorded)."
+    },
+    "acceptance_source": {
+      "type": "string",
+      "description": "How acceptance was received (phone, email, in_person, signed proposal, other)."
+    },
+    "declined_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "superseded_by": {
+      "type": "string",
+      "description": "SaleProposal id that replaced this one."
+    },
+    "superseded_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "operator_id",
+    "sale_id"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.operator_id": "{{user.id}}"
+        },
+        {
+          "data.sale_team_ids": {
+            "$in": [
+              "{{user.id}}"
+            ]
+          }
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "$or": [
+        {
+          "data.operator_id": "{{user.id}}"
+        },
+        {
+          "data.sale_team_ids": {
+            "$in": [
+              "{{user.id}}"
+            ]
+          }
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.operator_id": "{{user.id}}"
+        },
+        {
+          "data.sale_team_ids": {
+            "$in": [
+              "{{user.id}}"
+            ]
+          }
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.operator_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

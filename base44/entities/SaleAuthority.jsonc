@@ -86,6 +86,20 @@
     "notes": {
       "type": "string"
     },
+    "verification_status": {
+      "type": "string",
+      "enum": [
+        "VERIFIED",
+        "UNRESOLVED",
+        "DISPUTED"
+      ],
+      "default": "UNRESOLVED",
+      "description": "Chapter 9 P1 \u2014 OPERATIONAL classification the operator records about how well this authority is established. NEVER a legal conclusion: UNRESOLVED/DISPUTED surface 'AUTHORITY NEEDS REVIEW' operational warnings, not claims that the authority is illegal or invalid. UNKNOWN AUTHORITY IS NOT AUTHORITY \u2014 until the operator marks VERIFIED, decisions requiring authority surface a review warning."
+    },
+    "verification_notes": {
+      "type": "string",
+      "description": "Chapter 9 P1 \u2014 operator context for the verification status (what was seen, what is still unclear)."
+    },
     "is_active": {
       "type": "boolean",
       "default": true,

@@ -92,6 +92,10 @@
       "default": 1,
       "description": "Incremented when the file is replaced. Acknowledgment truth anchor: an acknowledgment records the version acknowledged, so a replaced policy is never silently considered acknowledged."
     },
+    "template_text": {
+      "type": "string",
+      "description": "Chapter 9 P0 \u2014 for operator-designated AGREEMENT templates only: the operator's own attorney-reviewed agreement TEXT containing {{MERGE_VARIABLE}} placeholders (e.g. {{CLIENT_NAME}}, {{COMMISSION_RATE}}). EstateSalen populates approved variables from structured records; it never authors, edits, or AI-generates legal language, and a placeholder with no source is flagged MISSING VALUE \u2014 never fabricated."
+    },
     "uploaded_by": {
       "type": "string",
       "description": "User ID of the uploader."

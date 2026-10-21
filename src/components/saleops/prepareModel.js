@@ -60,7 +60,7 @@ export function checklistState(tasks, prefix) {
 
 // ── Main deterministic analysis ───────────────────────────────────────────────
 export function analyzePreparation(input) {
-  const { sale, scope, tasks, itemCount, researchItems, attentionItems, assignments, kit, marketingKit, openDecisions } = input;
+  const { sale, scope, tasks, itemCount, researchItems, attentionItems, assignments, kit, marketingKit, openDecisions, authorities = [] } = input;
   const timing = timingFor(sale);
   const areas = [];
   const push = (id, label, status, detail, link, linkLabel) =>
@@ -79,15 +79,26 @@ export function analyzePreparation(input) {
       `/SaleEditor?saleId=${sale.id}`, 'Open Sale Editor');
   }
 
-  // CLIENT / SCOPE
+  // CLIENT / SCOPE (Chapter 9 P1 adds the operational AUTHORITY check —
+  // UNKNOWN AUTHORITY IS NOT AUTHORITY; wording stays operational, never legal)
+  const activeAuth = authorities.filter(a => a.is_active);
+  const primaryAuth = activeAuth.find(a => a.is_primary) || activeAuth[0];
+  const authIssue = !activeAuth.length
+    ? 'No authorized decision-maker recorded — AUTHORITY NEEDS REVIEW.'
+    : primaryAuth?.verification_status !== 'VERIFIED'
+      ? `AUTHORITY NEEDS REVIEW — ${primaryAuth?.full_name || 'the decision-maker'} is classified ${primaryAuth?.verification_status || 'UNRESOLVED'}.`
+      : null;
   if (openDecisions.length > 0) {
     push('client_scope', 'Client / Scope', STATUS.NEEDS_ATTENTION,
-      `${openDecisions.length} open client decision(s) awaiting an instruction.`,
+      `${openDecisions.length} open client decision(s) awaiting an instruction.${authIssue ? ` ${authIssue}` : ''}`,
       `/SaleClientDecisions?saleId=${sale.id}`, 'Open Client Decisions');
+  } else if (authIssue) {
+    push('client_scope', 'Client / Scope', STATUS.NEEDS_ATTENTION, authIssue,
+      `/ProposalAgreement?saleId=${sale.id}`, 'Review Authority & Agreement');
   } else if (scope) {
     const included = (scope.scope_items || []).filter(s => s.included).length;
     push('client_scope', 'Client / Scope', STATUS.READY,
-      `Agreed scope on file (${included} included service${included === 1 ? '' : 's'}); no open decisions.`);
+      `Agreed scope on file (${included} included service${included === 1 ? '' : 's'}); no open decisions; decision-maker verified.`);
   } else {
     push('client_scope', 'Client / Scope', STATUS.NEEDS_REVIEW,
       'No agreed-scope record for this sale — UNKNOWN, not "no scope". Record what this client hired you to do.',

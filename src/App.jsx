@@ -204,6 +204,7 @@ import EquipmentManager from './pages/EquipmentManager';
 import SaleEquipment from './pages/SaleEquipment';
 import ItemLabels from './pages/ItemLabels';
 import PrepareSale from './pages/PrepareSale';
+import ProposalAgreement from './pages/ProposalAgreement';
 
 // Life Transition SEO Engine — Phase 2
 import ProbateHubV2 from './pages/life-transition/ProbateHubV2';
@@ -389,6 +390,7 @@ const AuthenticatedApp = () => {
       <Route path="/SaleEquipment" element={<LayoutWrapper currentPageName="SaleEquipment"><SaleEquipment /></LayoutWrapper>} />
       <Route path="/ItemLabels" element={<LayoutWrapper currentPageName="ItemLabels"><ItemLabels /></LayoutWrapper>} />
       <Route path="/PrepareSale" element={<LayoutWrapper currentPageName="PrepareSale"><PrepareSale /></LayoutWrapper>} />
+      <Route path="/ProposalAgreement" element={<LayoutWrapper currentPageName="ProposalAgreement"><ProposalAgreement /></LayoutWrapper>} />
 
       {/* ── Operator Website Template #1 (Phase 3D.1) ── */}
       <Route path="/site" element={<OperatorSitePage pageType="home" />} />

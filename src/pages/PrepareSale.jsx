@@ -33,7 +33,7 @@ export default function PrepareSale() {
       const saleData = asList(await base44.entities.EstateSale.filter({ id: saleId }));
       if (saleData.length === 0) { navigate('/MySales'); return; }
       const s = saleData[0];
-      const [scopeRes, tasksRes, researchRes, attentionRes, countRes, assignRes, kitRes, mkRes, decisionsRes] = await Promise.all([
+      const [scopeRes, tasksRes, researchRes, attentionRes, countRes, assignRes, kitRes, mkRes, decisionsRes, authRes] = await Promise.all([
         base44.entities.SaleScope.filter({ sale_id: s.id, status: 'ACTIVE' }),
         base44.entities.SaleTask.filter({ sale_id: s.id }),
         base44.entities.Item.filter({ estate_sale_id: s.id, research_status: { $ne: 'CLEAR' } }),
@@ -43,6 +43,7 @@ export default function PrepareSale() {
         base44.entities.SaleKitTemplate.filter({ operator_id: s.operator_id, enabled: true }),
         base44.entities.MarketingKit.filter({ sale_id: s.id }),
         base44.entities.SaleClientDecision.filter({ sale_id: s.id, status: 'open' }),
+        base44.entities.SaleAuthority.filter({ sale_id: s.id }),
       ]);
       const d = {
         scope: asList(scopeRes)[0] || null,
@@ -54,6 +55,7 @@ export default function PrepareSale() {
         kit: asList(kitRes)[0] || null,
         marketingKit: asList(mkRes)[0] || null,
         openDecisions: asList(decisionsRes),
+        authorities: asList(authRes),
       };
       setSale(s);
       setData(d);
@@ -78,7 +80,7 @@ export default function PrepareSale() {
     sale, scope: data.scope, tasks: data.tasks, itemCount: data.itemCount,
     researchItems: data.researchItems, attentionItems: data.attentionItems,
     assignments: data.assignments, kit: data.kit, marketingKit: data.marketingKit,
-    openDecisions: data.openDecisions,
+    openDecisions: data.openDecisions, authorities: data.authorities,
   });
   const prepFacts = prepFactsString({
     sale, analysis, researchItems: data.researchItems, attentionItems: data.attentionItems,

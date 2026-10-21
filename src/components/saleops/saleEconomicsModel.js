@@ -146,9 +146,14 @@ export function projectedDealEconomics(deal, o = {}) {
   const fee = companyFee({ gross: estGross, commissionRate: rate, minimumFee });
   const companyRevenue = fee.applied + serviceRevenue;
   const labor = asArray(o.laborEstimates ?? deal?.labor_estimates)
-    .map(l => ({ hours: Number(l.hours) || 0, rate: Number(l.rate) || 0 }));
-  const estHours = labor.reduce((s, l) => s + l.hours, 0);
-  const estLaborCost = labor.reduce((s, l) => s + l.hours * l.rate, 0);
+    .map(l => ({ hours: Number(l.hours) || 0, rate: Number(l.rate) || 0, isOwner: !!l.is_owner_time }));
+  // Chapter 9 P1 — projected OWNER hours are reported separately and never
+  // counted as projected CASH labor cost (matching the LaborEntry owner-time
+  // doctrine). Rows without the flag keep the pre-Chapter-9 cash behavior.
+  const cashLabor = labor.filter(l => !l.isOwner);
+  const estOwnerHours = labor.filter(l => l.isOwner).reduce((s, l) => s + l.hours, 0);
+  const estHours = cashLabor.reduce((s, l) => s + l.hours, 0);
+  const estLaborCost = cashLabor.reduce((s, l) => s + l.hours * l.rate, 0);
   const advertising = num(o.advertising ?? deal?.estimated_advertising) || 0;
   const supplies = num(o.supplies ?? deal?.estimated_supplies) || 0;
   const transportation = num(o.transportation ?? deal?.estimated_transportation) || 0;
@@ -160,7 +165,7 @@ export function projectedDealEconomics(deal, o = {}) {
   const minContributionThreshold = num(deal?.min_contribution_threshold) || null;
   return {
     estGross, rate, minimumFee, serviceRevenue, fee, companyRevenue,
-    estHours, estLaborCost, advertising, supplies, transportation, processing, other,
+    estHours, estLaborCost, estOwnerHours, advertising, supplies, transportation, processing, other,
     directCosts, contribution,
     minRevenueThreshold, minContributionThreshold,
     minRevenueTest: minRevenueThreshold != null ? companyRevenue >= minRevenueThreshold : null,
