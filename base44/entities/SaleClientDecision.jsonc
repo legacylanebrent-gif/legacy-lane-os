@@ -1,7 +1,7 @@
 {
   "name": "SaleClientDecision",
   "type": "object",
-  "description": "Chapter 1 P1 \u2014 canonical sale-scoped client decision record with change history. Answers WHO authorized it, WHEN, WHAT they instructed, HOW it was received, and WHETHER it later changed. KEEP/SELL/REVIEW merchandise decisions are decision_type 'merchandise' on this same architecture \u2014 there is no second merchandise-decision system. Item.status (selling/transaction state) remains fully independent of these records. Chapter 4 P1: decision_type 'financial' with current_decision 'authorized' and charge_amount > 0 records a client-AUTHORIZED ADDITIONAL SERVICE CHARGE that flows to the settlement statement \u2014 there is no separate charge-approval entity.",
+  "description": "Chapter 1 P1 \u2014 canonical sale-scoped client decision record with change history. Answers WHO authorized it, WHEN, WHAT they instructed, HOW it was received, and WHETHER it later changed. KEEP/SELL/REVIEW merchandise decisions are decision_type 'merchandise' on this same architecture \u2014 there is no second merchandise-decision system. Item.status (selling/transaction state) remains fully independent of these records. Chapter 4 P1: decision_type 'financial' with current_decision 'authorized' and charge_amount > 0 records a client-AUTHORIZED ADDITIONAL SERVICE CHARGE that flows to the settlement statement \u2014 there is no separate charge-approval entity. Chapter 6 P2: decision_type 'financial' with related_expense_id set authorizes CLIENT REIMBURSEMENT of a canonical Expense \u2014 it is deliberately EXCLUDED from service-charge revenue and instead flows to settlement as an authorized reimbursable expense line. A company expense never reduces client proceeds without a decision like this.",
   "properties": {
     "sale_id": {
       "type": "string",
@@ -35,7 +35,7 @@
         "other"
       ],
       "default": "general",
-      "description": "What kind of matter this decision governs. 'merchandise' = KEEP/SELL/REVIEW. 'financial' + current_decision 'authorized' = client-authorized additional service charge (Chapter 4 P1)."
+      "description": "What kind of matter this decision governs. 'merchandise' = KEEP/SELL/REVIEW. 'financial' + current_decision 'authorized' = client-authorized additional service charge (Chapter 4 P1). 'financial' + related_expense_id = client-authorized reimbursement of a canonical Expense (Chapter 6 P2)."
     },
     "subject": {
       "type": "string",
@@ -47,7 +47,11 @@
     },
     "charge_amount": {
       "type": "number",
-      "description": "Chapter 4 P1 \u2014 for decision_type 'financial' with current_decision 'authorized': the dollar amount of the client-authorized additional service charge (e.g. extra cleanout work, special hauling, extra disposal, chargeable staffing). Flows to the settlement statement ONLY while current_decision is 'authorized'; a changed/revoked decision drops the charge automatically. Never a merchandise price."
+      "description": "For decision_type 'financial': the dollar amount involved. Without related_expense_id it is a client-authorized ADDITIONAL SERVICE CHARGE (Chapter 4 P1) that flows to settlement as company revenue while current_decision is 'authorized'. WITH related_expense_id it mirrors the linked reimbursable Expense amount for audit and is EXCLUDED from service-charge revenue \u2014 the linked expense flows to settlement as an authorized reimbursable expense instead. Never a merchandise price."
+    },
+    "related_expense_id": {
+      "type": "string",
+      "description": "Chapter 6 P2 \u2014 canonical Expense ID when this decision authorizes CLIENT REIMBURSEMENT of a sale expense marked is_reimbursable. Presence alone changes the financial semantics: the decision is a reimbursement authorization, not a service charge. The expense remains the record of the cost (description, amount, date, receipt); this decision is the authorization/agreement basis that lets it reduce client proceeds."
     },
     "current_decision": {
       "type": "string",

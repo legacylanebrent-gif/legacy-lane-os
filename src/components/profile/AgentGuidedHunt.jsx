@@ -256,7 +256,9 @@ export default function AgentGuidedHunt({ user, onItemsAdded }) {
                           });
                           console.log('AI Analysis response:', response.data);
                           const analysis = response.data;
-                          if (analysis && analysis.category) {
+                          if (analysis && analysis.sensitive) {
+                            setError('Potentially sensitive material — review before cataloging or publishing. This image was not cataloged or searched.');
+                          } else if (analysis && analysis.category) {
                             setCategory(analysis.category);
                             if (analysis.searchQuery) {
                               setSearchQuery(analysis.searchQuery);

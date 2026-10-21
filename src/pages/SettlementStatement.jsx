@@ -10,12 +10,13 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import {
-  DollarSign, FileText, CheckCircle, Clock, Package, TrendingUp,
+  DollarSign, FileText, CheckCircle, Clock, Package, TrendingUp, ReceiptText,
   Plus, Printer, ArrowLeft, AlertCircle, ChevronDown, ChevronUp, Search
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
-import { companyFee, authorizedServiceCharges, serviceChargesTotal, money } from '@/components/saleops/saleEconomicsModel';
+import { companyFee, authorizedServiceCharges, serviceChargesTotal, authorizedReimbursables, money } from '@/components/saleops/saleEconomicsModel';
+import AuthorizeExpenseDialog from '@/components/expenses/AuthorizeExpenseDialog';
 
 const PHASE_COLORS = {
   pre_sale: 'bg-blue-100 text-blue-700',
@@ -34,6 +35,9 @@ export default function SettlementStatement() {
   const [sale, setSale] = useState(null);
   const [items, setItems] = useState([]);
   const [financialDecisions, setFinancialDecisions] = useState([]);
+  // Chapter 6 P2 — sale expenses + the reimbursable expense being authorized right now
+  const [expenses, setExpenses] = useState([]);
+  const [authExpense, setAuthExpense] = useState(null);
   const [loading, setLoading] = useState(true);
   const [deals, setDeals] = useState([]);
   const [selectedDealId, setSelectedDealId] = useState(dealId || '');
@@ -98,6 +102,16 @@ export default function SettlementStatement() {
         } catch (e) { console.error('Service charge load failed', e); }
       }
       setFinancialDecisions(charges);
+
+      // Chapter 6 P2 — sale expenses for the client-reimbursable settlement lines
+      let saleExpenses = [];
+      if (d.estate_sale_id) {
+        try {
+          const expRes = await base44.entities.Expense.filter({ sale_id: d.estate_sale_id });
+          saleExpenses = Array.isArray(expRes) ? expRes : (expRes?.items || []);
+        } catch (e) { console.error('Expense load failed', e); }
+      }
+      setExpenses(saleExpenses);
     } catch (e) {
       toast.error('Error loading deal');
     } finally {
@@ -114,8 +128,14 @@ export default function SettlementStatement() {
   const companyFeeApplied = fee.applied;
   const serviceCharges = authorizedServiceCharges(financialDecisions);
   const chargesTotal = serviceChargesTotal(financialDecisions);
+  // Chapter 6 P2 — a reimbursable expense reduces client proceeds ONLY when the client
+  // authorized it (SaleClientDecision with related_expense_id). Unauthorized ones
+  // never reduce proceeds; they surface below as AUTHORIZATION NEEDED.
+  const reimbursables = authorizedReimbursables(expenses, financialDecisions);
+  const reimbursableTotal = reimbursables.total;
+  const unauthorizedReimbursables = reimbursables.unauthorized;
   const companyRevenue = companyFeeApplied + chargesTotal;
-  const netDueToClient = totalRevenue - companyRevenue;
+  const netDueToClient = totalRevenue - companyRevenue - reimbursableTotal;
   const totalPaid = deal?.total_paid_to_client || 0;
   const remainingBalance = netDueToClient - totalPaid;
 
@@ -325,6 +345,15 @@ export default function SettlementStatement() {
                   </CardContent>
                 </Card>
               )}
+              {reimbursableTotal > 0 && (
+                <Card className="border-2 border-cyan-200">
+                  <CardContent className="p-4 text-center">
+                    <ReceiptText className="w-6 h-6 text-cyan-600 mx-auto mb-1" />
+                    <p className="text-2xl font-bold text-cyan-700">${reimbursableTotal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                    <p className="text-xs text-slate-500 mt-1">Authorized Reimbursable Expenses</p>
+                  </CardContent>
+                </Card>
+              )}
               <Card className="border-2 border-green-200">
                 <CardContent className="p-4 text-center">
                   <CheckCircle className="w-6 h-6 text-green-500 mx-auto mb-1" />
@@ -388,6 +417,68 @@ export default function SettlementStatement() {
                   <p className="text-xs text-slate-500">
                     These client-authorized services are billed in addition to the merchandise commission. Net due to client = gross merchandise sales − company fee − authorized services.
                   </p>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Chapter 6 P2 — client-authorized reimbursable expenses: separate financial */}
+            {/* truth (company cost ≠ service charge ≠ reimbursable) shown as its own line */}
+            {reimbursables.authorized.length > 0 && (
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-base flex items-center justify-between">
+                    <span>Client-Authorized Reimbursable Expenses</span>
+                    <span className="text-sm font-semibold text-cyan-700">Total: {money(reimbursableTotal)}</span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  {reimbursables.authorized.map(({ expense, decision }) => (
+                    <div key={expense.id} className="flex items-center justify-between bg-cyan-50 rounded-lg px-4 py-3">
+                      <div>
+                        <p className="font-semibold text-slate-800">{expense.description || expense.vendor || 'Sale expense'}</p>
+                        <p className="text-xs text-slate-500">
+                          {expense.date ? `Dated ${expense.date} · ` : ''}Authorized by {decision.authorized_by_name || 'client'}
+                          {decision.decided_at ? ` · ${format(new Date(decision.decided_at), 'MMM d, yyyy')}` : ''}
+                          {expense.receipt_url ? ' · receipt on file' : ''}
+                        </p>
+                      </div>
+                      <p className="font-semibold text-cyan-700">-{money(expense.amount)}</p>
+                    </div>
+                  ))}
+                  <p className="text-xs text-slate-500">
+                    These are costs the client authorized you to bill back. Net due to client = gross merchandise sales
+                    − company fee − authorized services − authorized reimbursable expenses. Company-only costs never appear here.
+                  </p>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Chapter 6 P2 — reimbursable expenses without client authorization NEVER */}
+            {/* reduce client proceeds; they surface as AUTHORIZATION NEEDED instead. */}
+            {unauthorizedReimbursables.length > 0 && (
+              <Card className="border-amber-300 bg-amber-50">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-base flex items-center gap-2">
+                    <AlertCircle className="w-4 h-4 text-amber-600" /> Reimbursable Expenses — Authorization Needed
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  {unauthorizedReimbursables.map(exp => (
+                    <div key={exp.id} className="flex items-center justify-between bg-white rounded-lg px-4 py-3 gap-3 flex-wrap">
+                      <div className="min-w-0">
+                        <p className="font-semibold text-slate-800">{exp.description || exp.vendor || 'Sale expense'}</p>
+                        <p className="text-xs text-slate-500">
+                          {money(exp.amount)} · marked client-reimbursable, but no client authorization is recorded —
+                          it has NOT reduced the client's proceeds.
+                        </p>
+                      </div>
+                      {sale && (
+                        <Button size="sm" className="bg-amber-600 hover:bg-amber-700 h-8 flex-shrink-0" onClick={() => setAuthExpense(exp)}>
+                          Record authorization
+                        </Button>
+                      )}
+                    </div>
+                  ))}
                 </CardContent>
               </Card>
             )}
@@ -607,6 +698,17 @@ export default function SettlementStatement() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Chapter 6 P2 — client authorization for a reimbursable expense */}
+      {authExpense && sale && (
+        <AuthorizeExpenseDialog
+          open={!!authExpense}
+          onClose={() => setAuthExpense(null)}
+          expense={authExpense}
+          sale={sale}
+          onAuthorized={() => loadDealData(deal.id)}
+        />
+      )}
     </div>
   );
 }

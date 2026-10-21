@@ -16,30 +16,46 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'categories array is required' }, { status: 400 });
     }
 
-    // Use OpenAI's GPT-4 Vision for image analysis
+    // Chapter 6 P2 — SENSITIVE-MATERIAL GUARD: the vision check runs FIRST. If the
+    // image appears to contain potentially sensitive material (documents, IDs,
+    // financial/medical information, private photos, credentials), the AI must NOT
+    // proceed as though it were ordinary merchandise, must not describe/transcribe/
+    // extract any of the sensitive content, and returns a STOP/REVIEW signal instead.
     const response = await base44.integrations.Core.InvokeLLM({
-      prompt: `Look at this image and identify what category it belongs to from this list: ${categories.join(', ')}. Then provide a specific search query to find similar items (include brand, style, era, or type if visible). Return ONLY valid JSON with this exact format: {"category": "ExactCategoryName", "searchQuery": "specific search terms"}. Example: {"category": "Cameras & Photography", "searchQuery": "vintage medium format camera"}`,
+      prompt: `You are reviewing an image for an estate-sale inventory. FIRST check for potentially sensitive material: financial statements, tax records, bank or credit card information, checkbooks, Social Security cards, passports, driver licenses, medical records, prescription medication, legal documents, private correspondence, account credentials, or mail containing sensitive information.
+
+If the image appears to contain ANY of these, respond with sensitive=true, an EMPTY category and an EMPTY searchQuery, and do NOT describe, name, transcribe, or extract any of the sensitive content.
+
+Only if the image appears to be ordinary sale merchandise, respond with sensitive=false and identify what category it belongs to from this list: ${categories.join(', ')}, plus a specific search query to find similar items (include brand, style, era, or type if visible).
+
+Return ONLY valid JSON with this exact format: {"sensitive": true|false, "category": "ExactCategoryName or empty if sensitive", "searchQuery": "specific search terms or empty if sensitive"}.`,
       file_urls: [image_url],
       response_json_schema: {
         type: 'object',
         properties: {
-          category: { type: 'string', description: 'Category from the list' },
-          searchQuery: { type: 'string', description: 'Specific search query' },
+          sensitive: { type: 'boolean', description: 'True when the image appears to contain potentially sensitive material that must be reviewed before cataloging or publishing.' },
+          category: { type: 'string', description: 'Category from the list; empty when sensitive' },
+          searchQuery: { type: 'string', description: 'Specific search query; empty when sensitive' },
         },
-        required: ['category', 'searchQuery'],
+        required: ['sensitive', 'category', 'searchQuery'],
       },
       model: 'gpt_5_mini',
     });
 
     console.log('Image analysis result:', response);
 
+    if (response.sensitive === true) {
+      console.log('Sensitive-material guard triggered for image analysis.');
+    }
+
     return Response.json({
-      category: response.category,
-      searchQuery: response.searchQuery,
+      sensitive: response.sensitive === true,
+      category: response.sensitive === true ? '' : response.category,
+      searchQuery: response.sensitive === true ? '' : response.searchQuery,
     });
   } catch (error) {
     console.error('Image analysis error:', error);
-    return Response.json({ 
+    return Response.json({
       error: error.message || 'Failed to analyze image',
       details: error.toString()
     }, { status: 500 });

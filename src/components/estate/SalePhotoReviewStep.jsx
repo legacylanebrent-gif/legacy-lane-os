@@ -124,6 +124,16 @@ export default function SalePhotoReviewStep({ saleId, onStepComplete }) {
         </div>
       </div>
 
+      {/* Chapter 6 P2 — sensitive-material reminder before any search/publishing step */}
+      <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
+        <p className="text-sm font-semibold text-amber-800">Sensitive material — STOP · SEPARATE · ESCALATE</p>
+        <p className="text-xs text-amber-700 mt-1">
+          Before photographing or cataloging contents, separate documents, IDs, medications, financial information,
+          private photos, and other sensitive material for operator/client review. Do not search, catalog, or publish
+          images that may contain sensitive material — mark them "Do Not Search".
+        </p>
+      </div>
+
       {/* Photo Grid */}
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
         {photos.map((photo, index) => {

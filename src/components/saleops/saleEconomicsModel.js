@@ -45,9 +45,13 @@ export function companyFee({ gross, commissionRate, minimumFee }) {
 
 // ── AUTHORIZED SERVICE CHARGES (SaleClientDecision 'financial') ───────────────
 // Only client-AUTHORIZED financial decisions with a recorded authority flow to settlement.
+// Chapter 6 P2: decisions with related_expense_id are REIMBURSEMENT authorizations,
+// not service charges — they are excluded here so they never double-count; the linked
+// expense flows to settlement through authorizedReimbursables instead.
 export function authorizedServiceCharges(decisions) {
   return asArray(decisions).filter(d =>
     d.decision_type === 'financial' &&
+    !d.related_expense_id &&
     d.current_decision === 'authorized' &&
     (Number(d.charge_amount) || 0) > 0 &&
     !!(d.authorized_by || d.authorized_by_name)
@@ -55,6 +59,28 @@ export function authorizedServiceCharges(decisions) {
 }
 export const serviceChargesTotal = (decisions) =>
   authorizedServiceCharges(decisions).reduce((s, d) => s + (Number(d.charge_amount) || 0), 0);
+
+// ── AUTHORIZED CLIENT-REIMBURSABLE EXPENSES (Chapter 6 P2) ───────────────────
+// Doctrine: a company expense NEVER reduces client proceeds merely because
+// is_reimbursable=true. It reduces client proceeds ONLY when an authorized financial
+// SaleClientDecision links it (related_expense_id) — the client-authorization basis.
+// Without that, it stays a company direct cost and surfaces as AUTHORIZATION NEEDED.
+export function authorizedReimbursables(expenses, decisions) {
+  const marked = asArray(expenses).filter(e => !!e.is_reimbursable);
+  const authorizedById = new Map();
+  asArray(decisions).forEach(d => {
+    if (d.related_expense_id && d.decision_type === 'financial' && d.current_decision === 'authorized') {
+      const existing = authorizedById.get(d.related_expense_id);
+      if (!existing || (d.decided_at || '') > (existing.decided_at || '')) authorizedById.set(d.related_expense_id, d);
+    }
+  });
+  const authorized = marked
+    .filter(e => authorizedById.has(e.id))
+    .map(e => ({ expense: e, decision: authorizedById.get(e.id) }));
+  const unauthorized = marked.filter(e => !authorizedById.has(e.id));
+  const total = authorized.reduce((s, r) => s + (Number(r.expense.amount) || 0), 0);
+  return { authorized, unauthorized, total };
+}
 
 // ── LABOR (hours in, cash cost out — never the reverse) ──────────────────────
 export const totalLaborHours = (entries) => asArray(entries).reduce((s, e) => s + (Number(e.hours) || 0), 0);

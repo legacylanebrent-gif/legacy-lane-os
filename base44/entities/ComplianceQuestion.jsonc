@@ -1,0 +1,205 @@
+{
+  "name": "ComplianceQuestion",
+  "type": "object",
+  "description": "Chapter 6 P2 \u2014 the operator's structured record of WHAT COMPLIANCE/REQUIREMENT QUESTION NEEDS INVESTIGATING and WHAT THEY LEARNED, with provenance (source, status, who verified, when). NOT a national legal database and NOT a set of legal conclusions: status describes PROVENANCE ONLY (who/what the answer came from), never that EstateSalen guarantees the conclusion is legally correct. Core distinctions enforced by the system: QUESTION \u2260 ANSWER, AI SUGGESTION \u2260 VERIFIED REQUIREMENT, OPERATOR BELIEF \u2260 AUTHORITATIVE SOURCE, PROFESSIONAL GUIDANCE \u2260 GOVERNMENT RULE, UNKNOWN \u2260 NO REQUIREMENT. Sale-linked questions preserve WHY we investigated + provenance; HOW the sale will operate remains in EstateSale.site_assessment (no duplicate restrictions system).",
+  "properties": {
+    "operator_id": {
+      "type": "string",
+      "description": "Estate Sale Company Owner user ID (RLS anchor)."
+    },
+    "company_id": {
+      "type": "string",
+      "description": "Canonical Company when known (additive projection)."
+    },
+    "question": {
+      "type": "string",
+      "description": "The question that needs answering, in the operator's words. A question, never a claimed answer."
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "BUSINESS",
+        "TAX",
+        "EMPLOYMENT",
+        "INSURANCE",
+        "SIGNAGE",
+        "PARKING",
+        "PERMIT",
+        "HOA_CONDO",
+        "PROPERTY_ACCESS",
+        "SALES",
+        "OTHER"
+      ],
+      "default": "OTHER",
+      "description": "Broad question category. Deliberately small taxonomy \u2014 this is not a legal code index."
+    },
+    "jurisdiction_type": {
+      "type": "string",
+      "enum": [
+        "FEDERAL",
+        "STATE",
+        "COUNTY",
+        "MUNICIPALITY",
+        "HOA_CONDO",
+        "PROPERTY_SPECIFIC",
+        "OTHER"
+      ],
+      "default": "OTHER",
+      "description": "Which level of jurisdiction or situation the question relates to. Geography is reused from existing records (sale geography, site assessment) via jurisdiction_name \u2014 no new geographic database."
+    },
+    "jurisdiction_name": {
+      "type": "string",
+      "description": "Free-text name of the jurisdiction/situation (e.g. 'Alabama', 'City of Troy', 'Fairview Condo Association', 'this property')."
+    },
+    "sale_id": {
+      "type": "string",
+      "description": "OPTIONAL EstateSale link for sale-specific questions (e.g. condominium elevator-reservation rules for this sale)."
+    },
+    "sale_team_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "READ-SCOPE PROJECTION of EstateSale.sale_team for RLS when the question is sale-linked. The sale remains the source of truth."
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "RESEARCH_NEEDED",
+        "OPERATOR_VERIFIED",
+        "PROFESSIONAL_VERIFIED",
+        "AUTHORITY_VERIFIED"
+      ],
+      "default": "RESEARCH_NEEDED",
+      "description": "PROVENANCE of what was learned, not a legal-compliance guarantee. OPERATOR_VERIFIED = the operator confirmed it themselves. PROFESSIONAL_VERIFIED = a named professional provided it. AUTHORITY_VERIFIED = it came from the relevant authority/source. AI output can NEVER set PROFESSIONAL_VERIFIED or AUTHORITY_VERIFIED \u2014 only explicit operator action based on an identified source/professional."
+    },
+    "source_name": {
+      "type": "string",
+      "description": "Name of the source that was consulted (agency/office/HOA/professional). Free text \u2014 never fabricated by the system."
+    },
+    "source_url": {
+      "type": "string",
+      "description": "OPTIONAL link to the consulted source."
+    },
+    "source_type": {
+      "type": "string",
+      "enum": [
+        "GOVERNMENT",
+        "HOA_CONDO",
+        "PROFESSIONAL",
+        "INSURANCE_PROVIDER",
+        "OPERATOR_RESEARCH",
+        "OTHER"
+      ],
+      "description": "What KIND of source was consulted. AI is deliberately NOT a source type: AI may assist research but is not itself a verified source."
+    },
+    "last_verified_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the recorded answer was last confirmed against the source. A stale timestamp surfaces as REVIEW \u2014 never as a legal expiration."
+    },
+    "verified_by": {
+      "type": "string",
+      "description": "Name of the person who verified it (operator, team member, or professional name)."
+    },
+    "notes": {
+      "type": "string",
+      "description": "What was learned / operator context."
+    },
+    "professional_contact_id": {
+      "type": "string",
+      "description": "OPTIONAL canonical Contact link for the adviser associated with this question (escalation target or verifying professional). Reuses the Contact directory \u2014 no second adviser directory. Does not expand the Contact's own record access."
+    },
+    "professional_review_needed": {
+      "type": "boolean",
+      "default": false,
+      "description": "Operator marked that a professional should review this question before relying on the answer."
+    },
+    "escalation_notes": {
+      "type": "string",
+      "description": "Context for the professional escalation (what to ask, urgency, jurisdiction specifics)."
+    },
+    "follow_up_sale_task_id": {
+      "type": "string",
+      "description": "OPTIONAL SaleTask link when the operator created a follow-up task from the escalation (sale-linked questions only)."
+    }
+  },
+  "required": [
+    "operator_id",
+    "question"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "data.operator_id": "{{user.id}}"
+        },
+        {
+          "data.sale_team_ids": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "$or": [
+        {
+          "data.operator_id": "{{user.id}}"
+        },
+        {
+          "data.sale_team_ids": {
+            "$in": [
+              "{{user.id}}"
+            ]
+          }
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "data.operator_id": "{{user.id}}"
+        },
+        {
+          "data.sale_team_ids": {
+            "$in": [
+              "{{user.id}}"
+            ]
+          }
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.operator_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

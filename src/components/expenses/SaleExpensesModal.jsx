@@ -271,6 +271,19 @@ function ExpenseView({ sale, onSaved, onBack }) {
             {uploadingReceipt && <p className="text-xs text-slate-500 mt-1">Uploading…</p>}
             {form.receipt_url && <p className="text-xs text-green-600 mt-1">✓ Receipt uploaded (stored privately)</p>}
           </div>
+          {/* Chapter 6 P2 — company cost vs client-reimbursable distinction */}
+          <label className="flex items-start gap-2 text-sm text-slate-700">
+            <input
+              type="checkbox"
+              className="mt-1"
+              checked={!!form.is_reimbursable}
+              onChange={e => setForm(p => ({ ...p, is_reimbursable: e.target.checked }))}
+            />
+            <span>
+              Client-reimbursable expense
+              <span className="block text-xs text-slate-400">The client agreed to repay this cost. It reduces client proceeds only after you record their authorization on the settlement statement.</span>
+            </span>
+          </label>
           <div className="flex gap-2 justify-end pt-2 border-t">
             <Button type="button" variant="outline" onClick={onBack}>Back</Button>
             <Button type="submit" disabled={saving} className="bg-orange-600 hover:bg-orange-700">

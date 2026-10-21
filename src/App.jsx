@@ -192,6 +192,7 @@ import OperatorSkills from './pages/OperatorSkills';
 import BusinessDocuments from './pages/BusinessDocuments';
 import TeamMembers from './pages/TeamMembers';
 import MyPolicies from './pages/MyPolicies';
+import ComplianceQuestions from './pages/ComplianceQuestions';
 
 // Life Transition SEO Engine — Phase 2
 import ProbateHubV2 from './pages/life-transition/ProbateHubV2';
@@ -365,6 +366,7 @@ const AuthenticatedApp = () => {
       <Route path="/BusinessDocuments" element={<LayoutWrapper currentPageName="BusinessDocuments"><BusinessDocuments /></LayoutWrapper>} />
       <Route path="/TeamMembers" element={<LayoutWrapper currentPageName="TeamMembers"><TeamMembers /></LayoutWrapper>} />
       <Route path="/MyPolicies" element={<LayoutWrapper currentPageName="MyPolicies"><MyPolicies /></LayoutWrapper>} />
+      <Route path="/ComplianceQuestions" element={<LayoutWrapper currentPageName="ComplianceQuestions"><ComplianceQuestions /></LayoutWrapper>} />
 
       {/* ── Operator Website Template #1 (Phase 3D.1) ── */}
       <Route path="/site" element={<OperatorSitePage pageType="home" />} />

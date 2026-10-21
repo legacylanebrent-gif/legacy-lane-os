@@ -17,12 +17,15 @@ import { isOverdue, isDueSoon } from '@/components/saleops/saleDecisionModel';
 
 // Chapter 1 P1 — the canonical SaleTasks surface, now PERSISTED (SaleTask entity) with
 // accountability: assignee, due date, blocked state, priority, attention flag and
-// completion audit. The 15-step template and the three statuses are unchanged.
+// completion audit. The three statuses are unchanged; the template gains one
+// Chapter 6 P2 step (Sensitive Material Review) for new sales.
 
 const DEFAULT_TASKS = [
   { name: 'Initial Client Meeting', description: 'Meet with client to discuss estate sale needs and timeline', category: 'Planning' },
   { name: 'Sign Contract', description: 'Review and sign estate sale agreement with client', category: 'Planning' },
   { name: 'Property Walkthrough', description: 'Conduct detailed walkthrough and inventory of items', category: 'Planning' },
+  // Chapter 6 P2 — SENSITIVE MATERIAL REVIEW: one prep step, STOP / SEPARATE / ESCALATE.
+  { name: 'Sensitive Material Review', description: 'STOP — before photographing or cataloging contents, separate documents, IDs, medications, financial information, private photos, and other sensitive material for operator/client review. Do not catalog or photograph sensitive material.', category: 'Preparation' },
   { name: 'Research & Pricing', description: 'Research item values and set pricing strategy', category: 'Preparation' },
   { name: 'Item Sorting & Organization', description: 'Sort, organize, and stage items for sale', category: 'Preparation' },
   { name: 'Photography & Listing', description: 'Take photos and create online listings', category: 'Marketing' },

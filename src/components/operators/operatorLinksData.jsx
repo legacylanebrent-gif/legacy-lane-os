@@ -2,7 +2,7 @@ import {
   Home, BookOpen, Calendar, Package, User, BarChart2, Award, GitBranch, DollarSign, Briefcase, Users,
   Trash2, Heart, UserPlus, Warehouse, ShoppingBag, HandCoins,
   Megaphone, Zap, BarChart3, TrendingUp, FileText, FileCheck2, UserCog,
-  Sparkles, GraduationCap, Network, MapPin
+  Sparkles, GraduationCap, Network, MapPin, ShieldQuestion
 } from 'lucide-react';
 
 // Single source of truth for every operator page link, organized by section.
@@ -62,6 +62,7 @@ export const OPERATOR_LINK_SECTIONS = [
       { page: 'MyBusinessExpenses', label: 'Business Expenses', icon: FileText },
       { page: 'BusinessDocuments', label: 'Business Documents', icon: FileCheck2 },
       { page: 'TeamMembers', label: 'Team Members', icon: UserCog },
+      { page: 'ComplianceQuestions', label: 'Compliance Questions', icon: ShieldQuestion },
       { page: 'AIAssistant', label: 'AI Assistant', icon: Sparkles },
     ],
   },
