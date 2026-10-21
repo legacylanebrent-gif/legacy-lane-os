@@ -1,7 +1,7 @@
 {
   "name": "SaleProposal",
   "type": "object",
-  "description": "Chapter 9 P1 \u2014 the canonical record of WHAT WE PROPOSED TO THIS CLIENT ON A SPECIFIC DATE. A time-stamped SNAPSHOT of canonical truth (client, property, recommended services, scope summary, sale dates, estimated range, compensation, additional services, sale strategy, discount approach, post-sale plan) captured at build time. It is NOT current operational truth \u2014 live records may change after finalization without rewriting this \u2014 and it is NOT the agreement and NOT settlement. Accepting a proposal writes acceptance metadata back to the canonical SaleConversionPipeline deal; the DEAL remains the settlement-facing source of commercial terms. No SENT state: EstateSalen does not deliver proposals \u2014 the operator presents them. Private operator/client information: never projected to public pages, Marketing Kit, case studies, or buyer-facing surfaces.",
+  "description": "Chapter 9 P1 \u2014 the canonical record of WHAT WE PROPOSED TO THIS CLIENT ON A SPECIFIC DATE. A time-stamped SNAPSHOT of canonical truth (client, property, recommended services, scope summary, sale dates, estimated range, compensation, additional services, sale strategy, discount approach, post-sale plan) captured at build time. It is NOT current operational truth \u2014 live records may change after finalization without rewriting this \u2014 and it is NOT the agreement and NOT settlement. Accepting a proposal writes acceptance metadata back to the canonical SaleConversionPipeline deal; the DEAL remains the settlement-facing source of commercial terms. Chapter 12 P1: the snapshot also carries the consultation-derived ACCEPTANCE CONDITIONS, the operator's recommendation classification, and the client's goals at build time \u2014 provenance from the canonical deal's consultation block, populated without re-entry. No SENT state: EstateSalen does not deliver proposals \u2014 the operator presents them. Private operator/client information: never projected to public pages, Marketing Kit, case studies, or buyer-facing surfaces.",
   "properties": {
     "operator_id": {
       "type": "string",
@@ -46,7 +46,7 @@
     },
     "snapshot": {
       "type": "object",
-      "description": "Proposed content frozen at finalize time (client, property, overview, recommended services, scope summary, sale dates, estimated range, compensation, additional services, sale strategy, discount approach, post-sale plan, next steps). Unknown fields remain unresolved \u2014 never fabricated.",
+      "description": "Proposed content frozen at finalize time (client, property, overview, recommended services, scope summary, sale dates, estimated range, compensation, additional services, sale strategy, discount approach, post-sale plan, next steps). Chapter 12 P1 adds conditions / recommendation / client_goals provenance from the deal's consultation block. Unknown fields remain unresolved \u2014 never fabricated.",
       "properties": {
         "overview": {
           "type": "string"
@@ -202,6 +202,48 @@
         },
         "estimate_note": {
           "type": "string"
+        },
+        "conditions": {
+          "type": "array",
+          "description": "Chapter 12 P1 \u2014 ACCEPTANCE CONDITIONS carried from the canonical deal's consultation block at build time (no re-entry). Unresolved conditions are stated to the client; resolution history lives on the deal.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "condition": {
+                "type": "string"
+              },
+              "status": {
+                "type": "string",
+                "description": "open or resolved, as carried at build time."
+              },
+              "due_date": {
+                "type": "string",
+                "format": "date"
+              }
+            }
+          },
+          "default": []
+        },
+        "recommendation": {
+          "type": "object",
+          "description": "Chapter 12 P1 \u2014 provenance: the operator's human recommendation classification at proposal build time (advisory evidence, never a system decision).",
+          "properties": {
+            "classification": {
+              "type": "string"
+            },
+            "note": {
+              "type": "string"
+            }
+          },
+          "default": {}
+        },
+        "client_goals": {
+          "type": "array",
+          "description": "Chapter 12 P1 \u2014 client goals carried at build time: what the CLIENT wants (distinct from what is proposed).",
+          "items": {
+            "type": "string"
+          },
+          "default": []
         }
       },
       "default": {}
