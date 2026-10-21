@@ -49,6 +49,9 @@ export default function SaleTasks() {
   const [teamOptions, setTeamOptions] = useState([]);
   const [blockedTarget, setBlockedTarget] = useState(null);
   const [blockedReason, setBlockedReason] = useState('');
+  // Chapter 8 P0-1 — non-blocking notices replace native alert() dialogs,
+  // which froze the page (observed at mobile widths when opened without a saleId).
+  const [notice, setNotice] = useState(null);
 
   useEffect(() => {
     loadData();
@@ -82,10 +85,10 @@ export default function SaleTasks() {
       const params = new URLSearchParams(window.location.search);
       const saleId = params.get('saleId');
 
-      if (!saleId) { alert('Sale ID not found'); navigate(createPageUrl('MySales')); return; }
+      if (!saleId) { navigate(createPageUrl('MySales')); return; }
 
       const saleData = await base44.entities.EstateSale.filter({ id: saleId });
-      if (saleData.length === 0) { alert('Sale not found'); navigate(createPageUrl('MySales')); return; }
+      if (saleData.length === 0) { navigate(createPageUrl('MySales')); return; }
       const sale = saleData[0];
       setSale(sale);
 
@@ -121,7 +124,7 @@ export default function SaleTasks() {
       await base44.entities.SaleTask.update(taskId, patch);
     } catch (e) {
       console.error(e);
-      alert('Could not save the task change');
+      setNotice('Could not save the task change');
       if (sale) loadTasks(sale);
     }
   };
@@ -238,16 +241,16 @@ Return as a JSON array.`,
             sort_order: tasks.length + idx,
           }));
         if (additions.length === 0) {
-          alert('No new tasks to add — generated suggestions already exist on this sale.');
+          setNotice('No new tasks to add — generated suggestions already exist on this sale.');
         } else {
           await base44.entities.SaleTask.bulkCreate(additions);
           await loadTasks(sale);
-          alert(`Added ${additions.length} new task(s). Existing tasks and completions were preserved.`);
+          setNotice(`Added ${additions.length} new task(s). Existing tasks and completions were preserved.`);
         }
       }
     } catch (error) {
       console.error('Error generating tasks:', error);
-      alert('Failed to generate custom tasks');
+      setNotice('Failed to generate custom tasks');
     } finally {
       setGeneratingTasks(false);
     }
@@ -303,6 +306,14 @@ Return as a JSON array.`,
           {generatingTasks ? (<><Loader2 className="w-4 h-4 mr-2 animate-spin" />Generating...</>) : (<><Sparkles className="w-4 h-4 mr-2" />AI Generate Tasks</>)}
         </Button>
       </div>
+
+      {/* Chapter 8 P0-1 — non-blocking notice banner */}
+      {notice && (
+        <div className="flex items-center justify-between gap-3 bg-slate-100 border border-slate-200 rounded-lg px-4 py-2.5 text-sm text-slate-700">
+          <span>{notice}</span>
+          <button onClick={() => setNotice(null)} className="text-slate-500 hover:text-slate-800 text-lg leading-none">&times;</button>
+        </div>
+      )}
 
       {/* Attention strip */}
       {(stats.overdue > 0 || stats.blocked > 0 || stats.unassigned > 0 || stats.attention > 0) && (

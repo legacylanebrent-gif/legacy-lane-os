@@ -98,7 +98,10 @@ export default function ScanAndCart() {
               ];
             });
 
-            setMessage({ type: 'success', text: `Added "${item.title}" to cart` });
+            // Chapter 8 P1 — surface internal display attention to staff at scan time.
+            const attn = item.display_attention && item.display_attention !== 'NONE'
+              ? ` — ${item.display_attention.replace(/_/g, ' ')} (internal handling note)` : '';
+            setMessage({ type: 'success', text: `Added "${item.title}" to cart${attn}` });
 
             // Auto-hide message
             setTimeout(() => setMessage(null), 2000);

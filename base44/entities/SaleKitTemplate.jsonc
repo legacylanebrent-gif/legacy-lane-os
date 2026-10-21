@@ -1,0 +1,114 @@
+{
+  "name": "SaleKitTemplate",
+  "type": "object",
+  "description": "Chapter 8 P1 \u2014 the operator's reusable STANDARD SALE KIT: what the company normally takes to a sale. Kit entries are lightweight: a REUSABLE_EQUIPMENT entry may reference a canonical EquipmentAsset, while CONSUMABLE and REQUIREMENT entries stay generic (tape, price labels, markers, bags) \u2014 there is deliberately NO consumable quantity inventory (Chapter 4 decision stands). The template is projected per-sale into SaleEquipmentAssignment records; sale-specific additions never mutate this permanent kit.",
+  "properties": {
+    "operator_id": {
+      "type": "string",
+      "description": "Estate Sale Company Owner user ID (RLS anchor)."
+    },
+    "company_id": {
+      "type": "string",
+      "description": "Canonical Company when known (additive projection)."
+    },
+    "name": {
+      "type": "string",
+      "description": "Kit name (e.g. 'Standard Sale Kit')."
+    },
+    "items": {
+      "type": "array",
+      "default": [],
+      "description": "Kit entries. Names/categories are snapshots the operator edits here; an EquipmentAsset link is optional and only meaningful for REUSABLE_EQUIPMENT entries.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "entry_type": {
+            "type": "string",
+            "enum": [
+              "REUSABLE_EQUIPMENT",
+              "CONSUMABLE",
+              "REQUIREMENT"
+            ],
+            "default": "REQUIREMENT"
+          },
+          "name": {
+            "type": "string"
+          },
+          "category": {
+            "type": "string",
+            "description": "EquipmentAsset-style category (CHECKOUT, SIGNAGE, STAGING, SUPPLIES as CONSUMABLE category, etc.)."
+          },
+          "equipment_asset_id": {
+            "type": "string",
+            "description": "Optional canonical EquipmentAsset link for REUSABLE_EQUIPMENT entries."
+          },
+          "notes": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "enabled": {
+      "type": "boolean",
+      "default": true,
+      "description": "Only enabled kits are offered when projecting a sale's load-out."
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "operator_id",
+    "name"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.operator_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "$or": [
+        {
+          "data.operator_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.operator_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.operator_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

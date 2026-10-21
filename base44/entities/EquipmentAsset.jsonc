@@ -1,0 +1,129 @@
+{
+  "name": "EquipmentAsset",
+  "type": "object",
+  "description": "Chapter 8 P1 \u2014 ONE lightweight canonical record for REUSABLE COMPANY EQUIPMENT used to operate sales (tables, racks, checkout devices, signs, cords). Deliberately NOT the Item entity: Item is merchandise being sold; EquipmentAsset is company property that moves WITH the team. No GPS, no depreciation, no book value, no tax treatment \u2014 purchase_cost is informational capital truth only and never flows to any sale's Expense/BusinessExpense/settlement. Assignment records (SaleEquipmentAssignment) explain where an AT_SALE asset went.",
+  "properties": {
+    "operator_id": {
+      "type": "string",
+      "description": "Estate Sale Company Owner user ID (RLS anchor)."
+    },
+    "company_id": {
+      "type": "string",
+      "description": "Canonical Company when known (additive projection)."
+    },
+    "name": {
+      "type": "string",
+      "description": "Asset name (e.g. 'Folding table', 'Clothing rack', 'Checkout iPad')."
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "CHECKOUT",
+        "SIGNAGE",
+        "STAGING",
+        "DISPLAY",
+        "SECURITY",
+        "TECHNOLOGY",
+        "LIGHTING",
+        "CLEANING",
+        "PACKING",
+        "STORAGE",
+        "OTHER"
+      ],
+      "default": "OTHER",
+      "description": "Practical controlled category. Deliberately small taxonomy."
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "AVAILABLE",
+        "AT_SALE",
+        "MAINTENANCE",
+        "RETIRED"
+      ],
+      "default": "AVAILABLE",
+      "description": "Operational asset state. AT_SALE is explained by the linked SaleEquipmentAssignment records. MISSING assets never silently return to AVAILABLE \u2014 they stay AT_SALE until the operator resolves them."
+    },
+    "purchase_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Optional \u2014 when the company acquired the asset."
+    },
+    "purchase_cost": {
+      "type": "number",
+      "description": "Optional informational capital/reusable-equipment truth. NEVER automatically counted against an individual sale (Chapter 4/6 financial boundaries preserved)."
+    },
+    "condition": {
+      "type": "string",
+      "enum": [
+        "GOOD",
+        "FAIR",
+        "REPAIR_NEEDED",
+        "REPLACE_SOON"
+      ],
+      "description": "Operational condition only \u2014 no depreciation or book value is ever calculated."
+    },
+    "replacement_target": {
+      "type": "string",
+      "format": "date",
+      "description": "Optional replacement planning target date."
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "operator_id",
+    "name"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.operator_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "$or": [
+        {
+          "data.operator_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.operator_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.operator_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

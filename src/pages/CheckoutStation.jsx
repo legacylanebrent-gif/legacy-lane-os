@@ -115,10 +115,34 @@ export default function CheckoutStation() {
         fulfillment_method: 'pickup',
       });
 
+      // Chapter 8 P0-2 — truthful current-state sync: the same physical
+      // merchandise must not remain operationally AVAILABLE after checkout.
+      // Order/Transaction keep their existing canonical responsibilities;
+      // this only records the sale outcome on the Item records.
+      const synced = new Set();
+      const failedSync = [];
+      for (const ci of currentCart.items) {
+        if (synced.has(ci.item_id)) continue;
+        synced.add(ci.item_id);
+        try {
+          await base44.entities.Item.update(ci.item_id, {
+            status: 'sold',
+            sold_date: new Date().toISOString(),
+            payment_method_used: paymentMethod,
+            buyer_name: cartUser?.full_name || 'Customer',
+            buyer_contact: cartUser?.email || '',
+          });
+        } catch (e) {
+          console.error('Item sold-status sync failed for', ci.item_id, e);
+          failedSync.push(ci.item_title || ci.item_id);
+        }
+      }
+
       // Clear cart
       await base44.entities.Cart.delete(currentCart.id);
 
-      setMessage({ type: 'success', text: `Order ${order.order_number} completed!` });
+      const syncWarning = failedSync.length > 0 ? ` (Warning: could not mark ${failedSync.length} item(s) sold — check inventory.)` : '';
+      setMessage({ type: failedSync.length > 0 ? 'error' : 'success', text: `Order ${order.order_number} completed!${syncWarning}` });
       setCurrentCart(null);
       setCartUser(null);
       setPaymentMethod('cash');

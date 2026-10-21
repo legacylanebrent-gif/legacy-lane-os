@@ -13,7 +13,7 @@ import BuyerMatchModal from '@/components/estate/BuyerMatchModal';
 import SaleExpensesModal from '@/components/expenses/SaleExpensesModal';
 import { 
         Plus, Search, Calendar, MapPin, Eye, Heart, DollarSign,
-        Package, Edit, TrendingUp, Star, Briefcase, Trash, FileText, BarChart3, Megaphone, Download, Globe, Users, Receipt, Sparkles, ChevronDown, ChevronUp, BookOpen, Pin, UserCheck, Rocket, Building2, ClipboardCheck, ListChecks, CalendarDays, ClipboardList
+        Package, Edit, TrendingUp, Star, Briefcase, Trash, FileText, BarChart3, Megaphone, Download, Globe, Users, Receipt, Sparkles, ChevronDown, ChevronUp, BookOpen, Pin, UserCheck, Rocket, Building2, ClipboardCheck, ListChecks, CalendarDays, ClipboardList, Wrench
       } from 'lucide-react';
 import SocialCampaignModal from '@/components/social/SocialCampaignModal';
 import LiquidationProgressModal from '@/components/estate/LiquidationProgressModal';
@@ -701,6 +701,7 @@ export default function MySales() {
                            <Button variant="outline" size="sm" asChild className={`${btnClass} border-purple-500 hover:bg-purple-50`}><Link to={createPageUrl('SaleInventory') + '?saleId=' + sale.id}><Package className="w-3 h-3 mr-1 flex-shrink-0" />Inventory</Link></Button>
                            <Button variant="outline" size="sm" asChild className={`${btnClass} border-cyan-500 hover:bg-cyan-50`}><Link to={createPageUrl('Attendance') + '?saleId=' + sale.id}><TrendingUp className="w-3 h-3 mr-1 flex-shrink-0" />Attendance</Link></Button>
                            {!isCompleted && (<Button variant="outline" size="sm" asChild className={`${btnClass} border-amber-500 hover:bg-amber-50`}><Link to={createPageUrl('SaleTasks') + '?saleId=' + sale.id}><FileText className="w-3 h-3 mr-1 flex-shrink-0" />Tasks</Link></Button>)}
+                           <Button variant="outline" size="sm" asChild className={`${btnClass} border-teal-500 hover:bg-teal-50`}><Link to={'/SaleEquipment?saleId=' + sale.id}><Wrench className="w-3 h-3 mr-1 flex-shrink-0" />Equipment</Link></Button>
                            <Button variant="outline" size="sm" asChild className={`${btnClass} border-indigo-500 hover:bg-indigo-50`}><Link to={createPageUrl('SaleStatistics') + '?saleId=' + sale.id}><BarChart3 className="w-3 h-3 mr-1 flex-shrink-0" />Statistics</Link></Button>
                            {!isCompleted && (<Button variant="outline" size="sm" asChild className={`${btnClass} border-red-500 hover:bg-red-50`}><Link to={createPageUrl('PrintSigns') + '?saleId=' + sale.id}><Megaphone className="w-3 h-3 mr-1 flex-shrink-0" />Signs</Link></Button>)}
                            <Button variant="outline" size="sm" asChild className={`${btnClass} border-slate-500 hover:bg-slate-50`}><Link to={createPageUrl('SaleExport') + '?saleId=' + sale.id}><Download className="w-3 h-3 mr-1 flex-shrink-0" />Export</Link></Button>
@@ -790,6 +791,7 @@ export default function MySales() {
                                 <Button variant="outline" size="sm" asChild className="h-7 text-xs border-blue-500 text-black hover:bg-blue-50 px-2"><Link to={createPageUrl('SaleContracts') + '?saleId=' + sale.id}><FileText className="w-3 h-3 mr-1" />Contracts</Link></Button>
                                 <Button variant="outline" size="sm" asChild className="h-7 text-xs border-violet-600 text-black hover:bg-violet-50 px-2"><Link to={'/SaleClientDecisions?saleId=' + sale.id}><ClipboardCheck className="w-3 h-3 mr-1" />Decisions</Link></Button>
                                 <Button variant="outline" size="sm" asChild className="h-7 text-xs border-emerald-700 text-black hover:bg-emerald-50 px-2"><Link to={'/SaleCloseout?saleId=' + sale.id}><ListChecks className="w-3 h-3 mr-1" />Closeout</Link></Button>
+                                <Button variant="outline" size="sm" asChild className="h-7 text-xs border-amber-600 text-black hover:bg-amber-50 px-2"><Link to={'/SaleEquipment?saleId=' + sale.id}><Wrench className="w-3 h-3 mr-1" />Equipment</Link></Button>
                                 <Button variant="outline" size="sm" asChild className="h-7 text-xs border-purple-500 text-black hover:bg-purple-50 px-2"><Link to={`/ResellerPackupEventEditor?saleId=${sale.id}`}><Package className="w-3 h-3 mr-1" />Reseller Event</Link></Button>
                                 {isProOrElite && (<Button variant="outline" size="sm" onClick={() => handleCreateCleanout(sale)} className="h-7 text-xs border-cyan-600 text-cyan-700 hover:bg-cyan-50 px-2"><Building2 className="w-3 h-3 mr-1" />Cleanout</Button>)}
                                 {isProOrElite && (<Button variant="outline" size="sm" onClick={() => handleCreateDonation(sale)} className="h-7 text-xs border-pink-600 text-pink-700 hover:bg-pink-50 px-2"><Heart className="w-3 h-3 mr-1" />Donation</Button>)}

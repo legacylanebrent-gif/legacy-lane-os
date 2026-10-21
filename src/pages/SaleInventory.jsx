@@ -8,8 +8,9 @@ import { Skeleton } from '@/components/ui/skeleton';
 import UnifiedItemForm from '@/components/inventory/UnifiedItemForm';
 import SoldDetailsDialog from '@/components/estate/SoldDetailsDialog';
 import OffersPanel from '@/components/estate/OffersPanel';
-import { Plus, Search, Edit2, Trash2, Package, Globe, AlertCircle, FileText, User, CreditCard, MapPin, PackageCheck, FlaskConical } from 'lucide-react';
+import { Plus, Search, Edit2, Trash2, Package, Globe, AlertCircle, FileText, User, CreditCard, MapPin, PackageCheck, FlaskConical, Eye, Tag } from 'lucide-react';
 import ResearchFlagDialog from '@/components/inventory/ResearchFlagDialog';
+import DisplayAttentionDialog from '@/components/inventory/DisplayAttentionDialog';
 import { Link } from 'react-router-dom';
 import { toast } from 'sonner';
 
@@ -27,6 +28,7 @@ export default function SaleInventory() {
   const [statusFilter, setStatusFilter] = useState('all');
   const [researchFilter, setResearchFilter] = useState('all');
   const [researchDialogItem, setResearchDialogItem] = useState(null);
+  const [attentionDialogItem, setAttentionDialogItem] = useState(null);
   const [soldDialogItem, setSoldDialogItem] = useState(null);
 
   useEffect(() => {
@@ -215,6 +217,13 @@ export default function SaleInventory() {
                   </Button>
                 </Link>
               )}
+              {saleId && (
+                <Link to={`/ItemLabels?saleId=${saleId}`}>
+                  <Button variant="outline" className="gap-2">
+                    <Tag className="w-4 h-4" /> QR Labels
+                  </Button>
+                </Link>
+              )}
               <Button
                 onClick={() => {
                   setEditingItem(null);
@@ -307,6 +316,15 @@ export default function SaleInventory() {
                             title={item.research_reason || ''}
                           >
                             Research: {item.research_status === 'VERIFY' ? 'Verify' : item.research_status === 'SPECIALIST_REVIEW' ? 'Specialist' : 'Needed'}
+                          </Badge>
+                        )}
+
+                        {item.display_attention && item.display_attention !== 'NONE' && (
+                          <Badge
+                            className="bg-amber-100 text-amber-700 border border-amber-300"
+                            title="Internal handling note — never shown publicly"
+                          >
+                            {item.display_attention.replace(/_/g, ' ')}
                           </Badge>
                         )}
 
@@ -424,6 +442,16 @@ export default function SaleInventory() {
                   <Button
                     size="sm"
                     variant="outline"
+                    onClick={() => setAttentionDialogItem(item)}
+                    className={item.display_attention && item.display_attention !== 'NONE' ? 'border-amber-300 text-amber-700' : ''}
+                    title="Set display attention (internal)"
+                  >
+                    <Eye className="w-4 h-4" />
+                  </Button>
+
+                  <Button
+                    size="sm"
+                    variant="outline"
                     onClick={() => {
                       setEditingItem(item);
                       setShowForm(true);
@@ -453,6 +481,16 @@ export default function SaleInventory() {
           item={researchDialogItem}
           open={!!researchDialogItem}
           onClose={() => setResearchDialogItem(null)}
+          onSaved={() => loadData()}
+        />
+      )}
+
+      {/* Chapter 8 P1 — display attention (internal handling) */}
+      {attentionDialogItem && (
+        <DisplayAttentionDialog
+          item={attentionDialogItem}
+          open={!!attentionDialogItem}
+          onClose={() => setAttentionDialogItem(null)}
           onSaved={() => loadData()}
         />
       )}

@@ -3,7 +3,7 @@ import {
   Trash2, Heart, UserPlus, Warehouse, ShoppingBag, HandCoins,
   Megaphone, Zap, BarChart3, TrendingUp, FileText, FileCheck2, UserCog,
   Sparkles, GraduationCap, Network, MapPin, ShieldQuestion,
-  Globe, Camera, ClipboardList
+  Globe, Camera, ClipboardList, Wrench
 } from 'lucide-react';
 
 // Single source of truth for every operator page link, organized by section.
@@ -45,6 +45,7 @@ export const OPERATOR_LINK_SECTIONS = [
       { page: 'Buyouts', label: 'Buyouts', icon: HandCoins },
       { page: 'SaleConversionPipeline', label: 'Sale Pipeline', icon: TrendingUp },
       { page: 'SellerOnboarding', label: 'Seller Onboarding', icon: ClipboardList },
+      { page: 'EquipmentManager', label: 'Equipment & Kit', icon: Wrench },
     ],
   },
   {

@@ -1,0 +1,163 @@
+{
+  "name": "SaleEquipmentAssignment",
+  "type": "object",
+  "description": "Chapter 8 P1 \u2014 the sale-specific projection of the operator's kit: WHAT WAS EXPECTED, WHAT WAS PACKED (load-out), and WHAT CAME BACK (pack-out). Created by projecting a SaleKitTemplate and/or sale-specific additions; the SAME record serves load-out and pack-out (no separate PackOut entity). Pack-out terminal states are exhaustive for reusable equipment: RETURNED / DAMAGED / MISSING / LEFT_INTENTIONALLY \u2014 every company asset that leaves should have an ending, and a MISSING asset never silently returns to AVAILABLE. Consumable entries carry only a lightweight restock flag (OK / RESTOCK NEEDED) \u2014 no quantity inventory. Execution of load-out/pack-out work stays in SaleTask; this record is equipment truth, not a second checklist engine.",
+  "properties": {
+    "sale_id": {
+      "type": "string",
+      "description": "EstateSale this assignment belongs to."
+    },
+    "operator_id": {
+      "type": "string",
+      "description": "EstateSale.operator_id projection \u2014 sale owner (RLS anchor)."
+    },
+    "company_id": {
+      "type": "string",
+      "description": "EstateSale.company_id projection when present."
+    },
+    "sale_team_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "READ-SCOPE PROJECTION of EstateSale.sale_team for RLS. The sale remains the source of truth."
+    },
+    "kit_template_id": {
+      "type": "string",
+      "description": "SaleKitTemplate this entry was projected from (when source is 'kit')."
+    },
+    "source": {
+      "type": "string",
+      "enum": [
+        "kit",
+        "sale_specific"
+      ],
+      "default": "kit",
+      "description": "kit = projected from the operator's standard SaleKitTemplate. sale_specific = added for this one sale only; it never mutates the permanent template."
+    },
+    "entry_type": {
+      "type": "string",
+      "enum": [
+        "REUSABLE_EQUIPMENT",
+        "CONSUMABLE",
+        "REQUIREMENT"
+      ],
+      "default": "REQUIREMENT",
+      "description": "REUSABLE_EQUIPMENT entries may link an EquipmentAsset; CONSUMABLE entries support the lightweight restock flag; REQUIREMENT is any other one-off need."
+    },
+    "name": {
+      "type": "string",
+      "description": "What this entry is (e.g. 'Folding table', 'Price labels', 'Extension cord')."
+    },
+    "category": {
+      "type": "string",
+      "description": "Practical category mirroring EquipmentAsset categories."
+    },
+    "equipment_asset_id": {
+      "type": "string",
+      "description": "Canonical EquipmentAsset link for REUSABLE_EQUIPMENT entries \u2014 explains WHERE an AT_SALE asset went."
+    },
+    "assignee_name": {
+      "type": "string",
+      "description": "Optional free-text responsibility note (who is bringing/returning this)."
+    },
+    "packed": {
+      "type": "boolean",
+      "default": false,
+      "description": "LOAD-OUT state: true once this entry is packed/confirmed for the sale. Packing a linked EquipmentAsset deterministically sets the asset AT_SALE."
+    },
+    "packout_state": {
+      "type": "string",
+      "enum": [
+        "PENDING",
+        "RETURNED",
+        "DAMAGED",
+        "MISSING",
+        "LEFT_INTENTIONALLY"
+      ],
+      "default": "PENDING",
+      "description": "PACK-OUT terminal state. RETURNED sets a linked asset AVAILABLE; DAMAGED sets it MAINTENANCE; MISSING leaves it AT_SALE (never silently AVAILABLE); LEFT_INTENTIONALLY retires it. PENDING = no ending recorded yet (surfaces as an unresolved-equipment warning in closeout)."
+    },
+    "restock_needed": {
+      "type": "boolean",
+      "default": false,
+      "description": "Consumable lightweight state: OK (false) / RESTOCK NEEDED (true). No quantities. When true, an ordinary SaleTask ('Restock: <name>') is created through the existing task system \u2014 no second reminder engine."
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "sale_id",
+    "operator_id",
+    "name"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.operator_id": "{{user.id}}"
+        },
+        {
+          "data.sale_team_ids": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "$or": [
+        {
+          "data.operator_id": "{{user.id}}"
+        },
+        {
+          "data.sale_team_ids": {
+            "$in": [
+              "{{user.id}}"
+            ]
+          }
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.operator_id": "{{user.id}}"
+        },
+        {
+          "data.sale_team_ids": {
+            "$in": [
+              "{{user.id}}"
+            ]
+          }
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.operator_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

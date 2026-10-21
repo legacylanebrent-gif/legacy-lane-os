@@ -53,7 +53,7 @@ export default function SaleCloseout() {
       const sale = saleData[0];
       setSale(sale);
 
-      const [itemsRes, decisionsRes, tasksRes, expensesRes, dealsRes, donationsRes, cleanoutsRes, laborRes] = await Promise.all([
+      const [itemsRes, decisionsRes, tasksRes, expensesRes, dealsRes, donationsRes, cleanoutsRes, laborRes, equipRes] = await Promise.all([
         base44.entities.Item.filter({ estate_sale_id: sale.id }),
         base44.entities.SaleClientDecision.filter({ sale_id: sale.id }),
         base44.entities.SaleTask.filter({ sale_id: sale.id }),
@@ -62,6 +62,7 @@ export default function SaleCloseout() {
         base44.entities.Donation.filter({ operator_id: sale.operator_id }),
         base44.entities.Cleanout.filter({ operator_id: sale.operator_id }),
         base44.entities.LaborEntry.filter({ sale_id: sale.id }),
+        base44.entities.SaleEquipmentAssignment.filter({ sale_id: sale.id }),
       ]);
       const items = asArray(itemsRes);
       const decisions = asArray(decisionsRes);
@@ -71,6 +72,7 @@ export default function SaleCloseout() {
       const donations = asArray(donationsRes);
       const cleanouts = asArray(cleanoutsRes);
       const laborEntries = asArray(laborRes);
+      const equipmentAssignments = asArray(equipRes);
 
       // Match donation/cleanout records to this sale by property address (city or zip).
       const addr = sale.property_address || {};
@@ -81,7 +83,7 @@ export default function SaleCloseout() {
       const saleDonations = donations.filter(addressMatch);
       const saleCleanouts = cleanouts.filter(addressMatch);
 
-      setData({ items, decisions, tasks, expenses, deals, saleDonations, saleCleanouts, laborEntries, sale });
+      setData({ items, decisions, tasks, expenses, deals, saleDonations, saleCleanouts, laborEntries, equipmentAssignments, sale });
     } catch (e) {
       console.error('Error loading closeout data:', e);
     } finally {
@@ -101,7 +103,7 @@ export default function SaleCloseout() {
   }
   if (!sale || !data) return <div className="p-8 text-slate-500">Could not load closeout data.</div>;
 
-  const { items, decisions, tasks, expenses, deals, saleDonations, saleCleanouts, laborEntries } = data;
+  const { items, decisions, tasks, expenses, deals, saleDonations, saleCleanouts, laborEntries, equipmentAssignments } = data;
   const isPickedUp = (i) => !!i.pickup_completed_at || pickedUpIds.includes(i.id);
 
   // 1 — Sold merchandise
@@ -145,6 +147,11 @@ export default function SaleCloseout() {
   const openTasks = tasks.filter(t => t.status !== 'completed');
   const blockedTasks = tasks.filter(t => t.blocked && t.status !== 'completed');
 
+  // Chapter 8 P1 — every company asset that leaves should have an ending.
+  const unresolvedEquipment = (equipmentAssignments || []).filter(
+    a => a.packed && a.entry_type === 'REUSABLE_EQUIPMENT' && (a.packout_state || 'PENDING') === 'PENDING'
+  );
+
   // Step states: done | warning | blocker | info
   const step1 = awaitingPickup.length > 0 ? 'blocker' : (missingPaymentMethod.length > 0 ? 'warning' : 'done');
   const step2 = unsoldItems.length === 0 ? 'done' : (dispositionScheduled ? 'done' : 'warning');
@@ -166,6 +173,7 @@ export default function SaleCloseout() {
   if (step2 === 'warning') warnings.push(`${unsoldItems.length} unsold item(s) with no disposition scheduled (donation / cleanout / buyout)`);
   if (openGeneral.length > 0) warnings.push(`${openGeneral.length} open client decision(s)`);
   if (openTasks.length > 0) warnings.push(`${openTasks.length} open task(s)${blockedTasks.length ? `, ${blockedTasks.length} blocked` : ''}`);
+  if (unresolvedEquipment.length > 0) warnings.push(`EQUIPMENT STILL UNRESOLVED: ${unresolvedEquipment.length} company asset(s) with no pack-out ending — open Sale Equipment (My Sales) to record returns`);
   if (step5 === 'warning' && deal && !deal.settlement_finalized) warnings.push('Settlement payouts look complete — finalize the settlement record');
 
   const markPickedUp = async (item) => {
@@ -240,6 +248,7 @@ export default function SaleCloseout() {
       n: 6, title: 'Final Property / Project Check', icon: ClipboardCheck, state: step6,
       lines: [
         `Open tasks: ${openTasks.length}${blockedTasks.length ? ` (${blockedTasks.length} blocked)` : ''}`,
+        `Company equipment with no pack-out ending: ${unresolvedEquipment.length}`,
         `Paid merchandise still under custody: ${awaitingPickup.length}`,
         `Unresolved client decisions: ${reviewOpen.length + openGeneral.length}`,
       ],

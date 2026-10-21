@@ -1576,6 +1576,81 @@
           ]
         }
       }
+    },
+    "display_attention": {
+      "type": "string",
+      "enum": [
+        "NONE",
+        "HIGH_VALUE",
+        "CONTROLLED_DISPLAY",
+        "CHECKOUT_HOLD",
+        "STAFF_ATTENTION"
+      ],
+      "default": "NONE",
+      "description": "Chapter 8 P1 \u2014 operational DISPLAY/HANDLING attention for this item DURING the sale (how staff should handle it on the floor). Deliberately distinct from research_status (whether we know enough about the item) \u2014 the two are never merged. INTERNAL operational information only: never projected to public sale pages, public marketplace detail, website presentations, or Marketing Kit drafts; public-facing merchandise may still be marketed normally.",
+      "rls": {
+        "read": {
+          "$or": [
+            {
+              "$and": [
+                {
+                  "user_condition": {
+                    "role": "user"
+                  }
+                },
+                {
+                  "created_by_id": "{{user.id}}"
+                }
+              ]
+            },
+            {
+              "$and": [
+                {
+                  "user_condition": {
+                    "role": "user"
+                  }
+                },
+                {
+                  "data.seller_id": "{{user.id}}"
+                }
+              ]
+            },
+            {
+              "$and": [
+                {
+                  "user_condition": {
+                    "role": "user"
+                  }
+                },
+                {
+                  "data.operator_id": "{{user.id}}"
+                }
+              ]
+            },
+            {
+              "$and": [
+                {
+                  "user_condition": {
+                    "role": "user"
+                  }
+                },
+                {
+                  "data.sale_team_ids": {
+                    "$in": [
+                      "{{user.id}}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "user_condition": {
+                "role": "admin"
+              }
+            }
+          ]
+        }
+      }
     }
   },
   "required": [
