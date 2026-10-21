@@ -7,6 +7,7 @@
 // website tenant (client value ignored); sale ownership must match the tenant's
 // Company; consent is explicit-only (never inferred from submission).
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.52';
+import { bridgeSellerInquiry, websiteLeadToBridgeInput, resolveCompanyOperator } from '../../shared/sellerInquiryBridge.ts';
 
 const LEAD_TYPES = ['seller_inquiry', 'contact', 'vip_signup', 'sale_question', 'consultation_request'];
 

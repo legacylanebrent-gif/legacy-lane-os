@@ -7,6 +7,7 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.52';
 import { resolveWebsiteTenant, getPublishedSales } from '../../shared/websiteRuntimeService.ts';
 import { enqueueActivity, resolveMasterUserID } from '../../shared/identityActivityOutbox.ts';
 import { emitLeadFunnelEvent } from '../../shared/websiteEventEmit.ts';
+import { bridgeSellerInquiry, websiteLeadToBridgeInput, resolveCompanyOperator } from '../../shared/sellerInquiryBridge.ts';
 
 const MVP_LEAD_TYPES = ['seller_inquiry', 'contact', 'sale_question'];
 const SERVICES = ['estate_sale', 'downsizing', 'cleanout', 'probate_estate', 'moving', 'consignment', 'real_estate', 'valuation', 'not_sure', 'other'];
@@ -189,7 +190,26 @@ export default async function(req) {
 
     // Phase 4E (Parts 32/35) — canonical lead ⇄ analytics linkage.
     await emitLeadFunnelEvent(service, ctx, 'seller_lead', { page: created.source_url || null });
-    return Response.json({ ok: true, lead_id: created.id });
+
+    // Chapter 10 P1 — bridge seller inquiries into the canonical opportunity
+    // record (best-effort: a bridge failure must NEVER fail the inquiry).
+    // Consent is NOT copied — creating an opportunity is not marketing consent.
+    let bridge = null;
+    if (leadType === 'seller_inquiry') {
+      try {
+        const operatorId = await resolveCompanyOperator(service, ctx.company.id);
+        if (operatorId) {
+          bridge = await bridgeSellerInquiry(service, {
+            ...websiteLeadToBridgeInput(created),
+            operator_id: operatorId,
+            notify_user_ids: ctx.tenant.member_user_ids || [],
+          });
+        }
+      } catch (e) {
+        console.error('[submitPublicWebsiteLead] Chapter 10 bridge failed:', e && e.message);
+      }
+    }
+    return Response.json({ ok: true, lead_id: created.id, bridge });
   } catch (error) {
     console.error('submitPublicWebsiteLead error:', error && error.message);
     return err('internal_error', 'Unexpected error', 500);
