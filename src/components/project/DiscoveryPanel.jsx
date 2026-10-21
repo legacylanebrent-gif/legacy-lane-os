@@ -139,6 +139,7 @@ export default function DiscoveryPanel({ sale, zones, discoveries, onChanged }) 
     setBusy(disc.id);
     try {
       if (disc.promoted_to_item_id) { setPromote(null); return; }
+      if (disc.is_restricted) { setPromote(null); return; } // P1-32 — restricted material never enters the ordinary sale flow
       const item = await base44.entities.Item.create({
         title: disc.description, description: 'Promoted from a prep discovery.',
         price: p, category: category && category !== 'none' ? category : undefined,
@@ -223,10 +224,12 @@ export default function DiscoveryPanel({ sale, zones, discoveries, onChanged }) 
             <Button size="sm" variant="outline" className="h-7 text-[11px] px-2" onClick={() => lookForRelated(d)}>Look for Related</Button>
             <Button size="sm" variant="outline" className="h-7 text-[11px] px-2" onClick={() => setCustody({ disc: d, event: 'MOVED_TO_CONTROLLED_LOCATION', note: '', location: '' })}>Custody</Button>
             <Button size="sm" variant="outline" className="h-7 text-[11px] px-2" onClick={() => setResolve({ disc: d, resolution: 'other', note: '' })}>Resolve</Button>
-            <Button size="sm" variant="outline" className="h-7 text-[11px] px-2"
-              onClick={() => d.promoted_to_item_id ? alert('Already promoted — one Item per discovery; no duplicates.') : setPromote({ disc: d, price: '', category: 'none' })}>
-              Promote to Inventory
-            </Button>
+            {!d.is_restricted && (
+              <Button size="sm" variant="outline" className="h-7 text-[11px] px-2"
+                onClick={() => d.promoted_to_item_id ? alert('Already promoted — one Item per discovery; no duplicates.') : setPromote({ disc: d, price: '', category: 'none' })}>
+                Promote to Inventory
+              </Button>
+            )}
             <Button size="sm" variant="ghost" className="h-7 text-[11px] px-2" onClick={() => printLabel(d)}><Printer className="w-3 h-3 mr-1" />Label</Button>
           </div>
         )}
