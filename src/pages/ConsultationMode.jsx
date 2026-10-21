@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -81,15 +81,29 @@ export default function ConsultationMode() {
   };
 
   // ONE write path for the consultation block (P1-2: guided navigation, no duplicate stores).
-  const saveConsult = async (patch) => {
+  // Patches merge onto the FRESHEST local state and saves run strictly in order,
+  // so rapid consecutive actions can never overwrite each other.
+  const consultRef = useRef(deal?.consultation || {});
+  useEffect(() => { consultRef.current = deal?.consultation || {}; }, [deal]);
+  const saveChain = useRef(Promise.resolve());
+  const pendingSaves = useRef(0);
+  const saveConsult = (patch) => {
+    const merged = { ...(consultRef.current || {}), ...patch };
+    consultRef.current = merged;
+    setDeal(d => ({ ...d, consultation: merged }));
+    pendingSaves.current += 1;
     setSaving(true);
-    try {
-      const merged = { ...(deal.consultation || {}), ...patch };
-      await base44.entities.SaleConversionPipeline.update(deal.id, { consultation: merged });
-      setDeal(d => ({ ...d, consultation: merged }));
-    } catch (e) {
-      console.error(e);
-    } finally { setSaving(false); }
+    saveChain.current = saveChain.current.then(async () => {
+      try {
+        await base44.entities.SaleConversionPipeline.update(deal.id, { consultation: merged });
+      } catch (e) {
+        console.error(e);
+      } finally {
+        pendingSaves.current -= 1;
+        if (pendingSaves.current === 0) setSaving(false);
+      }
+    });
+    return saveChain.current;
   };
 
   // Canonical economics persist (same single write path the pipeline uses).
