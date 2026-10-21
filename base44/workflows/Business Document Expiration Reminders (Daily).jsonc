@@ -1,0 +1,45 @@
+{
+  "name": "Business Document Expiration Reminders (Daily)",
+  "description": "Daily at 9:00am ET \u2014 scans active Business Documents and notifies each operator when a stored document expiration date is inside a warning window (60/30/7 days, or expired). Idempotent per window; factual wording only.",
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "scheduled",
+      "events": [],
+      "schedule_mode": "recurring",
+      "cron_expression": "0 9 * * *",
+      "one_time_date": null,
+      "timezone": "America/New_York",
+      "interval_value": null,
+      "interval_unit": null,
+      "interval_anchor": null,
+      "ends_type": "never",
+      "ends_on_date": null,
+      "ends_after_count": null
+    }
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "business_document_expiration_reminders_daily",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "check_document_expirations": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "businessDocumentExpirationCheck",
+            "args": {}
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Check document expirations",
+            "description": "60/30/7-day and expired reminders"
+          }
+        }
+      }
+    ]
+  }
+}

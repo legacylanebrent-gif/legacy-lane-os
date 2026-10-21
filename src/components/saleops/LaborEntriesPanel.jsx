@@ -79,6 +79,7 @@ export default function LaborEntriesPanel({ saleId }) {
   const [loading, setLoading] = useState(true);
   const [entries, setEntries] = useState([]);
   const [team, setTeam] = useState([]); // [{id, name}]
+  const [workers, setWorkers] = useState([]); // Chapter 6 P1 worker directory (TeamMember records)
   const [form, setForm] = useState(emptyForm());
   const [editingId, setEditingId] = useState(null);
   const [saving, setSaving] = useState(false);
@@ -103,6 +104,11 @@ export default function LaborEntriesPanel({ saleId }) {
           setTeam(asArray(users).map(u => ({ id: u.id, name: u.full_name || u.email || 'Team member' })));
         }
       } catch { /* team name resolution is cosmetic — helper-by-name always works */ }
+      // Chapter 6 P1 — worker directory: consistent identity + default rate.
+      try {
+        const workers = await base44.entities.TeamMember.filter({ operator_id: sale?.operator_id, status: 'ACTIVE' });
+        setWorkers(asArray(workers));
+      } catch { /* directory unavailable for this viewer — sale team + helper-by-name still work */ }
     } catch (e) {
       console.error('Labor load failed', e);
     } finally {
@@ -124,8 +130,14 @@ export default function LaborEntriesPanel({ saleId }) {
         hourly_rate: form.is_owner_time || form.hourly_rate === '' ? null : parseFloat(form.hourly_rate) || null,
         is_owner_time: !!form.is_owner_time,
         notes: form.notes || '',
-        member_name: form.member === 'owner' ? 'Owner' : (form.member_name || 'Team member'),
-        user_id: form.member.startsWith('team:') ? form.member.replace('team:', '') : null,
+        member_name: form.member === 'owner' ? 'Owner' : (
+          form.member.startsWith('worker:')
+            ? (workers.find(w => w.id === form.member.replace('worker:', ''))?.name || 'Worker')
+            : (form.member_name || 'Team member')
+        ),
+        user_id: form.member.startsWith('team:') ? form.member.replace('team:', '')
+          : (form.member.startsWith('worker:') ? (workers.find(w => w.id === form.member.replace('worker:', ''))?.user_id || null) : null),
+        team_member_id: form.member.startsWith('worker:') ? form.member.replace('worker:', '') : null,
       };
       if (editingId) {
         await base44.entities.LaborEntry.update(editingId, payload);
@@ -151,7 +163,7 @@ export default function LaborEntriesPanel({ saleId }) {
   const handleEdit = (entry) => {
     setEditingId(entry.id);
     setForm({
-      member: entry.user_id ? `team:${entry.user_id}` : (entry.is_owner_time ? 'owner' : 'helper'),
+      member: entry.team_member_id ? `worker:${entry.team_member_id}` : (entry.user_id ? `team:${entry.user_id}` : (entry.is_owner_time ? 'owner' : 'helper')),
       member_name: entry.is_owner_time ? '' : (entry.member_name || ''),
       user_id: entry.user_id || '',
       work_category: entry.work_category,
@@ -198,11 +210,24 @@ export default function LaborEntriesPanel({ saleId }) {
           <div className="grid sm:grid-cols-2 gap-3">
             <div>
               <Label>Who worked</Label>
-              <Select value={form.member} onValueChange={v => setForm(p => ({ ...p, member: v, is_owner_time: v === 'owner' }))}>
+              <Select value={form.member} onValueChange={v => {
+                if (v.startsWith('worker:')) {
+                  const w = workers.find(x => x.id === v.replace('worker:', ''));
+                  setForm(p => ({
+                    ...p, member: v, member_name: w?.name || '', is_owner_time: false,
+                    hourly_rate: w?.default_hourly_rate != null && p.hourly_rate === '' ? String(w.default_hourly_rate) : p.hourly_rate,
+                  }));
+                } else {
+                  setForm(p => ({ ...p, member: v, is_owner_time: v === 'owner' }));
+                }
+              }}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="owner">Owner (my time)</SelectItem>
                   {team.map(t => <SelectItem key={t.id} value={`team:${t.id}`}>{t.name}</SelectItem>)}
+                  {workers.filter(w => !w.user_id || !team.some(t => t.id === w.user_id)).map(w => (
+                    <SelectItem key={w.id} value={`worker:${w.id}`}>{w.name}{w.default_hourly_rate != null ? ` ($${w.default_hourly_rate}/hr)` : ''}</SelectItem>
+                  ))}
                   <SelectItem value="helper">Helper (by name)</SelectItem>
                 </SelectContent>
               </Select>

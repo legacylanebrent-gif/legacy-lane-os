@@ -1,7 +1,7 @@
 import {
   Home, BookOpen, Calendar, Package, User, BarChart2, Award, GitBranch, DollarSign, Briefcase, Users,
   Trash2, Heart, UserPlus, Warehouse, ShoppingBag, HandCoins,
-  Megaphone, Zap, BarChart3, TrendingUp, FileText,
+  Megaphone, Zap, BarChart3, TrendingUp, FileText, FileCheck2, UserCog,
   Sparkles, GraduationCap, Network, MapPin
 } from 'lucide-react';
 
@@ -60,6 +60,8 @@ export const OPERATOR_LINK_SECTIONS = [
     links: [
       { page: 'IncomeTracker', label: 'Income Tracker', icon: TrendingUp },
       { page: 'MyBusinessExpenses', label: 'Business Expenses', icon: FileText },
+      { page: 'BusinessDocuments', label: 'Business Documents', icon: FileCheck2 },
+      { page: 'TeamMembers', label: 'Team Members', icon: UserCog },
       { page: 'AIAssistant', label: 'AI Assistant', icon: Sparkles },
     ],
   },

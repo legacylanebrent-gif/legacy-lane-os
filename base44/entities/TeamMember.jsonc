@@ -1,0 +1,111 @@
+{
+  "name": "TeamMember",
+  "type": "object",
+  "description": "Chapter 6 P1 \u2014 minimal operator-level worker/helper DIRECTORY record. Person/worker directory only: NOT a duplicate of platform User, NOT payroll, NOT an HRIS. Deliberately excludes Social Security numbers, tax IDs, bank/routing numbers, medical records, payroll credentials, IDs/licenses, and background-check data. LaborEntry remains the canonical PROJECT labor record; this record supplies worker selection, consistent identity (team_member_id), and a default hourly rate convenience (snapshot doctrine: historical LaborEntry rates never change when the default changes). Non-platform helpers simply have no user_id; they cannot join EstateSale.sale_team (which requires a platform account) \u2014 their identity is carried by LaborEntry.team_member_id/member_name.",
+  "properties": {
+    "operator_id": {
+      "type": "string",
+      "description": "Estate Sale Company Owner user ID (RLS anchor)."
+    },
+    "company_id": {
+      "type": "string",
+      "description": "Canonical Company when known (additive projection)."
+    },
+    "user_id": {
+      "type": "string",
+      "description": "Platform user ID when the worker has an account. Null = non-platform helper."
+    },
+    "name": {
+      "type": "string"
+    },
+    "role": {
+      "type": "string",
+      "description": "Free-text job role (e.g. Crew lead, Cashier, Mover). Not a platform permission."
+    },
+    "default_hourly_rate": {
+      "type": "number",
+      "description": "Convenience default copied into new LaborEntries at creation (the entry's rate is a snapshot; it never changes when this default changes later)."
+    },
+    "skills": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Shorthand capabilities (e.g. heavy lifting, POS, staging)."
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "ACTIVE",
+        "INACTIVE"
+      ],
+      "default": "ACTIVE"
+    },
+    "phone": {
+      "type": "string",
+      "description": "Optional. Permission-protected (operator/admin only by RLS)."
+    },
+    "email": {
+      "type": "string",
+      "description": "Optional. Permission-protected (operator/admin only by RLS)."
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "operator_id",
+    "name"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.operator_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "$or": [
+        {
+          "data.operator_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.operator_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.operator_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

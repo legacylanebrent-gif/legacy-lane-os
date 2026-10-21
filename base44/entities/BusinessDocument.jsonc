@@ -1,0 +1,173 @@
+{
+  "name": "BusinessDocument",
+  "type": "object",
+  "description": "Chapter 6 P1 \u2014 the ONE canonical business document vault record (insurance, formation, agreements, policies, registrations, permits, certifications, professional documents \u2014 no separate vaults). Files live in PRIVATE storage (file_uri); viewing/downloading always goes through a short-lived signed URL. The document owns its expiration_date; a missing expiration_date means NO EXPIRATION KNOWN (never 'never expires'). version is the acknowledgment-truth anchor: it increments when the file is replaced, so an old acknowledgment never silently covers a new version.",
+  "properties": {
+    "operator_id": {
+      "type": "string",
+      "description": "Estate Sale Company Owner user ID (RLS anchor)."
+    },
+    "company_id": {
+      "type": "string",
+      "description": "Canonical Company when known (additive projection)."
+    },
+    "title": {
+      "type": "string"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "FORMATION",
+        "INSURANCE",
+        "AGREEMENT",
+        "POLICY",
+        "REGISTRATION",
+        "PERMIT",
+        "CERTIFICATION",
+        "PROFESSIONAL",
+        "OTHER"
+      ],
+      "default": "OTHER",
+      "description": "Document category. Deliberately small taxonomy."
+    },
+    "policy_type": {
+      "type": "string",
+      "description": "For POLICY documents only: e.g. Confidentiality Policy, Safety Policy, Team Policy, Photo / Privacy Policy, Sale-Day Procedure."
+    },
+    "scope": {
+      "type": "string",
+      "enum": [
+        "business",
+        "sale",
+        "contact",
+        "team_member"
+      ],
+      "default": "business",
+      "description": "Explicit scope. sale_id / contact_id / team_member_id must match this scope (enforced by the vault UI \u2014 one ref per scope, never contradictory combinations)."
+    },
+    "sale_id": {
+      "type": "string",
+      "description": "EstateSale ID when scope is 'sale'."
+    },
+    "contact_id": {
+      "type": "string",
+      "description": "Contact ID when scope is 'contact'."
+    },
+    "team_member_id": {
+      "type": "string",
+      "description": "TeamMember ID when scope is 'team_member'."
+    },
+    "file_uri": {
+      "type": "string",
+      "description": "PRIVATE storage URI (UploadPrivateFile). Never a public URL."
+    },
+    "file_name": {
+      "type": "string",
+      "description": "Original filename at upload."
+    },
+    "effective_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "expiration_date": {
+      "type": "string",
+      "format": "date",
+      "description": "The document owns this date. Null = NO EXPIRATION KNOWN (not 'never expires')."
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "ACTIVE",
+        "ARCHIVED",
+        "REVIEW"
+      ],
+      "default": "ACTIVE",
+      "description": "No status implies a legal retention conclusion."
+    },
+    "notes": {
+      "type": "string"
+    },
+    "version": {
+      "type": "integer",
+      "default": 1,
+      "description": "Incremented when the file is replaced. Acknowledgment truth anchor: an acknowledgment records the version acknowledged, so a replaced policy is never silently considered acknowledged."
+    },
+    "uploaded_by": {
+      "type": "string",
+      "description": "User ID of the uploader."
+    },
+    "reminders_sent": {
+      "type": "array",
+      "default": [],
+      "description": "Reminder-engine idempotency ledger. Each warning window (60/30/7/expired) fires at most once per document; a second daily run creates no duplicate notification.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "window": {
+            "type": "string"
+          },
+          "sent_date": {
+            "type": "string",
+            "format": "date"
+          }
+        }
+      }
+    }
+  },
+  "required": [
+    "operator_id",
+    "title",
+    "category",
+    "file_uri"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.operator_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "$or": [
+        {
+          "data.operator_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.operator_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.operator_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

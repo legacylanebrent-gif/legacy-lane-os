@@ -1,0 +1,113 @@
+{
+  "name": "PolicyAcknowledgment",
+  "type": "object",
+  "description": "Chapter 6 P1 \u2014 one small acknowledgment record answering WHO acknowledged WHAT VERSION of WHICH policy and WHEN. Policies are BusinessDocuments (category POLICY) \u2014 there is no second policy repository and no separate confidentiality subsystem (a confidentiality policy is just another POLICY document). Workers never write these records through RLS (update is operator/admin only): self-service acknowledgment happens ONLY through the policyAcknowledgments server seam, which verifies the caller and snapshots the CURRENT document version at acknowledge time. Viewing a policy is never the same as acknowledging it \u2014 an explicit action is required.",
+  "properties": {
+    "operator_id": {
+      "type": "string",
+      "description": "Estate Sale Company Owner user ID (RLS anchor)."
+    },
+    "business_document_id": {
+      "type": "string",
+      "description": "The POLICY BusinessDocument this acknowledgment belongs to."
+    },
+    "team_member_id": {
+      "type": "string",
+      "description": "TeamMember the policy was assigned to."
+    },
+    "user_id": {
+      "type": "string",
+      "description": "Platform user ID of the acknowledging worker when they have an account. Null for non-platform helpers \u2014 those records are operator-recorded only (worker cannot self-acknowledge in-app)."
+    },
+    "document_version": {
+      "type": "integer",
+      "description": "Version of the document AT ASSIGNMENT. Immutable after creation \u2014 the acknowledged version is tracked separately (acknowledged_version) so assignment history is never rewritten."
+    },
+    "document_title": {
+      "type": "string",
+      "description": "Title snapshot at assignment for durable display."
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "ASSIGNED",
+        "ACKNOWLEDGED"
+      ],
+      "default": "ASSIGNED"
+    },
+    "assigned_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "acknowledged_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "acknowledged_version": {
+      "type": "integer",
+      "description": "The document version actually acknowledged (snapshotted by the acknowledge seam, or by the operator for offline records). If the document is later replaced (version bumps), this acknowledgment no longer covers the new version \u2014 the operator sees it as pending for the current version."
+    },
+    "notes": {
+      "type": "string",
+      "description": "Optional operator context (e.g. 'Paper copy signed at sale prep, recorded by operator')."
+    }
+  },
+  "required": [
+    "operator_id",
+    "business_document_id",
+    "document_version"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.operator_id": "{{user.id}}"
+        },
+        {
+          "data.user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "$or": [
+        {
+          "data.operator_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.operator_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.operator_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

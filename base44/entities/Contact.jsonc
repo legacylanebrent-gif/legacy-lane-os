@@ -45,10 +45,15 @@
           "agent",
           "attorney",
           "cpa",
+          "insurance",
+          "payroll",
+          "bookkeeper",
+          "tax_adviser",
+          "employment_adviser",
           "contractor"
         ]
       },
-      "description": "Multiple roles a contact can have",
+      "description": "Multiple roles a contact can have. Chapter 6 P1 adds professional adviser roles (insurance, payroll, bookkeeper, tax_adviser, employment_adviser) alongside the existing attorney/cpa \u2014 one Contact taxonomy, no separate adviser directory.",
       "default": []
     },
     "lead_source": {
