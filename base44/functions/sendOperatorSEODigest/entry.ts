@@ -1,5 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
-import { isMarketingEmailAllowed } from '../../shared/consentGuard.ts';
+import { isOperatorNoticeEmailAllowed } from '../../shared/consentGuard.ts';
 
 Deno.serve(async (req) => {
   try {
@@ -33,8 +33,8 @@ Deno.serve(async (req) => {
       const opSales = salesByOperator[op.id] || [];
       if (opSales.length === 0 || !op.email) { skipped++; continue; }
 
-      // Consent guard: respect operator marketing opt-out / suppression
-      if (!(await isMarketingEmailAllowed(base44, op.id))) { skipped++; continue; }
+      // Operator service notice (not consumer marketing): opt-out only
+      if (!(await isOperatorNoticeEmailAllowed(base44, op.id))) { skipped++; continue; }
 
       const totalViews = opSales.reduce((s, sale) => s + (sale.views || 0), 0);
       const totalSaves = opSales.reduce((s, sale) => s + (sale.saves || 0), 0);

@@ -9,10 +9,15 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, Sparkles, QrCode, Download, ArrowLeft, Megaphone, Signpost, ImageIcon, Package, Save } from 'lucide-react';
+import { Loader2, Sparkles, QrCode, Download, ArrowLeft, Megaphone, Signpost, ImageIcon, Save } from 'lucide-react';
 import QRCode from 'qrcode';
 import PhotoApprovalGrid from '@/components/marketingkit/PhotoApprovalGrid';
 import KitDrafts from '@/components/marketingkit/KitDrafts';
+import ListingCompletenessCard from '@/components/marketingkit/ListingCompletenessCard';
+import FinalReviewCard from '@/components/marketingkit/FinalReviewCard';
+import FeaturedItemsCard from '@/components/marketingkit/FeaturedItemsCard';
+import MarketingTasksCard, { buildMarketingTaskPlan } from '@/components/marketingkit/MarketingTasksCard';
+import PostSaleReviewCard from '@/components/marketingkit/PostSaleReviewCard';
 
 const STATUS_BADGE = {
   not_created: 'bg-slate-100 text-slate-500 border-slate-200',
@@ -35,6 +40,15 @@ export default function MarketingKit() {
   const [savingPhotos, setSavingPhotos] = useState(false);
   const [savingDrafts, setSavingDrafts] = useState(false);
   const [qrDataUrl, setQrDataUrl] = useState(null);
+  const [completeness, setCompleteness] = useState(null);
+  const [featuredPicks, setFeaturedPicks] = useState([]);
+  const [availabilityWarnings, setAvailabilityWarnings] = useState([]);
+  const [review, setReview] = useState(null);
+  const [saleItems, setSaleItems] = useState([]);
+  const [mktTasks, setMktTasks] = useState([]);
+  const [savingFeatured, setSavingFeatured] = useState(false);
+  const [approving, setApproving] = useState(false);
+  const [creatingPlan, setCreatingPlan] = useState(false);
 
   const loadSaleList = async () => {
     const me = await base44.auth.me();
@@ -45,11 +59,20 @@ export default function MarketingKit() {
     setLoading(false);
   };
 
+  const applyKitExtras = (data, s) => {
+    if (data.listing_completeness) setCompleteness(data.listing_completeness);
+    if (Array.isArray(data.featured)) setFeaturedPicks(data.featured);
+    if (Array.isArray(data.availability_warnings)) setAvailabilityWarnings(data.availability_warnings);
+    if (data.review) setReview(data.review);
+  };
+
   const loadKit = async (sid) => {
     try {
-      const [salePage, kitRes] = await Promise.all([
+      const [salePage, kitRes, itemsPage, tasksPage] = await Promise.all([
         base44.entities.EstateSale.filter({ id: sid }),
-        base44.functions.invoke('buildMarketingKit', { action: 'get', sale_id: sid })
+        base44.functions.invoke('buildMarketingKit', { action: 'get', sale_id: sid }),
+        base44.entities.Item.filter({ estate_sale_id: sid }, { limit: 200 }).catch(() => ({ items: [] })),
+        base44.entities.SaleTask.filter({ sale_id: sid, category: 'Marketing' }, { limit: 50 }).catch(() => ({ items: [] }))
       ]);
       const s = (salePage.items || salePage)[0];
       if (!s) { navigate('/MySales'); return; }
@@ -57,6 +80,9 @@ export default function MarketingKit() {
       const k = kitRes.data.kit;
       setKit(k);
       setEligiblePhotos(kitRes.data.eligible_photos || []);
+      applyKitExtras(kitRes.data, s);
+      setSaleItems(itemsPage.items || []);
+      setMktTasks(tasksPage.items || []);
       setDraft(k ? {
         sale_description: k.sale_description, social_posts: k.social_posts || [],
         email_draft: k.email_draft || {}, sms_draft: k.sms_draft, ai_removals: k.ai_removals || []
@@ -78,6 +104,7 @@ export default function MarketingKit() {
       const res = await base44.functions.invoke('buildMarketingKit', { action: 'build', sale_id: saleId });
       const k = res.data.kit;
       setKit(k);
+      applyKitExtras(res.data, sale);
       setDraft({
         sale_description: k.sale_description, social_posts: k.social_posts || [],
         email_draft: k.email_draft || {}, sms_draft: k.sms_draft, ai_removals: k.ai_removals || []
@@ -120,6 +147,53 @@ export default function MarketingKit() {
     } catch (e) { alert('Could not update status.'); }
   };
 
+  // Chapter 18 P1-15 — save canonical featured-Item picks (server validates
+  // the Items belong to this sale) and refresh conflict warnings.
+  const saveFeaturedItems = async (ids) => {
+    setSavingFeatured(true);
+    try {
+      const res = await base44.functions.invoke('buildMarketingKit', { action: 'save_featured_items', sale_id: saleId, featured_item_ids: ids });
+      setKit(res.data.kit);
+      setFeaturedPicks(res.data.featured || []);
+      setAvailabilityWarnings(res.data.availability_warnings || []);
+      refreshReview();
+    } catch (e) { alert('Could not save featured picks.'); }
+    setSavingFeatured(false);
+  };
+
+  // Chapter 18 P1-14 — explicit human approval of the final accuracy review.
+  const approveFinalReview = async () => {
+    setApproving(true);
+    try {
+      const res = await base44.functions.invoke('buildMarketingKit', { action: 'approve_final_review', sale_id: saleId });
+      setKit(res.data.kit);
+      refreshReview();
+    } catch (e) { alert('Could not record the approval.'); }
+    setApproving(false);
+  };
+
+  const refreshReview = async () => {
+    try {
+      const res = await base44.functions.invoke('buildMarketingKit', { action: 'get', sale_id: saleId });
+      applyKitExtras(res.data, sale);
+    } catch (e) { /* non-fatal */ }
+  };
+
+  // Chapter 18 P1-28 — marketing responsibilities reuse the canonical
+  // SaleTask (owner, due date, status, sale relationship).
+  const createTaskPlan = async () => {
+    if (!sale) return;
+    setCreatingPlan(true);
+    try {
+      const me = await base44.auth.me();
+      const plan = buildMarketingTaskPlan(sale, me.id);
+      await base44.entities.SaleTask.bulkCreate(plan);
+      const tasksPage = await base44.entities.SaleTask.filter({ sale_id: sale.id, category: 'Marketing' }, { limit: 50 });
+      setMktTasks(tasksPage.items || []);
+    } catch (e) { alert('Could not create the task plan.'); }
+    setCreatingPlan(false);
+  };
+
   if (loading) return <div className="p-10 flex justify-center"><Loader2 className="w-7 h-7 animate-spin text-slate-400" /></div>;
 
   // No sale selected — pick which sale to kit up.
@@ -145,7 +219,7 @@ export default function MarketingKit() {
   }
 
   const cs = (kit && kit.component_status) || {};
-  const chips = [['description', 'Description'], ['social', 'Social'], ['email', 'Email'], ['sms', 'SMS'], ['qr', 'QR'], ['signs', 'Signs'], ['featured', 'Featured']];
+  const chips = [['description', 'Description'], ['social', 'Social'], ['email', 'Email'], ['sms', 'SMS draft'], ['qr', 'QR'], ['signs', 'Signs'], ['featured', 'Featured'], ['final_review', 'Final review']];
 
   return (
     <div className="p-4 md:p-8 max-w-4xl mx-auto">
@@ -163,6 +237,8 @@ export default function MarketingKit() {
       </div>
 
       <div className="space-y-6">
+        <ListingCompletenessCard completeness={completeness} />
+        <MarketingTasksCard sale={sale} tasks={mktTasks} creating={creatingPlan} onCreatePlan={createTaskPlan} />
         <div className="bg-white border border-slate-200 rounded-lg p-5">
           <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
             <div className="font-semibold text-slate-900 flex items-center gap-2"><Sparkles className="w-4 h-4 text-cyan-700" /> One-click kit</div>
@@ -194,6 +270,10 @@ export default function MarketingKit() {
                 </Button>
               </div>
               <KitDrafts draft={draft} onChange={setDraft} />
+              <p className="text-xs text-slate-500 mt-3">
+                Drafts are point-in-time snapshots — sent email/SMS, published social posts and print never update automatically.
+                The public sale page is the current digital truth. SMS here is a DRAFT only: EstateSalen does not send SMS.
+              </p>
             </div>
 
             <div className="grid gap-4 sm:grid-cols-2">
@@ -220,15 +300,25 @@ export default function MarketingKit() {
                 <Link to={`/SalePublication?saleId=${saleId}`}><Button variant="outline" size="sm">Open Sale Publication</Button></Link>
               </div>
 
-              <div className="bg-white border border-slate-200 rounded-lg p-5">
-                <div className="font-semibold text-slate-900 mb-2 flex items-center gap-2"><Package className="w-4 h-4 text-cyan-700" /> Featured merchandise</div>
-                {((sale && sale.featured_items) || []).length > 0 ? (
-                  <ul className="text-sm text-slate-600 space-y-1">
-                    {sale.featured_items.slice(0, 6).map((f, i) => <li key={i}>• {f.name || f.title}{f.estimated_value ? ' (recorded value shown on the sale page)' : ''}</li>)}
-                  </ul>
-                ) : <p className="text-sm text-slate-400">No featured items on this sale yet — add them in the sale editor.</p>}
-              </div>
+              <FeaturedItemsCard
+                items={saleItems}
+                featured={featuredPicks}
+                warnings={availabilityWarnings}
+                onSave={saveFeaturedItems}
+                saving={savingFeatured}
+              />
             </div>
+
+            <FinalReviewCard
+              review={review}
+              finalReview={kit && kit.final_review}
+              onApprove={approveFinalReview}
+              approving={approving}
+            />
+
+            {sale && ['completed', 'archived'].includes(sale.status) && (
+              <PostSaleReviewCard saleId={sale.id} />
+            )}
 
             <div className="bg-white border border-slate-200 rounded-lg p-5">
               <div className="font-semibold text-slate-900 mb-3">Mark components ready</div>

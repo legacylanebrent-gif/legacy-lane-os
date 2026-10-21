@@ -54,6 +54,39 @@
       "type": "boolean",
       "default": false
     },
+    "sms_marketing_opt_in": {
+      "type": "boolean",
+      "default": false,
+      "description": "Chapter 18 P1-2 \u2014 EXPLICIT SMS marketing consent, COMPLETELY SEPARATE from email consent. Email opt-in never authorizes SMS. Explicit opt-in only (never default true, never inferred from RSVP/attendance/purchase)."
+    },
+    "email_consent_source": {
+      "type": "string",
+      "description": "Chapter 18 P1-3 \u2014 provenance of the recorded EMAIL opt-in (where it was captured, e.g. operator_website_alerts, early_sign_in). Null = never recorded / unknown \u2014 unknown stays unknown; historical provenance is never fabricated."
+    },
+    "email_consent_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Chapter 18 P1-3 \u2014 when the EMAIL opt-in was captured, when recorded."
+    },
+    "email_opt_out_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Chapter 18 P1-3 \u2014 when the buyer withdrew EMAIL consent, when recorded."
+    },
+    "sms_consent_source": {
+      "type": "string",
+      "description": "Chapter 18 P1-3 \u2014 provenance of the recorded SMS opt-in. Null = unknown."
+    },
+    "sms_consent_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Chapter 18 P1-3 \u2014 when the SMS opt-in was captured, when recorded."
+    },
+    "sms_opt_out_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Chapter 18 P1-3 \u2014 when the buyer withdrew SMS consent, when recorded."
+    },
     "interest_categories": {
       "type": "array",
       "items": {

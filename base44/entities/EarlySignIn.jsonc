@@ -34,6 +34,25 @@
       "type": "string",
       "format": "date-time",
       "description": "When the user signed"
+    },
+    "discovery_source": {
+      "type": "string",
+      "enum": [
+        "estate_sale_listing_site",
+        "email",
+        "sms",
+        "facebook",
+        "instagram",
+        "other_social",
+        "sign",
+        "qr",
+        "referral",
+        "walk_by",
+        "other",
+        "unknown"
+      ],
+      "default": "unknown",
+      "description": "Chapter 18 P1-36/P1-37 \u2014 how this attendee says they found THIS sale: an EXPLICIT attendee response only (deterministic evidence). Campaign causality is NEVER inferred from timing. unknown is honest and valid \u2014 never substituted with an assumption."
     }
   },
   "required": [

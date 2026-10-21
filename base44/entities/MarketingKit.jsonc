@@ -1,7 +1,7 @@
 {
   "name": "MarketingKit",
   "type": "object",
-  "description": "Chapter 7 P2 \u2014 per-sale MARKETING KIT orchestration record. The kit is PREPARATION, never publication: it coordinates existing marketing surfaces (sale page, social, email, SMS, QR, printable signs, featured merchandise) around ONE canonical source of truth (Company identity, EstateSale, Items, OperatorService). Drafts are generated from verified records only and always remain DRAFT until the operator acts \u2014 every publish/send still happens through its own existing system. PHOTO APPROVAL: the smallest useful marketing-approval state lives here as approved_photo_indexes \u2014 kit content uses ONLY explicitly approved sale photos (Chapter 6 sensitive-material guardrails respected; nothing is assumed public-safe). Publication statuses of existing systems (SocialPost, campaigns, sale page) are read LIVE from those systems \u2014 never duplicated here.",
+  "description": "Chapter 7 P2 / Chapter 18 P1 \u2014 per-sale MARKETING KIT orchestration record. The kit is PREPARATION, never publication: it coordinates existing marketing surfaces (sale page, social, email, SMS, QR, printable signs, featured merchandise) around ONE canonical source of truth (Company identity, EstateSale, Items, OperatorService). Drafts are generated from verified records only and always remain DRAFT until the operator acts \u2014 every publish/send still happens through its own existing system. PHOTO APPROVAL: the smallest useful marketing-approval state lives here as approved_photo_indexes \u2014 kit content uses ONLY explicitly approved sale photos (Chapter 6 sensitive-material guardrails respected; nothing is assumed public-safe). Publication statuses of existing systems (SocialPost, campaigns, sale page) are read LIVE from those systems \u2014 never duplicated here. Chapter 18 P1 adds canonical featured-Item picks (featured_item_ids) and the operator's final accuracy review (final_review) \u2014 the human approval boundary before marketing goes out.",
   "properties": {
     "sale_id": {
       "type": "string",
@@ -73,16 +73,42 @@
     },
     "sms_draft": {
       "type": "string",
-      "description": "SMS content DRAFT. SMS SENDING IS NOT AVAILABLE PRE-LAUNCH \u2014 this is content preparation only; the kit never sends and never implies send capability."
+      "description": "SMS content DRAFT ONLY (Chapter 18 P1-25). EstateSalen has NO SMS delivery \u2014 this is content preparation for use through an operator's own approved messaging channel; the kit never sends and never implies send capability."
     },
     "qr_url": {
       "type": "string",
       "description": "Canonical public destination the kit's QR code points at (the sale's public page on EstateSalen). Deterministic \u2014 derived from the sale, never invented."
     },
+    "featured_item_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Chapter 18 P1-15/P1-18 \u2014 canonical Item IDs the operator picked as merchandise highlights for marketing. Deterministic availability checks run against these: an Item that is sold/unavailable surfaces a REMOVE/UPDATE warning on future material. Sent/published external content is a snapshot and cannot be recalled."
+    },
+    "final_review": {
+      "type": "object",
+      "default": {},
+      "description": "Chapter 18 P1-14/P1-45 \u2014 the operator's FINAL ACCURACY REVIEW approval: the human boundary before marketing goes out. Approval is always an explicit human action; AI never approves.",
+      "properties": {
+        "approved_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "approved_by": {
+          "type": "string",
+          "description": "User ID of the approving operator."
+        },
+        "approved_by_name": {
+          "type": "string"
+        }
+      }
+    },
     "component_status": {
       "type": "object",
       "default": {},
-      "description": "Per-component PREPARATION state of the kit: not_created | draft | ready. This tracks kit preparation only \u2014 publication states live in their own systems (SocialPost, campaigns, sale page) and are read live.",
+      "description": "Per-component PREPARATION state of the kit: not_created | draft | ready. This tracks kit preparation only \u2014 publication states live in their own systems (SocialPost, campaigns, sale page) and are read live. final_review = ready means the operator approved the final accuracy review.",
       "properties": {
         "description": {
           "type": "string",
@@ -133,6 +159,14 @@
           ]
         },
         "featured": {
+          "type": "string",
+          "enum": [
+            "not_created",
+            "draft",
+            "ready"
+          ]
+        },
+        "final_review": {
           "type": "string",
           "enum": [
             "not_created",

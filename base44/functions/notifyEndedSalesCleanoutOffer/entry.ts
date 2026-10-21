@@ -1,5 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
-import { isMarketingEmailAllowed } from '../../shared/consentGuard.ts';
+import { isOperatorNoticeEmailAllowed } from '../../shared/consentGuard.ts';
 
 Deno.serve(async (req) => {
     try {
@@ -84,8 +84,9 @@ Deno.serve(async (req) => {
             });
 
             // ── Send email ──
+            // Operator service notice (not consumer marketing): opt-out only
             const emailAllowed = operator.email
-                ? await isMarketingEmailAllowed(base44, operator.id)
+                ? await isOperatorNoticeEmailAllowed(base44, operator.id)
                 : false;
             if (emailAllowed) {
                 const emailBody = `<!DOCTYPE html>

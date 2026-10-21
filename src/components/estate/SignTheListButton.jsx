@@ -27,6 +27,23 @@ function isInProgress(d, now) {
   return now >= times.start && now <= times.end;
 }
 
+// Chapter 18 P1-36 — explicit attendee response only; unknown is honest and
+// is never substituted with an assumption. Campaign causality is never inferred.
+const DISCOVERY_SOURCES = [
+  ['unknown', 'How did you find this sale? (optional)'],
+  ['estate_sale_listing_site', 'Estate sale listing site'],
+  ['email', 'Email alert'],
+  ['sms', 'Text message'],
+  ['facebook', 'Facebook'],
+  ['instagram', 'Instagram'],
+  ['other_social', 'Other social media'],
+  ['sign', 'Saw a sign'],
+  ['qr', 'Scanned a QR code'],
+  ['referral', 'Referral / word of mouth'],
+  ['walk_by', 'Walked / drove by'],
+  ['other', 'Other'],
+];
+
 function getAvailableSaleDays(saleDates) {
   if (!saleDates?.length) return [];
   const now = new Date();
@@ -86,10 +103,12 @@ export default function SignTheListButton({ saleId, saleTitle, saleDates, user, 
     setMySignUps(existing);
   };
 
-  // Chapter 7 P0 — marketing consent follows the channel and is NEVER inferred
-  // from signing the list. This optional, never-pre-checked checkbox records
-  // the buyer's EXPLICIT opt-in into the canonical preference records only.
+  // Chapter 7 P0 / Chapter 18 P1-1..P1-3 — marketing consent follows the
+  // channel and is NEVER inferred from signing the list. This optional,
+  // never-pre-checked checkbox records the buyer's EXPLICIT opt-in into the
+  // canonical records only — with provenance (source + timestamp).
   const [notifyOptIn, setNotifyOptIn] = useState(false);
+  const [discoverySource, setDiscoverySource] = useState('unknown');
   const recordExplicitConsent = async (u) => {
     try {
       const prefs = await base44.entities.EmailPreferences.filter({ user_id: u.id });
@@ -100,6 +119,35 @@ export default function SignTheListButton({ saleId, saleTitle, saleDates, user, 
       const np = await base44.entities.NotificationPreference.filter({ user_id: u.id });
       if (np.length) await base44.entities.NotificationPreference.update(np[0].id, { sale_alert_enabled: true, sale_alert_email: true });
       else await base44.entities.NotificationPreference.create({ user_id: u.id, sale_alert_enabled: true, sale_alert_email: true });
+    } catch (e) { /* non-fatal */ }
+    // Chapter 18 P1 — the affirmative, default-false opt-in the consent guard
+    // trusts lives on the canonical buyer profile (ConsumerMarketingProfile),
+    // recorded with provenance. Existing consent is never downgraded.
+    try {
+      const now = new Date().toISOString();
+      const profiles = await base44.entities.ConsumerMarketingProfile.filter({ email: u.email });
+      const mine = (profiles || []).find(p => p.user_id === u.id) || (profiles || [])[0];
+      if (mine && (mine.created_by_id === u.id || mine.user_id === u.id)) {
+        await base44.entities.ConsumerMarketingProfile.update(mine.id, {
+          estate_sale_alerts_opt_in: true,
+          email_consent_source: mine.email_consent_source || 'early_sign_in',
+          email_consent_at: mine.email_consent_at || now,
+          user_id: mine.user_id || u.id,
+          updated_at: now,
+        });
+      } else {
+        await base44.entities.ConsumerMarketingProfile.create({
+          email: u.email,
+          user_id: u.id,
+          first_name: (u.full_name || '').split(' ')[0] || null,
+          estate_sale_alerts_opt_in: true,
+          email_consent_source: 'early_sign_in',
+          email_consent_at: now,
+          source: 'sale_page',
+          created_at: now,
+          updated_at: now,
+        });
+      }
     } catch (e) { /* non-fatal */ }
   };
 
@@ -129,6 +177,7 @@ export default function SignTheListButton({ saleId, saleTitle, saleDates, user, 
         user_id: user.id,
         user_name: user.full_name || user.email,
         signed_at: new Date().toISOString(),
+        discovery_source: discoverySource,
       });
 
       if (notifyOptIn) await recordExplicitConsent(user);
@@ -219,6 +268,7 @@ export default function SignTheListButton({ saleId, saleTitle, saleDates, user, 
         <input type="checkbox" checked={notifyOptIn} onChange={e => setNotifyOptIn(e.target.checked)} />
         Keep me posted about sales like this (optional)
       </label>
+      <DiscoverySourceSelect value={discoverySource} onChange={setDiscoverySource} />
       </>
     );
   }
@@ -265,12 +315,30 @@ export default function SignTheListButton({ saleId, saleTitle, saleDates, user, 
         </div>
       )}
       {unsignedDays.length > 0 && (
-        <label className="flex items-center gap-2 text-xs text-slate-500 justify-center">
-          <input type="checkbox" checked={notifyOptIn} onChange={e => setNotifyOptIn(e.target.checked)} />
-          Keep me posted about sales like this (optional)
-        </label>
+        <>
+          <label className="flex items-center gap-2 text-xs text-slate-500 justify-center">
+            <input type="checkbox" checked={notifyOptIn} onChange={e => setNotifyOptIn(e.target.checked)} />
+            Keep me posted about sales like this (optional)
+          </label>
+          <DiscoverySourceSelect value={discoverySource} onChange={setDiscoverySource} />
+        </>
       )}
     </div>
+  );
+}
+
+function DiscoverySourceSelect({ value, onChange }) {
+  return (
+    <select
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      aria-label="How did you find this sale?"
+      className="w-full text-xs text-slate-500 border border-slate-200 rounded-md px-2 py-1.5 bg-white"
+    >
+      {DISCOVERY_SOURCES.map(([v, label]) => (
+        <option key={v} value={v}>{label}</option>
+      ))}
+    </select>
   );
 }
 

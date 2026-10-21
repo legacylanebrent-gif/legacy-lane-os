@@ -10,6 +10,7 @@ import { base44 } from '@/api/base44Client';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import BuyerDetailDrawer from '@/components/buyers/BuyerDetailDrawer';
+import BuyerMatchPanel from '@/components/buyers/BuyerMatchPanel';
 import { Loader2, Mail, MessageSquare, Ban, Crown, Users, Star } from 'lucide-react';
 
 const FILTERS = [
@@ -77,14 +78,19 @@ export default function BuyerAudience() {
       </p>
 
       {totals && (
-        <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 mb-5">
+        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3 mb-5">
           <SummaryCard label="Audience" value={totals.audience} />
           <SummaryCard label="Email eligible" value={totals.email_eligible} />
           <SummaryCard label="SMS eligible" value={totals.sms_eligible} />
+          <SummaryCard label="Known interests" value={totals.interests_known} />
+          <SummaryCard label="Repeat attendees" value={totals.repeat_attendees} />
+          <SummaryCard label="Purchasers" value={totals.purchasers} />
           <SummaryCard label="VIP guests" value={totals.vip} />
           <SummaryCard label="Followers" value={totals.followers} />
         </div>
       )}
+
+      <BuyerMatchPanel />
 
       <div className="flex flex-wrap gap-2 mb-4">
         {FILTERS.map(f => (
@@ -139,6 +145,10 @@ export default function BuyerAudience() {
                           : null}
                         {!b.email_ok && !b.sms_ok && <Badge variant="outline" className="text-slate-400 text-[11px]"><Ban className="w-3 h-3 mr-0.5" />No marketing consent</Badge>}
                         {b.vip && <Badge className="bg-amber-100 text-amber-800 border-amber-200 text-[11px]">VIP</Badge>}
+                        {b.email_ok && b.consent && b.consent.email && b.consent.email.source && (
+                          <span className="text-[10px] text-slate-400">opt-in: {b.consent.email.source}{b.identity_note ? ' · ' + b.identity_note : ''}</span>
+                        )}
+                        {!b.email_ok && b.identity_note && <span className="text-[10px] text-slate-400">{b.identity_note}</span>}
                       </div>
                     </td>
                     <td className="px-3 py-2.5 max-w-[200px]">

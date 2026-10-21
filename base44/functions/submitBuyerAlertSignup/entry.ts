@@ -67,10 +67,21 @@ export default async function(req) {
     let profile;
     const now = new Date().toISOString();
     if (existing) {
+      // Chapter 18 P1-3 — consent provenance is recorded when a flag is
+      // captured for the first time; existing consent is never downgraded
+      // and historical provenance is never fabricated.
+      const emailFirstTime = alerts && existing.estate_sale_alerts_opt_in !== true;
+      const smsFirstTime = sms && existing.sms_marketing_opt_in !== true;
       profile = await service.entities.ConsumerMarketingProfile.update(existing.id, {
         estate_sale_alerts_opt_in: existing.estate_sale_alerts_opt_in === true ? true : alerts,
         global_marketing_opt_in: existing.global_marketing_opt_in === true ? true : marketing,
         vip_alerts_opt_in: existing.vip_alerts_opt_in === true ? true : alerts,
+        // P1-2 — SMS consent is captured and stored COMPLETELY separately.
+        sms_marketing_opt_in: existing.sms_marketing_opt_in === true ? true : sms,
+        email_consent_source: emailFirstTime ? 'operator_website_alerts' : (existing.email_consent_source || null),
+        email_consent_at: emailFirstTime ? now : (existing.email_consent_at || null),
+        sms_consent_source: smsFirstTime ? 'operator_website_alerts' : (existing.sms_consent_source || null),
+        sms_consent_at: smsFirstTime ? now : (existing.sms_consent_at || null),
         phone: str(body.phone, 40) || existing.phone || null,
         zip_code: str(body.zip_code, 20) || existing.zip_code || null,
         preferred_radius_miles: Number.isFinite(radius) && radius > 0 ? radius : (existing.preferred_radius_miles || 25),
@@ -88,6 +99,11 @@ export default async function(req) {
         estate_sale_alerts_opt_in: alerts,
         global_marketing_opt_in: marketing,
         vip_alerts_opt_in: alerts,
+        sms_marketing_opt_in: sms,
+        email_consent_source: alerts ? 'operator_website_alerts' : null,
+        email_consent_at: alerts ? now : null,
+        sms_consent_source: sms ? 'operator_website_alerts' : null,
+        sms_consent_at: sms ? now : null,
         source: 'operator_page',
         created_at: now,
         updated_at: now

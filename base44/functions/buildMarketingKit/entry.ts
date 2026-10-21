@@ -16,7 +16,7 @@ import { sanitizeMarketingText } from '../../shared/brandTruthGuard.ts';
 import { jerr, pageOf, cap, loadAuthorizedSale } from '../../shared/saleAccess.ts';
 
 const PUBLIC_APP_URL = 'https://estatesalen.com';
-const COMPONENTS = ['description', 'social', 'email', 'sms', 'qr', 'signs', 'featured'];
+const COMPONENTS = ['description', 'social', 'email', 'sms', 'qr', 'signs', 'featured', 'final_review'];
 const STATUSES = ['not_created', 'draft', 'ready'];
 
 export default async function(req) {
@@ -32,8 +32,10 @@ export default async function(req) {
     if (action === 'approve_photos') return await approvePhotos(service, user, body);
     if (action === 'save_drafts') return await saveDrafts(service, user, body);
     if (action === 'set_component_status') return await setComponentStatus(service, user, body);
+    if (action === 'save_featured_items') return await saveFeaturedItems(service, user, body);
+    if (action === 'approve_final_review') return await approveFinalReview(service, user, body);
     if (action === 'get') return await get(service, user, body);
-    return jerr('unknown_action', 'Supported actions: build, approve_photos, save_drafts, set_component_status, get', 400);
+    return jerr('unknown_action', 'Supported actions: build, approve_photos, save_drafts, set_component_status, save_featured_items, approve_final_review, get', 400);
   } catch (error) {
     console.error('buildMarketingKit error:', error && error.message);
     return jerr('internal_error', 'Unexpected error', 500);
@@ -45,6 +47,95 @@ const loadSale = loadAuthorizedSale;
 async function findKit(service, saleId) {
   const page = await service.entities.MarketingKit.filter({ sale_id: saleId }, { limit: 5 });
   return pageOf(page)[0] || null;
+}
+
+// ── CHAPTER 18 P1-11..P1-13 — DETERMINISTIC LISTING COMPLETENESS ────────────
+// No AI, no percentage: real publication BLOCKERS are distinguished from
+// quality WARNINGS, and warnings never block publishing.
+function computeListingCompleteness(sale, items) {
+  const blockers = [];
+  const warnings = [];
+  const dates = (sale.sale_dates || []).filter(d => d && d.date);
+  if (dates.length === 0) {
+    blockers.push({ field: 'sale_dates', issue: 'No sale dates are set.' });
+  } else {
+    const noHours = dates.filter(d => !d.start_time || !d.end_time);
+    if (noHours.length > 0) blockers.push({ field: 'hours', issue: `${noHours.length} sale day(s) have no start/end hours.` });
+  }
+  const addr = sale.property_address || {};
+  if (!addr.city || !addr.state) blockers.push({ field: 'location', issue: 'Public location (city/state) is missing.' });
+  const eligible = eligiblePhotos(sale);
+  if (eligible.length === 0) blockers.push({ field: 'photos', issue: 'No marketing-eligible public photos.' });
+  if (!(sale.categories || []).length && !items.length) warnings.push('No categories or merchandise recorded yet — the listing will be vague.');
+  if (eligible.length > 0 && eligible.length < 3) warnings.push('Few marketing-eligible photos (under 3).');
+  if (!cap(sale.description, 10)) warnings.push('No sale description.');
+  if (!(sale.payment_methods || []).length) warnings.push('No payment methods shown to buyers.');
+  if (!((sale.featured_items || []).length)) warnings.push('No featured merchandise highlights.');
+  const state = blockers.length > 0 ? 'INCOMPLETE' : warnings.length > 0 ? 'READY_WITH_WARNINGS' : 'READY';
+  return { state, blockers, warnings, checked_at: new Date().toISOString() };
+}
+
+async function loadSaleItems(service, saleId) {
+  const page = await service.entities.Item.filter({ estate_sale_id: saleId }, { limit: 500 }).catch(() => null);
+  return page ? pageOf(page) : [];
+}
+
+// ── CHAPTER 18 P1-15/P1-18 — FEATURED ITEM CONFLICT (deterministic) ──────────
+// Canonical picks are checked against CURRENT availability; an unavailable
+// pick surfaces a REMOVE/UPDATE warning for FUTURE material. Already-sent or
+// published external content is a snapshot — never claimed to be recallable.
+async function featuredItemStatuses(service, kit, saleItems) {
+  const ids = ((kit && kit.featured_item_ids) || []).slice(0, 25);
+  if (ids.length === 0) return [];
+  const byId = new Map(saleItems.map(i => [i.id, i]));
+  const missing = ids.filter(id => !byId.has(id));
+  if (missing.length) {
+    const page = await service.entities.Item.filter({ id: { $in: missing } }, { limit: 25 }).catch(() => null);
+    for (const it of (page ? pageOf(page) : [])) byId.set(it.id, it);
+  }
+  return ids.map(id => {
+    const it = byId.get(id);
+    return {
+      id,
+      title: (it && it.title) || null,
+      item_number: (it && it.item_number) || null,
+      price: (it && typeof it.price === 'number') ? it.price : null,
+      status: (it && it.status) || null,
+      available: !it || it.status === 'available' ? !!it : false
+    };
+  });
+}
+
+function availabilityWarnings(featured) {
+  return featured
+    .filter(f => f.status && f.status !== 'available')
+    .map(f => ({
+      item_id: f.id,
+      title: f.title,
+      status: f.status,
+      action: 'REMOVE_OR_UPDATE_FROM_FUTURE_MATERIAL',
+      note: 'Already-sent email/SMS, published social posts and print are snapshots and cannot be recalled.'
+    }));
+}
+
+// ── CHAPTER 18 P1-14 — FINAL ACCURACY REVIEW assembly ───────────────────────
+// Current canonical truth only — assembled at read time, never a stored copy.
+function buildReview(sale, items, featured, kit) {
+  const addr = sale.property_address || {};
+  return {
+    dates: (sale.sale_dates || []).slice(0, 8),
+    location: { city: addr.city || null, state: addr.state || null },
+    payment_methods: (sale.payment_methods || []).slice(0, 6),
+    parking_info: cap(sale.parking_info, 200) || null,
+    special_notes: cap(sale.special_notes, 200) || null,
+    categories: (sale.categories || []).slice(0, 10),
+    discount_stages: (sale.discount_schedule || []).slice(0, 4).map(d => ({ name: d.name || null, percent: typeof d.discount_percent === 'number' ? d.discount_percent : null })),
+    pickup_window: cap(sale.pickup_plan && sale.pickup_plan.pickup_window, 120) || null,
+    featured,
+    approved_photo_count: kit ? (kit.approved_photo_indexes || []).length : 0,
+    eligible_photo_count: eligiblePhotos(sale).length,
+    item_count: items.length
+  };
 }
 
 function eligiblePhotos(sale) {
@@ -78,7 +169,14 @@ function saleFacts(sale, company, catalog, featured) {
       sale_type: cap(sale.sale_type, 60) || null,
       parking_info: cap(sale.parking_info, 200) || null,
       special_notes: cap(sale.special_notes, 200) || null,
-      payment_methods: (sale.payment_methods || []).slice(0, 5)
+      payment_methods: (sale.payment_methods || []).slice(0, 5),
+      // Chapter 18 P1-30 — canonical policy/pickup/discount truth (never copied
+      // stale text; drafts always regenerate from the current records).
+      discount_stages: (sale.discount_schedule || []).slice(0, 4).map(d => ({
+        name: cap(d.name, 40) || null,
+        percent: typeof d.discount_percent === 'number' ? d.discount_percent : null
+      })),
+      pickup_window: cap(sale.pickup_plan && sale.pickup_plan.pickup_window, 120) || null
     },
     services: catalog.slice(0, 8).map(s => cap(s, 60)),
     featured_items: featured.slice(0, 6).map(f => cap(f && (f.name || f.title), 80)).filter(Boolean)
@@ -199,7 +297,13 @@ async function build(base44, service, user, body) {
       ...payload
     });
 
-  return Response.json({ ok: true, kit, removals, facts_used: facts });
+  const items = await loadSaleItems(service, sale.id);
+  const featuredPicks = await featuredItemStatuses(service, kit, items);
+  return Response.json({
+    ok: true, kit, removals, facts_used: facts,
+    listing_completeness: computeListingCompleteness(sale, items),
+    featured: featuredPicks, availability_warnings: availabilityWarnings(featuredPicks)
+  });
 }
 
 async function approvePhotos(service, user, body) {
@@ -259,6 +363,56 @@ async function setComponentStatus(service, user, body) {
 async function get(service, user, body) {
   const loaded = await loadSale(service, user, body.sale_id);
   if (loaded.error) return loaded.error;
-  const kit = await findKit(service, loaded.sale.id);
-  return Response.json({ ok: true, kit, eligible_photos: eligiblePhotos(loaded.sale) });
+  const sale = loaded.sale;
+  const kit = await findKit(service, sale.id);
+  const items = await loadSaleItems(service, sale.id);
+  const featuredPicks = await featuredItemStatuses(service, kit, items);
+  return Response.json({
+    ok: true, kit, eligible_photos: eligiblePhotos(sale),
+    listing_completeness: computeListingCompleteness(sale, items),
+    featured: featuredPicks,
+    availability_warnings: availabilityWarnings(featuredPicks),
+    review: buildReview(sale, items, featuredPicks, kit)
+  });
+}
+
+// Chapter 18 P1-15 — operator picks canonical Items of THIS sale as
+// marketing highlights (server-side verified against the sale's items).
+async function saveFeaturedItems(service, user, body) {
+  const loaded = await loadSale(service, user, body.sale_id);
+  if (loaded.error) return loaded.error;
+  const items = await loadSaleItems(service, loaded.sale.id);
+  const saleItemIds = new Set(items.map(i => i.id));
+  const picks = (Array.isArray(body.featured_item_ids) ? body.featured_item_ids : [])
+    .map(id => String(id)).filter(id => saleItemIds.has(id)).slice(0, 12);
+  const existing = await findKit(service, loaded.sale.id);
+  const kit = existing
+    ? await service.entities.MarketingKit.update(existing.id, { featured_item_ids: picks })
+    : await service.entities.MarketingKit.create({
+      sale_id: loaded.sale.id, operator_id: loaded.sale.operator_id, company_id: loaded.sale.company_id || null,
+      sale_team_ids: loaded.sale.sale_team || [], featured_item_ids: picks,
+      component_status: {}, qr_url: `${PUBLIC_APP_URL}/EstateSaleDetail?id=${loaded.sale.id}`
+    });
+  const featuredPicks = await featuredItemStatuses(service, kit, items);
+  return Response.json({ ok: true, kit, featured: featuredPicks, availability_warnings: availabilityWarnings(featuredPicks) });
+}
+
+// Chapter 18 P1-14/P1-45 — explicit HUMAN approval of the final accuracy
+// review. AI never approves; this is always a logged operator action.
+async function approveFinalReview(service, user, body) {
+  const loaded = await loadSale(service, user, body.sale_id);
+  if (loaded.error) return loaded.error;
+  const existing = await findKit(service, loaded.sale.id);
+  if (!existing) return jerr('kit_not_found', 'Build the kit first', 404);
+  const cs = { ...(existing.component_status || {}) };
+  cs.final_review = 'ready';
+  const kit = await service.entities.MarketingKit.update(existing.id, {
+    component_status: cs,
+    final_review: {
+      approved_at: new Date().toISOString(),
+      approved_by: user.id,
+      approved_by_name: cap(user.full_name, 80) || null
+    }
+  });
+  return Response.json({ ok: true, kit });
 }
