@@ -1,11 +1,11 @@
 {
   "name": "SaleConversionPipeline",
   "type": "object",
-  "description": "Canonical PRE-SALE opportunity record and, once linked, the settlement/commission agreement record. Chapter 4 P1 adds the pre-sale economics block: contractual minimum fee, expected additional service revenue, category-level estimated labor, estimated direct costs, and the operator's internal minimum-revenue/minimum-contribution thresholds. Projected figures are estimates for evaluation only \u2014 authoritative actuals derive from settlement/closeout. Chapter 5 P1 adds the operational distance snapshot (distance_miles, projected from the linked EstateSale when the sale already carries one) and the structured client-fit assessment that feeds the Sale Acceptance Scorecard as advisory, explainable input. Chapter 9 P1 adds the client-facing estimated sale RANGE (low/high \u2014 never auto-invented from a single estimate), the owner-time flag on projected labor rows, and ACCEPTED COMMERCIAL TERMS metadata: the deal remains the ONE settlement-facing source of commercial truth, and commercial_terms_accepted_at records when the client accepted it \u2014 the accepted_terms_snapshot preserves exactly what was accepted so later deal edits never rewrite accepted history.",
+  "description": "Canonical PRE-SALE opportunity record and, once linked, the settlement/commission agreement record. Chapter 4 P1 adds the pre-sale economics block: contractual minimum fee, expected additional service revenue, category-level estimated labor, estimated direct costs, and the operator's internal minimum-revenue/minimum-contribution thresholds. Projected figures are estimates for evaluation only \u2014 authoritative actuals derive from settlement/closeout. Chapter 5 P1 adds the operational distance snapshot (distance_miles, projected from the linked EstateSale when the sale already carries one) and the structured client-fit assessment that feeds the Sale Acceptance Scorecard as advisory, explainable input. Chapter 9 P1 adds the client-facing estimated sale RANGE (low/high \u2014 never auto-invented from a single estimate), the owner-time flag on projected labor rows, and ACCEPTED COMMERCIAL TERMS metadata: the deal remains the ONE settlement-facing source of commercial truth, and commercial_terms_accepted_at records when the client accepted it \u2014 the accepted_terms_snapshot preserves exactly what was accepted so later deal edits never rewrite accepted history. Chapter 10 P1 adds CRM DISCIPLINE to this same record (no second CRM): a canonical NEXT ACTION (what happens next, when \u2014 deterministic seed from an inquiry, operator-owned thereafter), distinct OUTCOME stages (CONTACTED progression; NURTURE = not ready but not lost; REFERRED = directed elsewhere with destination/provenance; LOST with a structured reason), INQUIRY PROVENANCE (source system, source record, inquiry timestamp, first meaningful HUMAN response timestamp), and an optional client Contact link for exact-identity continuity. Inquiry capture NEVER grants marketing consent; consent lives only where it was explicitly captured.",
   "properties": {
     "operator_id": {
       "type": "string",
-      "description": "Estate Sale Company Owner user ID"
+      "description": "Estate Sale Company Owner user ID \u2014 the ACCOUNTABLE OWNER of this opportunity (operational ownership, not just security ownership)."
     },
     "lead_id": {
       "type": "string",
@@ -19,14 +19,18 @@
       "type": "string",
       "enum": [
         "new_lead",
+        "contacted",
         "consultation_scheduled",
         "contract_signed",
         "setup_in_progress",
         "sale_live",
         "completed",
-        "lost"
+        "lost",
+        "referred",
+        "nurture"
       ],
-      "default": "new_lead"
+      "default": "new_lead",
+      "description": "Chapter 10 P1 \u2014 progression AND outcome truth on one axis. new_lead \u2192 contacted \u2192 consultation_scheduled \u2192 contract_signed \u2192 setup_in_progress \u2192 sale_live \u2192 completed (WON). Terminal outcomes are DISTINCT by design: lost (with structured lost_reason), referred (Chapter 10: the family was directed to a more appropriate professional/service \u2014 NOT lost; see referred_* provenance), nurture (Chapter 10: legitimate opportunity, not ready now, future relationship stays active \u2014 NOT lost, NOT stale, and excluded from immediate active-work views). NOT READY IS NOT LOST. REFERRED IS NOT LOST."
     },
     "client_name": {
       "type": "string"
@@ -36,6 +40,10 @@
     },
     "client_phone": {
       "type": "string"
+    },
+    "client_contact_id": {
+      "type": "string",
+      "description": "Chapter 10 P1 \u2014 optional canonical Contact link for the seller PERSON (exact-identity continuity across inquiries and future engagements). Linked by exact email/phone match at bridge time; never fuzzy-merged. The deal fields above remain the operational snapshot."
     },
     "property_address": {
       "type": "string"
@@ -289,6 +297,95 @@
     "notes": {
       "type": "string"
     },
+    "next_action": {
+      "type": "string",
+      "description": "Chapter 10 P1 \u2014 THE canonical WHAT HAPPENS NEXT for this opportunity ('Call seller', 'Follow up after family meeting', 'Contact after probate hearing', 'Check back in 60 days'). Null on an ACTIVE opportunity = NEEDS NEXT ACTION (surfaced as a strong operational warning). Never AI-invented: it is set by the operator or deterministically seeded at inquiry bridge time ('Respond to seller inquiry'). One next action at a time \u2014 completing it prompts the operator for the next."
+    },
+    "next_action_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Chapter 10 P1 \u2014 WHEN the next action is due. Past date with no completion = NEXT ACTION OVERDUE. Free-scheduled per the family's circumstances \u2014 never a forced cadence."
+    },
+    "next_action_completed_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Chapter 10 P1 \u2014 when the current next action was completed. Set on completion; replacing with the next action clears it. Operational history of past actions lives in Activity."
+    },
+    "lost_reason": {
+      "type": "string",
+      "enum": [
+        "client_chose_another_company",
+        "price_fee",
+        "not_enough_saleable_value",
+        "location",
+        "timing",
+        "client_not_ready",
+        "scope_mismatch",
+        "authority_family_issue",
+        "operator_capacity",
+        "no_response",
+        "alternative_service",
+        "other",
+        "unknown"
+      ],
+      "description": "Chapter 10 P1 \u2014 structured reason captured when stage becomes lost. CLIENT NOT READY should usually be NURTURE, and a more appropriate service should usually be REFERRED \u2014 the outcome dialog guides the operator there. Notes go in the deal notes."
+    },
+    "referred_to_contact_id": {
+      "type": "string",
+      "description": "Chapter 10 P1 \u2014 canonical Contact link for the professional/service the family was referred to (referred stage). Reuses Contact; no ReferralOut entity."
+    },
+    "referred_service": {
+      "type": "string",
+      "enum": [
+        "cleanout",
+        "donation",
+        "auction",
+        "consignment",
+        "mover",
+        "real_estate_agent",
+        "attorney",
+        "organizer",
+        "specialist",
+        "other"
+      ],
+      "description": "Chapter 10 P1 \u2014 service category the opportunity was referred to."
+    },
+    "referred_reason": {
+      "type": "string",
+      "description": "Chapter 10 P1 \u2014 why the opportunity was directed elsewhere (operator's words)."
+    },
+    "referred_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Chapter 10 P1 \u2014 when the referral-out was recorded."
+    },
+    "inquiry_source_type": {
+      "type": "string",
+      "enum": [
+        "operator_website",
+        "estatesalen_public",
+        "estate_transition",
+        "seo",
+        "manual",
+        "professional_referral",
+        "houszu"
+      ],
+      "description": "Chapter 10 P1 \u2014 provenance: WHICH SYSTEM captured the original inquiry that created this opportunity. Preserved so the operator can always answer WHERE DID THIS OPPORTUNITY COME FROM? Distinct from referral_source_type (Chapter 2: how the seller heard about the company, self-reported)."
+    },
+    "inquiry_source_record_id": {
+      "type": "string",
+      "description": "Chapter 10 P1 \u2014 ID of the original inquiry record (WebsiteLead / EstateTransitionLead) \u2014 the source-of-truth link back to the captured inquiry, its consent flags and its timestamps."
+    },
+    "inquiry_received_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Chapter 10 P1 \u2014 when the original inquiry arrived (bridge-time copy of the source record's creation). Null = inquiry capture time UNKNOWN (manually created opportunities)."
+    },
+    "first_meaningful_response_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Chapter 10 P1 \u2014 when the FIRST HUMAN/OPERATOR response occurred (set when the first call/email/SMS/meeting Activity is logged against this deal). Automated acknowledgments, system notifications and Customer.io ingestion NEVER count. Null = no human response recorded yet."
+    },
     "referral_source_type": {
       "type": "string",
       "enum": [
@@ -305,7 +402,7 @@
         "website",
         "other"
       ],
-      "description": "Chapter 2 P1 \u2014 structured source attribution: what kind of source introduced this seller opportunity. This is source tracking on the operator's own pipeline; it is NOT the agent/operator Referral Exchange."
+      "description": "Chapter 2 P1 \u2014 structured source attribution: what kind of source introduced this seller opportunity. This is source tracking on the operator's own pipeline; it is NOT the agent/operator Referral Exchange. SELF-REPORTED by the seller/operator \u2014 it is not click attribution."
     },
     "referral_source_name": {
       "type": "string",
@@ -388,12 +485,13 @@
         }
       }
     },
-    "lost_reason": {
-      "type": "string"
+    "lost_notes": {
+      "type": "string",
+      "description": "Chapter 10 P1 \u2014 operator notes captured at the LOST review (context, competitor if relevant, what could be reconsidered). Completes the interactive Lost Lead Review."
     },
     "actual_revenue": {
       "type": "number",
-      "description": "Deal-level actual revenue snapshot written by the settlement/closeout writer (mirrors EstateSale fields; EstateSale remains the canonical sale record)."
+      "description": "Deal-level actual revenue snapshot written by the settlement/closeout writer (mirrors EstateSale fields; EstateSale remains the canonical sale record). Chapter 10 source-to-revenue reporting reads this canonical figure."
     },
     "total_paid_to_client": {
       "type": "number",
