@@ -1,0 +1,238 @@
+{
+  "name": "SaleIssue",
+  "type": "object",
+  "description": "Chapter 13 P1 \u2014 AN IMPORTANT UNANSWERED OPERATIONAL QUESTION OR ISSUE THAT NEEDS RESOLUTION on a sale. It is deliberately NOT a SaleTask (work to do), NOT a SaleClientDecision (a matter requiring client/authority instruction), NOT a SaleNote (narrative team memory), and NOT a research flag (merchandise needing another look). It is the ONE new Chapter 13 operational entity: the home for unresolved questions that may block work ('Who is removing the piano?', 'Will the HOA permit Saturday?'). Resolution records REFERENCES to canonical destinations \u2014 answer only, a SaleClientDecision, a SaleTask, or both \u2014 final truth is never duplicated inside the issue. PENDING (unresolved) issues surface as operational warnings; an issue NEVER certifies, authorizes, or decides anything by itself.",
+  "properties": {
+    "sale_id": {
+      "type": "string",
+      "description": "EstateSale this issue belongs to."
+    },
+    "operator_id": {
+      "type": "string",
+      "description": "EstateSale.operator_id projection \u2014 sale owner (RLS anchor). Derived from the sale at creation."
+    },
+    "company_id": {
+      "type": "string",
+      "description": "EstateSale.company_id projection when present."
+    },
+    "sale_team_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "READ-SCOPE PROJECTION of EstateSale.sale_team for RLS. The sale remains the source of truth."
+    },
+    "title": {
+      "type": "string",
+      "description": "The question/issue in one line."
+    },
+    "description": {
+      "type": "string",
+      "description": "Context the operator wants to preserve \u2014 never a decision, never a diagnosis."
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "client_family",
+        "authority",
+        "property_access",
+        "merchandise",
+        "provider",
+        "timeline",
+        "marketing",
+        "pickup",
+        "disposition",
+        "financial_settlement",
+        "other"
+      ],
+      "default": "other",
+      "description": "Small practical vocabulary \u2014 which part of the project this question touches."
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "OPEN",
+        "WAITING",
+        "RESOLVED",
+        "CANCELLED"
+      ],
+      "default": "OPEN",
+      "description": "OPEN = needs attention. WAITING = waiting on client/external party (see waiting_on). RESOLVED = answered/resolved into canonical destinations (see resolution refs). CANCELLED = no longer relevant, kept for truth."
+    },
+    "waiting_on": {
+      "type": "string",
+      "enum": [
+        "client",
+        "family",
+        "external_provider",
+        "hoa_association",
+        "team",
+        "other"
+      ],
+      "description": "Who the issue is waiting on when status is WAITING \u2014 an honest external dependency, never an invention."
+    },
+    "owner_user_id": {
+      "type": "string",
+      "description": "Responsible operator/team user. Empty with WAITING status = waiting on an external party; unknown owner stays visible as an operational warning."
+    },
+    "owner_name": {
+      "type": "string",
+      "description": "Owner display-name snapshot at assignment."
+    },
+    "answer_by": {
+      "type": "string",
+      "format": "date",
+      "description": "When an answer is needed. Past date with an unresolved issue = ANSWER OVERDUE (deterministic display, never a deadline engine)."
+    },
+    "blocking_areas": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "pricing",
+          "research",
+          "photography",
+          "marketing",
+          "staging",
+          "sale_opening",
+          "pickup",
+          "cleanout_disposition",
+          "settlement",
+          "other"
+        ]
+      },
+      "default": [],
+      "description": "Which parts of the project this question may hold up \u2014 a plain descriptor for humans, plus SaleTask dependency links for real blocking."
+    },
+    "resolution": {
+      "type": "string",
+      "description": "The answer/resolution in the operator's words. Final truth (client decision, work) lives in the canonical destination records referenced below \u2014 never only here."
+    },
+    "resolution_source": {
+      "type": "string",
+      "enum": [
+        "answer_only",
+        "client_decision",
+        "task",
+        "decision_and_task",
+        "none"
+      ],
+      "description": "How the issue resolved: an answer only, a canonical SaleClientDecision, a SaleTask, or both. Recorded with the reference ids."
+    },
+    "linked_decision_id": {
+      "type": "string",
+      "description": "SaleClientDecision created as the canonical resolution, when the answer required a client decision."
+    },
+    "linked_task_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "SaleTask record(s) created as the operational resolution. Provenance flows the other way too \u2014 the created task carries source_type SALE_ISSUE."
+    },
+    "resolved_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "source_type": {
+      "type": "string",
+      "enum": [
+        "CONSULTATION",
+        "CLIENT_DECISION",
+        "SALE_NOTE",
+        "COMMUNICATION",
+        "ACCEPTANCE_CONDITION",
+        "MANUAL"
+      ],
+      "default": "MANUAL",
+      "description": "Where the issue came from (provenance \u2014 why does this issue exist?)."
+    },
+    "source_id": {
+      "type": "string",
+      "description": "Id of the source record when applicable."
+    },
+    "source_label": {
+      "type": "string",
+      "description": "Short excerpt/label of the source \u2014 no sensitive full communication text."
+    }
+  },
+  "required": [
+    "sale_id",
+    "title"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "data.operator_id": "{{user.id}}"
+        },
+        {
+          "data.sale_team_ids": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "$or": [
+        {
+          "data.operator_id": "{{user.id}}"
+        },
+        {
+          "data.sale_team_ids": {
+            "$in": [
+              "{{user.id}}"
+            ]
+          }
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "data.operator_id": "{{user.id}}"
+        },
+        {
+          "data.sale_team_ids": {
+            "$in": [
+              "{{user.id}}"
+            ]
+          }
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.operator_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

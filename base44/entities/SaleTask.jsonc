@@ -1,7 +1,7 @@
 {
   "name": "SaleTask",
   "type": "object",
-  "description": "Chapter 1 P1 \u2014 persisted operator task for the canonical SaleTasks workflow (15-step template). Adds accountability to the existing task system: assignee, due date, blocked state, priority, attention flag, and completion audit. NOT a parallel task-management application \u2014 SaleTasks (page) remains the single task surface.",
+  "description": "Chapter 1 P1 \u2014 persisted operator task for the canonical SaleTasks workflow (15-step template). Adds accountability to the existing task system: assignee, due date, blocked state, priority, attention flag, and completion audit. NOT a parallel task-management application \u2014 SaleTasks (page) remains the single task surface. Chapter 13 P1 adds the smallest real DEPENDENCY MODEL (blocked_by_task_ids / blocked_by_decision_ids / blocked_by_issue_ids \u2014 references, never a graph engine) and TASK PROVENANCE (source_type/source_id/source_label answers WHY DOES THIS TASK EXIST). The boolean blocked flag remains the display cache; when any dependency is unresolved the task is blocked and the UI shows WHAT IT IS WAITING FOR. Resolving all dependencies unblocks the task but NEVER auto-completes it.",
   "properties": {
     "sale_id": {
       "type": "string",
@@ -63,10 +63,58 @@
     "blocked": {
       "type": "boolean",
       "default": false,
-      "description": "Separate blocked flag \u2014 intentionally NOT a status, so not_started/in_progress/completed stay intact."
+      "description": "Separate blocked flag \u2014 intentionally NOT a status, so not_started/in_progress/completed stay intact. Chapter 13 P1: a display cache synced from the dependency fields below; the dependency references are the truth."
     },
     "blocked_reason": {
-      "type": "string"
+      "type": "string",
+      "description": "Human-readable 'waiting for' summary synced from the dependency fields (what/who it is waiting for)."
+    },
+    "blocked_by_task_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Chapter 13 P1 \u2014 this task waits on these SaleTask ids completing. Reference-only dependency \u2014 no graph engine, and a simple deterministic cycle guard prevents A\u2192B\u2192A loops."
+    },
+    "blocked_by_decision_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Chapter 13 P1 \u2014 this task waits on these SaleClientDecision ids being approved and resolved."
+    },
+    "blocked_by_issue_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Chapter 13 P1 \u2014 this task waits on these SaleIssue ids reaching RESOLVED/CANCELLED."
+    },
+    "source_type": {
+      "type": "string",
+      "enum": [
+        "CONSULTATION",
+        "CLIENT_DECISION",
+        "SALE_ISSUE",
+        "SALE_NOTE",
+        "COMMUNICATION",
+        "ACCEPTANCE_CONDITION",
+        "ONBOARDING_TEMPLATE",
+        "MANUAL"
+      ],
+      "default": "MANUAL",
+      "description": "Chapter 13 P1 \u2014 task PROVENANCE: why this task exists (a promise converted to work, an approved decision, an issue resolution, onboarding template, or manual)."
+    },
+    "source_id": {
+      "type": "string",
+      "description": "Id of the source record (note, decision, issue, activity...) when applicable."
+    },
+    "source_label": {
+      "type": "string",
+      "description": "Short excerpt/label of the source promise \u2014 no sensitive full communication text copied."
     },
     "attention": {
       "type": "boolean",

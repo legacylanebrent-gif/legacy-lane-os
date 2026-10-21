@@ -189,7 +189,7 @@
     },
     "site_assessment": {
       "type": "object",
-      "description": "Chapter 5 P1 \u2014 CANONICAL operational site assessment: practical property factors that affect the work, sale economics, and sale-day operations. This is the single editable copy (no second property/site entity, no deal-side duplicate). Captured at consultation/site visit via the sale editor. It is an operational assessment, NOT a home inspection and NOT the investor-oriented Property entity. Unknown defaults are honest: the system never guesses site conditions. Chapter 9 P1 adds access_details \u2014 the practical PRIVATE access plan (key/access method, alarm considerations, gate access, pets, association requirements, contractors, occupied/restricted areas, access windows).",
+      "description": "Chapter 5 P1 \u2014 CANONICAL operational site assessment: practical property factors that affect the work, sale economics, and sale-day operations. This is the single editable copy (no second property/site entity, no deal-side duplicate). Captured at consultation/site visit via the sale editor. It is an operational assessment, NOT a home inspection and NOT the investor-oriented Property entity. Unknown defaults are honest: the system never guesses site conditions. Chapter 9 P1 adds access_details \u2014 the practical PRIVATE access plan (key/access method, alarm considerations, gate access, pets, association requirements, contractors, occupied/restricted areas, access windows). Chapter 13 P1 PRIVACY: field-level read is restricted to the sale owner (operator), the creator, and platform admins \u2014 LEAST PRIVILEGE. Assignment to the sale team is NOT sufficient authorization to read the site assessment and its sensitive access plan (alarm/gate codes, key locations); the operator briefs staff through tasks and team-safe excluded-area records.",
       "properties": {
         "property_type": {
           "type": "string",
@@ -289,7 +289,7 @@
         },
         "access_details": {
           "type": "object",
-          "description": "Chapter 9 P1 \u2014 the practical property ACCESS PLAN for preparation and sale-day work: key/access method, alarm considerations, gate access, pets, association requirements, contractors, occupied areas, restricted rooms, access windows. HIGHLY SENSITIVE and PRIVATE: alarm codes, gate codes, and key locations must never be projected to proposals, agreements, public pages, Marketing Kit, case studies, or any AI context that does not need them. Client documents may reference RESPONSIBILITY for access without embedding codes or key locations (the agreement merge variable is access RESPONSIBILITIES only).",
+          "description": "Chapter 9 P1 \u2014 the practical property ACCESS PLAN for preparation and sale-day work: key/access method, alarm considerations, gate access, pets, association requirements, contractors, occupied areas, restricted rooms, access windows. HIGHLY SENSITIVE and PRIVATE: alarm codes, gate codes, and key locations must never be projected to proposals, agreements, public pages, Marketing Kit, case studies, or any AI context that does not need them. Chapter 13 P1: never readable by sale-team members through the sale record \u2014 least privilege; owner/admin only. Client documents may reference RESPONSIBILITY for access without embedding codes or key locations (the agreement merge variable is access RESPONSIBILITIES only).",
           "properties": {
             "key_access_method": {
               "type": "string",
@@ -364,22 +364,6 @@
                 },
                 {
                   "data.operator_id": "{{user.id}}"
-                }
-              ]
-            },
-            {
-              "$and": [
-                {
-                  "user_condition": {
-                    "role": "user"
-                  }
-                },
-                {
-                  "data.sale_team": {
-                    "$in": [
-                      "{{user.id}}"
-                    ]
-                  }
                 }
               ]
             },
@@ -491,6 +475,11 @@
           "thumbnail_url": {
             "type": "string",
             "description": "Pre-generated thumbnail URL"
+          },
+          "excluded_from_public": {
+            "type": "boolean",
+            "default": false,
+            "description": "Chapter 13 P1 \u2014 RETAINED-PRIVATE photo. Set when the client KEEPS this merchandise/photo (image-level KEEP merchandise decision). A retained/excluded photo is PRIVATE BY DEFAULT: it never appears in the public gallery, Marketing Kit, public website, or social imagery. Metadata flag only \u2014 existing production files are preserved, never duplicated or deleted."
           }
         }
       },
@@ -572,22 +561,6 @@
               ]
             },
             {
-              "$and": [
-                {
-                  "user_condition": {
-                    "role": "user"
-                  }
-                },
-                {
-                  "data.sale_team": {
-                    "$in": [
-                      "{{user.id}}"
-                    ]
-                  }
-                }
-              ]
-            },
-            {
               "user_condition": {
                 "role": "admin"
               }
@@ -627,22 +600,6 @@
               ]
             },
             {
-              "$and": [
-                {
-                  "user_condition": {
-                    "role": "user"
-                  }
-                },
-                {
-                  "data.sale_team": {
-                    "$in": [
-                      "{{user.id}}"
-                    ]
-                  }
-                }
-              ]
-            },
-            {
               "user_condition": {
                 "role": "admin"
               }
@@ -678,22 +635,6 @@
                 },
                 {
                   "data.operator_id": "{{user.id}}"
-                }
-              ]
-            },
-            {
-              "$and": [
-                {
-                  "user_condition": {
-                    "role": "user"
-                  }
-                },
-                {
-                  "data.sale_team": {
-                    "$in": [
-                      "{{user.id}}"
-                    ]
-                  }
                 }
               ]
             },
@@ -1318,6 +1259,148 @@
     "website_slug": {
       "type": "string",
       "description": "Public website URL slug (human-readable, normalized, URL-safe; Company-scoped unique; deterministic initial generation with collision-safe ordinal suffixes). Presentation/routing identity ONLY \u2014 never replaces the canonical Sale ID. Generated server-side."
+    },
+    "source_deal_id": {
+      "type": "string",
+      "description": "Chapter 13 P1 \u2014 ACTIVATION PROVENANCE: the SaleConversionPipeline deal this active project was activated from. The deal's estate_sale_id link points back here; this field lets the sale itself answer WHERE DID THIS ACTIVE PROJECT COME FROM? even before/without the deal link."
+    },
+    "activation": {
+      "type": "object",
+      "default": {},
+      "description": "Chapter 13 P1 \u2014 activation provenance snapshot (references only \u2014 immutable snapshot truth stays in the proposal/agreement records and is never copied here): deal, accepted proposal, executed agreement, when, and who activated.",
+      "properties": {
+        "deal_id": {
+          "type": "string"
+        },
+        "proposal_id": {
+          "type": "string",
+          "description": "The ACCEPTED SaleProposal at activation time, when one exists (reference, never a copy)."
+        },
+        "agreement_id": {
+          "type": "string",
+          "description": "The EXECUTED/READY SaleAgreement at activation time, when one exists (reference, never a copy)."
+        },
+        "activated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "activated_by": {
+          "type": "string"
+        },
+        "activated_by_name": {
+          "type": "string"
+        }
+      }
+    },
+    "communication_plan": {
+      "type": "object",
+      "default": {},
+      "description": "Chapter 13 P1 \u2014 the project's CLIENT COMMUNICATION PLAN: primary communication contact, preferred method, and update cadence. This is OPERATIONAL PREFERENCE ONLY \u2014 it is NEVER marketing consent, and an SMS preference is NEVER SMS marketing consent. Customer.io / marketing consent state is never created or changed by this field.",
+      "properties": {
+        "primary_contact_id": {
+          "type": "string",
+          "description": "Optional canonical Contact link for the primary communication contact."
+        },
+        "primary_contact_name": {
+          "type": "string",
+          "description": "Who the operator communicates with routinely (client or family member). INVOLVEMENT IS NOT AUTHORITY \u2014 the authorized decision-makers live in SaleAuthority."
+        },
+        "relationship": {
+          "type": "string",
+          "description": "Relationship to the client/estate (e.g. daughter, executor, attorney)."
+        },
+        "preferred_method": {
+          "type": "string",
+          "enum": [
+            "EMAIL",
+            "SMS",
+            "PHONE",
+            "OTHER"
+          ],
+          "description": "How this contact prefers routine project updates. PREFERENCE \u2260 CONSENT \u2014 it never opts anyone into marketing."
+        },
+        "cadence": {
+          "type": "string",
+          "enum": [
+            "AS_NEEDED",
+            "WEEKLY",
+            "TWICE_WEEKLY",
+            "MILESTONE",
+            "CUSTOM"
+          ],
+          "description": "How often the operator committed to updating the client. Informs the human (and optional client-update tasks); nothing is auto-sent."
+        },
+        "update_note": {
+          "type": "string",
+          "description": "Custom cadence / context in the operator's words."
+        }
+      }
+    },
+    "excluded_areas": {
+      "type": "array",
+      "default": [],
+      "description": "Chapter 13 P1 \u2014 areas EXCLUDED / RESTRICTED FROM SALE (rooms, closets, cabinets, storage, outbuildings the client retains or restricts). TEAM-SAFE by design: names and notes only \u2014 never access codes or credentials (those live in the operator-only site_assessment.access_details). Deliberately on the sale (team-readable), not the operator-private consultation deal.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "area_id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string",
+            "description": "Area name (e.g. Primary bedroom closet, Garage workshop, Attic)."
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "room",
+              "closet",
+              "cabinet",
+              "storage",
+              "outbuilding",
+              "other"
+            ],
+            "default": "room"
+          },
+          "note": {
+            "type": "string",
+            "description": "Why it is excluded / handling notes (team-safe, no codes)."
+          },
+          "family_deadline": {
+            "type": "string",
+            "format": "date",
+            "description": "Chapter 13 P1 \u2014 CLIENT/FAMILY ACTION DEADLINE: the date the family committed to handle this area by (e.g. remove retained items). Deliberately distinct from any team task due date \u2014 this is the family's own commitment, surfaced on the timeline, never a scheduling engine."
+          },
+          "resolved": {
+            "type": "boolean",
+            "default": false,
+            "description": "Family/owner confirmed the area is handled."
+          },
+          "resolved_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      }
+    },
+    "pickup_plan": {
+      "type": "object",
+      "default": {},
+      "description": "Chapter 13 P1 \u2014 project-level DEFAULT large-item pickup plan (window/location/instructions) for buyer pickups. A planning default only: Chapter 21 transaction truth stays on Item records and checkout \u2014 this plan never alters it.",
+      "properties": {
+        "pickup_window": {
+          "type": "string",
+          "description": "Default pickup window (e.g. 'Sat 3pm\u20135pm, Sun 12pm\u20134pm')."
+        },
+        "pickup_location": {
+          "type": "string",
+          "description": "Where buyers pick up (e.g. 'Side driveway, 2nd garage door')."
+        },
+        "instructions": {
+          "type": "string",
+          "description": "Default pickup instructions for buyers."
+        }
+      }
     }
   },
   "required": [

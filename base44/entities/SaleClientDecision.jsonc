@@ -1,7 +1,7 @@
 {
   "name": "SaleClientDecision",
   "type": "object",
-  "description": "Chapter 1 P1 \u2014 canonical sale-scoped client decision record with change history. Answers WHO authorized it, WHEN, WHAT they instructed, HOW it was received, and WHETHER it later changed. KEEP/SELL/REVIEW merchandise decisions are decision_type 'merchandise' on this same architecture \u2014 there is no second merchandise-decision system. Item.status (selling/transaction state) remains fully independent of these records. Chapter 4 P1: decision_type 'financial' with current_decision 'authorized' and charge_amount > 0 records a client-AUTHORIZED ADDITIONAL SERVICE CHARGE that flows to the settlement statement \u2014 there is no separate charge-approval entity. Chapter 6 P2: decision_type 'financial' with related_expense_id set authorizes CLIENT REIMBURSEMENT of a canonical Expense \u2014 it is deliberately EXCLUDED from service-charge revenue and instead flows to settlement as an authorized reimbursable expense line. A company expense never reduces client proceeds without a decision like this.",
+  "description": "Chapter 1 P1 \u2014 canonical sale-scoped client decision record with change history. Answers WHO authorized it, WHEN, WHAT they instructed, HOW it was received, and WHETHER it later changed. KEEP/SELL/REVIEW merchandise decisions are decision_type 'merchandise' on this same architecture \u2014 there is no second merchandise-decision system. Item.status (selling/transaction state) remains fully independent of these records. Chapter 4 P1: decision_type 'financial' with current_decision 'authorized' and charge_amount > 0 records a client-AUTHORIZED ADDITIONAL SERVICE CHARGE that flows to the settlement statement \u2014 there is no separate charge-approval entity. Chapter 6 P2: decision_type 'financial' with related_expense_id set authorizes CLIENT REIMBURSEMENT of a canonical Expense \u2014 it is deliberately EXCLUDED from service-charge revenue and instead flows to settlement as an authorized reimbursable expense line. A company expense never reduces client proceeds without a decision like this. Chapter 13 P1 adds the REQUEST STATE (a client request is NOT an approved change): while request_status is REQUESTED/UNDER_REVIEW the requested instruction NEVER changes current_decision or project truth \u2014 only explicit operator approval appends the controlling history entry. Chapter 13 P1 adds image_index for image-level merchandise decisions: a KEEP decision on a property photo marks it retained-private (excluded_from_public) so it never enters the public gallery or marketing.",
   "properties": {
     "sale_id": {
       "type": "string",
@@ -45,6 +45,10 @@
       "type": "string",
       "description": "Canonical Item this merchandise decision attaches to (decision_type 'merchandise' only). Item selling status is never modified by this record."
     },
+    "image_index": {
+      "type": "integer",
+      "description": "Chapter 13 P1 \u2014 index into EstateSale.images for an image-level merchandise decision (decision_type 'merchandise' without item_id). A KEEP image decision marks the photo retained-private (sale.images[i].excluded_from_public = true): it never appears in the public gallery, marketing kit, or public website. SELL clears the retained-private mark."
+    },
     "charge_amount": {
       "type": "number",
       "description": "For decision_type 'financial': the dollar amount involved. Without related_expense_id it is a client-authorized ADDITIONAL SERVICE CHARGE (Chapter 4 P1) that flows to settlement as company revenue while current_decision is 'authorized'. WITH related_expense_id it mirrors the linked reimbursable Expense amount for audit and is EXCLUDED from service-charge revenue \u2014 the linked expense flows to settlement as an authorized reimbursable expense instead. Never a merchandise price."
@@ -55,7 +59,36 @@
     },
     "current_decision": {
       "type": "string",
-      "description": "The CONTROLLING instruction. For merchandise: 'keep' | 'sell' | 'review'. For financial service charges: 'authorized' | 'declined' (or free text for other financial matters). Free text for other types."
+      "description": "The CONTROLLING instruction. For merchandise: 'keep' | 'sell' | 'review'. For financial service charges: 'authorized' | 'declined' (or free text for other financial matters). Free text for other types. NEVER changed by a mere request \u2014 only by operator-recorded approval."
+    },
+    "request_status": {
+      "type": "string",
+      "enum": [
+        "REQUESTED",
+        "UNDER_REVIEW",
+        "APPROVED",
+        "DECLINED",
+        "CANCELLED"
+      ],
+      "description": "Chapter 13 P1 \u2014 the CLIENT REQUEST state on this same record (no DecisionRequest entity). REQUESTED/UNDER_REVIEW = the client asked for something (see requested_decision) that is NOT yet approved \u2014 current_decision and project truth stay unchanged. APPROVED = the operator approved the request; the approval is recorded as the controlling history entry (requester + approver + timestamp preserved). DECLINED/CANCELLED = the request did not proceed; history keeps the request visible. Null = no outstanding request \u2014 the record is a direct operator-recorded authorized decision (all pre-Chapter-13 semantics unchanged)."
+    },
+    "requested_decision": {
+      "type": "string",
+      "description": "Chapter 13 P1 \u2014 WHAT the client asked for, kept distinct from current_decision until approved (e.g. current_decision 'sell', requested_decision 'keep')."
+    },
+    "requested_by_name": {
+      "type": "string",
+      "description": "Chapter 13 P1 \u2014 who made the request (client/family member name)."
+    },
+    "requested_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Chapter 13 P1 \u2014 when the request arrived."
+    },
+    "answer_by": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Chapter 13 P1 \u2014 when the client needs an answer to the request. Past date with REQUESTED/UNDER_REVIEW = ANSWER OVERDUE (deterministic display only, never a deadline engine)."
     },
     "status": {
       "type": "string",
