@@ -48,7 +48,7 @@ export default function RoomsSection({ consult, saveConsult }) {
         <p className="text-sm font-semibold text-slate-800">Add a room / area</p>
         <div className="flex gap-2">
           <Input value={newName} onChange={e => setNewName(e.target.value)} placeholder="Room or area name" className="h-11 text-base" />
-          <Button onClick={() => addRoom()} disabled={!newName.trim()} className="h-11 px-4 bg-cyan-600 hover:bg-cyan-700"><Plus className="w-4 h-4" /></Button>
+          <Button onClick={() => addRoom()} disabled={!newName.trim()} aria-label="Add room" className="h-11 px-4 bg-cyan-600 hover:bg-cyan-700"><Plus className="w-4 h-4" /></Button>
         </div>
         <div className="flex flex-wrap gap-2">
           {QUICK_ROOMS.filter(q => !rooms.some(r => r.name === q)).map(q => (
@@ -68,7 +68,7 @@ export default function RoomsSection({ consult, saveConsult }) {
       {rooms.map(room => {
         const roomPhotos = photos.filter(p => p.room_id === room.room_id);
         return (
-          <div key={room.room_id} className="bg-white border border-slate-200 rounded-lg p-4 space-y-3">
+          <div key={room.room_id} data-testid={`room-card-${room.name}`} className="bg-white border border-slate-200 rounded-lg p-4 space-y-3">
             <div className="flex items-center justify-between gap-2">
               <p className="text-sm font-semibold text-slate-800">{room.name}</p>
               <button onClick={() => delRoom(room.room_id)} className="w-9 h-9 flex items-center justify-center text-slate-400 hover:text-red-500" aria-label={`Remove ${room.name}`}>

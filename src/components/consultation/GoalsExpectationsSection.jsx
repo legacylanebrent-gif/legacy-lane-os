@@ -71,7 +71,7 @@ export default function GoalsExpectationsSection({ deal, consult, saveConsult })
           </Select>
           <div className="flex gap-2">
             <Input type="date" value={dl.date} onChange={e => setDl(p => ({ ...p, date: e.target.value }))} className="h-11 text-base" />
-            <Button onClick={addDeadline} disabled={!dl.type || !dl.date} className="h-11 px-4 bg-cyan-600 hover:bg-cyan-700"><Plus className="w-4 h-4" /></Button>
+            <Button onClick={addDeadline} disabled={!dl.type || !dl.date} aria-label="Add deadline" className="h-11 px-4 bg-cyan-600 hover:bg-cyan-700"><Plus className="w-4 h-4" /></Button>
           </div>
           <Input value={dl.note} onChange={e => setDl(p => ({ ...p, note: e.target.value }))} placeholder="Brief note (optional)" className="h-11 text-base" />
           <label className="flex items-center gap-2 text-xs text-slate-600">

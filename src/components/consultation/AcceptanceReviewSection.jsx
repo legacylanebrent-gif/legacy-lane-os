@@ -81,7 +81,7 @@ export default function AcceptanceReviewSection({ deal, allDeals, linkedSale, au
           <Input value={form.condition} onChange={e => setForm(p => ({ ...p, condition: e.target.value }))} placeholder="e.g. Garage must be cleared by [date]" className="h-11 text-base" />
           <div className="flex gap-2">
             <Input type="date" value={form.due_date} onChange={e => setForm(p => ({ ...p, due_date: e.target.value }))} className="h-11 text-base" />
-            <Button onClick={addCondition} disabled={!form.condition.trim()} className="h-11 px-4 bg-cyan-600 hover:bg-cyan-700"><Plus className="w-4 h-4" /></Button>
+            <Button onClick={addCondition} disabled={!form.condition.trim()} aria-label="Add condition" className="h-11 px-4 bg-cyan-600 hover:bg-cyan-700"><Plus className="w-4 h-4" /></Button>
           </div>
           <Input value={form.note} onChange={e => setForm(p => ({ ...p, note: e.target.value }))} placeholder="Note (optional)" className="h-11 text-base" />
         </div>
