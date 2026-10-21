@@ -103,6 +103,16 @@ export default function SaleTasks() {
 
       await loadTasks(sale);
 
+      // Chapter 13 P1 — dependency options (open client decisions + open issues)
+      try {
+        const [dRes, iRes] = await Promise.all([
+          base44.entities.SaleClientDecision.filter({ sale_id: sale.id }),
+          base44.entities.SaleIssue.filter({ sale_id: sale.id }),
+        ]);
+        setDecisionDeps(Array.isArray(dRes) ? dRes : (dRes.items || []));
+        setIssueDeps(Array.isArray(iRes) ? iRes : (iRes.items || []));
+      } catch (e) { console.error(e); }
+
       // Assignee options: the operator + sale team (reuse existing identities only).
       let options = [{ id: 'unassigned', label: 'Unassigned' }];
       const me = await base44.auth.me().catch(() => null);
@@ -412,6 +422,11 @@ Return as a JSON array.`,
                       {task.blocked && task.blocked_reason && (
                         <p className="text-sm text-red-700 mt-1">Blocked: {task.blocked_reason}</p>
                       )}
+                      {((task.blocked_by_task_ids || []).length + (task.blocked_by_decision_ids || []).length + (task.blocked_by_issue_ids || []).length) > 0 && (
+                        <p className="text-xs text-slate-500 mt-1 flex items-center gap-1">
+                          <Link2 className="w-3 h-3" /> Waiting on {(task.blocked_by_task_ids || []).length} task(s), {(task.blocked_by_decision_ids || []).length} decision(s), {(task.blocked_by_issue_ids || []).length} issue(s)
+                        </p>
+                      )}
                       {task.status === 'completed' && task.completed_at && (
                         <p className="text-xs text-slate-500 mt-1">Completed {new Date(task.completed_at).toLocaleString()}{task.completed_by_name ? ` by ${task.completed_by_name}` : ''}</p>
                       )}
@@ -450,6 +465,9 @@ Return as a JSON array.`,
                       </Select>
                     </div>
                     <div className="flex gap-2 flex-shrink-0">
+                      <Button variant="outline" size="sm" className="h-8 text-xs" onClick={() => openDepDialog(task)}>
+                        <Link2 className="w-3 h-3 mr-1" />Deps
+                      </Button>
                       <Button variant="outline" size="sm" className={`h-8 text-xs ${task.blocked ? 'border-red-400 bg-red-50 text-red-700' : ''}`} onClick={() => toggleBlocked(task)}>
                         {task.blocked ? 'Unblock' : 'Block'}
                       </Button>
