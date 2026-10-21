@@ -894,22 +894,6 @@
               ]
             },
             {
-              "$and": [
-                {
-                  "user_condition": {
-                    "role": "user"
-                  }
-                },
-                {
-                  "data.sale_team": {
-                    "$in": [
-                      "{{user.id}}"
-                    ]
-                  }
-                }
-              ]
-            },
-            {
               "user_condition": {
                 "role": "admin"
               }
@@ -932,18 +916,6 @@
                 },
                 {
                   "created_by_id": "{{user.id}}"
-                }
-              ]
-            },
-            {
-              "$and": [
-                {
-                  "user_condition": {
-                    "role": "user"
-                  }
-                },
-                {
-                  "data.operator_id": "{{user.id}}"
                 }
               ]
             },
@@ -999,22 +971,6 @@
                 },
                 {
                   "data.operator_id": "{{user.id}}"
-                }
-              ]
-            },
-            {
-              "$and": [
-                {
-                  "user_condition": {
-                    "role": "user"
-                  }
-                },
-                {
-                  "data.sale_team": {
-                    "$in": [
-                      "{{user.id}}"
-                    ]
-                  }
                 }
               ]
             },
@@ -1386,7 +1342,7 @@
     "prep_zones": {
       "type": "array",
       "default": [],
-      "description": "Chapter 14 P1 \u2014 TEAM-READABLE PREP ZONES (rooms / work areas) for preparation. Same projection pattern as excluded_areas: deliberately ON THE SALE (team-readable), NOT on the operator-private Chapter 12 consultation deal. source_type/source_id preserves provenance back to the consultation room a zone originated from WITHOUT exposing private consultation content \u2014 only the room NAME is projected, so the two never drift independently. Zone notes are TEAM-SAFE (no codes/credentials). Prep status is honest human-set state \u2014 no percentage progress anywhere. Discovery counts are DERIVED at read time from SaleDiscovery records, never stored here.",
+      "description": "Chapter 14 P1 \u2014 TEAM-READABLE PREP ZONES (rooms / work areas) for preparation. Same projection pattern as excluded_areas: deliberately ON THE SALE (team-readable), NOT on the operator-private Chapter 12 consultation deal. source_type/source_id preserves provenance back to the consultation room a zone originated from WITHOUT exposing private consultation content \u2014 only the room NAME is projected, so the two never drift independently. Zone notes are TEAM-SAFE (no codes/credentials). Prep status is honest human-set state \u2014 no percentage progress anywhere. Discovery counts are DERIVED at read time from SaleDiscovery records, never stored here. Chapter 17 P1 extends the SAME zone with the smallest staging layer (purpose, category plan, signage/equipment needs, lighting/flow concerns, staging notes, and a sale-day status that NEVER overwrites Chapter 14 preparation truth) \u2014 there is NO second room/staging system.",
       "items": {
         "type": "object",
         "properties": {
@@ -1423,7 +1379,7 @@
               "complete"
             ],
             "default": "untouched",
-            "description": "Chapter 14 P1-8 \u2014 deterministic preparation state, human-set. WAITING states pair with the canonical open decision/research records; never a percentage."
+            "description": "Chapter 14 P1-8 \u2014 deterministic preparation state, human-set. WAITING states pair with the canonical open decision/research records; never a percentage. Chapter 17 P1: PREPARATION truth \u2014 the separate sale_day_status carries the sale-day operational state and this history is never overwritten."
           },
           "assignee_user_id": {
             "type": "string",
@@ -1480,7 +1436,112 @@
             "type": "string",
             "format": "date-time",
             "description": "When prep_status was set to complete."
+          },
+          "staging_purpose": {
+            "type": "string",
+            "enum": [
+              "SALE_FLOOR",
+              "PREP_ONLY",
+              "STORAGE",
+              "CHECKOUT",
+              "OTHER"
+            ],
+            "description": "Chapter 17 P1-1 \u2014 the zone's role in the temporary retail environment. Absent = not yet planned (honest unknown)."
+          },
+          "category_plan": {
+            "type": "array",
+            "default": [],
+            "description": "Chapter 17 P1-7 \u2014 PLANNING intent for merchandise categories in this zone. A PLAN ONLY: Item locations change only when merchandise physically moves; nothing is ever auto-relocated. References the existing Item.category vocabulary \u2014 no competing category truth.",
+            "items": {
+              "type": "object",
+              "properties": {
+                "category": {
+                  "type": "string",
+                  "description": "Existing Item category (or 'other')."
+                },
+                "intent": {
+                  "type": "string",
+                  "enum": [
+                    "KEEP_HERE",
+                    "CONSOLIDATE_TO"
+                  ],
+                  "default": "KEEP_HERE",
+                  "description": "Keep this category displayed here, or plan to consolidate it into another zone."
+                },
+                "target_zone_id": {
+                  "type": "string",
+                  "description": "Destination zone when intent is CONSOLIDATE_TO (planning reference only)."
+                },
+                "note": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "signage_needs": {
+            "type": "string",
+            "description": "Chapter 17 P1-1 \u2014 signs this zone needs (category, directional, restricted...). Team-safe."
+          },
+          "equipment_needs": {
+            "type": "string",
+            "description": "Chapter 17 P1-1 \u2014 tables/racks/lighting equipment this zone needs (actual equipment truth stays in SaleEquipmentAssignment \u2014 this is the plan)."
+          },
+          "lighting_concern": {
+            "type": "string",
+            "enum": [
+              "ok",
+              "insufficient",
+              "additional_needed",
+              "unknown"
+            ],
+            "default": "unknown",
+            "description": "Chapter 17 P1 \u2014 honest lighting state for merchandising visibility. unknown until assessed; never a claim the space is safe or code-compliant."
+          },
+          "flow_concerns": {
+            "type": "string",
+            "description": "Chapter 17 P1-4/P1-5 \u2014 customer-flow / bottleneck observations for this zone (narrow passage, doorway, stairs, queue conflict, removal conflict). Team-safe; never access codes."
+          },
+          "staging_notes": {
+            "type": "string",
+            "description": "Chapter 17 P1-1 \u2014 team-safe staging notes. NEVER private consultation content, codes, or credentials (those stay in the operator-only consultation deal / access plan)."
+          },
+          "sale_day_status": {
+            "type": "string",
+            "enum": [
+              "READY",
+              "ACTIVE",
+              "DEPLETED",
+              "CONSOLIDATE",
+              "CLOSED"
+            ],
+            "description": "Chapter 17 P1-37 \u2014 SALE-DAY operational state, deliberately a SEPARATE field from prep_status so Chapter 14 preparation history is never overwritten. Absent = pre-opening / not applicable. Human-set; marking CONSOLIDATE never auto-moves Items."
           }
+        }
+      }
+    },
+    "customer_flow": {
+      "type": "object",
+      "default": {},
+      "description": "Chapter 17 P1-3/P1-4 \u2014 the sale's practical CUSTOMER PATH: entry, exit, checkout location, and queue notes. Operational strings only \u2014 NOT floor-plan/CAD architecture, and NEVER private access/security details (those stay in the operator-only site_assessment.access_details). Safe buyer-facing subsets of this plan may render on the public sale guide.",
+      "properties": {
+        "entry_note": {
+          "type": "string",
+          "description": "Where customers enter (e.g. 'Front porch door')."
+        },
+        "exit_note": {
+          "type": "string",
+          "description": "Where customers exit / where large purchases leave (e.g. 'Side door to driveway')."
+        },
+        "checkout_location": {
+          "type": "string",
+          "description": "Where checkout is set up (e.g. 'Dining room table by the stairs')."
+        },
+        "queue_note": {
+          "type": "string",
+          "description": "Where the line should form and what it must not block."
+        },
+        "notes": {
+          "type": "string"
         }
       }
     },
@@ -1506,7 +1567,7 @@
     "discount_schedule": {
       "type": "array",
       "default": [],
-      "description": "Chapter 16 P1-39/P1-40 \u2014 the operator's PLANNED discount stages for this sale (Day 1 full price, Day 2, final hours...). OPERATOR-DEFINED PLAN ONLY: the system never applies a discount automatically; a stage is guidance for the team, and an Item marked excluded_from_discounts is never silently discounted \u2014 applying a stage to such an item is an explicit human price change through the normal price-change path (changeItemPrice), never a batch effect.",
+      "description": "Chapter 16 P1-39/P1-40 \u2014 the operator's PLANNED discount stages for this sale (Day 1 full price, Day 2, final hours...). OPERATOR-DEFINED PLAN ONLY: the system never applies a discount automatically; a stage is guidance for the team, and an Item marked excluded_from_discounts is never silently discounted \u2014 applying a stage to such an item is an explicit human price change through the normal price-change path (changeItemPrice), never a batch effect. Chapter 17 P1: discount SIGNS may be printed from this plan \u2014 a printed sign is a SNAPSHOT and never modifies Item.price.",
       "items": {
         "type": "object",
         "properties": {

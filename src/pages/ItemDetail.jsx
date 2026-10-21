@@ -374,6 +374,61 @@ export default function ItemDetail() {
               </Card>
             )}
 
+            {/* Chapter 17 P1-10/P1-11 — buyer-facing dimensions, components
+                and SAFE pickup info, drawn from canonical Item truth (no
+                re-entry; no custody/controlled-location/internal notes). */}
+            {!isEditing && (
+              (item.dimensions && (item.dimensions.height || item.dimensions.width || item.dimensions.depth)) ||
+              (item.included_items || []).length > 0 ||
+              (item.excluded_items || []).length > 0 ||
+              item.pickup_requirements?.scheduled_required
+            ) && (
+              <Card>
+                <CardContent className="p-6 space-y-4">
+                  {item.dimensions && (item.dimensions.height || item.dimensions.width || item.dimensions.depth) && (
+                    <div>
+                      <h3 className="text-sm font-semibold text-slate-900 mb-1">Dimensions</h3>
+                      <p className="text-slate-700 text-sm">
+                        {['height', 'width', 'depth']
+                          .filter(k => item.dimensions[k])
+                          .map(k => `${k}: ${item.dimensions[k]}${item.dimensions.unit === 'cm' ? ' cm' : '"'}`)
+                          .join(' · ')}
+                      </p>
+                    </div>
+                  )}
+                  {(item.included_items || []).length > 0 && (
+                    <div>
+                      <h3 className="text-sm font-semibold text-slate-900 mb-1">What's included</h3>
+                      <ul className="text-slate-700 text-sm list-disc pl-5 space-y-0.5">
+                        {(item.included_items || []).map((s, i) => <li key={i}>{s}</li>)}
+                      </ul>
+                    </div>
+                  )}
+                  {(item.excluded_items || []).length > 0 && (
+                    <div>
+                      <h3 className="text-sm font-semibold text-slate-900 mb-1">Not included</h3>
+                      <ul className="text-slate-700 text-sm list-disc pl-5 space-y-0.5">
+                        {(item.excluded_items || []).map((s, i) => <li key={i}>{s}</li>)}
+                      </ul>
+                    </div>
+                  )}
+                  {item.pickup_requirements?.scheduled_required && (
+                    <div className="rounded-lg bg-cyan-50 border border-cyan-200 p-3">
+                      <p className="text-sm font-medium text-cyan-800">
+                        Scheduled pickup required — please see staff at checkout to arrange removal of this item.
+                      </p>
+                      {item.pickup_requirements.pickup_window && (
+                        <p className="text-xs text-cyan-700 mt-0.5">Pickup window: {item.pickup_requirements.pickup_window}</p>
+                      )}
+                      {item.pickup_requirements.special_handling && (
+                        <p className="text-xs text-cyan-700 mt-0.5">{item.pickup_requirements.special_handling}</p>
+                      )}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            )}
+
             {/* Sale Information */}
             {sale && (
               <Card>

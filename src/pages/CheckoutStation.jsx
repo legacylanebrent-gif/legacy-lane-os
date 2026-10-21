@@ -104,6 +104,20 @@ export default function CheckoutStation() {
 
     setCompleting(true);
     try {
+      // Chapter 17 P1-18 — DUPLICATE-SALE GUARD: verify every cart item is
+      // still AVAILABLE before creating the Order. A sold/held item can never
+      // be sold twice through the normal sale-day workflow.
+      const cartItemIds = [...new Set(currentCart.items.map(ci => ci.item_id))];
+      const freshItems = await Promise.all(cartItemIds.map(id => base44.entities.Item.get(id).catch(() => null)));
+      const titleById = Object.fromEntries(currentCart.items.map(ci => [ci.item_id, ci.item_title || 'an item']));
+      const blocked = freshItems.filter(it => !it || it.status !== 'available');
+      if (blocked.length > 0) {
+        const names = blocked.map(it => titleById[it?.id] || it?.title || 'a cart item').join(', ');
+        setMessage({ type: 'error', text: `Cannot complete sale — already sold or held: ${names}. Clear the cart and rescan the available items.` });
+        setCompleting(false);
+        return;
+      }
+
       // Create order from cart
       const order = await base44.entities.Order.create({
         order_number: `ORD-${Date.now()}`,

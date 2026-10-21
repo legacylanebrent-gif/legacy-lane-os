@@ -106,6 +106,12 @@ export default function ScanAndCart() {
 
   // Chapter 8 P1 display-attention note preserved; Chapter 15 P1-34 makes the add explicit.
   const addToCart = item => {
+    // Chapter 17 P1-18 — never cart merchandise that is not AVAILABLE.
+    if (item.status !== 'available') {
+      setMessage({ type: 'error', text: `"${item.title}" is ${item.status} and cannot be added to the cart.` });
+      setTimeout(() => setMessage(null), 2500);
+      return;
+    }
     setCart(prev => {
       const existing = prev.find(ci => ci.item_id === item.id);
       if (existing) {

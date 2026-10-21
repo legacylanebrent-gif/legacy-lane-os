@@ -17,6 +17,13 @@ export const ISSUE_CATEGORIES = [
   { key: 'pickup', label: 'Pickup' },
   { key: 'disposition', label: 'Disposition' },
   { key: 'financial_settlement', label: 'Financial / Settlement' },
+  { key: 'safety', label: 'Safety' },
+  { key: 'customer_flow', label: 'Customer Flow' },
+  { key: 'signage', label: 'Signage' },
+  { key: 'display', label: 'Display' },
+  { key: 'pricing_floor', label: 'Floor Pricing' },
+  { key: 'checkout_floor', label: 'Checkout (Floor)' },
+  { key: 'lighting', label: 'Lighting' },
   { key: 'other', label: 'Other' },
 ];
 

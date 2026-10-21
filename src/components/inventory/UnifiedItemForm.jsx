@@ -54,6 +54,10 @@ const BLANK = {
   market_context: 'UNKNOWN', selling_channel: 'ESTATE_SALE',
   negotiation_locked: false, excluded_from_discounts: false,
   price_range_low: '', price_range_high: '', pricing_rationale: '',
+  // Chapter 17 P1 — removal & pickup planning on the canonical record
+  disassembly: 'UNKNOWN', disassembly_note: '', removal_note: '',
+  pickup_scheduled: false, pickup_window: '', pickup_people: false,
+  pickup_equipment: '', pickup_assistance: false, pickup_handling: '',
 };
 
 // Chapter 15 P1 — ONE Item form, four workflow DEPTHS. The record starts as simply as
@@ -143,6 +147,15 @@ export default function UnifiedItemForm({ item = null, saleId = null, onClose, o
         price_range_low: item.price_range_low ?? '',
         price_range_high: item.price_range_high ?? '',
         pricing_rationale: item.pricing_rationale || '',
+        disassembly: item.disassembly || 'UNKNOWN',
+        disassembly_note: item.disassembly_note || '',
+        removal_note: item.removal_note || '',
+        pickup_scheduled: !!item.pickup_requirements?.scheduled_required,
+        pickup_window: item.pickup_requirements?.pickup_window || '',
+        pickup_people: !!item.pickup_requirements?.additional_people,
+        pickup_equipment: item.pickup_requirements?.equipment_needed || '',
+        pickup_assistance: !!item.pickup_requirements?.assistance_required,
+        pickup_handling: item.pickup_requirements?.special_handling || '',
       });
     } else {
       // QUICK capture burden: creating inside a sale pre-selects the inventory channel.
@@ -232,6 +245,18 @@ export default function UnifiedItemForm({ item = null, saleId = null, onClose, o
       price_range_high: formData.price_range_high === ''
         ? null : parseFloat(formData.price_range_high),
       pricing_rationale: formData.pricing_rationale.trim() || null,
+      // Chapter 17 P1-12..P1-15 — removal & pickup planning on the canonical record
+      pickup_requirements: {
+        scheduled_required: !!formData.pickup_scheduled,
+        pickup_window: formData.pickup_window || '',
+        additional_people: !!formData.pickup_people,
+        equipment_needed: formData.pickup_equipment || '',
+        assistance_required: !!formData.pickup_assistance,
+        special_handling: formData.pickup_handling || '',
+      },
+      disassembly: formData.disassembly,
+      disassembly_note: formData.disassembly_note || '',
+      removal_note: formData.removal_note || '',
     };
 
     if (item?.id) {
@@ -564,6 +589,50 @@ export default function UnifiedItemForm({ item = null, saleId = null, onClose, o
                 <div className="space-y-2">
                   <label className="block text-sm font-semibold text-slate-900">What's NOT included</label>
                   <Textarea value={formData.excluded_text} onChange={e => set('excluded_text', e.target.value)} placeholder={'Shade'} className="min-h-16 text-sm" />
+                </div>
+              </div>
+
+              {/* Chapter 17 P1-12..P1-15 — removal & pickup planning (furniture/large merchandise) */}
+              <div className="space-y-3 border border-slate-200 rounded-lg p-3 bg-slate-50/60">
+                <p className="text-sm font-semibold text-slate-900">Removal & pickup (large merchandise)</p>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                  <label className="block">
+                    <span className="text-xs font-medium text-slate-600">Disassembly</span>
+                    <select value={formData.disassembly} onChange={e => set('disassembly', e.target.value)} className="w-full mt-1 px-3 py-2 border border-slate-300 rounded-lg text-sm">
+                      <option value="UNKNOWN">Unknown</option>
+                      <option value="NOT_REQUIRED">Not required</option>
+                      <option value="CAN_DISASSEMBLE">Can disassemble</option>
+                      <option value="MUST_DISASSEMBLE">Must disassemble</option>
+                      <option value="DO_NOT_DISASSEMBLE">Do NOT disassemble</option>
+                    </select>
+                  </label>
+                  <label className="block">
+                    <span className="text-xs font-medium text-slate-600">Pickup window (optional)</span>
+                    <Input value={formData.pickup_window} onChange={e => set('pickup_window', e.target.value)} placeholder="Sat 3pm-5pm" className="mt-1 text-sm" />
+                  </label>
+                  <label className="block">
+                    <span className="text-xs font-medium text-slate-600">Equipment needed</span>
+                    <Input value={formData.pickup_equipment} onChange={e => set('pickup_equipment', e.target.value)} placeholder="Dolly, straps…" className="mt-1 text-sm" />
+                  </label>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <label className="block">
+                    <span className="text-xs font-medium text-slate-600">Removal path (internal — how it leaves the house)</span>
+                    <Input value={formData.removal_note} onChange={e => set('removal_note', e.target.value)} placeholder="Side door, one flight, protect the turn at the landing" className="mt-1 text-sm" />
+                  </label>
+                  <label className="block">
+                    <span className="text-xs font-medium text-slate-600">Disassembly note</span>
+                    <Input value={formData.disassembly_note} onChange={e => set('disassembly_note', e.target.value)} placeholder="Buyer disassembles; hardware in a bag" className="mt-1 text-sm" />
+                  </label>
+                  <label className="block">
+                    <span className="text-xs font-medium text-slate-600">Special handling (shown to buyers when it tells them what to do)</span>
+                    <Input value={formData.pickup_handling} onChange={e => set('pickup_handling', e.target.value)} placeholder="Bring a helper; we cannot load" className="mt-1 text-sm" />
+                  </label>
+                </div>
+                <div className="flex flex-wrap gap-x-5 gap-y-2">
+                  <label className="flex items-center gap-2 text-sm text-slate-700"><input type="checkbox" checked={formData.pickup_scheduled} onChange={e => set('pickup_scheduled', e.target.checked)} /> Scheduled pickup required</label>
+                  <label className="flex items-center gap-2 text-sm text-slate-700"><input type="checkbox" checked={formData.pickup_people} onChange={e => set('pickup_people', e.target.checked)} /> Two-person removal</label>
+                  <label className="flex items-center gap-2 text-sm text-slate-700"><input type="checkbox" checked={formData.pickup_assistance} onChange={e => set('pickup_assistance', e.target.checked)} /> Staff assistance required</label>
                 </div>
               </div>
 

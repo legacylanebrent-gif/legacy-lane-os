@@ -1,7 +1,7 @@
 {
   "name": "LaborEntry",
   "type": "object",
-  "description": "Chapter 4 P1 \u2014 canonical labor-hour entry for a sale. An OPERATIONAL dimension (hours worked), NOT an expense line: cash labor cost is always DERIVED (hours x rate for paid/non-owner entries), never stored here. Owner time is tracked as hours only and is never silently counted as cash cost. Distinct from Expense (a cost line) by design \u2014 do not merge them. Chapter 6 P1 adds team_member_id so entries from the operator's worker directory keep a consistent worker identity; the entry's hourly_rate remains a snapshot that never changes when a TeamMember's default rate changes later. Chapter 14 P1 adds the optional prep-zone reference (prep_zone_id/prep_zone_name snapshot) and extends the work_category vocabulary with prep activities (sorting, cleaning, pricing, photography, moving) \u2014 additive only; existing records and Chapter 4 economics are unchanged. Chapter 15 P1-58 adds inventory and measurement categories for progressive-inventory work \u2014 additive only; no per-Item time tracking is required for ordinary merchandise.",
+  "description": "Chapter 4 P1 \u2014 canonical labor-hour entry for a sale. An OPERATIONAL dimension (hours worked), NOT an expense line: cash labor cost is always DERIVED (hours x rate for paid/non-owner entries), never stored here. Owner time is tracked as hours only and is never silently counted as cash cost. Distinct from Expense (a cost line) by design \u2014 do not merge them. Chapter 6 P1 adds team_member_id so entries from the operator's worker directory keep a consistent worker identity; the entry's hourly_rate remains a snapshot that never changes when a TeamMember's default rate changes later. Chapter 14 P1 adds the optional prep-zone reference (prep_zone_id/prep_zone_name snapshot) and extends the work_category vocabulary with prep activities (sorting, cleaning, pricing, photography, moving) \u2014 additive only; existing records and Chapter 4 economics are unchanged. Chapter 15 P1-58 adds inventory and measurement categories for progressive-inventory work \u2014 additive only; no per-Item time tracking is required for ordinary merchandise. Chapter 17 P1-41 adds the sale-floor staging categories (grouping, lighting, signage, sale_floor_maintenance) \u2014 additive only; LaborEntry remains the ONE labor record and projected-vs-actual comparison is unchanged.",
   "properties": {
     "sale_id": {
       "type": "string",
@@ -41,16 +41,20 @@
         "research",
         "pricing",
         "staging",
+        "grouping",
+        "lighting",
+        "signage",
         "photography",
         "measurement",
         "moving",
         "sale_day",
+        "sale_floor_maintenance",
         "pickup",
         "closeout",
         "travel",
         "other"
       ],
-      "description": "What kind of work the hours were spent on. Chapter 14 P1-45 added prep activities additively; Chapter 15 P1-58 adds inventory and measurement for progressive-inventory work. Existing records keep their original category and Chapter 4 economics never change."
+      "description": "What kind of work the hours were spent on. Chapter 14 P1-45 added prep activities additively; Chapter 15 P1-58 adds inventory and measurement for progressive-inventory work. Chapter 17 P1-41 adds grouping/lighting/signage/sale_floor_maintenance for staging and sale-floor work \u2014 existing records keep their original category and Chapter 4 economics never change."
     },
     "prep_zone_id": {
       "type": "string",

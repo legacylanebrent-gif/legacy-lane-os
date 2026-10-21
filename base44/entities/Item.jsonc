@@ -2286,6 +2286,57 @@
         }
       }
     },
+    "pickup_requirements": {
+      "type": "object",
+      "default": {},
+      "description": "Chapter 17 P1-12/P1-15 \u2014 practical PICKUP/REMOVAL requirements for large or special-handling merchandise (furniture, appliances...). Operational planning truth for the team; the safe buyer-facing subset (scheduled-required flag, window, special handling expectations) may surface on buyer surfaces \u2014 NEVER controlled location, custody, or private staff/security notes. Reuses the canonical pickup/release architecture (authorized_pickup, pickup_completed_at, EstateSale.pickup_plan); there is NO second scheduling system.",
+      "properties": {
+        "scheduled_required": {
+          "type": "boolean",
+          "description": "Chapter 17 P1-12 \u2014 pickup must be scheduled with staff before removal."
+        },
+        "pickup_window": {
+          "type": "string",
+          "description": "Chapter 17 P1-15 \u2014 designated removal window for this item (e.g. 'Sat 3pm-5pm'). Empty = the EstateSale.pickup_plan default window applies."
+        },
+        "additional_people": {
+          "type": "boolean",
+          "description": "Chapter 17 P1-12 \u2014 two-person (or more) removal required."
+        },
+        "equipment_needed": {
+          "type": "string",
+          "description": "Chapter 17 P1-12 \u2014 equipment required for removal (dolly, straps, blanket wrap...)."
+        },
+        "assistance_required": {
+          "type": "boolean",
+          "description": "Chapter 17 P1-12 \u2014 operator/staff assistance required at removal."
+        },
+        "special_handling": {
+          "type": "string",
+          "description": "Chapter 17 P1-12 \u2014 special procedure / handling note, stated so it is safe to show a buyer when it describes what THEY must do."
+        }
+      }
+    },
+    "disassembly": {
+      "type": "string",
+      "enum": [
+        "NOT_REQUIRED",
+        "CAN_DISASSEMBLE",
+        "MUST_DISASSEMBLE",
+        "DO_NOT_DISASSEMBLE",
+        "UNKNOWN"
+      ],
+      "default": "UNKNOWN",
+      "description": "Chapter 17 P1-14 \u2014 disassembly truth for merchandise that may need to come apart to leave the house. UNKNOWN is the honest default. A planning fact only \u2014 never a guarantee the merchandise fits or that staff will disassemble it."
+    },
+    "disassembly_note": {
+      "type": "string",
+      "description": "Chapter 17 P1-14 \u2014 responsibility/notes for disassembly (who does it, hardware bags, take-apart sequence)."
+    },
+    "removal_note": {
+      "type": "string",
+      "description": "Chapter 17 P1-13 \u2014 INTERNAL operational removal path for large merchandise (exit used, stairs, doorways, tight turns, floor protection, obstacles). Private/internal by default \u2014 never projected to buyer surfaces unless deliberately summarized into safe pickup instructions."
+    },
     "display_attention": {
       "type": "string",
       "enum": [

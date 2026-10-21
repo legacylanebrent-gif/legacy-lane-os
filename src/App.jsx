@@ -58,6 +58,7 @@ import LandingPageAIPlan from './pages/LandingPageAIPlan';
 import LandingPageRetarget from './pages/LandingPageRetarget';
 import LandingPageConsumer from './pages/LandingPageConsumer';
 import LandingPageAgent from './pages/LandingPageAgent';
+import SaleGuide from './pages/SaleGuide';
 import DIYSaleSignup from './pages/DIYSaleSignup';
 import AgentPartnerships from './pages/AgentPartnerships';
 import JoinReferralExchange from './pages/JoinReferralExchange';
@@ -293,6 +294,7 @@ const AuthenticatedApp = () => {
       <Route path="/AdminAICredits" element={<LayoutWrapper currentPageName="AdminAICredits"><AdminAICredits /></LayoutWrapper>} />
       <Route path="/MarketplaceItemDetail" element={<LayoutWrapper currentPageName="MarketplaceItemDetail"><MarketplaceItemDetail /></LayoutWrapper>} />
       <Route path="/ScanAndCart" element={<LayoutWrapper currentPageName="ScanAndCart"><ScanAndCart /></LayoutWrapper>} />
+      <Route path="/SaleGuide" element={<LayoutWrapper currentPageName="SaleGuide"><SaleGuide /></LayoutWrapper>} />
       <Route path="/CheckoutStation" element={<LayoutWrapper currentPageName="CheckoutStation"><CheckoutStation /></LayoutWrapper>} />
       <Route path="/SalePipeline" element={<LayoutWrapper currentPageName="SalePipeline"><SalePipeline /></LayoutWrapper>} />
       <Route path="/ReferralOutreach" element={<LayoutWrapper currentPageName="ReferralOutreach"><ReferralOutreach /></LayoutWrapper>} />

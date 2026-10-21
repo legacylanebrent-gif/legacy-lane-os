@@ -105,6 +105,16 @@ export default function SaleInventory() {
   const handleStatusChange = async (item, newStatus) => {
     // Chapter 2 P1 — capture buyer/payment/pickup details when marking sold
     if (newStatus === 'sold') { setSoldDialogItem(item); return; }
+    // Chapter 17 P1-17/P1-49 — STATUS SAFETY: a sold item returning to the
+    // floor is a physical/digital contradiction. Surface it explicitly — never
+    // silently allow it. (The change is still recorded in item history.)
+    if (item.status === 'sold' && newStatus === 'available') {
+      const released = !!item.pickup_completed_at;
+      const ok = window.confirm(
+        `"${item.title}" is SOLD${released ? ' and already RELEASED to the buyer' : ' and awaiting pickup'}. Return it to AVAILABLE on the floor?`
+      );
+      if (!ok) return;
+    }
     try {
       const updates = { status: newStatus };
       if (newStatus === 'sold') {

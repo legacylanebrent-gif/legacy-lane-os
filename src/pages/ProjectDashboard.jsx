@@ -26,6 +26,8 @@ import ExcludedAreasCard from '@/components/project/ExcludedAreasCard';
 import PrepZonesPanel from '@/components/project/PrepZonesPanel';
 import DiscoveryPanel from '@/components/project/DiscoveryPanel';
 import EndOfDayPanel from '@/components/project/EndOfDayPanel';
+import ZoneStagingPanel from '@/components/staging/ZoneStagingPanel';
+import StagingReadinessCard from '@/components/staging/StagingReadinessCard';
 
 const asArr = (r) => (Array.isArray(r) ? r : (r && r.items) || []);
 const money = (n) => (typeof n === 'number' ? `$${n.toLocaleString()}` : '—');
@@ -209,6 +211,11 @@ export default function ProjectDashboard() {
         <DiscoveryPanel sale={sale} zones={sale.prep_zones || []} discoveries={discoveries} onChanged={refresh} />
         <EndOfDayPanel sale={sale} zones={sale.prep_zones || []} discoveries={discoveries} tasks={tasks} issues={issues} decisions={decisions} laborEntries={laborEntries} />
       </div>
+
+      {/* SALE-FLOOR STAGING (Chapter 17 P1): customer path, deterministic opening
+          readiness, zone staging layer — assembled from canonical records only. */}
+      <StagingReadinessCard sale={sale} zones={sale.prep_zones || []} items={data.items} issues={data.issues} tasks={data.tasks} laborEntries={data.laborEntries} linkedDeal={data.linkedDeal} onChanged={refresh} />
+      <ZoneStagingPanel sale={sale} items={data.items} tasks={data.tasks} onChanged={refresh} />
 
       {/* PREPARATION READINESS (deterministic, Chapter 8 reuse) + POST-SALE PLAN */}
       <div className="grid lg:grid-cols-2 gap-4">

@@ -11,6 +11,7 @@ import { Input } from '@/components/ui/input';
 import QRCode from 'qrcode';
 import { SIGN_TEMPLATES, SIGN_CATEGORIES } from '@/components/signs/signTemplatesData';
 import SignTemplateCard from '@/components/signs/SignTemplateCard';
+import SaleFloorSigns from '@/components/signs/SaleFloorSigns';
 import { loadBusinessIdentity } from '@/lib/businessIdentity';
 
 export default function PrintSigns() {
@@ -25,6 +26,7 @@ export default function PrintSigns() {
   const [signSearch, setSignSearch] = useState('');
   const [signCategoryFilter, setSignCategoryFilter] = useState('all');
   const [zoneQrs, setZoneQrs] = useState({}); // Chapter 14 — prep-zone QR signs
+  const [items, setItems] = useState([]); // Chapter 17 — for item-tied floor signs
 
   useEffect(() => {
     loadSale();
@@ -61,6 +63,7 @@ export default function PrintSigns() {
 
       const s = saleData[0];
       setSale(s);
+      setItems(itemsData);
       await generateQRCodes(s, itemsData);
     } catch (error) {
       console.error('Error loading sale:', error);
@@ -286,7 +289,16 @@ export default function PrintSigns() {
             <QrCode className="w-4 h-4" />
             Prep Zone Signs
           </TabsTrigger>
+          <TabsTrigger value="floorsigns" className="flex items-center gap-2">
+            <Printer className="w-4 h-4" />
+            Floor Signs (Chapter 17)
+          </TabsTrigger>
         </TabsList>
+
+        {/* Chapter 17 P1 — item-tied sold signs, discount/pickup/category signs, buyer-guide QR */}
+        <TabsContent value="floorsigns" className="space-y-4">
+          <SaleFloorSigns sale={sale} items={items} />
+        </TabsContent>
 
         {/* QR Code Sheet Tab */}
         <TabsContent value="qrcodes" className="space-y-4">

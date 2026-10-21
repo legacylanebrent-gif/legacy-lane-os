@@ -1,7 +1,7 @@
 {
   "name": "SaleIssue",
   "type": "object",
-  "description": "Chapter 13 P1 \u2014 AN IMPORTANT UNANSWERED OPERATIONAL QUESTION OR ISSUE THAT NEEDS RESOLUTION on a sale. It is deliberately NOT a SaleTask (work to do), NOT a SaleClientDecision (a matter requiring client/authority instruction), NOT a SaleNote (narrative team memory), and NOT a research flag (merchandise needing another look). It is the ONE new Chapter 13 operational entity: the home for unresolved questions that may block work ('Who is removing the piano?', 'Will the HOA permit Saturday?'). Resolution records REFERENCES to canonical destinations \u2014 answer only, a SaleClientDecision, a SaleTask, or both \u2014 final truth is never duplicated inside the issue. PENDING (unresolved) issues surface as operational warnings; an issue NEVER certifies, authorizes, or decides anything by itself.",
+  "description": "Chapter 13 P1 \u2014 AN IMPORTANT UNANSWERED OPERATIONAL QUESTION OR ISSUE THAT NEEDS RESOLUTION on a sale. It is deliberately NOT a SaleTask (work to do), NOT a SaleClientDecision (a matter requiring client/authority instruction), NOT a SaleNote (narrative team memory), and NOT a research flag (merchandise needing another look). It is the ONE new Chapter 13 operational entity: the home for unresolved questions that may block work ('Who is removing the piano?', 'Will the HOA permit Saturday?'). Resolution records REFERENCES to canonical destinations \u2014 answer only, a SaleClientDecision, a SaleTask, or both \u2014 final truth is never duplicated inside the issue. PENDING (unresolved) issues surface as operational warnings; an issue NEVER certifies, authorizes, or decides anything by itself. Chapter 17 P1 extends the category vocabulary with sale-floor categories (safety, customer_flow, signage, display, pricing, checkout, lighting) \u2014 reuse of the SAME entity; there is NO StagingIssue.",
   "properties": {
     "sale_id": {
       "type": "string",
@@ -44,10 +44,17 @@
         "pickup",
         "disposition",
         "financial_settlement",
+        "safety",
+        "customer_flow",
+        "signage",
+        "display",
+        "pricing",
+        "checkout",
+        "lighting",
         "other"
       ],
       "default": "other",
-      "description": "Small practical vocabulary \u2014 which part of the project this question touches."
+      "description": "Small practical vocabulary \u2014 which part of the project this question touches. Chapter 17 P1-5 adds the sale-floor categories (safety, customer_flow, signage, display, pricing, checkout, lighting) so staging/floor problems reuse this ONE issue architecture instead of a StagingIssue entity. A safety issue is an OPERATIONAL flag only \u2014 never a certification that anything is or is not safe."
     },
     "status": {
       "type": "string",
@@ -103,7 +110,7 @@
         ]
       },
       "default": [],
-      "description": "Which parts of the project this question may hold up \u2014 a plain descriptor for humans, plus SaleTask dependency links for real blocking."
+      "description": "Which parts of the project this question may hold up \u2014 a plain descriptor for humans, plus SaleTask dependency links for real blocking. Chapter 17: an unresolved safety/customer_flow issue with blocking area sale_opening is an OPENING BLOCKER candidate (deterministic)."
     },
     "resolution": {
       "type": "string",
@@ -130,7 +137,7 @@
         "type": "string"
       },
       "default": [],
-      "description": "SaleTask record(s) created as the operational resolution. Provenance flows the other way too \u2014 the created task carries source_type SALE_ISSUE."
+      "description": "SaleTask record(s) created as the operational resolution. Provenance flows the other way too \u2014 the created task carries source_type SALE_ISSUE. Chapter 17 P1-6: staging corrections reuse this same Issue \u2192 Task path."
     },
     "resolved_at": {
       "type": "string",
