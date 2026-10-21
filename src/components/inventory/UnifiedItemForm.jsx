@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { X, Save, AlertCircle, Plus, Check, Lightbulb, Lock } from 'lucide-react';
+import { X, Save, AlertCircle, Plus, Check, Lightbulb, Lock, DollarSign } from 'lucide-react';
 import { toast } from 'sonner';
 import { researchBlocked, overridePayload } from '@/components/saleops/researchGuard';
 import { LEVELS, LEVEL_META, levelRank, suggestLevel, locationDisplay, formatItemNumber } from '@/components/saleops/inventoryLevels';
@@ -377,6 +377,12 @@ export default function UnifiedItemForm({ item = null, saleId = null, onClose, o
 
   const zoneName = (zones.find(z => z.zone_id === formData.zone_id) || {}).name;
 
+  // Chapter 16 P0-4 — HIGH_VALUE price authority on existing records
+  const priceLocked = !!(item?.id && formData.inventory_level === 'HIGH_VALUE'
+    && currentUser && currentUser.role !== 'admin'
+    && currentUser.id !== item.operator_id
+    && currentUser.id !== item.seller_id);
+
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
       <Card className="w-full max-w-2xl max-h-[90vh] overflow-y-auto">
@@ -436,8 +442,15 @@ export default function UnifiedItemForm({ item = null, saleId = null, onClose, o
                 <label className="block font-semibold text-slate-900 text-sm">Price *</label>
                 <div className="relative">
                   <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-600">$</span>
-                  <Input type="number" value={formData.price} onChange={e => set('price', e.target.value)} placeholder="0.00" className="pl-6" />
+                  <Input type="number" value={formData.price}
+                    onChange={e => set('price', e.target.value)}
+                    disabled={priceLocked} placeholder="0.00" className="pl-6" />
                 </div>
+                {priceLocked && (
+                  <p className="text-[10px] text-amber-800 bg-amber-50 border border-amber-200 rounded px-2 py-1">
+                    High Value — only the sale operator can change this price.
+                  </p>
+                )}
                 {errors.price && <p className="text-xs text-red-600">{errors.price}</p>}
               </div>
               <div className="space-y-2">
@@ -574,6 +587,83 @@ export default function UnifiedItemForm({ item = null, saleId = null, onClose, o
                 <Input value={formData.sku} onChange={e => set('sku', e.target.value)} placeholder="e.g., VIN-001" />
               </div>
             </>
+          )}
+
+          {/* Chapter 16 P1 — pricing context (evidence-based, operator-owned) */}
+          {rank >= 2 && (
+            <div className="space-y-4 border-t pt-4">
+              <p className="font-semibold text-slate-900 flex items-center gap-2"><DollarSign className="w-4 h-4 text-gold-600" />Pricing context</p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="block text-sm font-semibold text-slate-900">Realistic market</label>
+                  <select value={formData.market_context}
+                    onChange={e => set('market_context', e.target.value)}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm">
+                    <option value="UNKNOWN">Unknown</option>
+                    <option value="LOCAL_PICKUP">Local pickup</option>
+                    <option value="REGIONAL">Regional</option>
+                    <option value="NATIONAL">National</option>
+                    <option value="ONLINE_SHIPPED">Online shipped</option>
+                  </select>
+                </div>
+                <div className="space-y-2">
+                  <label className="block text-sm font-semibold text-slate-900">Selling channel</label>
+                  <select value={formData.selling_channel}
+                    onChange={e => set('selling_channel', e.target.value)}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm">
+                    <option value="ESTATE_SALE">Estate sale</option>
+                    <option value="AUCTION">Auction</option>
+                    <option value="CONSIGNMENT">Consignment</option>
+                    <option value="SPECIALTY_MARKETPLACE">Specialty marketplace</option>
+                    <option value="DIRECT_SALE">Direct sale</option>
+                    <option value="OTHER">Other</option>
+                  </select>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="block text-sm font-semibold text-slate-900">Operator range — low</label>
+                  <Input type="number" value={formData.price_range_low}
+                    onChange={e => set('price_range_low', e.target.value)}
+                    placeholder="Optional" />
+                </div>
+                <div className="space-y-2">
+                  <label className="block text-sm font-semibold text-slate-900">Operator range — high</label>
+                  <Input type="number" value={formData.price_range_high}
+                    onChange={e => set('price_range_high', e.target.value)}
+                    placeholder="Optional" />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <label className="block text-sm font-semibold text-slate-900">Pricing rationale</label>
+                <Textarea value={formData.pricing_rationale}
+                  onChange={e => set('pricing_rationale', e.target.value)}
+                  placeholder="Three sold comparables; condition below strongest comparable; short selling window…"
+                  className="min-h-16 text-sm" />
+              </div>
+              <div className="space-y-2">
+                <label className="flex items-start gap-2 text-sm">
+                  <input type="checkbox" checked={formData.negotiation_locked}
+                    onChange={e => set('negotiation_locked', e.target.checked)}
+                    className="mt-0.5" />
+                  <span>No discount without the operator (overrides company policy for this item)</span>
+                </label>
+                <label className="flex items-start gap-2 text-sm">
+                  <input type="checkbox" checked={formData.excluded_from_discounts}
+                    onChange={e => set('excluded_from_discounts', e.target.checked)}
+                    className="mt-0.5" />
+                  <span>Excluded from the sale's planned discount schedule</span>
+                </label>
+              </div>
+              {item?.id && formData.inventory_level === 'HIGH_VALUE' && !priceLocked && (
+                <div className="space-y-2">
+                  <label className="block text-sm font-semibold text-slate-900">Reason for this price change</label>
+                  <Input value={priceChangeReason}
+                    onChange={e => setPriceChangeReason(e.target.value)}
+                    placeholder="Required — recorded in the item's price history" />
+                </div>
+              )}
+            </div>
           )}
 
           {/* RESEARCH and above — identification, evidence, facts vs notes */}
