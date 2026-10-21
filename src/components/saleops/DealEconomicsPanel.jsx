@@ -7,14 +7,13 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Loader2, Save, Calculator, CalendarDays, Users, Info, TriangleAlert } from 'lucide-react';
 import { LABOR_CATEGORIES, projectedDealEconomics, money } from './saleEconomicsModel';
-import { CLIENT_FIT_DIMENSIONS } from './ClientFitPanel';
+import { calendarOverlap, advisoryInputs, conservativeScenario, acceptanceReview } from './acceptanceReviewModel';
 
 // Chapter 4 P1 — Pre-Sale Economics Calculator + Sale Acceptance Scorecard.
 // Deterministic calculation only. Scenario and comparison modeling are local (never persisted;
 // signed contract terms and actual records are never overwritten by analysis).
 // Advisory: the operator makes the accept/reject decision. The score is not a guarantee.
 
-const ACTIVE_STAGES = ['new_lead', 'consultation_scheduled', 'contract_signed', 'setup_in_progress', 'sale_live'];
 const toNum = (v) => (v === '' || v === null || v === undefined ? null : Number(v) || 0);
 
 function Field({ label, value, onChange, prefix, hint }) {
@@ -71,23 +70,8 @@ export default function DealEconomicsPanel({ deal, onPersist, allDeals, linkedSa
   const draftDeal = useMemo(() => ({ ...deal, ...inputs, labor_estimates: laborRows }), [deal, inputs, laborRows]);
   const base = useMemo(() => projectedDealEconomics(draftDeal), [draftDeal]);
 
-  // Conservative scenario: lower gross, extra hours, higher costs.
-  const scenarioResult = useMemo(() => {
-    const blendedRate = base.estHours > 0 ? base.estLaborCost / base.estHours : 25;
-    const scenarioRate = toNum(scenario.extraRate) || blendedRate || 25;
-    const hours = base.estHours + (Number(scenario.extraHours) || 0);
-    const laborCost = base.estLaborCost + (Number(scenario.extraHours) || 0) * scenarioRate;
-    const gross = base.estGross * (1 + (Number(scenario.grossPct) || 0) / 100);
-    return projectedDealEconomics(
-      { ...draftDeal, estimated_value: gross, min_company_revenue_threshold: null, min_contribution_threshold: null },
-      {
-        advertising: base.advertising + (Number(scenario.extraAdvertising) || 0),
-        supplies: base.supplies + (Number(scenario.extraSupplies) || 0),
-        other: base.other + (Number(scenario.extraOther) || 0),
-        laborEstimates: [{ hours, rate: laborCost / (hours || 1) }],
-      }
-    );
-  }, [base, scenario, draftDeal]);
+  // Conservative scenario: lower gross, extra hours, higher costs (canonical shared engine).
+  const scenarioResult = useMemo(() => conservativeScenario(draftDeal, base, scenario), [base, scenario, draftDeal]);
 
   const comparisonResult = useMemo(() => {
     const rate = toNum(comparison.rate) ?? base.rate;
@@ -95,90 +79,16 @@ export default function DealEconomicsPanel({ deal, onPersist, allDeals, linkedSa
     return projectedDealEconomics(draftDeal, { commissionRate: rate, minimumFee: minFee });
   }, [base, comparison, draftDeal]);
 
-  // Calendar overlap with other active deals (Chapter 3 information, structured here).
-  const overlap = useMemo(() => {
-    const start = deal?.estimated_sale_start_date;
-    const end = deal?.estimated_sale_end_date || start;
-    if (!start) return { count: null, others: [] };
-    const s = new Date(start).getTime();
-    const e = new Date(end).getTime();
-    const others = (allDeals || []).filter(d => {
-      if (d.id === deal.id) return false;
-      if (!ACTIVE_STAGES.includes(d.stage)) return false;
-      const ds = d.estimated_sale_start_date;
-      if (!ds) return false;
-      const dss = new Date(ds).getTime();
-      const dee = new Date(d.estimated_sale_end_date || ds).getTime();
-      return dss <= e && dee >= s;
-    });
-    return { count: others.length, others };
-  }, [deal, allDeals]);
+  // Calendar overlap with other active deals (canonical shared engine).
+  const overlap = useMemo(() => calendarOverlap(deal, allDeals), [deal, allDeals]);
 
   // Chapter 5 P1 — advisory inputs: client fit (deal), distance (deal snapshot or
   // the linked sale's snapshot), site complexity (canonical EstateSale site assessment).
   // These NEVER change the deterministic financial rating; they add explainable reasons.
-  const advisory = useMemo(() => {
-    const cf = deal?.client_fit || {};
-    const flagged = CLIENT_FIT_DIMENSIONS
-      .filter(d => cf[d.key] === 'caution' || cf[d.key] === 'concern')
-      .map(d => ({ label: d.label, level: cf[d.key] }));
-    const cfWorst = flagged.some(f => f.level === 'concern') ? 'CONCERN'
-      : flagged.length ? 'CAUTION'
-        : CLIENT_FIT_DIMENSIONS.some(d => cf[d.key] === 'good') ? 'CLEAR' : 'NOT ASSESSED';
-    const site = linkedSale?.site_assessment || {};
-    const siteFlags = [];
-    if (site.gated_access === 'gated' || site.gated_access === 'controlled_entry') siteFlags.push('gated/controlled access');
-    if (site.community_restrictions === 'some' || site.community_restrictions === 'significant') siteFlags.push(`${site.community_restrictions} community restrictions`);
-    if (site.parking === 'limited' || site.parking === 'difficult') siteFlags.push(`${site.parking} parking`);
-    if (site.loading_access === 'limited' || site.loading_access === 'difficult') siteFlags.push(`${site.loading_access} loading/removal access`);
-    if (site.merchandise_volume === 'heavy') siteFlags.push('heavy merchandise volume');
-    if (site.pickup_constraints === 'limited' || site.pickup_constraints === 'difficult') siteFlags.push(`${site.pickup_constraints} pickup constraints`);
-    if (site.stairs_levels === 'multiple_flights') siteFlags.push('multiple flights of stairs');
-    const distance = deal?.distance_miles ?? linkedSale?.distance_miles ?? null;
-    return { cfWorst, flagged, distance, siteFlags };
-  }, [deal, linkedSale]);
+  const advisory = useMemo(() => advisoryInputs(deal, linkedSale), [deal, linkedSale]);
 
-  // Acceptance scorecard — deterministic, advisory only.
-  const scorecard = useMemo(() => {
-    const reasons = [];
-    let rating;
-    if (!base.estGross) {
-      rating = 'NEEDS INPUTS';
-      reasons.push('Enter projected gross merchandise sales to evaluate this opportunity.');
-    } else if (scenarioResult.contribution < 0 ||
-      (base.minRevenueThreshold != null && base.companyRevenue < base.minRevenueThreshold) ||
-      (base.minContributionThreshold != null && base.contribution < base.minContributionThreshold)) {
-      rating = 'HIGH RISK';
-      if (scenarioResult.contribution < 0) reasons.push(`Conservative scenario projects a negative contribution (${money(scenarioResult.contribution)}).`);
-      if (base.minRevenueThreshold != null && base.companyRevenue < base.minRevenueThreshold) reasons.push(`Projected company revenue ${money(base.companyRevenue)} is below your minimum revenue threshold ${money(base.minRevenueThreshold)}.`);
-      if (base.minContributionThreshold != null && base.contribution < base.minContributionThreshold) reasons.push(`Projected contribution ${money(base.contribution)} is below your minimum contribution threshold ${money(base.minContributionThreshold)}.`);
-    } else if ((base.minContributionThreshold != null && scenarioResult.contribution < base.minContributionThreshold) ||
-      base.contribution > 0 && scenarioResult.contribution < base.contribution * 0.5 ||
-      (overlap.count != null && overlap.count >= 2)) {
-      rating = 'MARGINAL';
-      if (base.minContributionThreshold != null && scenarioResult.contribution < base.minContributionThreshold) reasons.push(`Conservative contribution ${money(scenarioResult.contribution)} falls below your minimum contribution threshold.`);
-      if (base.contribution > 0 && scenarioResult.contribution < base.contribution * 0.5) reasons.push('Conservative scenario removes more than half of the projected contribution.');
-      if (overlap.count != null && overlap.count >= 2) reasons.push(`${overlap.count} other active deals overlap this sale window.`);
-    } else if (base.contribution > 0 && scenarioResult.contribution >= base.contribution * 0.75) {
-      rating = 'STRONG';
-      reasons.push('Projection and the conservative scenario both hold up, and the calendar overlap is manageable.');
-    } else {
-      rating = 'ACCEPTABLE';
-      reasons.push('The projection holds, but the conservative scenario erodes a meaningful share of it.');
-    }
-    if (overlap.count == null) reasons.push('Set the estimated sale dates on the Dates tab to include calendar overlap in this assessment.');
-    // Chapter 5 P1 advisory inputs — explainable, never auto-accept/reject.
-    if (advisory.flagged.length) {
-      reasons.push(`Advisory — client fit ${advisory.cfWorst}: ${advisory.flagged.map(f => `${f.label}${f.level === 'concern' ? ' (concern)' : ''}`).join(', ')}.`);
-    }
-    if (advisory.distance != null) {
-      reasons.push(`Advisory — distance from operating base: ${advisory.distance} miles (informational; no distance threshold configured).`);
-    }
-    if (advisory.siteFlags.length) {
-      reasons.push(`Advisory — site complexity: ${advisory.siteFlags.join('; ')}.`);
-    }
-    return { rating, reasons };
-  }, [base, scenarioResult, overlap, advisory]);
+  // Acceptance scorecard — deterministic, advisory only (canonical shared engine).
+  const scorecard = useMemo(() => acceptanceReview({ base, scenarioResult, overlap, advisory }), [base, scenarioResult, overlap, advisory]);
 
   const save = async () => {
     setSaving(true);

@@ -73,7 +73,7 @@ export default function BeforeArriveSection({ deal, consult, saveConsult }) {
         <VoiceNoteInput label="Previous removals (if known)" value={form.previous_removals} onChange={v => f('previous_removals', v)} placeholder="What has already been removed from the property?" rows={2} />
         <VoiceNoteInput label="Merchandise overview" value={form.merchandise_overview} onChange={v => f('merchandise_overview', v)} placeholder="Basic overview of what is in the property" rows={2} />
         <VoiceNoteInput label="Special circumstances" value={form.special_circumstances} onChange={v => f('special_circumstances', v)} placeholder="Anything the team should know before arriving" rows={2} />
-        <Textarea label="dates" value={form.important_dates_note} onChange={e => f('important_dates_note', e.target.value)} rows={2} placeholder="Important dates context (structured deadlines go in Goals & Expectations)" />
+        <Textarea value={form.important_dates_note} onChange={e => f('important_dates_note', e.target.value)} rows={2} placeholder="Important dates context (structured deadlines go in Goals & Expectations)" />
         <Button onClick={save} disabled={saving} className="w-full h-11 bg-cyan-600 hover:bg-cyan-700">
           {saving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />} Save Questionnaire
         </Button>

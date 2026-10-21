@@ -49,6 +49,11 @@ export function buildProposalSnapshot({ sale, deal, scope }) {
   const optional = items.filter(i => !i.included && i.charge_policy === 'additional_when_authorized');
   const excluded = items.filter(i => !i.included && i.charge_policy !== 'additional_when_authorized');
   const sa = sale?.site_assessment || {};
+  // Chapter 12 P1 — consultation findings carried WITHOUT re-entry (acceptance
+  // conditions, recommendation provenance, client goals). Chapter 9 remains the
+  // one snapshot system; nothing is retyped.
+  const c = deal?.consultation || {};
+  const openConditions = (c.acceptance_conditions || []).filter(x => (x.status || 'open') !== 'resolved');
 
   return {
     overview: '',
@@ -97,7 +102,12 @@ export function buildProposalSnapshot({ sale, deal, scope }) {
       sa.loading_access && sa.loading_access !== 'unknown' ? `removal access: ${sa.loading_access}` : '',
       sa.community_restrictions && sa.community_restrictions !== 'unknown' ? `${sa.community_restrictions} community restrictions` : '',
     ].filter(Boolean).join('; '),
-    next_steps: '',
+    next_steps: openConditions.length
+      ? `This recommendation depends on: ${openConditions.map(x => `${x.condition}${x.due_date ? ` (by ${x.due_date})` : ''}`).join('; ')}.`
+      : '',
+    conditions: (c.acceptance_conditions || []).map(x => ({ condition: x.condition, status: x.status || 'open', due_date: x.due_date || '' })),
+    recommendation: { classification: c.recommendation?.classification || '', note: c.recommendation?.note || '' },
+    client_goals: (c.client_goals || []),
     estimate_note: ESTIMATE_NOTE,
   };
 }

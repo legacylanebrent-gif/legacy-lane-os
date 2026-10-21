@@ -108,6 +108,15 @@ export default function ProposalBuilder({ sale, deal, scope, nextVersion, onDone
           <Textarea rows={2} value={snapshot.next_steps} onChange={e => set('next_steps', e.target.value)} placeholder="Review, confirm, agreement preparation…" />
         </div>
 
+        {(snapshot.conditions || []).length > 0 && (
+          <div className="text-xs bg-cyan-50 border border-cyan-200 rounded-md p-2 text-cyan-900">
+            <p className="font-semibold text-[11px] mb-1">Acceptance conditions carried from the consultation (no re-entry):</p>
+            {(snapshot.conditions || []).map((x, i) => (
+              <p key={i}>• {x.condition}{x.due_date ? ` (by ${x.due_date})` : ''}{x.status === 'resolved' ? ' — resolved' : ''}</p>
+            ))}
+          </div>
+        )}
+
         {unresolved.length > 0 && (
           <div className="text-xs bg-amber-50 border border-amber-200 rounded-md p-2 text-amber-800">
             Still unresolved (kept visible — never fabricated): {unresolved.join(', ')}.

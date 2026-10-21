@@ -136,7 +136,7 @@ export function consultationAdvisory({ deal, authority, unresolvedResearchCount 
   } else if (unresolved.length) {
     reasons.push(`Advisory — ${unresolved.length} unresolved condition observation${unresolved.length > 1 ? 's' : ''} recorded. Review them before the agreement.`);
   }
-  if (authority && !authority.is_active === false) {
+  if (authority && authority.is_active !== false) {
     if (authority.verification_status === 'UNRESOLVED') {
       reasons.push(`Advisory — authority for ${authority.full_name} is UNRESOLVED. Verify it before presenting the agreement (operational classification, not a legal conclusion).`);
     } else if (authority.verification_status === 'DISPUTED') {

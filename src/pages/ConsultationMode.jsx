@@ -165,7 +165,15 @@ export default function ConsultationMode() {
         {section === 'before' && <BeforeArriveSection {...props} />}
         {section === 'client' && <ClientAuthoritySection deal={deal} authority={authority} linkedSaleId={deal.estate_sale_id} />}
         {section === 'property' && <PropertySection deal={deal} linkedSale={linkedSale} />}
-        {section === 'rooms' && <RoomsSection consult={consult} saveConsult={saveConsult} />}
+        {section === 'rooms' && (
+          <>
+            <RoomsSection consult={consult} saveConsult={saveConsult} />
+            <div className="border-t border-slate-200 mt-6 pt-4 space-y-3">
+              <p className="text-sm font-semibold text-slate-800">Condition & safety observations</p>
+              <ConditionsSection consult={consult} saveConsult={saveConsult} />
+            </div>
+          </>
+        )}
         {section === 'prep' && <PrepAccessSection deal={deal} linkedSale={linkedSale} consult={consult} saveConsult={saveConsult} />}
         {section === 'goals' && <GoalsExpectationsSection deal={deal} consult={consult} saveConsult={saveConsult} />}
         {section === 'research' && <ResearchHandlingSection deal={deal} linkedSaleId={deal.estate_sale_id} consult={consult} researchItems={researchItems} />}

@@ -23,6 +23,7 @@ import NextActionPanel from '@/components/saleops/NextActionPanel';
 import DealCommsPanel from '@/components/saleops/DealCommsPanel';
 import DealOutcomeDialog from '@/components/saleops/DealOutcomeDialog';
 import DealCh9Progression from '@/components/saleops/DealCh9Progression';
+import ConsultationEntryCard from '@/components/consultation/ConsultationEntryCard';
 import NewDealForm from '@/components/saleops/NewDealForm';
 import TaskRow from '@/components/saleops/TaskRow';
 import { STAGES, STAGE_MAP, ACTIVE_PROGRESS, TERMINAL_STAGES, needsNextAction, isOverdueNextAction, isStaleDeal } from '@/components/saleops/pipelineStages';
@@ -854,6 +855,9 @@ function DealDetail({ deal, setDeal, onSave, saving, onStageChange, onGenerateTi
 
           {/* Chapter 10 P1 — Chapter 9 progression recognized from canonical records */}
           <DealCh9Progression deal={deal} />
+
+          {/* Chapter 12 P1 — guided Consultation Mode entry from the canonical opportunity */}
+          <ConsultationEntryCard deal={deal} />
 
           <div className="grid sm:grid-cols-2 gap-3">
             {deal.client_email && <div className="flex items-center gap-2 text-sm"><Mail className="w-4 h-4 text-slate-400"/><a href={`mailto:${deal.client_email}`} className="text-cyan-600">{deal.client_email}</a></div>}
