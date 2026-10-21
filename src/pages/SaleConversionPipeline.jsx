@@ -19,17 +19,46 @@ import {
 import { format, addDays, parseISO, isToday, isTomorrow, isPast } from 'date-fns';
 import DealEconomicsPanel from '@/components/saleops/DealEconomicsPanel';
 import ClientFitPanel from '@/components/saleops/ClientFitPanel';
+import NextActionPanel from '@/components/saleops/NextActionPanel';
+import DealCommsPanel from '@/components/saleops/DealCommsPanel';
+import DealOutcomeDialog from '@/components/saleops/DealOutcomeDialog';
+import DealCh9Progression from '@/components/saleops/DealCh9Progression';
 
 // ─── Stage config ────────────────────────────────────────────────────────────
 const STAGES = [
   { key: 'new_lead',               label: 'New Lead',            color: 'bg-slate-100 text-slate-700',   dot: 'bg-slate-400',   border: 'border-slate-200' },
+  { key: 'contacted',              label: 'Contacted',           color: 'bg-indigo-100 text-indigo-700', dot: 'bg-indigo-500',  border: 'border-indigo-200' },
   { key: 'consultation_scheduled', label: 'Consultation',        color: 'bg-blue-100 text-blue-700',     dot: 'bg-blue-500',    border: 'border-blue-200' },
   { key: 'contract_signed',        label: 'Contract Signed',     color: 'bg-purple-100 text-purple-700', dot: 'bg-purple-500',  border: 'border-purple-200' },
   { key: 'setup_in_progress',      label: 'Setup / Staging',     color: 'bg-orange-100 text-orange-700', dot: 'bg-orange-500',  border: 'border-orange-200' },
   { key: 'sale_live',              label: 'Sale Live',           color: 'bg-green-100 text-green-700',   dot: 'bg-green-500',   border: 'border-green-200' },
   { key: 'completed',              label: 'Completed',           color: 'bg-cyan-100 text-cyan-700',     dot: 'bg-cyan-500',    border: 'border-cyan-200' },
-  { key: 'lost',                   label: 'Lost / Declined',     color: 'bg-red-100 text-red-700',       dot: 'bg-red-400',     border: 'border-red-200' },
+  { key: 'lost',                   label: 'Lost',                color: 'bg-red-100 text-red-700',       dot: 'bg-red-400',     border: 'border-red-200' },
+  { key: 'referred',               label: 'Referred Out',        color: 'bg-amber-100 text-amber-700',   dot: 'bg-amber-500',   border: 'border-amber-200' },
+  { key: 'nurture',                label: 'Nurture',             color: 'bg-teal-100 text-teal-700',     dot: 'bg-teal-500',    border: 'border-teal-200' },
 ];
+
+// Chapter 10 P1 — outcome truth on the existing stage axis. WON = completed.
+// NOT READY IS NOT LOST. REFERRED IS NOT LOST.
+const TERMINAL_STAGES = ['completed', 'lost', 'referred', 'nurture'];
+const ACTIVE_PROGRESS = ['new_lead', 'contacted', 'consultation_scheduled', 'contract_signed', 'setup_in_progress', 'sale_live', 'completed'];
+
+// Chapter 10 P1 — deterministic discipline rules (NO AI involvement):
+// NEEDS NEXT ACTION: active opportunity with no pending next action.
+// OVERDUE: pending next action whose date has passed.
+// STALE: pre-consultation active opportunity with no future next action, no
+// future consultation and no accepted commercial terms. Nurture is never stale.
+const needsNextAction = d =>
+  !['completed', 'lost', 'referred', 'nurture'].includes(d.stage) && !(d.next_action && !d.next_action_completed_at);
+const isOverdueNextAction = d =>
+  !!d.next_action && !d.next_action_completed_at && !!d.next_action_at && isPast(parseISO(d.next_action_at)) && !['lost', 'referred'].includes(d.stage);
+const isStaleDeal = d => {
+  if (!['new_lead', 'contacted', 'consultation_scheduled'].includes(d.stage)) return false;
+  if (d.commercial_terms_accepted_at) return false;
+  if (d.next_action && !d.next_action_completed_at && d.next_action_at && !isPast(parseISO(d.next_action_at))) return false;
+  if (d.consultation_date && !isPast(parseISO(d.consultation_date))) return false;
+  return true;
+};
 
 const STAGE_MAP = Object.fromEntries(STAGES.map(s => [s.key, s]));
 
@@ -106,6 +135,11 @@ export default function SaleConversionPipeline() {
   const [form, setForm] = useState(emptyForm());
   const [saving, setSaving] = useState(false);
 
+  // Chapter 10 P1 — discipline filter + outcome dialog state
+  const [disciplineFilter, setDisciplineFilter] = useState('all');
+  const [outcome, setOutcome] = useState(null); // { dealId, stage, deal }
+  const [outcomeContacts, setOutcomeContacts] = useState([]);
+
   // AI timeline
   const [generatingTimeline, setGeneratingTimeline] = useState(false);
   const [editingTaskId, setEditingTaskId] = useState(null);
@@ -164,6 +198,46 @@ export default function SaleConversionPipeline() {
     await base44.entities.SaleConversionPipeline.update(dealId, { stage: newStage });
     setDeals(prev => prev.map(d => d.id === dealId ? { ...d, stage: newStage } : d));
     if (selectedDeal?.id === dealId) setSelectedDeal(prev => ({ ...prev, stage: newStage }));
+  };
+
+  // Chapter 10 P1 — outcome transitions route through the outcome dialog so
+  // LOST always carries a structured reason, REFERRED carries its destination,
+  // NURTURE carries a future next action, and completion prompts post-sale
+  // follow-up. Plain progression stages update directly.
+  const requestStageChange = (dealId, newStage, dealRecord) => {
+    if (['lost', 'referred', 'nurture', 'completed'].includes(newStage)) {
+      if (newStage === 'referred') {
+        base44.entities.Contact.filter({}, '-created_date', 200)
+          .then(r => setOutcomeContacts(r || []))
+          .catch(() => setOutcomeContacts([]));
+      }
+      setOutcome({ dealId, stage: newStage, deal: dealRecord || deals.find(d => d.id === dealId) || selectedDeal });
+      return;
+    }
+    handleUpdateStage(dealId, newStage);
+  };
+
+  const applyOutcome = async (fields) => {
+    const o = outcome;
+    if (!o) return;
+    setOutcome(null);
+    const update = { stage: o.stage, ...fields };
+    await base44.entities.SaleConversionPipeline.update(o.dealId, update);
+    setDeals(prev => prev.map(d => d.id === o.dealId ? { ...d, ...update } : d));
+    if (selectedDeal?.id === o.dealId) setSelectedDeal(prev => ({ ...prev, ...update }));
+  };
+
+  const createReferredContact = async ({ first_name, last_name, email, phone, roles }) => {
+    const created = await base44.entities.Contact.create({
+      first_name: first_name || 'Unknown',
+      last_name: last_name || '',
+      email: email || null,
+      phone: phone || null,
+      roles: roles || ['vendor'],
+      status: 'new',
+      notes: 'Created when an opportunity was referred out (Chapter 10 P1).',
+    });
+    return created.id;
   };
 
   const handleLinkSale = async (dealId, saleId, dealRecord) => {
@@ -362,7 +436,15 @@ Include 18-24 tasks covering every stage. Order them chronologically by due_date
 
   // ─── Stage funnel counts ───────────────────────────────────────────────────
   const stageCounts = STAGES.map(s => ({ ...s, count: deals.filter(d => d.stage === s.key).length, deals: deals.filter(d => d.stage === s.key) }));
-  const activeCount = deals.filter(d => !['completed','lost'].includes(d.stage)).length;
+  const activeCount = deals.filter(d => !TERMINAL_STAGES.includes(d.stage)).length;
+  // Chapter 10 P1 — deterministic discipline counts + filtered list view
+  const needsCount = deals.filter(needsNextAction).length;
+  const overdueCount = deals.filter(isOverdueNextAction).length;
+  const staleCount = deals.filter(isStaleDeal).length;
+  const visibleDeals = disciplineFilter === 'all' ? deals
+    : disciplineFilter === 'needs' ? deals.filter(needsNextAction)
+    : disciplineFilter === 'overdue' ? deals.filter(isOverdueNextAction)
+    : deals.filter(isStaleDeal);
 
   if (loading) return <div className="p-8 animate-pulse"><div className="h-8 bg-slate-200 rounded w-1/3 mb-4"/><div className="h-64 bg-slate-200 rounded"/></div>;
 
@@ -374,10 +456,13 @@ Include 18-24 tasks covering every stage. Order them chronologically by due_date
           <h1 className="text-3xl font-serif font-bold text-slate-900">Sale Conversion Pipeline</h1>
           <p className="text-slate-500 text-sm mt-0.5">{activeCount} active deals · {deals.filter(d=>d.stage==='completed').length} completed</p>
         </div>
-        <div className="flex gap-2 self-start sm:self-auto">
+        <div className="flex gap-2 flex-wrap self-start sm:self-auto">
           <Button variant="outline" onClick={handleSyncAllDeals} disabled={syncing} className="gap-2">
             <RefreshCw className={`w-4 h-4 ${syncing ? 'animate-spin' : ''}`} />
             Sync
+          </Button>
+          <Button asChild variant="outline" className="gap-2">
+            <Link to="/LeadSourcePerformance"><TrendingUp className="w-4 h-4" /> Source Report</Link>
           </Button>
           <Button onClick={() => setShowNewDeal(true)} className="bg-orange-600 hover:bg-orange-700 gap-2">
             <Plus className="w-4 h-4" /> New Deal
@@ -385,17 +470,39 @@ Include 18-24 tasks covering every stage. Order them chronologically by due_date
         </div>
       </div>
 
+      {/* ── Chapter 10 P1 — active-lead discipline (deterministic, no AI) ── */}
+      <div className="flex flex-wrap gap-2 items-center">
+        {[
+          ['all', 'All', deals.length, 'bg-slate-100 text-slate-600 border-slate-200'],
+          ['needs', 'Needs Next Action', needsCount, 'bg-amber-100 text-amber-700 border-amber-300'],
+          ['overdue', 'Overdue', overdueCount, 'bg-red-100 text-red-700 border-red-300'],
+          ['stale', 'Stale', staleCount, 'bg-orange-100 text-orange-700 border-orange-300'],
+        ].map(([key, label, count, cls]) => (
+          <button
+            key={key}
+            onClick={() => setDisciplineFilter(key)}
+            className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors ${disciplineFilter === key ? cls + ' ring-1 ring-slate-400' : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50'}`}
+          >
+            {label} <span className="ml-1 font-bold">{count}</span>
+          </button>
+        ))}
+        {disciplineFilter !== 'all' && (
+          <p className="text-xs text-slate-400">Filtering the List view · computed from records only</p>
+        )}
+      </div>
+
       {/* ── Funnel Stats ── */}
       <div className="flex flex-wrap gap-2">
-        {STAGES.filter(s => s.key !== 'lost').map((s, i) => {
-          const cnt = stageCounts.find(sc => sc.key === s.key)?.count || 0;
+        {ACTIVE_PROGRESS.map((key, i) => {
+          const s = STAGE_MAP[key];
+          const cnt = stageCounts.find(sc => sc.key === key)?.count || 0;
           return (
-            <div key={s.key} className="flex items-center gap-1">
+            <div key={key} className="flex items-center gap-1">
               <div className={`px-3 py-1.5 rounded-full text-xs font-semibold border ${s.color} ${s.border}`}>
                 <span className={`inline-block w-2 h-2 rounded-full mr-1.5 ${s.dot}`}></span>
                 {s.label} <span className="ml-1 font-bold">{cnt}</span>
               </div>
-              {i < 5 && <ChevronRight className="w-3 h-3 text-slate-300" />}
+              {i < ACTIVE_PROGRESS.length - 1 && <ChevronRight className="w-3 h-3 text-slate-300" />}
             </div>
           );
         })}
@@ -412,7 +519,8 @@ Include 18-24 tasks covering every stage. Order them chronologically by due_date
         {/* ── KANBAN ── */}
         <TabsContent value="kanban" className="mt-4">
           <div className="flex gap-4 overflow-x-auto pb-4">
-            {STAGES.filter(s => s.key !== 'lost').map(stage => {
+            {ACTIVE_PROGRESS.map(progressKey => {
+              const stage = STAGE_MAP[progressKey];
               const stageDeals = deals.filter(d => d.stage === stage.key);
               return (
                 <div key={stage.key} className="flex-shrink-0 w-64">
@@ -427,8 +535,8 @@ Include 18-24 tasks covering every stage. Order them chronologically by due_date
                         deal={deal}
                         onOpen={() => { setSelectedDeal({...deal}); setShowDetail(true); }}
                         onAdvance={() => {
-                          const idx = STAGES.findIndex(s => s.key === deal.stage);
-                          if (idx < STAGES.length - 2) handleUpdateStage(deal.id, STAGES[idx+1].key);
+                          const idx = ACTIVE_PROGRESS.indexOf(deal.stage);
+                          if (idx >= 0 && idx < ACTIVE_PROGRESS.length - 1) requestStageChange(deal.id, ACTIVE_PROGRESS[idx + 1], deal);
                         }}
                       />
                     ))}
@@ -446,7 +554,39 @@ Include 18-24 tasks covering every stage. Order them chronologically by due_date
                 {deals.filter(d=>d.stage==='lost').map(deal => (
                   <button key={deal.id} onClick={() => { setSelectedDeal({...deal}); setShowDetail(true); }}
                     className="w-full text-left text-xs p-2 bg-white border border-red-100 rounded-lg text-slate-500 hover:bg-red-50">
-                    {deal.client_name}<br/><span className="text-slate-400">{deal.property_city}</span>
+                    {deal.client_name}<br/><span className="text-slate-400">{deal.lost_reason ? deal.lost_reason.replace(/_/g,' ') : deal.property_city}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+            {/* Referred-out column (Chapter 10 P1 — referred ≠ lost) */}
+            <div className="flex-shrink-0 w-48">
+              <div className="px-3 py-2 rounded-t-lg bg-amber-50 text-amber-700 text-sm font-semibold border-b-2 border-amber-200 flex items-center justify-between">
+                Referred Out <Badge variant="outline" className="text-xs">{deals.filter(d=>d.stage==='referred').length}</Badge>
+              </div>
+              <div className="bg-amber-50/50 rounded-b-lg border border-t-0 border-amber-100 min-h-16 p-2 space-y-2">
+                {deals.filter(d=>d.stage==='referred').map(deal => (
+                  <button key={deal.id} onClick={() => { setSelectedDeal({...deal}); setShowDetail(true); }}
+                    className="w-full text-left text-xs p-2 bg-white border border-amber-100 rounded-lg text-slate-500 hover:bg-amber-50">
+                    {deal.client_name}<br/><span className="text-slate-400">{deal.referred_service ? deal.referred_service.replace(/_/g,' ') : 'referred'}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+            {/* Nurture column (Chapter 10 P1 — not ready ≠ lost; excluded from immediate active work) */}
+            <div className="flex-shrink-0 w-48">
+              <div className="px-3 py-2 rounded-t-lg bg-teal-50 text-teal-700 text-sm font-semibold border-b-2 border-teal-200 flex items-center justify-between">
+                Nurture <Badge variant="outline" className="text-xs">{deals.filter(d=>d.stage==='nurture').length}</Badge>
+              </div>
+              <div className="bg-teal-50/50 rounded-b-lg border border-t-0 border-teal-100 min-h-16 p-2 space-y-2">
+                {deals.filter(d=>d.stage==='nurture').map(deal => (
+                  <button key={deal.id} onClick={() => { setSelectedDeal({...deal}); setShowDetail(true); }}
+                    className="w-full text-left text-xs p-2 bg-white border border-teal-100 rounded-lg text-slate-500 hover:bg-teal-50">
+                    {deal.client_name}<br/>
+                    <span className="text-slate-400">
+                      {deal.next_action && !deal.next_action_completed_at && deal.next_action_at
+                        ? `→ ${format(parseISO(deal.next_action_at), 'MMM d')}` : 'no future action'}
+                    </span>
                   </button>
                 ))}
               </div>
@@ -504,7 +644,7 @@ Include 18-24 tasks covering every stage. Order them chronologically by due_date
         {/* ── LIST ── */}
         <TabsContent value="list" className="mt-4">
           <div className="space-y-2">
-            {deals.map(deal => {
+            {visibleDeals.map(deal => {
               const stage = STAGE_MAP[deal.stage];
               const taskDone = (deal.ai_timeline_tasks||[]).filter(t=>t.status==='completed').length;
               const taskTotal = (deal.ai_timeline_tasks||[]).length;
@@ -515,7 +655,13 @@ Include 18-24 tasks covering every stage. Order them chronologically by due_date
                   <div className="flex-1 min-w-0">
                     <div className="font-semibold text-slate-900 text-sm">{deal.client_name}</div>
                     <div className="text-xs text-slate-500 truncate">{deal.property_address}{deal.property_city && `, ${deal.property_city}`}</div>
+                    {deal.next_action && !deal.next_action_completed_at && (
+                      <div className="text-xs text-orange-600 truncate">→ {deal.next_action}{deal.next_action_at ? ` · ${format(parseISO(deal.next_action_at), 'MMM d')}` : ''}</div>
+                    )}
                   </div>
+                  {needsNextAction(deal) && <Badge className="bg-amber-100 text-amber-700 text-[10px] hidden sm:flex">NEEDS ACTION</Badge>}
+                  {isOverdueNextAction(deal) && <Badge className="bg-red-100 text-red-700 text-[10px] hidden sm:flex">OVERDUE</Badge>}
+                  {isStaleDeal(deal) && <Badge className="bg-orange-100 text-orange-700 text-[10px] hidden sm:flex">STALE</Badge>}
                   <Badge className={`${stage.color} text-xs hidden sm:flex`}>{stage.label}</Badge>
                   {deal.consultation_date && (
                     <div className="text-xs text-blue-600 hidden md:block flex-shrink-0">
@@ -534,6 +680,9 @@ Include 18-24 tasks covering every stage. Order them chronologically by due_date
                 </div>
               );
             })}
+            {visibleDeals.length === 0 && deals.length > 0 && (
+              <div className="text-center py-10 text-slate-400 text-sm">No opportunities match this filter.</div>
+            )}
             {deals.length === 0 && (
               <div className="text-center py-16 text-slate-400">
                 <TrendingUp className="w-12 h-12 mx-auto mb-3 opacity-30"/>
@@ -561,7 +710,9 @@ Include 18-24 tasks covering every stage. Order them chronologically by due_date
               setDeal={setSelectedDeal}
               onSave={handleSaveDetail}
               saving={saving}
-              onStageChange={(s) => handleUpdateStage(selectedDeal.id, s)}
+              user={user}
+              operatorName={user ? (user.full_name || user.email) : null}
+              onStageChange={(s) => requestStageChange(selectedDeal.id, s, selectedDeal)}
               onGenerateTimeline={handleGenerateTimeline}
               generatingTimeline={generatingTimeline}
               onUpdateTask={handleUpdateTask}
@@ -588,6 +739,15 @@ function DealCard({ deal, onOpen, onAdvance }) {
   return (
     <div className="bg-white border border-slate-200 rounded-lg p-3 shadow-sm hover:shadow-md transition-shadow cursor-pointer" onClick={onOpen}>
       <div className="font-semibold text-slate-900 text-sm mb-1 leading-tight">{deal.client_name}</div>
+      {needsNextAction(deal) && <Badge className="bg-amber-100 text-amber-700 text-[10px] mb-1">NEEDS NEXT ACTION</Badge>}
+      {isOverdueNextAction(deal) && <Badge className="bg-red-100 text-red-700 text-[10px] mb-1">OVERDUE</Badge>}
+      {isStaleDeal(deal) && <Badge className="bg-orange-100 text-orange-700 text-[10px] mb-1">STALE</Badge>}
+      {deal.next_action && !deal.next_action_completed_at && (
+        <div className="text-xs text-orange-600 flex items-start gap-1 mb-1">
+          <ArrowRight className="w-3 h-3 mt-0.5 flex-shrink-0" />
+          <span className="truncate">{deal.next_action}{deal.next_action_at ? ` · ${format(parseISO(deal.next_action_at), 'MMM d')}` : ''}</span>
+        </div>
+      )}
       {deal.estate_sale_id && (
         <div className="text-xs text-orange-600 flex items-center gap-1 mb-1 font-medium">
           <Home className="w-3 h-3" /> Linked to Sale
@@ -707,7 +867,7 @@ function NewDealForm({ form, setForm, onSave, onCancel, saving, existingDeals })
           <Select value={form.stage} onValueChange={v=>f('stage',v)}>
             <SelectTrigger><SelectValue/></SelectTrigger>
             <SelectContent>
-              {STAGES.filter(s => s.key !== 'lost').map(s=><SelectItem key={s.key} value={s.key}>{s.label}</SelectItem>)}
+              {STAGES.filter(s => !['lost','referred','nurture'].includes(s.key)).map(s=><SelectItem key={s.key} value={s.key}>{s.label}</SelectItem>)}
             </SelectContent>
           </Select>
         </div>
@@ -729,7 +889,7 @@ function NewDealForm({ form, setForm, onSave, onCancel, saving, existingDeals })
 }
 
 // ─── Deal Detail Modal ────────────────────────────────────────────────────────
-function DealDetail({ deal, setDeal, onSave, saving, onStageChange, onGenerateTimeline, generatingTimeline, onUpdateTask, editingTaskId, setEditingTaskId, sales, onLinkSale, onUnlinkSale, onUpdateEconomics, allDeals }) {
+function DealDetail({ deal, setDeal, onSave, saving, onStageChange, onGenerateTimeline, generatingTimeline, onUpdateTask, editingTaskId, setEditingTaskId, sales, onLinkSale, onUnlinkSale, onUpdateEconomics, allDeals, user, operatorName }) {
   const [detailTab, setDetailTab] = useState('overview');
   const [saleSearch, setSaleSearch] = useState('');
   const [saleResults, setSaleResults] = useState([]);
@@ -814,10 +974,17 @@ function DealDetail({ deal, setDeal, onSave, saving, onStageChange, onGenerateTi
           </TabsTrigger>
           <TabsTrigger value="economics">Economics</TabsTrigger>
           <TabsTrigger value="clientfit">Client Fit</TabsTrigger>
+          <TabsTrigger value="activity">Activity</TabsTrigger>
         </TabsList>
 
         {/* OVERVIEW */}
         <TabsContent value="overview" className="mt-3 space-y-4">
+          {/* Chapter 10 P1 — canonical next action (WHAT / WHEN / WHO) */}
+          <NextActionPanel deal={deal} operatorName={operatorName} onPersist={onUpdateEconomics} />
+
+          {/* Chapter 10 P1 — Chapter 9 progression recognized from canonical records */}
+          <DealCh9Progression deal={deal} />
+
           <div className="grid sm:grid-cols-2 gap-3">
             {deal.client_email && <div className="flex items-center gap-2 text-sm"><Mail className="w-4 h-4 text-slate-400"/><a href={`mailto:${deal.client_email}`} className="text-cyan-600">{deal.client_email}</a></div>}
             {deal.client_phone && <div className="flex items-center gap-2 text-sm"><Phone className="w-4 h-4 text-slate-400"/><a href={`tel:${deal.client_phone}`} className="text-cyan-600">{deal.client_phone}</a></div>}
@@ -1088,6 +1255,11 @@ function DealDetail({ deal, setDeal, onSave, saving, onStageChange, onGenerateTi
         {/* Chapter 5 P1 — structured client-fit assessment (advisory scorecard input) */}
         <TabsContent value="clientfit" className="mt-3">
           <ClientFitPanel deal={deal} onPersist={onUpdateEconomics} />
+        </TabsContent>
+
+        {/* Chapter 10 P1 — pre-sale communication history on the canonical Activity record */}
+        <TabsContent value="activity" className="mt-3">
+          <DealCommsPanel deal={deal} user={user} onPersist={onUpdateEconomics} />
         </TabsContent>
       </Tabs>
     </div>
