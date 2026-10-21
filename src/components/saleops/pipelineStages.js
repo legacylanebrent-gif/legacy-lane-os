@@ -24,8 +24,9 @@ export const ACTIVE_PROGRESS = ['new_lead', 'contacted', 'consultation_scheduled
 
 // NEEDS NEXT ACTION: active opportunity with no pending next action.
 // OVERDUE: pending next action whose date has passed.
-// STALE: pre-consultation active opportunity with no future next action, no
-// future consultation and no accepted commercial terms. Nurture is never stale.
+// STALE: pre-consultation active opportunity with NOTHING scheduled — no
+// pending next action at all (an overdue action is OVERDUE, not stale noise),
+// no future consultation and no accepted commercial terms. Nurture is never stale.
 export const needsNextAction = d =>
   !['completed', 'lost', 'referred', 'nurture'].includes(d.stage) && !(d.next_action && !d.next_action_completed_at);
 
@@ -35,7 +36,7 @@ export const isOverdueNextAction = d =>
 export const isStaleDeal = d => {
   if (!['new_lead', 'contacted', 'consultation_scheduled'].includes(d.stage)) return false;
   if (d.commercial_terms_accepted_at) return false;
-  if (d.next_action && !d.next_action_completed_at && d.next_action_at && !isPast(parseISO(d.next_action_at))) return false;
+  if (d.next_action && !d.next_action_completed_at) return false;
   if (d.consultation_date && !isPast(parseISO(d.consultation_date))) return false;
   return true;
 };
