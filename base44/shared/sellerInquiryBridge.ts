@@ -116,7 +116,9 @@ export async function bridgeSellerInquiry(service, input) {
     inquiry_source_record_id: input.source.inquiry_source_record_id || null,
     inquiry_received_at: receivedAt,
     next_action: 'Respond to seller inquiry',
-    next_action_at: receivedAt,
+    // Same-day speed-to-lead window: due 4 hours after receipt — deterministic,
+    // and a brand-new inquiry is never INSTANTLY "overdue".
+    next_action_at: new Date(new Date(receivedAt).getTime() + 4 * 60 * 60 * 1000).toISOString(),
     // Chapter 2 structured source (self-reported; NOT click attribution).
     referral_source_type: input.source.referral_source_type || null,
     referral_source_name: input.source.referral_source_name || null,
