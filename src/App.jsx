@@ -195,6 +195,11 @@ import MyPolicies from './pages/MyPolicies';
 import ComplianceQuestions from './pages/ComplianceQuestions';
 import OperatorServices from './pages/OperatorServices';
 import ClientTestimonials from './pages/ClientTestimonials';
+import MyWebsite from './pages/MyWebsite';
+import MarketingKit from './pages/MarketingKit';
+import BuyerAudience from './pages/BuyerAudience';
+import CaseStudies from './pages/CaseStudies';
+import SellerOnboarding from './pages/SellerOnboarding';
 
 // Life Transition SEO Engine — Phase 2
 import ProbateHubV2 from './pages/life-transition/ProbateHubV2';
@@ -371,6 +376,11 @@ const AuthenticatedApp = () => {
       <Route path="/ComplianceQuestions" element={<LayoutWrapper currentPageName="ComplianceQuestions"><ComplianceQuestions /></LayoutWrapper>} />
       <Route path="/OperatorServices" element={<LayoutWrapper currentPageName="OperatorServices"><OperatorServices /></LayoutWrapper>} />
       <Route path="/ClientTestimonials" element={<LayoutWrapper currentPageName="ClientTestimonials"><ClientTestimonials /></LayoutWrapper>} />
+      <Route path="/MyWebsite" element={<LayoutWrapper currentPageName="MyWebsite"><MyWebsite /></LayoutWrapper>} />
+      <Route path="/MarketingKit" element={<LayoutWrapper currentPageName="MarketingKit"><MarketingKit /></LayoutWrapper>} />
+      <Route path="/BuyerAudience" element={<LayoutWrapper currentPageName="BuyerAudience"><BuyerAudience /></LayoutWrapper>} />
+      <Route path="/CaseStudies" element={<LayoutWrapper currentPageName="CaseStudies"><CaseStudies /></LayoutWrapper>} />
+      <Route path="/SellerOnboarding" element={<LayoutWrapper currentPageName="SellerOnboarding"><SellerOnboarding /></LayoutWrapper>} />
 
       {/* ── Operator Website Template #1 (Phase 3D.1) ── */}
       <Route path="/site" element={<OperatorSitePage pageType="home" />} />

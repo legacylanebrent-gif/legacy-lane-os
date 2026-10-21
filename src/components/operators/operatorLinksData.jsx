@@ -2,7 +2,8 @@ import {
   Home, BookOpen, Calendar, Package, User, BarChart2, Award, GitBranch, DollarSign, Briefcase, Users,
   Trash2, Heart, UserPlus, Warehouse, ShoppingBag, HandCoins,
   Megaphone, Zap, BarChart3, TrendingUp, FileText, FileCheck2, UserCog,
-  Sparkles, GraduationCap, Network, MapPin, ShieldQuestion
+  Sparkles, GraduationCap, Network, MapPin, ShieldQuestion,
+  Globe, Camera, ClipboardList
 } from 'lucide-react';
 
 // Single source of truth for every operator page link, organized by section.
@@ -43,6 +44,16 @@ export const OPERATOR_LINK_SECTIONS = [
       { page: 'MyListings', label: 'Marketplace Listings', icon: ShoppingBag },
       { page: 'Buyouts', label: 'Buyouts', icon: HandCoins },
       { page: 'SaleConversionPipeline', label: 'Sale Pipeline', icon: TrendingUp },
+      { page: 'SellerOnboarding', label: 'Seller Onboarding', icon: ClipboardList },
+    ],
+  },
+  {
+    title: '🌐 Website & Audience',
+    links: [
+      { page: 'MyWebsite', label: 'My Website', icon: Globe },
+      { page: 'CaseStudies', label: 'Case Studies', icon: Camera },
+      { page: 'MarketingKit', label: 'Marketing Kit', icon: Megaphone },
+      { page: 'BuyerAudience', label: 'My Buyers', icon: Users },
     ],
   },
   {

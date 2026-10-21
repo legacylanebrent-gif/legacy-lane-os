@@ -154,7 +154,10 @@ export default function MyWebsite() {
   const w = data.website;
   const workflow = w.workflow_status;
   const isLive = workflow === 'live';
-  const platformDomain = (data.domains || []).find(d => d.domain_type === 'platform_subdomain' && d.status !== 'disconnected');
+  const domainInfo = data.domains || {};
+  const platformDomain = domainInfo.platform_hostname
+    ? { hostname: domainInfo.platform_hostname, status: domainInfo.platform_status }
+    : null;
   const readiness = data.readiness || { percent: 0, blockers: [] };
 
   return (
