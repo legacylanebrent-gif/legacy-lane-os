@@ -10,9 +10,13 @@
       "type": "string",
       "description": "EstateSale.operator_id projection \u2014 sale owner (RLS anchor). Derived from the sale at creation."
     },
+    "item_id": {
+      "type": "string",
+      "description": "Chapter 15 P1-35 \u2014 CANONICAL Item link (stable database ID). New offers reference this ID; the merchandise is never identified by its mutable name. Legacy offers created before Chapter 15 may have this empty \u2014 they keep item_name for display and are linked only through deterministic backfill or operator review, never guessed."
+    },
     "item_name": {
       "type": "string",
-      "description": "Item being offered on"
+      "description": "LEGACY display snapshot of the item title at offer time. Display only \u2014 never the offer's identity (item_id is)."
     },
     "offer_amount": {
       "type": "number",
@@ -46,7 +50,16 @@
         "rejected"
       ],
       "default": "pending",
-      "description": "Offer status"
+      "description": "Offer status. Accepted means commercial intent / accepted price \u2014 it is NEVER payment; payment truth stays in the Order/Transaction system."
+    },
+    "converted_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Chapter 15 P1-40 \u2014 when an ACCEPTED offer was handed off to the checkout workflow. IDEMPOTENCY ANCHOR: presence means the handoff already happened; a repeated conversion must never create a second cart/transaction."
+    },
+    "converted_cart_id": {
+      "type": "string",
+      "description": "Chapter 15 P1-39 \u2014 the Cart prepared from this accepted offer (when the buyer is a platform user), for completion at the Checkout Station. No payment is claimed by this handoff."
     }
   },
   "required": [

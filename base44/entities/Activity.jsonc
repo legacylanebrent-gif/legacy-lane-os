@@ -12,6 +12,10 @@
     "property_id": {
       "type": "string"
     },
+    "item_id": {
+      "type": "string",
+      "description": "Chapter 15 P1-30 \u2014 canonical Item link for item-scoped history (buyer communication about an item, consequential item changes logged by the Chapter 15 history helper). Reuses Activity as the single change/communication log; there is NO separate ItemHistory entity."
+    },
     "user_id": {
       "type": "string",
       "description": "User who logged the activity"
@@ -41,7 +45,7 @@
         "property_showing",
         "other"
       ],
-      "description": "What kind of communication/activity occurred. Communication channels (call/email/sms/meeting/in_person/voicemail/client_update) double as the channel for sale-scoped communication records."
+      "description": "What kind of communication/activity occurred. Communication channels (call/email/sms/meeting/in_person/voicemail/client_update) double as the channel for sale-scoped communication records. Chapter 15 item-change history uses 'note' with item_id set."
     },
     "direction": {
       "type": "string",

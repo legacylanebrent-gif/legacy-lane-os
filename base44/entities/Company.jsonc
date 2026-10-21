@@ -63,6 +63,48 @@
       "type": "string",
       "description": "Free-text service area metadata (structured territories live in OperatorTerritoryProfile)"
     },
+    "inventory_rules": {
+      "type": "array",
+      "default": [],
+      "description": "Chapter 15 P1-9 \u2014 operator-defined deterministic GUIDANCE for inventory depth (category/price-based suggestions shown at item creation). GUIDELINES ONLY: the human operator always chooses the actual level; nothing is automatic truth and no rule implies value alone (P1-2/P1-74).",
+      "items": {
+        "type": "object",
+        "properties": {
+          "rule_id": {
+            "type": "string"
+          },
+          "category": {
+            "type": "string",
+            "description": "Optional Item category the rule applies to."
+          },
+          "min_price": {
+            "type": "number",
+            "description": "Optional price floor for the suggestion."
+          },
+          "max_price": {
+            "type": "number",
+            "description": "Optional price ceiling for the suggestion."
+          },
+          "suggested_level": {
+            "type": "string",
+            "enum": [
+              "QUICK",
+              "STANDARD",
+              "RESEARCH",
+              "HIGH_VALUE"
+            ]
+          },
+          "note": {
+            "type": "string",
+            "description": "Why the operator suggests this depth \u2014 shown to the employee as guidance."
+          },
+          "enabled": {
+            "type": "boolean",
+            "default": true
+          }
+        }
+      }
+    },
     "notes": {
       "type": "string"
     }
