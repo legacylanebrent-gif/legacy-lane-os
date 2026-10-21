@@ -8,11 +8,12 @@ import { Skeleton } from '@/components/ui/skeleton';
 import UnifiedItemForm from '@/components/inventory/UnifiedItemForm';
 import SoldDetailsDialog from '@/components/estate/SoldDetailsDialog';
 import OffersPanel from '@/components/estate/OffersPanel';
-import { Plus, Search, Edit2, Trash2, Package, Globe, AlertCircle, FileText, User, CreditCard, MapPin, PackageCheck, FlaskConical, Eye, Tag, Lock, Printer, BookOpen } from 'lucide-react';
+import { Plus, Search, Edit2, Trash2, Package, Globe, AlertCircle, FileText, User, CreditCard, MapPin, PackageCheck, FlaskConical, Eye, Tag, Lock, Printer, BookOpen, Scale } from 'lucide-react';
 import ResearchFlagDialog from '@/components/inventory/ResearchFlagDialog';
 import DisplayAttentionDialog from '@/components/inventory/DisplayAttentionDialog';
 import ItemCustodyDialog from '@/components/inventory/ItemCustodyDialog';
 import InventoryRulesDialog from '@/components/inventory/InventoryRulesDialog';
+import PricingWorkspace from '@/components/inventory/PricingWorkspace';
 import { formatItemNumber, locationDisplay, LEVEL_META, readinessCues } from '@/components/saleops/inventoryLevels';
 import { logItemChange } from '@/components/saleops/itemHistory';
 import { Link } from 'react-router-dom';
@@ -36,6 +37,7 @@ export default function SaleInventory() {
   const [soldDialogItem, setSoldDialogItem] = useState(null);
   const [custodyItem, setCustodyItem] = useState(null);
   const [rulesOpen, setRulesOpen] = useState(false);
+  const [pricingItem, setPricingItem] = useState(null);
 
   useEffect(() => {
     loadData();
@@ -533,6 +535,15 @@ export default function SaleInventory() {
                   <Button
                     size="sm"
                     variant="outline"
+                    onClick={() => setPricingItem(item)}
+                    title="Pricing workspace — evidence, comparables, range, history"
+                  >
+                    <Scale className="w-4 h-4" />
+                  </Button>
+
+                  <Button
+                    size="sm"
+                    variant="outline"
                     onClick={() => setResearchDialogItem(item)}
                     className={item.research_status && item.research_status !== 'CLEAR' ? 'border-violet-300 text-violet-700' : ''}
                     title="Flag or resolve research"
@@ -613,6 +624,16 @@ export default function SaleInventory() {
           item={custodyItem}
           sale={sale}
           onClose={() => setCustodyItem(null)}
+          onSaved={() => loadData()}
+        />
+      )}
+
+      {/* Chapter 16 P1-15 — pricing workspace (assembled view, no duplication) */}
+      {pricingItem && (
+        <PricingWorkspace
+          open={!!pricingItem}
+          item={pricingItem}
+          onClose={() => setPricingItem(null)}
           onSaved={() => loadData()}
         />
       )}

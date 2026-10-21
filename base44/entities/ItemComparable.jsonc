@@ -1,0 +1,227 @@
+{
+  "name": "ItemComparable",
+  "type": "object",
+  "description": "Chapter 16 P1-1..P1-9 \u2014 ONE piece of external or internal PRICING EVIDENCE connected to a single canonical Item. This is the operator's curated comparable record: it preserves what was seen, where, for how much, and WHY it is or is not useful \u2014 with ASKING and SOLD kept structurally distinct (asking price \u2260 sold price; one comparable \u2260 the market). It is EVIDENCE for a human pricing decision, never a system conclusion: an ItemComparable never writes Item.price, never creates a fact, and never authenticates or appraises anything. Internal EstateSalen evidence references the canonical historical Item rather than copying financial truth. Outliers are flagged with a reason and preserved \u2014 never deleted or silently excluded. AI/Lens output may seed a record only through an explicit human capture; a source that does not establish a completed sale is never classified SOLD.",
+  "properties": {
+    "operator_id": {
+      "type": "string",
+      "description": "Item.operator_id projection \u2014 sale owner (RLS anchor). Derived from the item at creation."
+    },
+    "company_id": {
+      "type": "string",
+      "description": "Item.company projection when present (canonical Company ownership for cross-company isolation)."
+    },
+    "sale_id": {
+      "type": "string",
+      "description": "EstateSale the item belongs to (projection; convenience for sale-scoped evidence views)."
+    },
+    "sale_team_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "READ-SCOPE PROJECTION of EstateSale.sale_team for RLS. The sale remains the source of truth."
+    },
+    "item_id": {
+      "type": "string",
+      "description": "Chapter 16 P1-1 \u2014 the ONE canonical Item this evidence supports. Required; evidence never floats free of merchandise."
+    },
+    "evidence_type": {
+      "type": "string",
+      "enum": [
+        "ASKING",
+        "SOLD",
+        "UNKNOWN"
+      ],
+      "default": "UNKNOWN",
+      "description": "Chapter 16 P1-2 \u2014 WHAT KIND OF PRICE this evidence carries. ASKING = active listing / asking price (the default for retail web matches \u2014 a source that does not establish a completed sale is NEVER classified SOLD). SOLD = completed sale evidence. UNKNOWN = the source does not say. The UI never casually converts ASKING \u2192 SOLD; only explicit operator entry with a source that establishes a completed sale (or classification from a canonical internal EstateSalen transaction) sets SOLD."
+    },
+    "source_type": {
+      "type": "string",
+      "enum": [
+        "ESTATESALEN_INTERNAL",
+        "ONLINE_MARKETPLACE",
+        "AUCTION_RESULT",
+        "DEALER_RETAIL",
+        "RETAIL_LISTING",
+        "OTHER"
+      ],
+      "default": "OTHER",
+      "description": "Chapter 16 P1-3 \u2014 provenance of the evidence. A source NAME implies nothing about quality \u2014 usefulness is its own operator judgment."
+    },
+    "internal_item_id": {
+      "type": "string",
+      "description": "Chapter 16 P1-9 \u2014 canonical historical Item reference when source_type is ESTATESALEN_INTERNAL (a reference, never a copy of financial truth)."
+    },
+    "source_ref": {
+      "type": "string",
+      "description": "URL or reference for the evidence (listing, auction result, venue...)."
+    },
+    "source_label": {
+      "type": "string",
+      "description": "Where it was seen, in the operator's words (eBay listing, local auction, Brimfield...)."
+    },
+    "title": {
+      "type": "string",
+      "description": "What the evidence item is, as titled/listed."
+    },
+    "price": {
+      "type": "number",
+      "description": "The observed price \u2014 meaning depends on evidence_type (asking or sold)."
+    },
+    "currency": {
+      "type": "string",
+      "default": "USD"
+    },
+    "evidence_date": {
+      "type": "string",
+      "format": "date",
+      "description": "When the evidence event happened (listing/sale date as observed)."
+    },
+    "condition_context": {
+      "type": "string",
+      "description": "Chapter 16 P1-4 \u2014 condition as described in the evidence (mint, heavily worn, restored...)."
+    },
+    "maker_model_context": {
+      "type": "string",
+      "description": "Maker/model/artist as stated in the evidence."
+    },
+    "size_context": {
+      "type": "string",
+      "description": "Size/dimensions when materially relevant to comparability."
+    },
+    "materials_context": {
+      "type": "string",
+      "description": "Materials when materially relevant (sterling vs plate, walnut vs oak...)."
+    },
+    "market_context": {
+      "type": "string",
+      "enum": [
+        "LOCAL_PICKUP",
+        "REGIONAL",
+        "NATIONAL",
+        "ONLINE_SHIPPED",
+        "UNKNOWN"
+      ],
+      "default": "UNKNOWN",
+      "description": "Chapter 16 P1-30 \u2014 the market the evidence sold/listed in. A national/online evidence price never automatically transfers to a local pickup market \u2014 the operator weighs this in usefulness."
+    },
+    "shipping_context": {
+      "type": "string",
+      "description": "Shipping/pickup context (shipping included, pickup only, buyer premium...)."
+    },
+    "similarities": {
+      "type": "string",
+      "description": "Chapter 16 P1-5 \u2014 WHY the evidence is relevant (same maker, same era, same size...)."
+    },
+    "differences": {
+      "type": "string",
+      "description": "Chapter 16 P1-5 \u2014 WHY the evidence is limited (different size, better condition, older sale, different market, different model, different venue...)."
+    },
+    "usefulness": {
+      "type": "string",
+      "enum": [
+        "STRONG",
+        "USEFUL",
+        "LIMITED"
+      ],
+      "default": "USEFUL",
+      "description": "Chapter 16 P1-6 \u2014 transparent QUALITATIVE operator classification. No numeric scores, no fake precision (an 87% comparable is a lie)."
+    },
+    "outlier": {
+      "type": "boolean",
+      "default": false,
+      "description": "Chapter 16 P1-7 \u2014 operator marked this evidence OUTLIER / LIMITED USE. The record is preserved and stays visible with its reason \u2014 never deleted or silently excluded from the body of evidence."
+    },
+    "outlier_reason": {
+      "type": "string",
+      "description": "Why this evidence is an outlier (exceptional condition, auction bidding war, retail replacement pricing...)."
+    },
+    "notes": {
+      "type": "string",
+      "description": "Any other operator context (team-safe, no codes or credentials)."
+    }
+  },
+  "required": [
+    "item_id",
+    "evidence_type",
+    "price"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "data.operator_id": "{{user.id}}"
+        },
+        {
+          "data.sale_team_ids": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "$or": [
+        {
+          "data.operator_id": "{{user.id}}"
+        },
+        {
+          "data.sale_team_ids": {
+            "$in": [
+              "{{user.id}}"
+            ]
+          }
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "data.operator_id": "{{user.id}}"
+        },
+        {
+          "data.sale_team_ids": {
+            "$in": [
+              "{{user.id}}"
+            ]
+          }
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "data.operator_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

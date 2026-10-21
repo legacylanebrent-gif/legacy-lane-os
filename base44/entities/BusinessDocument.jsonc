@@ -1,7 +1,7 @@
 {
   "name": "BusinessDocument",
   "type": "object",
-  "description": "Chapter 6 P1 \u2014 the ONE canonical business document vault record (insurance, formation, agreements, policies, registrations, permits, certifications, professional documents \u2014 no separate vaults). Files live in PRIVATE storage (file_uri); viewing/downloading always goes through a short-lived signed URL. The document owns its expiration_date; a missing expiration_date means NO EXPIRATION KNOWN (never 'never expires'). version is the acknowledgment-truth anchor: it increments when the file is replaced, so an old acknowledgment never silently covers a new version.",
+  "description": "Chapter 6 P1 \u2014 the ONE canonical business document vault record (insurance, formation, agreements, policies, registrations, permits, certifications, professional documents \u2014 no separate vaults). Files live in PRIVATE storage (file_uri); viewing/downloading always goes through a short-lived signed URL. The document owns its expiration_date; a missing expiration_date means NO EXPIRATION KNOWN (never 'never expires'). version is the acknowledgment-truth anchor: it increments when the file is replaced, so an old acknowledgment never silently covers a new version. Chapter 16 P1-25 adds the 'item' scope so a client-provided APPRAISAL (or other item evidence document) attaches to a canonical Item \u2014 no Appraisal entity; an appraisal is EVIDENCE/CONTEXT and its value is never copied into Item.price.",
   "properties": {
     "operator_id": {
       "type": "string",
@@ -25,10 +25,11 @@
         "PERMIT",
         "CERTIFICATION",
         "PROFESSIONAL",
+        "APPRAISAL",
         "OTHER"
       ],
       "default": "OTHER",
-      "description": "Document category. Deliberately small taxonomy."
+      "description": "Document category. Deliberately small taxonomy. Chapter 16 APPRAISAL = a client-provided or commissioned appraisal document attached to an Item \u2014 evidence/context only, never a price the system applies."
     },
     "policy_type": {
       "type": "string",
@@ -40,10 +41,11 @@
         "business",
         "sale",
         "contact",
-        "team_member"
+        "team_member",
+        "item"
       ],
       "default": "business",
-      "description": "Explicit scope. sale_id / contact_id / team_member_id must match this scope (enforced by the vault UI \u2014 one ref per scope, never contradictory combinations)."
+      "description": "Explicit scope. sale_id / contact_id / team_member_id / item_id must match this scope (enforced by the vault UI \u2014 one ref per scope, never contradictory combinations). Chapter 16 P1-25 'item' scope attaches an item-scoped evidence document (e.g. an appraisal) to a canonical Item."
     },
     "sale_id": {
       "type": "string",
@@ -56,6 +58,10 @@
     "team_member_id": {
       "type": "string",
       "description": "TeamMember ID when scope is 'team_member'."
+    },
+    "item_id": {
+      "type": "string",
+      "description": "Chapter 16 P1-25 \u2014 canonical Item ID when scope is 'item' (e.g. an appraisal attached to specific merchandise). The Item remains the merchandise record; this document is private evidence only."
     },
     "file_uri": {
       "type": "string",

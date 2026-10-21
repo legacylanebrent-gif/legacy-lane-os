@@ -188,7 +188,8 @@
       "description": "Price item sold for if different from listed price"
     },
     "original_price": {
-      "type": "number"
+      "type": "number",
+      "description": "Chapter 16 P1-17 \u2014 the OPENING PRICE snapshot, written ONCE when the item is first priced (changeItemPrice sets it only when empty) and NEVER overwritten by later price changes. Price history lives in Activity; Item.price remains the single CURRENT price \u2014 there is no competing current-price field."
     },
     "brand": {
       "type": "string"
@@ -291,7 +292,7 @@
         "SPECIALIST_REVIEWED"
       ],
       "default": "UNVERIFIED",
-      "description": "Chapter 15 P1-19 \u2014 internal business-process verification state for the item's identification facts. REASONABLY_VERIFIED is operator/business-process language ONLY \u2014 not an appraisal, authentication, or guarantee of authenticity. SPECIALIST_REVIEWED records that a specialist looked; still not a certification."
+      "description": "Chapter 15 P1-19 \u2014 internal business-process verification state for the item's identification facts. REASONABLY_VERIFIED is operator/business-process language ONLY \u2014 not an appraisal, authentication, or guarantee of authenticity. SPECIALIST_REVIEWED records that a specialist looked; still not a certification. Chapter 16 P1-11: this remains the ONE verification architecture; research_status (attention/ready state) is deliberately separate and the two are never merged."
     },
     "verified_facts": {
       "type": "array",
@@ -1575,10 +1576,11 @@
         "CLEAR",
         "RESEARCH_NEEDED",
         "VERIFY",
-        "SPECIALIST_REVIEW"
+        "SPECIALIST_REVIEW",
+        "READY_TO_PRICE"
       ],
       "default": "CLEAR",
-      "description": "Chapter 3 P1 \u2014 research attention state. Flags questionable or potentially valuable merchandise for another look instead of pricing to keep moving. INDEPENDENT of Item.status, SaleClientDecision, price and availability \u2014 human-controlled only; AI may suggest but never set it. Chapter 14 P1-13: while this is not CLEAR and no authorized override exists, ordinary pricing/publication progression is GUARDED \u2014 resolve the research or record an explicit operator override.",
+      "description": "Chapter 3 P1 / Chapter 16 P1-10 \u2014 research attention state. Flags questionable or potentially valuable merchandise for another look instead of pricing to keep moving. INDEPENDENT of Item.status, SaleClientDecision, price and availability \u2014 human-controlled only; AI may suggest but never set it. Chapter 14 P1-13: while this is a non-CLEAR attention state and no authorized override exists, ordinary pricing/publication progression is GUARDED \u2014 resolve the research or record an explicit operator override. Chapter 16 READY_TO_PRICE = the operator judges there is sufficient evidence for a HUMAN pricing decision \u2014 NOT certainty, authentication, or a value claim, and deliberately separate from verification_status.",
       "rls": {
         "read": {
           "$or": [
@@ -1995,6 +1997,292 @@
               }
             }
           ]
+        }
+      }
+    },
+    "price_range_low": {
+      "type": "number",
+      "description": "Chapter 16 P1-16 \u2014 OPERATOR PRICING RANGE, low end. Evidence-supported planning range the human operator sets (optional \u2014 never required for QUICK merchandise and never invented by the system from a single number). NOT an appraisal and never a promise to the client."
+    },
+    "price_range_high": {
+      "type": "number",
+      "description": "Chapter 16 P1-16 \u2014 OPERATOR PRICING RANGE, high end. Optional; distinct by design from Item.price (the single current asking price)."
+    },
+    "pricing_rationale": {
+      "type": "string",
+      "description": "Chapter 16 P1-18 \u2014 concise operator rationale for an important price (three sold comparables; condition below strongest comparable; local pickup market; short selling window; client approved aggressive pricing). Optional for low-value merchandise; the system preserves WHY an important price was chosen."
+    },
+    "market_context": {
+      "type": "string",
+      "enum": [
+        "LOCAL_PICKUP",
+        "REGIONAL",
+        "NATIONAL",
+        "ONLINE_SHIPPED",
+        "UNKNOWN"
+      ],
+      "default": "UNKNOWN",
+      "description": "Chapter 16 P1-30 \u2014 the market this item realistically sells in. A NATIONAL/ONLINE internet price never automatically applies to a LOCAL_PICKUP floor market; comparables carry their own market context."
+    },
+    "selling_channel": {
+      "type": "string",
+      "enum": [
+        "ESTATE_SALE",
+        "AUCTION",
+        "CONSIGNMENT",
+        "SPECIALTY_MARKETPLACE",
+        "DIRECT_SALE",
+        "OTHER"
+      ],
+      "default": "ESTATE_SALE",
+      "description": "Chapter 16 P1-32/P1-35 \u2014 the operator's decision for HOW this merchandise will be sold. Default ESTATE_SALE (normal floor sale). Recording the chosen channel preserves it for later review; it never auto-reroutes anything and never duplicates Chapter 22 disposition."
+    },
+    "channel_considered": {
+      "type": "boolean",
+      "default": false,
+      "description": "Chapter 16 P1-33 \u2014 operator flagged CONSIDER ALTERNATE CHANNEL for this merchandise. A review flag only \u2014 the system never reroutes the item automatically."
+    },
+    "channel_consideration_reason": {
+      "type": "string",
+      "description": "Chapter 16 P1-33 \u2014 why an alternate channel is being considered (specialist interest, auction potential, better venue...)."
+    },
+    "channel_decision_id": {
+      "type": "string",
+      "description": "Chapter 16 P1-34 \u2014 canonical SaleClientDecision link when a channel change required client/authority approval. Reuses the ONE client-approval system; no duplicate approval record."
+    },
+    "negotiation_override": {
+      "type": "string",
+      "enum": [
+        "NONE",
+        "NO_DISCOUNT_WITHOUT_OPERATOR"
+      ],
+      "default": "NONE",
+      "description": "Chapter 16 P1-37 \u2014 ITEM-LEVEL override of the company's general negotiation policy (Company.negotiation_policy). NO_DISCOUNT_WITHOUT_OPERATOR wins over any company-level employee authority for this item. Guidance/authority truth only \u2014 the system never auto-accepts or auto-declines an Offer."
+    },
+    "excluded_from_discounts": {
+      "type": "boolean",
+      "default": false,
+      "description": "Chapter 16 P1-40 \u2014 this item is EXCLUDED from the sale's planned discount schedule (EstateSale.discount_schedule). Typical for HIGH_VALUE, specialist-reviewed, or client-restricted merchandise. A stage that would discount this item surfaces it for explicit human handling instead."
+    },
+    "high_consequence_research": {
+      "type": "boolean",
+      "default": false,
+      "description": "Chapter 16 P1-12 \u2014 operator-controlled HIGH-CONSEQUENCE RESEARCH flag: competing identifications could materially affect price or client outcome (original vs reproduction; signed vs unsigned; attributed vs copy). Surfaces the item for more research attention. NEVER an authentication or value conclusion \u2014 AI may suggest looking, never set it.",
+      "rls": {
+        "read": {
+          "$or": [
+            {
+              "$and": [
+                {
+                  "user_condition": {
+                    "role": "user"
+                  }
+                },
+                {
+                  "created_by_id": "{{user.id}}"
+                }
+              ]
+            },
+            {
+              "$and": [
+                {
+                  "user_condition": {
+                    "role": "user"
+                  }
+                },
+                {
+                  "data.seller_id": "{{user.id}}"
+                }
+              ]
+            },
+            {
+              "$and": [
+                {
+                  "user_condition": {
+                    "role": "user"
+                  }
+                },
+                {
+                  "data.operator_id": "{{user.id}}"
+                }
+              ]
+            },
+            {
+              "$and": [
+                {
+                  "user_condition": {
+                    "role": "user"
+                  }
+                },
+                {
+                  "data.sale_team_ids": {
+                    "$in": [
+                      "{{user.id}}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "user_condition": {
+                "role": "admin"
+              }
+            }
+          ]
+        }
+      }
+    },
+    "high_consequence_note": {
+      "type": "string",
+      "description": "Chapter 16 P1-12 \u2014 what the competing-identification risk is, in the operator's words.",
+      "rls": {
+        "read": {
+          "$or": [
+            {
+              "$and": [
+                {
+                  "user_condition": {
+                    "role": "user"
+                  }
+                },
+                {
+                  "created_by_id": "{{user.id}}"
+                }
+              ]
+            },
+            {
+              "$and": [
+                {
+                  "user_condition": {
+                    "role": "user"
+                  }
+                },
+                {
+                  "data.seller_id": "{{user.id}}"
+                }
+              ]
+            },
+            {
+              "$and": [
+                {
+                  "user_condition": {
+                    "role": "user"
+                  }
+                },
+                {
+                  "data.operator_id": "{{user.id}}"
+                }
+              ]
+            },
+            {
+              "$and": [
+                {
+                  "user_condition": {
+                    "role": "user"
+                  }
+                },
+                {
+                  "data.sale_team_ids": {
+                    "$in": [
+                      "{{user.id}}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "user_condition": {
+                "role": "admin"
+              }
+            }
+          ]
+        }
+      }
+    },
+    "specialist_opinions": {
+      "type": "array",
+      "default": [],
+      "description": "Chapter 16 P1-22/P1-23 \u2014 structured record of a specialist's opinion on this item's identification/value, as EVIDENCE for the pricing decision. The RELATIONSHIP is operator-declared and never inferred (a potential buyer's opinion is displayed as such). NOT an authentication or appraisal; the operator remains responsible for the price.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "opinion_id": {
+            "type": "string"
+          },
+          "contact_id": {
+            "type": "string",
+            "description": "Optional canonical Contact link for the specialist."
+          },
+          "specialist_name": {
+            "type": "string",
+            "description": "Display-name snapshot of the specialist."
+          },
+          "relationship": {
+            "type": "string",
+            "enum": [
+              "INDEPENDENT",
+              "POTENTIAL_BUYER",
+              "BOTH",
+              "UNKNOWN"
+            ],
+            "default": "UNKNOWN",
+            "description": "Chapter 16 P1-23 \u2014 the specialist's relationship to the potential sale, OPERATOR-DECLARED. Never inferred; a POTENTIAL_BUYER opinion is visibly labeled and never represented as independent."
+          },
+          "opinion": {
+            "type": "string",
+            "description": "What the specialist said, in plain words \u2014 never a system conclusion."
+          },
+          "basis": {
+            "type": "string",
+            "description": "Context/basis (in-person inspection, photos, documents...)."
+          },
+          "at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the opinion was recorded."
+          },
+          "by": {
+            "type": "string",
+            "description": "User ID who recorded the opinion."
+          },
+          "by_name": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "appraisal_context": {
+      "type": "object",
+      "default": {},
+      "description": "Chapter 16 P1-26/P1-27 \u2014 smallest metadata for understanding a client-provided or commissioned APPRAISAL attached as an item-scoped BusinessDocument. The appraisal is EVIDENCE/CONTEXT ONLY: its value is never copied into Item.price, and the operator records the appraisal's own context without interpreting its methodology. Comparing current condition against the appraisal happens in the pricing view \u2014 the source document is never altered.",
+      "properties": {
+        "document_id": {
+          "type": "string",
+          "description": "Canonical BusinessDocument (category APPRAISAL, scope 'item') holding the private file."
+        },
+        "value": {
+          "type": "number",
+          "description": "The appraisal's stated value \u2014 CONTEXT ONLY, never transferred to Item.price."
+        },
+        "date": {
+          "type": "string",
+          "format": "date",
+          "description": "Appraisal date as stated in the document."
+        },
+        "professional": {
+          "type": "string",
+          "description": "Appraiser/professional/source as stated."
+        },
+        "purpose": {
+          "type": "string",
+          "description": "Valuation purpose/standard context if known (insurance, estate, resale...)."
+        },
+        "condition_differs_note": {
+          "type": "string",
+          "description": "Chapter 16 P1-28 \u2014 operator note where current item condition differs from the appraised condition. The appraisal document itself is never altered."
+        },
+        "notes": {
+          "type": "string"
         }
       }
     },

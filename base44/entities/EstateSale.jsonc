@@ -1502,6 +1502,36 @@
           "description": "Default pickup instructions for buyers."
         }
       }
+    },
+    "discount_schedule": {
+      "type": "array",
+      "default": [],
+      "description": "Chapter 16 P1-39/P1-40 \u2014 the operator's PLANNED discount stages for this sale (Day 1 full price, Day 2, final hours...). OPERATOR-DEFINED PLAN ONLY: the system never applies a discount automatically; a stage is guidance for the team, and an Item marked excluded_from_discounts is never silently discounted \u2014 applying a stage to such an item is an explicit human price change through the normal price-change path (changeItemPrice), never a batch effect.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "stage_id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string",
+            "description": "Stage name (e.g. 'Day 2', 'Final Hours')."
+          },
+          "start_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the stage begins (optional)."
+          },
+          "discount_percent": {
+            "type": "number",
+            "description": "Planned percent off the current price at this stage."
+          },
+          "note": {
+            "type": "string",
+            "description": "Operator note (e.g. 'Everything except jewelry and the dining set')."
+          }
+        }
+      }
     }
   },
   "required": [

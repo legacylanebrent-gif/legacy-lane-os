@@ -50,6 +50,10 @@ const BLANK = {
   photo_library: [],
   verified_facts: [],
   research_notes: [],
+  // Chapter 16 P1
+  market_context: 'UNKNOWN', selling_channel: 'ESTATE_SALE',
+  negotiation_locked: false, excluded_from_discounts: false,
+  price_range_low: '', price_range_high: '', pricing_rationale: '',
 };
 
 // Chapter 15 P1 — ONE Item form, four workflow DEPTHS. The record starts as simply as
@@ -69,6 +73,13 @@ export default function UnifiedItemForm({ item = null, saleId = null, onClose, o
   const [guardOpen, setGuardOpen] = useState(false);
   const [overrideReason, setOverrideReason] = useState('');
   const [overrideApplied, setOverrideApplied] = useState(false);
+  // Chapter 16 P0-4 — current user for HIGH_VALUE price authority
+  const [currentUser, setCurrentUser] = useState(null);
+  const [priceChangeReason, setPriceChangeReason] = useState('');
+
+  useEffect(() => {
+    base44.auth.me().then(setCurrentUser).catch(() => setCurrentUser(null));
+  }, []);
 
   useEffect(() => {
     (async () => {
@@ -121,10 +132,17 @@ export default function UnifiedItemForm({ item = null, saleId = null, onClose, o
         },
         dim_unit: item.dimensions?.unit || 'in',
         verification_status: item.verification_status || 'UNVERIFIED',
-        research_needed: !!(item.research_status && item.research_status !== 'CLEAR'),
+        research_needed: !!(item.research_status && !['CLEAR', 'READY_TO_PRICE'].includes(item.research_status)),
         photo_library: item.photo_library || [],
         verified_facts: item.verified_facts || [],
         research_notes: item.research_notes || [],
+        market_context: item.market_context || 'UNKNOWN',
+        selling_channel: item.selling_channel || 'ESTATE_SALE',
+        negotiation_locked: item.negotiation_override === 'NO_DISCOUNT_WITHOUT_OPERATOR',
+        excluded_from_discounts: !!item.excluded_from_discounts,
+        price_range_low: item.price_range_low ?? '',
+        price_range_high: item.price_range_high ?? '',
+        pricing_rationale: item.pricing_rationale || '',
       });
     } else {
       // QUICK capture burden: creating inside a sale pre-selects the inventory channel.
@@ -203,9 +221,24 @@ export default function UnifiedItemForm({ item = null, saleId = null, onClose, o
       research_notes: (formData.research_notes || []).map(n => n.at ? n : { ...n, at: now }),
       images: publishedImages,
       estate_sale_id: saleId,
+      // Chapter 16 P1 — pricing context on the canonical record
+      market_context: formData.market_context,
+      selling_channel: formData.selling_channel,
+      negotiation_override: formData.negotiation_locked
+        ? 'NO_DISCOUNT_WITHOUT_OPERATOR' : 'NONE',
+      excluded_from_discounts: formData.excluded_from_discounts,
+      price_range_low: formData.price_range_low === ''
+        ? null : parseFloat(formData.price_range_low),
+      price_range_high: formData.price_range_high === ''
+        ? null : parseFloat(formData.price_range_high),
+      pricing_rationale: formData.pricing_rationale.trim() || null,
     };
 
     if (item?.id) {
+      // Chapter 16 P0-4..P0-6 — the ONE sanctioned price-change path on an
+      // existing record is the changeItemPrice function (authority + reason
+      // + history). The general form save never writes Item.price here.
+      delete payload.price;
       // The research flag lifecycle is owned by the Research action (ResearchFlagDialog);
       // editing here never rewrites it.
       delete payload.research_status;
@@ -232,13 +265,33 @@ export default function UnifiedItemForm({ item = null, saleId = null, onClose, o
       let savedNumber = item?.item_number;
 
       if (item?.id) {
+        // Chapter 16 P0-4/P0-5 — a price change on an existing record goes
+        // through changeItemPrice (HIGH_VALUE authority + reason + history).
+        const priceChanged = Number(item.price) !== Number(formData.price);
+        if (priceChanged) {
+          const isHighValueNow = formData.inventory_level === 'HIGH_VALUE';
+          const priceAuthorized = !currentUser || currentUser.role === 'admin'
+            || currentUser.id === item.operator_id || currentUser.id === item.seller_id;
+          if (isHighValueNow && !priceAuthorized) {
+            setSaving(false);
+            toast.error('High Value price changes require the sale operator. Ask the operator to authorize this change.');
+            return;
+          }
+          if (isHighValueNow && !priceChangeReason.trim()) {
+            setSaving(false);
+            toast.error('A reason is required for every High Value price change.');
+            return;
+          }
+          await base44.functions.invoke('changeItemPrice', {
+            item_id: item.id,
+            new_price: parseFloat(formData.price),
+            reason: priceChangeReason.trim() || undefined,
+          });
+        }
         await base44.entities.Item.update(item.id, payload);
         // Chapter 15 P1-30 — consequential change history (reuses Activity)
         if (item.inventory_level !== payload.inventory_level) {
           await logItemChange('level', item, `${item.inventory_level || 'STANDARD'} → ${payload.inventory_level}`, { saleId, operatorId: saleScope?.operatorId });
-        }
-        if (Number(item.price) !== payload.price) {
-          await logItemChange('price', item, `$${item.price} → $${payload.price}`, { saleId, operatorId: saleScope?.operatorId });
         }
         if ((item.verification_status || 'UNVERIFIED') !== payload.verification_status) {
           await logItemChange('verification', item, `${item.verification_status || 'UNVERIFIED'} → ${payload.verification_status}`, { saleId, operatorId: saleScope?.operatorId });
@@ -250,6 +303,8 @@ export default function UnifiedItemForm({ item = null, saleId = null, onClose, o
         payload.operator_id = saleScope?.operatorId || user.id;
         payload.sale_team_ids = saleScope?.teamIds || [];
         payload.seller_name = user.full_name;
+        // Chapter 16 P1-17 — opening price is written once, at first pricing.
+        payload.original_price = payload.price;
         const created = await base44.entities.Item.create(payload);
         // Chapter 15 P1-10 — stable sale-scoped item number, assigned server-side.
         try {

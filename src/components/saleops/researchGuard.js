@@ -7,8 +7,14 @@
 //      on the Item (research_override_*). Casual employees cannot bypass:
 //      the override writes a name, reason, and timestamp every time.
 
+// Chapter 16 P1-10 — READY_TO_PRICE is the operator's "sufficient evidence for a
+// HUMAN pricing decision" state. It is NOT an attention state: it releases the
+// ordinary pricing/publication guard like CLEAR does (and is still separate
+// from verification_status, which never changes here).
+const UNBLOCKED = ['CLEAR', 'READY_TO_PRICE'];
+
 export function researchBlocked(item) {
-  if (!item || (item.research_status || 'CLEAR') === 'CLEAR') return { blocked: false, overridden: false };
+  if (!item || UNBLOCKED.includes(item.research_status || 'CLEAR')) return { blocked: false, overridden: false };
   if (item.research_override_at) return { blocked: false, overridden: true };
   return { blocked: true, overridden: false };
 }

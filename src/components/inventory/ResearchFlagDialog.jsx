@@ -53,15 +53,15 @@ export default function ResearchFlagDialog({ item, open, onClose, onSaved }) {
     }
   };
 
-  const resolveFlag = async () => {
+  const resolveFlag = async (toStatus = 'CLEAR') => {
     setSaving(true);
     try {
       await base44.entities.Item.update(item.id, {
-        research_status: 'CLEAR',
+        research_status: toStatus,
         research_resolved_at: new Date().toISOString(),
         research_resolution: resolution.trim() || null,
       });
-      toast.success('Research flag resolved');
+      toast.success(toStatus === 'READY_TO_PRICE' ? 'Research complete — ready to price (a human decision, not a certainty)' : 'Research flag resolved');
       onSaved && onSaved();
       onClose();
     } catch (error) {
@@ -120,10 +120,19 @@ export default function ResearchFlagDialog({ item, open, onClose, onSaved }) {
                 value={resolution}
                 onChange={e => setResolution(e.target.value)}
               />
-              <Button onClick={resolveFlag} disabled={saving} variant="outline" className="w-full border-green-300 text-green-700 hover:bg-green-50">
-                {saving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <CheckCircle2 className="w-4 h-4 mr-2" />}
-                Resolve / Clear Flag
-              </Button>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                <Button onClick={() => resolveFlag('CLEAR')} disabled={saving} variant="outline" className="w-full border-green-300 text-green-700 hover:bg-green-50">
+                  {saving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <CheckCircle2 className="w-4 h-4 mr-2" />}
+                  Resolve / Clear Flag
+                </Button>
+                <Button onClick={() => resolveFlag('READY_TO_PRICE')} disabled={saving} variant="outline" className="w-full border-cyan-300 text-cyan-700 hover:bg-cyan-50">
+                  Ready to Price
+                </Button>
+              </div>
+              <p className="text-[10px] text-slate-400">
+                "Ready to Price" means you judge there is enough evidence for a human pricing decision — it is not certainty,
+                authentication, or a value claim, and it never changes the verification status.
+              </p>
             </div>
           )}
         </div>

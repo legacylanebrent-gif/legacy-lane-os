@@ -105,6 +105,44 @@
         }
       }
     },
+    "negotiation_policy": {
+      "type": "object",
+      "default": {},
+      "description": "Chapter 16 P1-36 \u2014 the company's deterministic NEGOTIATION AUTHORITY GUIDANCE: who may accept which offer or discount. COMPANY POLICY ONLY \u2014 guidance and authority boundaries for humans; the system NEVER auto-accepts or auto-declines a buyer Offer. An Item-level override (Item.negotiation_override) wins over this general policy. Empty object = NO POLICY RECORDED (an honest unknown, never 'anything goes').",
+      "properties": {
+        "policy": {
+          "type": "string",
+          "enum": [
+            "NO_NEGOTIATION",
+            "EMPLOYEE_AUTHORITY_LIMIT",
+            "MANAGER_APPROVAL_THRESHOLD",
+            "OPERATOR_ONLY"
+          ],
+          "description": "General company approach to offers on sale merchandise."
+        },
+        "employee_authority_max": {
+          "type": "number",
+          "description": "P1-38 \u2014 the maximum DISCOUNT (dollars or percent per unit) an employee may accept without escalation, when the policy allows employee authority. Guidance only \u2014 never auto-applied."
+        },
+        "employee_authority_unit": {
+          "type": "string",
+          "enum": [
+            "dollars",
+            "percent"
+          ],
+          "default": "dollars",
+          "description": "Whether the employee authority max is a dollar or percent discount."
+        },
+        "escalation_threshold": {
+          "type": "number",
+          "description": "Offers below this price, or discounts above this threshold, require the manager/operator. Guidance for humans, not an auto-decline engine."
+        },
+        "notes": {
+          "type": "string",
+          "description": "The operator's own words on negotiation practice, shown to the team as guidance."
+        }
+      }
+    },
     "notes": {
       "type": "string"
     }
