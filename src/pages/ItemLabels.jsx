@@ -52,13 +52,17 @@ export default function ItemLabels() {
       for (const item of chosen) {
         const url = `${window.location.origin}/ItemDetail?itemId=${item.id}`;
         const qr = await QRCode.toDataURL(url, { width: 240, margin: 1 });
-        labels.push({ title: item.title, price: item.price, qr });
+        const zoneName = (sale?.prep_zones || []).find(z => z.zone_id === item.zone_id)?.name;
+        const loc = [zoneName, item.location_detail].filter(Boolean).join(' — ');
+        labels.push({ title: item.title, price: item.price, qr, number: item.item_number, location: loc });
       }
       const labelsHtml = labels.map(l => `
         <div class="label">
           <div class="qr"><img src="${l.qr}" /></div>
           <div class="meta">
+            ${l.number != null ? `<div class="num">#${String(l.number).padStart(4, '0')}</div>` : ''}
             <div class="title">${escapeHtml(l.title || 'Item')}</div>
+            ${l.location ? `<div class="loc">${escapeHtml(l.location)}</div>` : ''}
             ${includePrice && l.price != null ? `<div class="price">$${Number(l.price).toFixed(2)}</div>` : ''}
             <div class="scan">Scan for details &amp; cart</div>
           </div>
@@ -71,6 +75,8 @@ export default function ItemLabels() {
         .qr img { width: 30mm; height: 30mm; display: block; }
         .meta { min-width: 0; }
         .title { font-size: 12px; font-weight: bold; line-height: 1.2; word-break: break-word; }
+        .num { font-size: 10px; color: #444; font-weight: bold; }
+        .loc { font-size: 9px; color: #666; margin-top: 0.5mm; }
         .price { font-size: 16px; font-weight: bold; margin-top: 2mm; }
         .scan { font-size: 8px; color: #777; margin-top: 2mm; }
         @media print { .label { border-color: #bbb; } }

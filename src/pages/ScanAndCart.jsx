@@ -3,6 +3,7 @@ import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { QrCode, ShoppingCart, Trash2, Plus, Minus, Check, AlertCircle, CreditCard, Loader2 } from 'lucide-react';
+import ItemInspectDialog from '@/components/inventory/ItemInspectDialog';
 import { Html5QrcodeScanner } from 'html5-qrcode';
 
 export default function ScanAndCart() {
@@ -14,6 +15,7 @@ export default function ScanAndCart() {
   const [sale, setSale] = useState(null);
   const [processingPayment, setProcessingPayment] = useState(false);
   const [savedCartId, setSavedCartId] = useState(null);
+  const [inspectItem, setInspectItem] = useState(null);
   const scannerRef = useRef(null);
   const [qrScanner, setQrScanner] = useState(null);
 
@@ -77,34 +79,11 @@ export default function ScanAndCart() {
 
             const item = items[0];
 
-            // Add to cart
-            setCart(prev => {
-              const existing = prev.find(ci => ci.item_id === item.id);
-              if (existing) {
-                return prev.map(ci =>
-                  ci.item_id === item.id ? { ...ci, quantity: ci.quantity + 1 } : ci
-                );
-              }
-              return [
-                ...prev,
-                {
-                  item_id: item.id,
-                  item_title: item.title,
-                  quantity: 1,
-                  price: item.price,
-                  seller_id: item.seller_id,
-                  seller_name: item.seller_name,
-                },
-              ];
-            });
-
-            // Chapter 8 P1 — surface internal display attention to staff at scan time.
-            const attn = item.display_attention && item.display_attention !== 'NONE'
-              ? ` — ${item.display_attention.replace(/_/g, ' ')} (internal handling note)` : '';
-            setMessage({ type: 'success', text: `Added "${item.title}" to cart${attn}` });
-
-            // Auto-hide message
-            setTimeout(() => setMessage(null), 2000);
+            // Chapter 15 P1-34 — a staff scan opens the role-appropriate item view;
+            // adding to the cart is an explicit action from there. Public QR codes
+            // still just open the public item page for buyers.
+            stopScanning();
+            setInspectItem(item);
           } catch (error) {
             console.error('Scan error:', error);
             setMessage({ type: 'error', text: error.message });
@@ -123,6 +102,33 @@ export default function ScanAndCart() {
       setQrScanner(null);
     }
     setScanning(false);
+  };
+
+  // Chapter 8 P1 display-attention note preserved; Chapter 15 P1-34 makes the add explicit.
+  const addToCart = item => {
+    setCart(prev => {
+      const existing = prev.find(ci => ci.item_id === item.id);
+      if (existing) {
+        return prev.map(ci =>
+          ci.item_id === item.id ? { ...ci, quantity: ci.quantity + 1 } : ci
+        );
+      }
+      return [
+        ...prev,
+        {
+          item_id: item.id,
+          item_title: item.title,
+          quantity: 1,
+          price: item.price,
+          seller_id: item.seller_id,
+          seller_name: item.seller_name,
+        },
+      ];
+    });
+    const attn = item.display_attention && item.display_attention !== 'NONE'
+      ? ` — ${item.display_attention.replace(/_/g, ' ')} (internal handling note)` : '';
+    setMessage({ type: 'success', text: `Added "${item.title}" to cart${attn}` });
+    setTimeout(() => setMessage(null), 2000);
   };
 
   const saveCart = async () => {
@@ -219,6 +225,17 @@ export default function ScanAndCart() {
           </h1>
           <p className="text-slate-600 mt-1">Scan items to add to your cart</p>
         </div>
+
+        {/* Chapter 15 P1-34 — employee scan inspect view */}
+        {inspectItem && (
+          <ItemInspectDialog
+            open={!!inspectItem}
+            item={inspectItem}
+            zones={sale?.prep_zones || []}
+            onClose={() => setInspectItem(null)}
+            onAddToCart={() => { addToCart(inspectItem); setInspectItem(null); }}
+          />
+        )}
 
         {/* Messages */}
         {message && (

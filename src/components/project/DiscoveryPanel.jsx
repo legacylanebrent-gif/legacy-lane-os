@@ -140,6 +140,37 @@ export default function DiscoveryPanel({ sale, zones, discoveries, onChanged }) 
     try {
       if (disc.promoted_to_item_id) { setPromote(null); return; }
       if (disc.is_restricted) { setPromote(null); return; } // P1-32 — restricted material never enters the ordinary sale flow
+      // Chapter 15 P1-12 — the handoff carries context forward without re-entry and
+      // WITHOUT exposing private/sensitive material: zone + sub-location, research
+      // context, the family statement as an UNVERIFIED research note, discovery
+      // provenance, and custody continuity (the discovery's chain seeds the Item's).
+      const suggestedLevel =
+        ['potential_high_value', 'valuable', 'specialist_review'].includes(disc.discovery_type) ? 'HIGH_VALUE'
+        : (disc.research_needed || disc.discovery_type === 'research_needed') ? 'RESEARCH'
+        : 'STANDARD';
+      const researchNotes = [];
+      if (disc.family_statement) {
+        researchNotes.push({
+          text: `CLIENT/FAMILY STATEMENT (unverified): ${disc.family_statement}`,
+          source_type: 'CLIENT_FAMILY_STATEMENT',
+          at: new Date().toISOString(),
+        });
+      }
+      const seedCustody = (disc.custody_events || []).map(e => ({
+        ...e,
+        note: e.note ? `${e.note} (carried from discovery)` : 'Carried from prep discovery',
+      }));
+      const photoLibrary = (!disc.is_sensitive && disc.photo_uri)
+        ? [{
+            url: disc.photo_uri,
+            purpose: 'CUSTODY_EVIDENCE',
+            approved_public: false, // private evidence photo — explicit human action only
+            screen_status: disc.photo_privacy_check || 'not_run',
+            source_discovery_id: disc.id,
+            note: 'Private discovery evidence photo (view via the discovery record / signed URL).',
+            added_at: new Date().toISOString(),
+          }]
+        : [];
       const item = await base44.entities.Item.create({
         title: disc.description, description: 'Promoted from a prep discovery.',
         price: p, category: category && category !== 'none' ? category : undefined,
@@ -148,7 +179,19 @@ export default function DiscoveryPanel({ sale, zones, discoveries, onChanged }) 
         status: 'available', sales_channels: ['inventory'],
         research_status: disc.research_needed ? 'RESEARCH_NEEDED' : 'CLEAR',
         research_reason: disc.research_needed ? 'Flagged during prep discovery before pricing.' : undefined,
+        inventory_level: suggestedLevel,
+        zone_id: disc.zone_id || '',
+        location_detail: disc.location_note || '',
+        promoted_from_discovery_id: disc.id,
+        research_notes: researchNotes,
+        custody_events: seedCustody,
+        controlled_location: disc.controlled_location || undefined,
+        photo_library: photoLibrary,
       });
+      // Chapter 15 P1-10 — stable sale-scoped item number for the promoted item.
+      try {
+        await base44.functions.invoke('assignItemNumber', { item_id: item.id });
+      } catch (e) { console.warn('Item number assignment failed:', e?.message); }
       await base44.entities.SaleDiscovery.update(disc.id, {
         promoted_to_item_id: item.id, resolution_status: 'promoted_to_item',
         resolved_at: new Date().toISOString(), resolved_by: me?.id || '', resolved_by_name: me?.full_name || '',

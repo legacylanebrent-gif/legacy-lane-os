@@ -22,7 +22,7 @@ const PAYMENT_METHODS = [
 // onConfirm(details) saves with details; onConfirm(null) marks sold without them.
 export default function SoldDetailsDialog({ open, item, onClose, onConfirm }) {
   const [form, setForm] = useState({
-    buyer_name: '', buyer_contact: '', payment_method_used: '', payment_notes: '', pickup_instructions: '',
+    buyer_name: '', buyer_contact: '', payment_method_used: '', payment_notes: '', authorized_pickup: '', pickup_instructions: '',
   });
 
   useEffect(() => {
@@ -32,6 +32,7 @@ export default function SoldDetailsDialog({ open, item, onClose, onConfirm }) {
         buyer_contact: item.buyer_contact || '',
         payment_method_used: item.payment_method_used || '',
         payment_notes: item.payment_notes || '',
+        authorized_pickup: item.authorized_pickup || '',
         pickup_instructions: item.pickup_location?.instructions || '',
       });
     }
@@ -50,6 +51,10 @@ export default function SoldDetailsDialog({ open, item, onClose, onConfirm }) {
         <div className="space-y-3">
           <p className="text-xs text-slate-500">
             Optional but recommended — this records who bought it, whether it is paid, and how it will be picked up.
+          </p>
+          {/* Chapter 15 P1-43 — truthful manual-sold warning */}
+          <p className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded px-2.5 py-1.5">
+            Manually marking sold creates NO payment record — record the payment at Checkout/POS. Chapter 21 will deepen transaction states.
           </p>
           <div className="space-y-1">
             <Label>Buyer name</Label>
@@ -72,6 +77,10 @@ export default function SoldDetailsDialog({ open, item, onClose, onConfirm }) {
           <div className="space-y-1">
             <Label>Payment notes</Label>
             <Input value={form.payment_notes} onChange={e => set('payment_notes', e.target.value)} placeholder="Optional (e.g. deposit paid, balance on pickup)" />
+          </div>
+          <div className="space-y-1">
+            <Label>Authorized alternate pickup (optional)</Label>
+            <Input value={form.authorized_pickup} onChange={e => set('authorized_pickup', e.target.value)} placeholder="Name of someone else authorized to pick it up" />
           </div>
           <div className="space-y-1">
             <Label>Pickup instructions / timing</Label>

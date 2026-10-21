@@ -141,9 +141,25 @@ export default function CreateItemModal({ open, onClose, onSuccess, item, saleId
     const uploaded = [];
     for (const file of Array.from(files)) {
       const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      // Chapter 15 P0 — the marketplace listing path also uses the certified
+      // sensitive-material screen BEFORE the photo can publish on a public listing.
+      let sensitive = false;
+      try {
+        const res = await base44.functions.invoke('analyzeItemImage', {
+          image_url: file_url,
+          categories: ['documents', 'sensitive', 'ordinary'],
+        });
+        sensitive = res.data?.sensitive === true;
+      } catch (e) {
+        sensitive = true; // FAIL-SAFE: a screen failure never means "cleared"
+      }
+      if (sensitive) {
+        toast.error('Photo not added — it may contain sensitive material (documents, IDs, financial or medical information). Review it first.');
+        continue;
+      }
       uploaded.push(file_url);
     }
-    setImages(prev => [...prev, ...uploaded]);
+    if (uploaded.length > 0) setImages(prev => [...prev, ...uploaded]);
     setUploadingImages(false);
   };
 

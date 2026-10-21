@@ -160,6 +160,63 @@ export default function SaleInventory() {
     }
   };
 
+  // Chapter 15 P1-55/P1-56 — printable inventory backup: a connectivity backup prepared
+  // BEFORE connectivity loss (this is NOT offline application support), plus a critical
+  // section (research / high value / awaiting pickup / controlled location).
+  const esc = s => String(s == null ? '' : s).replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
+
+  const printBackup = () => {
+    const rows = filteredItems.length ? filteredItems : items;
+    if (rows.length === 0) {
+      toast.error('No items to print');
+      return;
+    }
+    const zones = sale?.prep_zones || [];
+    const rowHtml = it => `<tr>
+      <td>${it.item_number != null ? it.item_number : '—'}</td>
+      <td>${esc(it.title)}</td>
+      <td>${esc(it.category || '')}</td>
+      <td>${esc(LEVEL_META[it.inventory_level]?.label || 'Standard')}</td>
+      <td>$${Number(it.price || 0).toFixed(2)}</td>
+      <td>${esc(it.status)}${it.research_status && it.research_status !== 'CLEAR' ? ' / research' : ''}</td>
+      <td>${esc(locationDisplay(it, zones))}</td>
+      <td>${it.status === 'sold' ? (it.pickup_completed_at ? 'Released' : 'Awaiting pickup') : ''}</td>
+    </tr>`;
+    const crit = rows.filter(it =>
+      ['RESEARCH', 'HIGH_VALUE'].includes(it.inventory_level) ||
+      (it.status === 'sold' && !it.pickup_completed_at) ||
+      it.controlled_location ||
+      it.offsite_research?.status === 'OFFSITE'
+    );
+    const head = '<thead><tr><th>#</th><th>Title</th><th>Category</th><th>Level</th><th>Price</th><th>Status</th><th>Location</th><th>Pickup</th></tr></thead>';
+    const html = `<!DOCTYPE html><html><head><title>Inventory backup — ${esc(sale.title)}</title><style>
+      body { font-family: Arial, sans-serif; padding: 10mm; }
+      h1 { font-size: 16px; margin: 0 0 2mm; }
+      h2 { font-size: 13px; margin: 8mm 0 2mm; }
+      p.meta { font-size: 10px; color: #555; margin: 0 0 4mm; }
+      table { width: 100%; border-collapse: collapse; font-size: 10px; }
+      th, td { border: 1px solid #999; padding: 3px 5px; text-align: left; }
+      th { background: #eee; }
+    </style></head><body>
+      <h1>${esc(sale.title)} — Inventory backup (${rows.length} items)</h1>
+      <p class="meta">Printed ${new Date().toLocaleString()} · connectivity backup, not offline sync · research/high-value/pickup details included below</p>
+      <table>${head}<tbody>${rows.map(rowHtml).join('')}</tbody></table>
+      ${crit.length > 0 ? `<h2>Critical items (${crit.length}) — research, high value, controlled location or awaiting pickup</h2>
+      <table>${head}<tbody>${crit.map(rowHtml).join('')}</tbody></table>` : ''}
+    </body></html>`;
+    const w = window.open('', '_blank');
+    if (w) {
+      w.document.write(html);
+      w.document.close();
+    } else {
+      const el = document.createElement('div');
+      el.innerHTML = html;
+      document.body.appendChild(el);
+      window.print();
+      document.body.removeChild(el);
+    }
+  };
+
   const handleTogglePrePost = async (item, field) => {
     try {
       await base44.entities.Item.update(item.id, { [field]: !item[field] });
@@ -237,6 +294,12 @@ export default function SaleInventory() {
                   </Button>
                 </Link>
               )}
+              <Button variant="outline" className="gap-2" onClick={printBackup} title="Printable inventory backup (connectivity backup — not offline sync)">
+                <Printer className="w-4 h-4" /> Backup List
+              </Button>
+              <Button variant="outline" className="gap-2" onClick={() => setRulesOpen(true)} title="Company inventory guidance">
+                <BookOpen className="w-4 h-4" /> Guidance
+              </Button>
               <Button
                 onClick={() => {
                   setEditingItem(null);
@@ -317,12 +380,25 @@ export default function SaleInventory() {
                 <div className="flex-1">
                   <div className="flex items-start gap-4">
                     <div className="flex-1">
-                      <h3 className="font-semibold text-slate-900">{item.title}</h3>
+                      <h3 className="font-semibold text-slate-900">{formatItemNumber(item.item_number)} {item.title}</h3>
                       <p className="text-sm text-slate-600 mt-1">{item.description}</p>
 
                       <div className="flex gap-2 mt-3 flex-wrap">
                         <Badge variant="secondary">{item.category}</Badge>
                         <Badge className={getStatusColor(item.status)}>{item.status}</Badge>
+                        <Badge className="bg-orange-100 text-orange-700" title={LEVEL_META[item.inventory_level]?.description}>{LEVEL_META[item.inventory_level]?.label || 'Standard'}</Badge>
+                        {(item.zone_id || item.location_detail) && (
+                          <Badge variant="outline" className="text-slate-600">{locationDisplay(item, sale?.prep_zones)}</Badge>
+                        )}
+                        {item.group_note && <Badge variant="outline" className="text-slate-500">{item.group_note}</Badge>}
+                        {readinessCues(item).map(c => (
+                          <Badge
+                            key={c.key}
+                            className={c.tone === 'amber' ? 'bg-amber-100 text-amber-700' : c.tone === 'blue' ? 'bg-blue-100 text-blue-700' : c.tone === 'green' ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-600'}
+                          >
+                            {c.label}
+                          </Badge>
+                        ))}
                         {item.research_status && item.research_status !== 'CLEAR' && (
                           <Badge
                             className="bg-violet-100 text-violet-700 border border-violet-300"
@@ -442,6 +518,18 @@ export default function SaleInventory() {
                     </select>
                   )}
 
+                  {(item.inventory_level === 'HIGH_VALUE' || (item.custody_events || []).length > 0) && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="border-amber-300 text-amber-700"
+                      onClick={() => setCustodyItem(item)}
+                      title="Custody — controlled location, movements, off-site research"
+                    >
+                      <Lock className="w-4 h-4" />
+                    </Button>
+                  )}
+
                   <Button
                     size="sm"
                     variant="outline"
@@ -517,6 +605,20 @@ export default function SaleInventory() {
           onConfirm={details => applySoldDetails(soldDialogItem, details)}
         />
       )}
+
+      {/* Chapter 15 P1-49/P1-50 — custody continuation for high-value merchandise */}
+      {custodyItem && (
+        <ItemCustodyDialog
+          open={!!custodyItem}
+          item={custodyItem}
+          sale={sale}
+          onClose={() => setCustodyItem(null)}
+          onSaved={() => loadData()}
+        />
+      )}
+
+      {/* Chapter 15 P1-9 — operator inventory guidance */}
+      <InventoryRulesDialog open={rulesOpen} sale={sale} onClose={() => setRulesOpen(false)} />
 
       {/* Item Form Modal */}
       {showForm && (
