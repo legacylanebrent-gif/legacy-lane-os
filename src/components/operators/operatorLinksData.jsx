@@ -44,6 +44,7 @@ export const OPERATOR_LINK_SECTIONS = [
       { page: 'MyListings', label: 'Marketplace Listings', icon: ShoppingBag },
       { page: 'Buyouts', label: 'Buyouts', icon: HandCoins },
       { page: 'SaleConversionPipeline', label: 'Sale Pipeline', icon: TrendingUp },
+      { page: 'ProfessionalNetwork', label: 'Professional Network', icon: Network },
       { page: 'SellerOnboarding', label: 'Seller Onboarding', icon: ClipboardList },
       { page: 'EquipmentManager', label: 'Equipment & Kit', icon: Wrench },
     ],

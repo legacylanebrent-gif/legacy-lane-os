@@ -17,7 +17,13 @@ Deno.serve(async (req) => {
 
     // Find the referrer using service role
     const users = await base44.asServiceRole.entities.User.list();
-    const referrer = users.find(u => u.id.slice(0, 8).toUpperCase() === referralCode.toUpperCase());
+    // Chapter 11 P0-2: accept both historical code forms (first-8 links and
+    // last-8 QR codes) — server-side only; no user data leaves this function.
+    const code = String(referralCode).trim().toUpperCase();
+    const referrer = users.find(u =>
+      u.id.slice(0, 8).toUpperCase() === code ||
+      u.id.slice(-8).toUpperCase() === code
+    );
 
     if (!referrer) {
       return Response.json({ error: 'Referrer not found' }, { status: 404 });

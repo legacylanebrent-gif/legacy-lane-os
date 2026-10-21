@@ -42,11 +42,11 @@ export default function ReferralLanding() {
       // If there's a referral code, try to find the referrer
       if (code) {
         try {
-          // The referral code is the first 8 chars of user ID
-          const users = await base44.asServiceRole.entities.User.list();
-          const referrerUser = users.find(u => u.id.slice(0, 8).toUpperCase() === code);
-          if (referrerUser) {
-            setReferrer(referrerUser);
+          // Chapter 11 P0-2: resolve the code through the server-side resolver
+          // only — this public page never lists or enumerates users.
+          const res = await base44.functions.invoke('resolveReferralCode', { code });
+          if (res.data?.valid && res.data?.referrer_name) {
+            setReferrer({ full_name: res.data.referrer_name });
           }
         } catch (e) {
           // Service role may not be available on public pages — non-critical

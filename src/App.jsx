@@ -27,6 +27,8 @@ import SalePipeline from './pages/SalePipeline';
 import ReferralOutreach from './pages/ReferralOutreach';
 import LeadFunnel from './pages/LeadFunnel';
 import LeadSourcePerformance from './pages/LeadSourcePerformance';
+import ProfessionalNetwork from './pages/ProfessionalNetwork';
+import PartnerReferral from './pages/PartnerReferral';
 import TerritoryHeatmap from './pages/TerritoryHeatmap';
 import ContentCalendar from './pages/ContentCalendar';
 import SEOBoostDashboard from './pages/SEOBoostDashboard';
@@ -294,12 +296,14 @@ const AuthenticatedApp = () => {
       <Route path="/ReferralOutreach" element={<LayoutWrapper currentPageName="ReferralOutreach"><ReferralOutreach /></LayoutWrapper>} />
       <Route path="/LeadFunnel" element={<LayoutWrapper currentPageName="LeadFunnel"><LeadFunnel /></LayoutWrapper>} />
       <Route path="/LeadSourcePerformance" element={<LayoutWrapper currentPageName="LeadSourcePerformance"><LeadSourcePerformance /></LayoutWrapper>} />
+      <Route path="/ProfessionalNetwork" element={<LayoutWrapper currentPageName="ProfessionalNetwork"><ProfessionalNetwork /></LayoutWrapper>} />
       <Route path="/TerritoryHeatmap" element={<LayoutWrapper currentPageName="TerritoryHeatmap"><TerritoryHeatmap /></LayoutWrapper>} />
       <Route path="/ContentCalendar" element={<LayoutWrapper currentPageName="ContentCalendar"><ContentCalendar /></LayoutWrapper>} />
       <Route path="/SEOBoostDashboard" element={<LayoutWrapper currentPageName="SEOBoostDashboard"><SEOBoostDashboard /></LayoutWrapper>} />
       <Route path="/CSVLeadImport" element={<LayoutWrapper currentPageName="CSVLeadImport"><CSVLeadImport /></LayoutWrapper>} />
       <Route path="/AdminLeadImporter" element={<LayoutWrapper currentPageName="AdminLeadImporter"><AdminLeadImporter /></LayoutWrapper>} />
       <Route path="/CompanyLanding" element={<CompanyLanding />} />
+      <Route path="/PartnerReferral" element={<PartnerReferral />} />
       <Route path="/CompareEstateSales" element={<LayoutWrapper currentPageName="CompareEstateSales"><CompareEstateSales /></LayoutWrapper>} />
       <Route path="/ReferralDashboard" element={<LayoutWrapper currentPageName="ReferralDashboard"><ReferralDashboard /></LayoutWrapper>} />
       <Route path="/ReferralBatchInvite" element={<LayoutWrapper currentPageName="ReferralBatchInvite"><ReferralBatchInvite /></LayoutWrapper>} />

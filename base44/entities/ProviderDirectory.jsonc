@@ -1,6 +1,7 @@
 {
   "name": "ProviderDirectory",
   "type": "object",
+  "description": "Platform-facing public provider directory for life-transition resource pages. Chapter 11 P0-1: PUBLIC READ stays open (intentional public directory); ALL writes are admin-only \u2014 PUBLIC READ \u2260 PUBLIC WRITE. The rating/review_count fields are preserved for historical records only; there is no non-admin write path and Chapter 11 direction is no public consumer star-rating system.",
   "properties": {
     "provider_type": {
       "type": "string",
@@ -61,11 +62,13 @@
       "type": "string"
     },
     "rating": {
-      "type": "number"
+      "type": "number",
+      "description": "Historical data only. No public rating write path; not part of the Chapter 11 operator network."
     },
     "review_count": {
       "type": "integer",
-      "default": 0
+      "default": 0,
+      "description": "Historical data only."
     },
     "status": {
       "type": "string",
@@ -81,5 +84,23 @@
     "provider_type",
     "business_name",
     "state"
-  ]
+  ],
+  "rls": {
+    "read": {},
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
 }

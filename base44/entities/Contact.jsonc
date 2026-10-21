@@ -1,6 +1,7 @@
 {
   "name": "Contact",
   "type": "object",
+  "description": "Canonical PERSON record. Chapter 11 P1 extends Contact \u2014 NOT a new partner entity \u2014 with the professional referral-network profile: service categories, service areas (an office address is NOT a service area), preferences, limitations, private fit notes, licensing/verification flags (EstateSalen never concludes legality \u2014 UNKNOWN stays UNKNOWN), an opaque partner referral token for attributed seller intake, and the operator's outbound referral history. A referral or professional role grants NO access to any client record. Attribution is not compensation; no field here creates payment obligations.",
   "properties": {
     "first_name": {
       "type": "string"
@@ -53,7 +54,7 @@
           "contractor"
         ]
       },
-      "description": "Multiple roles a contact can have. Chapter 6 P1 adds professional adviser roles (insurance, payroll, bookkeeper, tax_adviser, employment_adviser) alongside the existing attorney/cpa \u2014 one Contact taxonomy, no separate adviser directory.",
+      "description": "Multiple roles a contact can have. Chapter 6 P1 added professional adviser roles (one Contact taxonomy, no separate adviser directory). Chapter 11 P1: a professional role is how a Contact participates in the referral network \u2014 no redundant 'is_partner' boolean.",
       "default": []
     },
     "lead_source": {
@@ -125,7 +126,8 @@
     },
     "next_follow_up": {
       "type": "string",
-      "format": "date-time"
+      "format": "date-time",
+      "description": "Chapter 11 P1 \u2014 relationship follow-up for professional Contacts reuses this existing field (plus Activity); there is no second reminder system."
     },
     "tags": {
       "type": "array",
@@ -164,6 +166,336 @@
     "last_activity_date": {
       "type": "string",
       "format": "date-time"
+    },
+    "professional_profile": {
+      "type": "object",
+      "description": "Chapter 11 P1 \u2014 the professional referral-network profile. FACTUAL PROFILE data (what they do, where they work, preferences, limitations, licensing) is distinct from fit_notes, which is the operator's PRIVATE observation. UNKNOWN CAPABILITY IS NOT SUPPORTED CAPABILITY: every field is empty by default and an empty service area is never treated as confirmed coverage. Being a referral source or destination grants NO access to any client record and creates NO compensation obligation.",
+      "properties": {
+        "organization_name": {
+          "type": "string",
+          "description": "Company/organization affiliation (e.g. 'ABC Cleanouts'). The Contact remains the actual PERSON to call; this is the organization side of the company\u2192human distinction. No duplicate partner-organization entity."
+        },
+        "organization_contact_id": {
+          "type": "string",
+          "description": "Optional link to another Contact record representing the organization-level relationship."
+        },
+        "service_categories": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "real_estate",
+              "elder_law",
+              "probate_estate_law",
+              "organizing",
+              "senior_move",
+              "moving",
+              "cleanout",
+              "donation",
+              "appraisal",
+              "auction",
+              "consignment",
+              "buyout",
+              "jewelry",
+              "fine_art",
+              "coins",
+              "vehicles",
+              "collectibles_specialty",
+              "contractor_home_services",
+              "accounting_tax",
+              "other"
+            ]
+          },
+          "default": [],
+          "description": "WHAT THEY DO \u2014 multiple categories supported. One vocabulary shared with the Chapter 10 referred_service family; no competing taxonomies."
+        },
+        "service_area": {
+          "type": "object",
+          "description": "WHERE THEY WORK \u2014 explicitly NOT the office address. Empty means UNKNOWN coverage, never statewide/confirmed.",
+          "properties": {
+            "states": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "default": [],
+              "description": "2-letter states the provider has confirmed they serve."
+            },
+            "counties": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "default": []
+            },
+            "cities": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "default": []
+            },
+            "zip_codes": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "default": []
+            },
+            "radius_miles": {
+              "type": "number",
+              "description": "Optional operating radius from a base point, where meaningful."
+            },
+            "notes": {
+              "type": "string",
+              "description": "Service-area exceptions/qualifications in the operator's words."
+            }
+          },
+          "default": {}
+        },
+        "preferences": {
+          "type": "object",
+          "description": "Lightweight fit information \u2014 enough to improve referral decisions, deliberately not over-modeled.",
+          "properties": {
+            "preferred_project_types": {
+              "type": "string",
+              "description": "e.g. 'full-house cleanouts, estate contents'"
+            },
+            "preferred_client_situations": {
+              "type": "string"
+            },
+            "specialties": {
+              "type": "string"
+            },
+            "ideal_referrals": {
+              "type": "string"
+            },
+            "project_minimums": {
+              "type": "string",
+              "description": "Minimums where relevant (size, value)."
+            },
+            "notes": {
+              "type": "string"
+            }
+          },
+          "default": {}
+        },
+        "limitations": {
+          "type": "object",
+          "description": "WHAT THEY DON'T DO / WON'T TAKE. Unknown limitations must never be interpreted as 'no limitations' \u2014 an empty limitations object means NOT YET ASSESSED.",
+          "properties": {
+            "does_not_handle": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "default": [],
+              "description": "e.g. hazardous materials, firearms, apartments, litigation work."
+            },
+            "travel_limits": {
+              "type": "string",
+              "description": "e.g. 'does not travel outside Monmouth County'"
+            },
+            "availability_constraints": {
+              "type": "string",
+              "description": "e.g. 'no urgent projects', 'booked 3 weeks out'"
+            },
+            "licensing_boundaries": {
+              "type": "string"
+            },
+            "notes": {
+              "type": "string"
+            }
+          },
+          "default": {}
+        },
+        "fit_notes": {
+          "type": "string",
+          "description": "PRIVATE OPERATOR OBSERVATION \u2014 response behavior, fit observations, relationship context. Deliberately distinct from the factual profile above. NEVER projected to public surfaces, client-facing summaries, or the public provider directory."
+        },
+        "licensing": {
+          "type": "object",
+          "description": "Smallest professional-verification record. EstateSalen records what the operator knows; it NEVER concludes that a compensated referral is legal, that a license is valid (a populated license number is not validity), or that no license is required. Unknown = NOT_VERIFIED, which is not a finding of wrongdoing.",
+          "properties": {
+            "regulated_profession": {
+              "type": "boolean",
+              "default": false
+            },
+            "license_type": {
+              "type": "string"
+            },
+            "license_jurisdiction": {
+              "type": "string"
+            },
+            "license_number": {
+              "type": "string"
+            },
+            "verification_status": {
+              "type": "string",
+              "enum": [
+                "NOT_APPLICABLE",
+                "NOT_VERIFIED",
+                "VERIFIED",
+                "REVIEW_NEEDED"
+              ],
+              "default": "NOT_VERIFIED"
+            },
+            "verified_at": {
+              "type": "string",
+              "format": "date"
+            },
+            "verification_source": {
+              "type": "string"
+            },
+            "requires_professional_review": {
+              "type": "boolean",
+              "default": false,
+              "description": "Surface 'verify requirements' \u2014 broker/attorney/accountant/regulator review. Never an answer."
+            }
+          },
+          "default": {}
+        }
+      },
+      "default": {}
+    },
+    "partner_referral_token": {
+      "type": "string",
+      "description": "Chapter 11 P1 \u2014 opaque token for this professional's attributed seller-intake link/QR. The token identifies the REFERRING PROFESSIONAL, never a single client: many clients may reuse the same link, and each seller inquiry remains its own inquiry (Chapter 10 duplicate protections apply). Resolved server-side only; exact-match lookup; never exposes internal IDs or other users."
+    },
+    "professional_referrals": {
+      "type": "array",
+      "default": [],
+      "description": "Chapter 11 P1 \u2014 outbound referral history for referrals made while helping a client (NOT the Chapter 10 seller-opportunity Referred outcome, which stays on the deal). One canonical writer per flow, no duplication: seller-opportunity referrals remain deal records; these entries record operator\u2192professional introductions with client authorization, minimum-necessary context, follow-up, outcome, and private experience history. Private to the operator/company by Contact RLS; never a public rating.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "referral_id": {
+            "type": "string",
+            "description": "Unique id for the entry (uuid)."
+          },
+          "client_name": {
+            "type": "string"
+          },
+          "client_contact_id": {
+            "type": "string",
+            "description": "Optional canonical client Contact link."
+          },
+          "sale_id": {
+            "type": "string",
+            "description": "Optional EstateSale link when the referral happened while helping a sale client."
+          },
+          "operator_id": {
+            "type": "string",
+            "description": "Operator who made the introduction."
+          },
+          "service_category": {
+            "type": "string",
+            "description": "Category of help referred (professionalNetworkModel vocabulary)."
+          },
+          "referred_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "reason": {
+            "type": "string",
+            "description": "The client need in the operator's words."
+          },
+          "authorized_context": {
+            "type": "object",
+            "description": "What the client authorized the operator to share \u2014 the minimum-necessary boundary record. Sharing beyond these fields is not authorized by this record.",
+            "properties": {
+              "authorized_by_name": {
+                "type": "string",
+                "description": "Who authorized the introduction (client/authority name)."
+              },
+              "authorized_fields": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": [
+                    "client_name",
+                    "preferred_contact_method",
+                    "general_need",
+                    "property_city",
+                    "brief_authorized_context"
+                  ]
+                },
+                "default": [],
+                "description": "The ONLY client fields authorized for this introduction. Access codes, keys, financials, settlement, family matters, private notes, inventory, and documents are never in this allow-list."
+              },
+              "brief_context": {
+                "type": "string",
+                "description": "The brief authorized context actually shared, if any."
+              },
+              "authorized_at": {
+                "type": "string",
+                "format": "date-time"
+              }
+            },
+            "default": {}
+          },
+          "introduction_text": {
+            "type": "string",
+            "description": "The introduction prepared by the operator (operator reviews and delivers; never auto-sent)."
+          },
+          "next_follow_up": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Operator's follow-up reminder for this referral."
+          },
+          "outcome": {
+            "type": "string",
+            "enum": [
+              "INTRODUCED",
+              "CONTACTED",
+              "ACCEPTED",
+              "DECLINED",
+              "UNAVAILABLE",
+              "CLIENT_CHOSE_PROVIDER",
+              "CLIENT_CHOSE_OTHER",
+              "SERVICE_COMPLETED",
+              "NO_RESPONSE",
+              "CANCELLED",
+              "UNKNOWN_FOLLOW_UP_NEEDED"
+            ],
+            "default": "INTRODUCED",
+            "description": "Smallest truthful outcome model. REFERRED \u2260 SERVICE COMPLETED; UNKNOWN_FOLLOW_UP_NEEDED is an honest unresolved state, never fabricated."
+          },
+          "outcome_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the outcome was recorded."
+          },
+          "outcome_notes": {
+            "type": "string"
+          },
+          "experience": {
+            "type": "array",
+            "default": [],
+            "description": "Private follow-up history: facts/events vs observations are labeled by kind. No numeric scores, no public ratings.",
+            "items": {
+              "type": "object",
+              "properties": {
+                "note": {
+                  "type": "string"
+                },
+                "kind": {
+                  "type": "string",
+                  "enum": [
+                    "fact",
+                    "observation"
+                  ],
+                  "default": "fact"
+                },
+                "recorded_at": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "required": [

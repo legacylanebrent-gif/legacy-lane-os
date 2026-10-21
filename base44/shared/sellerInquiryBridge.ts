@@ -122,6 +122,9 @@ export async function bridgeSellerInquiry(service, input) {
     // Chapter 2 structured source (self-reported; NOT click attribution).
     referral_source_type: input.source.referral_source_type || null,
     referral_source_name: input.source.referral_source_name || null,
+    // Chapter 11 P1 — canonical Contact link to the referring professional.
+    // Exact relational identity; never inferred from a name match.
+    referral_source_contact_id: input.source.referral_source_contact_id || null,
   });
 
   if ((input.notify_user_ids || []).length > 0) {
