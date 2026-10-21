@@ -218,7 +218,7 @@ export function stripInternalFields(entry) {
   return rest;
 }
 
-export function buildPublicWebsiteContext({ ctx, sales, settings, template }) {
+export function buildPublicWebsiteContext({ ctx, sales, settings, template, caseStudies }) {
   return {
     hostname: ctx.hostname,
     site_name: ctx.tenant.name,
@@ -227,8 +227,38 @@ export function buildPublicWebsiteContext({ ctx, sales, settings, template }) {
     template: template || null,
     settings: settings || null,
     published_sales: (sales || []).map(stripInternalFields),
+    // Chapter 7 P2 — published case studies (safe projection only).
+    case_studies: caseStudies || [],
     generated_at: new Date().toISOString()
   };
+}
+
+// ── Chapter 7 P2 — public case-study projection ─────────────────────────────
+// ONLY PUBLISHED SaleCaseStudy records for THIS tenant's Company are visible,
+// and only through this explicit allowlist. Client names, exact addresses,
+// settlement/economics and internal notes never exist on the record's public
+// side — the projection reads just the operator-approved public fields.
+export async function listPublicCaseStudies(service, ctx) {
+  if (!ctx.ok) return [];
+  const page = await service.entities.SaleCaseStudy.filter(
+    { company_id: ctx.tenant.company_id, status: 'PUBLISHED' },
+    { limit: 12, sort: '-published_at' });
+  return (page.items || page).map(cs => ({
+    id: cs.id,
+    public_title: cs.public_title || null,
+    generalized_location: cs.generalized_location || null,
+    sale_type: cs.sale_type || null,
+    challenge_context: cs.challenge_context || null,
+    services_performed: (cs.services_performed || []).slice(0, 8),
+    merchandise_highlights: (cs.merchandise_highlights || []).slice(0, 8),
+    approved_photo_urls: (cs.approved_photo_urls || []).slice(0, 6),
+    metrics: cs.metrics || null,
+    testimonial_snapshot: cs.testimonial_snapshot && cs.testimonial_snapshot.text ? {
+      public_display_name: cs.testimonial_snapshot.public_display_name || null,
+      text: cs.testimonial_snapshot.text
+    } : null,
+    operator_summary: cs.operator_summary || null
+  }));
 }
 
 // Phase 4E (Parts 15/23) — primary public hostname for canonical URLs. The

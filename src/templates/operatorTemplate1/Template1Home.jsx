@@ -9,7 +9,7 @@ import SaleCard from './SaleCard.jsx';
 import TestimonialsSection from './TestimonialsSection.jsx';
 import IconBadge from './IconBadge.jsx';
 
-export const DEFAULT_SECTION_ORDER = ['intro', 'services', 'sales', 'why_choose_us', 'how_it_works', 'testimonials', 'service_area', 'cta'];
+export const DEFAULT_SECTION_ORDER = ['intro', 'services', 'sales', 'case_studies', 'why_choose_us', 'how_it_works', 'testimonials', 'service_area', 'cta'];
 
 function orderedSections(homepage) {
   const configured = (homepage.sections || []);
@@ -148,6 +148,35 @@ export default function Template1Home({ website }) {
         )}
       </section>
     ),
+    // Chapter 7 P2 — published case studies (safe projection only; rendered
+    // nothing when the company has none published).
+    case_studies: (website.case_studies || []).length > 0 ? (
+      <section key="case_studies" aria-labelledby="t1-cases-heading">
+        <h2 id="t1-cases-heading" className="text-2xl font-bold mb-4">Recent Projects</h2>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {(website.case_studies || []).slice(0, 6).map(cs => (
+            <div key={cs.id || cs.public_title} className="rounded-lg border p-4" style={{ borderColor: 'var(--t1-primary)' }}>
+              <h3 className="font-semibold">{cs.public_title}</h3>
+              {cs.generalized_location && <p className="text-xs uppercase tracking-wide opacity-70 mt-0.5">{cs.generalized_location}</p>}
+              {cs.challenge_context && <p className="mt-2 text-sm opacity-80">{cs.challenge_context.slice(0, 220)}</p>}
+              {cs.metrics && (cs.metrics.total_items != null || cs.metrics.total_sold != null) && (
+                <p className="mt-2 text-sm font-medium" style={{ color: 'var(--t1-primary)' }}>
+                  {cs.metrics.total_sold != null && `${cs.metrics.total_sold} items sold`}
+                  {cs.metrics.total_sold != null && cs.metrics.total_items != null && ' '}
+                  {cs.metrics.total_items != null && `of ${cs.metrics.total_items} offered`}
+                </p>
+              )}
+              {cs.testimonial_snapshot && cs.testimonial_snapshot.text && (
+                <blockquote className="mt-3 border-l-2 pl-3 text-sm italic opacity-85" style={{ borderColor: 'var(--t1-primary)' }}>
+                  “{cs.testimonial_snapshot.text.slice(0, 180)}”
+                  {cs.testimonial_snapshot.public_display_name && <footer className="not-italic text-xs opacity-70 mt-1">— {cs.testimonial_snapshot.public_display_name}</footer>}
+                </blockquote>
+              )}
+            </div>
+          ))}
+        </div>
+      </section>
+    ) : null,
     why_choose_us: (why.items || []).length > 0 ? (
       <section key="why_choose_us" aria-labelledby="t1-why-heading">
         <h2 id="t1-why-heading" className="text-2xl font-bold mb-4">{why.headline || 'Why Choose Us'}</h2>

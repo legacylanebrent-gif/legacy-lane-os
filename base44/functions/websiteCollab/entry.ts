@@ -140,6 +140,12 @@ export default async function(req) {
       if (action === 'list_access') return await listAccess(service, user, ctx.tenant, ctx.company);
     }
 
+    // Chapter 7 P2 — operator GA launch: a company member with full edit
+    // authorization may launch their own website on the included platform
+    // subdomain once every blocking readiness requirement is met. The custom
+    // domain remains a separate later step — never a launch prerequisite.
+    if (action === 'launch_website') return await launchWebsite(service, user, body);
+
     // Mutating note actions share one authorization block.
     if (['add_note', 'respond_note', 'resolve_note', 'submit_for_review'].includes(action)) {
       return await manageAction(base44, service, user, body, action);
@@ -829,6 +835,61 @@ async function manageAction(base44, service, user, body, action) {
   if (action === 'respond_note') return await respondNote(service, user, tenant, company, body);
   if (action === 'resolve_note') return await resolveNote(service, user, tenant, company, body);
   return jerr('unknown_action', 'Unknown action', 400);
+}
+
+// ── Chapter 7 P2 — operator self-service launch on the platform URL ─────────
+async function launchWebsite(service, user, body) {
+  const ctx = await loadContext(service, body.website_tenant_id);
+  if (ctx.error) return ctx.error;
+  const { tenant, company } = ctx;
+  const freeze = requireLlbb(tenant);
+  if (freeze) return jerr(freeze.error.code, freeze.error.message, freeze.error.status);
+  const manage = assertWebsiteManagement(user, tenant, company);
+  if (!manage.ok) return Response.json({ error: manage.error }, { status: manage.error.status || 403 });
+
+  const workflow = tenant.workflow_status || inferWorkflowFromTechnical(tenant.status);
+  if (workflow === 'live') return jerr('already_live', 'This website is already live', 409);
+  if (['suspended', 'archived'].includes(workflow)) {
+    return jerr('invalid_state', 'This website cannot be launched from its current state', 409);
+  }
+
+  // Same readiness gate as review submission — blocking requirements only.
+  const { readiness } = await reviewContext(service, tenant);
+  if ((readiness.blockers || []).length > 0) {
+    return Response.json({
+      error: {
+        code: 'setup_blockers',
+        message: "Website isn't ready to launch yet — complete these required items first",
+        blockers: readiness.blockers.map(b => ({ key: b.key, label: b.label, reason: b.reason }))
+      }
+    }, { status: 409 });
+  }
+
+  // Launch from changes_requested requires every open ADMIN note resolved.
+  if (workflow === 'changes_requested') {
+    const openAdmin = pageOf(await service.entities.WebsiteReviewNote.filter(
+      { website_tenant_id: tenant.id, author_role: 'admin', status: 'open' }, { limit: 100 }));
+    if (openAdmin.length > 0) return jerr('open_review_notes', 'Resolve the open review notes before launching', 409);
+  }
+
+  // Walk the certified product transitions to 'live' — every hop is
+  // server-validated by applyWorkflow; no state is ever skipped.
+  const ROUTES = {
+    draft: ['setup_in_progress', 'ready_for_review', 'approved', 'live'],
+    setup_in_progress: ['ready_for_review', 'approved', 'live'],
+    ready_for_review: ['approved', 'live'],
+    changes_requested: ['ready_for_review', 'approved', 'live'],
+    approved: ['live']
+  };
+  const hops = ROUTES[workflow];
+  let current = tenant;
+  for (const to of hops) {
+    const res = await applyWorkflow(service, current, user, to);
+    if (res.error) return Response.json({ error: res.error }, { status: res.error.status || 409 });
+    current = res.tenant;
+  }
+  await logActivity(service, current, { actorUser: user, role: 'client', action: 'website_launched', section: 'publish' });
+  return ok({ website: current });
 }
 
 // ═══════════════════════ ACTIVITY + ATTENTION (Parts 16/38/39) ═══════════════

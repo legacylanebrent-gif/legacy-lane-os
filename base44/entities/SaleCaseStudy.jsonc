@@ -1,0 +1,213 @@
+{
+  "name": "SaleCaseStudy",
+  "type": "object",
+  "description": "Chapter 7 P2 \u2014 ONE small PORTFOLIO PROJECTION of a COMPLETED sale: proof from real work, in the operator's own words and records. Deliberately NOT a review system, NOT star ratings, NOT a copy of the sale. Privacy is absolute by design: client name, exact address, private communications, client decisions, documents, settlement/client-proceeds and internal profitability NEVER appear here \u2014 only an explicitly operator-selected public projection (generalized location like 'Middletown, NJ', sale type, services performed, approved photos, record-supported result metrics, and at most one APPROVED + publish-permitted ClientTestimonial snapshot). Metrics are computed from canonical records (SaleRecap / EstateSale) at publish time and stored as a publish-time snapshot with provenance \u2014 a metric with no record support is never offered. Status DRAFT/READY is private; only PUBLISHED records are publicly readable (public read is the safe projection only).",
+  "properties": {
+    "sale_id": {
+      "type": "string",
+      "description": "The COMPLETED EstateSale this case study projects. Reference to canonical truth \u2014 the sale is never duplicated."
+    },
+    "operator_id": {
+      "type": "string",
+      "description": "EstateSale.operator_id projection \u2014 sale owner (RLS anchor)."
+    },
+    "company_id": {
+      "type": "string",
+      "description": "EstateSale.company_id projection when present. Website projection scopes by Company."
+    },
+    "sale_team_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "READ-SCOPE PROJECTION of EstateSale.sale_team for RLS. The sale remains the source of truth."
+    },
+    "public_title": {
+      "type": "string",
+      "description": "Operator-written public title (no client names)."
+    },
+    "generalized_location": {
+      "type": "string",
+      "description": "Generalized public location ('Middletown, NJ'). NEVER the exact street address."
+    },
+    "sale_type": {
+      "type": "string",
+      "description": "Snapshot of EstateSale.sale_type at creation."
+    },
+    "challenge_context": {
+      "type": "string",
+      "description": "The situation/challenge in the operator's own words (no client-identifying detail)."
+    },
+    "services_performed": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Snapshot of the services the operator performed for this engagement (starting point: SaleScope scope_items / OperatorService names, operator-editable)."
+    },
+    "merchandise_highlights": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Merchandise highlights from records (item names/categories). Never invented rarity, age, maker, value, condition or provenance."
+    },
+    "approved_photo_urls": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "ONLY the photos the operator explicitly selected for public use. Private property photos are never auto-included."
+    },
+    "metrics": {
+      "type": "object",
+      "default": {},
+      "description": "Record-supported result metrics the operator chose to show. Values are computed from canonical records (SaleRecap/EstateSale) at publish time and stored as the publish snapshot \u2014 nothing unsupported is offered. Deliberately excludes gross revenue, client proceeds and internal profitability.",
+      "properties": {
+        "total_items": {
+          "type": "integer",
+          "description": "Items in the sale (SaleRecap.total_items)."
+        },
+        "total_sold": {
+          "type": "integer",
+          "description": "Items sold (SaleRecap.total_sold)."
+        },
+        "sell_through_pct": {
+          "type": "number",
+          "description": "Derived: total_sold / total_items * 100, only when both record values exist."
+        },
+        "total_views": {
+          "type": "integer",
+          "description": "Public listing views (SaleRecap.total_views)."
+        },
+        "sale_days": {
+          "type": "integer",
+          "description": "Number of sale dates (short-timeline proof)."
+        },
+        "notes": {
+          "type": "string",
+          "description": "Contextual proof in the operator's words (volume organized, specialty merchandise handled, complex property prepared, cleanout coordination, etc.) \u2014 never a dollar figure."
+        }
+      }
+    },
+    "testimonial_id": {
+      "type": "string",
+      "description": "OPTIONAL ClientTestimonial link. Invariant: only a testimonial with permission_to_publish AND status APPROVED/PUBLISHED may be referenced \u2014 enforced at publish."
+    },
+    "testimonial_snapshot": {
+      "type": "object",
+      "description": "Publish-time snapshot of the permitted testimonial (public_display_name + text). Projection only reads this snapshot \u2014 it never re-reads the private record publicly.",
+      "properties": {
+        "public_display_name": {
+          "type": "string"
+        },
+        "text": {
+          "type": "string"
+        }
+      },
+      "default": {}
+    },
+    "operator_summary": {
+      "type": "string",
+      "description": "Operator's public summary of the engagement. AI assistance on this field must pass the shared brand-truth claims guardrail."
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "DRAFT",
+        "READY",
+        "PUBLISHED",
+        "ARCHIVED"
+      ],
+      "default": "DRAFT",
+      "description": "Private by default. Only PUBLISHED is publicly readable (safe projection only). ARCHIVED keeps truth, stops projection."
+    },
+    "published_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "archived_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "sale_id",
+    "operator_id",
+    "public_title"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.operator_id": "{{user.id}}"
+        },
+        {
+          "data.sale_team_ids": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "data.status": "PUBLISHED"
+        }
+      ]
+    },
+    "create": {
+      "$or": [
+        {
+          "data.operator_id": "{{user.id}}"
+        },
+        {
+          "data.sale_team_ids": {
+            "$in": [
+              "{{user.id}}"
+            ]
+          }
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.operator_id": "{{user.id}}"
+        },
+        {
+          "data.sale_team_ids": {
+            "$in": [
+              "{{user.id}}"
+            ]
+          }
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.operator_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}
