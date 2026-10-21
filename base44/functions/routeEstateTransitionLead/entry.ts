@@ -1,4 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
+import { bridgeSellerInquiry, estateTransitionLeadToBridgeInput } from '../../shared/sellerInquiryBridge.ts';
 
 Deno.serve(async (req) => {
   try {
@@ -192,6 +193,25 @@ Deno.serve(async (req) => {
         );
       }
       await Promise.all(activityLogs);
+    }
+
+    // ── 5b. Chapter 10 P1 — bridge an estate-sale lead assigned to an operator
+    // into that operator's canonical opportunity record (best-effort; a bridge
+    // failure must never fail routing). Consent is never copied.
+    if (lead_id && updateData.assigned_operator_id) {
+      try {
+        const leadPage = await base44.asServiceRole.entities.EstateTransitionLead.filter({ id: lead_id }, { limit: 1 });
+        const lead = (leadPage.items || leadPage)[0];
+        if (lead) {
+          await bridgeSellerInquiry(base44.asServiceRole, {
+            ...estateTransitionLeadToBridgeInput(lead),
+            operator_id: updateData.assigned_operator_id,
+            notify_user_ids: [updateData.assigned_operator_id],
+          });
+        }
+      } catch (bridgeError) {
+        console.error('[route] Chapter 10 bridge failed:', bridgeError && bridgeError.message);
+      }
     }
 
     // ── 6. Admin notifications ──

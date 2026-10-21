@@ -89,7 +89,25 @@ export default async function(req) {
       consent: { marketing, vip, sms, captured_at: created.consent_captured_at }
     };
 
-    return Response.json({ ok: true, lead: created, event_attribution: outboxAttribution });
+    // Chapter 10 P1 — bridge seller inquiries/consultation requests into the
+    // canonical opportunity record (best-effort; consent is never copied).
+    let bridge = null;
+    if (leadType === 'seller_inquiry' || leadType === 'consultation_request') {
+      try {
+        const operatorId = await resolveCompanyOperator(service, companyId);
+        if (operatorId) {
+          bridge = await bridgeSellerInquiry(service, {
+            ...websiteLeadToBridgeInput(created),
+            operator_id: operatorId,
+            notify_user_ids: tenant.member_user_ids || [],
+          });
+        }
+      } catch (e) {
+        console.error('[submitWebsiteLead] Chapter 10 bridge failed:', e && e.message);
+      }
+    }
+
+    return Response.json({ ok: true, lead: created, event_attribution: outboxAttribution, bridge });
   } catch (error) {
     console.error('submitWebsiteTenantLead error:', error && error.message);
     return err('internal_error', 'Unexpected error', 500);
