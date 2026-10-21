@@ -52,7 +52,7 @@ async function findKit(service, saleId) {
 // ── CHAPTER 18 P1-11..P1-13 — DETERMINISTIC LISTING COMPLETENESS ────────────
 // No AI, no percentage: real publication BLOCKERS are distinguished from
 // quality WARNINGS, and warnings never block publishing.
-function computeListingCompleteness(sale, items) {
+function computeListingCompleteness(sale, items, kit) {
   const blockers = [];
   const warnings = [];
   const dates = (sale.sale_dates || []).filter(d => d && d.date);
@@ -70,7 +70,8 @@ function computeListingCompleteness(sale, items) {
   if (eligible.length > 0 && eligible.length < 3) warnings.push('Few marketing-eligible photos (under 3).');
   if (!cap(sale.description, 10)) warnings.push('No sale description.');
   if (!(sale.payment_methods || []).length) warnings.push('No payment methods shown to buyers.');
-  if (!((sale.featured_items || []).length)) warnings.push('No featured merchandise highlights.');
+  const kitPicks = kit && Array.isArray(kit.featured_item_ids) ? kit.featured_item_ids : [];
+  if (!((sale.featured_items || []).length) && !kitPicks.length) warnings.push('No featured merchandise highlights.');
   const state = blockers.length > 0 ? 'INCOMPLETE' : warnings.length > 0 ? 'READY_WITH_WARNINGS' : 'READY';
   return { state, blockers, warnings, checked_at: new Date().toISOString() };
 }
@@ -301,7 +302,7 @@ async function build(base44, service, user, body) {
   const featuredPicks = await featuredItemStatuses(service, kit, items);
   return Response.json({
     ok: true, kit, removals, facts_used: facts,
-    listing_completeness: computeListingCompleteness(sale, items),
+    listing_completeness: computeListingCompleteness(sale, items, kit),
     featured: featuredPicks, availability_warnings: availabilityWarnings(featuredPicks)
   });
 }
@@ -369,7 +370,7 @@ async function get(service, user, body) {
   const featuredPicks = await featuredItemStatuses(service, kit, items);
   return Response.json({
     ok: true, kit, eligible_photos: eligiblePhotos(sale),
-    listing_completeness: computeListingCompleteness(sale, items),
+    listing_completeness: computeListingCompleteness(sale, items, kit),
     featured: featuredPicks,
     availability_warnings: availabilityWarnings(featuredPicks),
     review: buildReview(sale, items, featuredPicks, kit)
