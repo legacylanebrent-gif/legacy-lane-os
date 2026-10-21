@@ -29,6 +29,7 @@ import LeadFunnel from './pages/LeadFunnel';
 import LeadSourcePerformance from './pages/LeadSourcePerformance';
 import ProfessionalNetwork from './pages/ProfessionalNetwork';
 import ConsultationMode from './pages/ConsultationMode';
+import ProjectDashboard from './pages/ProjectDashboard';
 import PartnerReferral from './pages/PartnerReferral';
 import TerritoryHeatmap from './pages/TerritoryHeatmap';
 import ContentCalendar from './pages/ContentCalendar';
@@ -299,6 +300,7 @@ const AuthenticatedApp = () => {
       <Route path="/LeadSourcePerformance" element={<LayoutWrapper currentPageName="LeadSourcePerformance"><LeadSourcePerformance /></LayoutWrapper>} />
       <Route path="/ProfessionalNetwork" element={<LayoutWrapper currentPageName="ProfessionalNetwork"><ProfessionalNetwork /></LayoutWrapper>} />
       <Route path="/Consultation" element={<LayoutWrapper currentPageName="Consultation"><ConsultationMode /></LayoutWrapper>} />
+          <Route path="/ProjectDashboard" element={<LayoutWrapper currentPageName="ProjectDashboard"><ProjectDashboard /></LayoutWrapper>} />
       <Route path="/TerritoryHeatmap" element={<LayoutWrapper currentPageName="TerritoryHeatmap"><TerritoryHeatmap /></LayoutWrapper>} />
       <Route path="/ContentCalendar" element={<LayoutWrapper currentPageName="ContentCalendar"><ContentCalendar /></LayoutWrapper>} />
       <Route path="/SEOBoostDashboard" element={<LayoutWrapper currentPageName="SEOBoostDashboard"><SEOBoostDashboard /></LayoutWrapper>} />

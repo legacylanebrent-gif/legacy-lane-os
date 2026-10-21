@@ -24,6 +24,7 @@ import DealCommsPanel from '@/components/saleops/DealCommsPanel';
 import DealOutcomeDialog from '@/components/saleops/DealOutcomeDialog';
 import DealCh9Progression from '@/components/saleops/DealCh9Progression';
 import ConsultationEntryCard from '@/components/consultation/ConsultationEntryCard';
+import ActivateSaleCard from '@/components/project/ActivateSaleCard';
 import NewDealForm from '@/components/saleops/NewDealForm';
 import TaskRow from '@/components/saleops/TaskRow';
 import { STAGES, STAGE_MAP, ACTIVE_PROGRESS, TERMINAL_STAGES, needsNextAction, isOverdueNextAction, isStaleDeal } from '@/components/saleops/pipelineStages';
@@ -858,6 +859,10 @@ function DealDetail({ deal, setDeal, onSave, saving, onStageChange, onGenerateTi
 
           {/* Chapter 12 P1 — guided Consultation Mode entry from the canonical opportunity */}
           <ConsultationEntryCard deal={deal} />
+
+          {/* Chapter 13 P1 — one-click ACTIVATE SALE: accepted business becomes an executable project */}
+          <ActivateSaleCard deal={deal} linkedSale={linkedSale}
+            onLinked={(saleId) => setDeal(prev => ({ ...prev, estate_sale_id: saleId, stage: 'setup_in_progress' }))} />
 
           <div className="grid sm:grid-cols-2 gap-3">
             {deal.client_email && <div className="flex items-center gap-2 text-sm"><Mail className="w-4 h-4 text-slate-400"/><a href={`mailto:${deal.client_email}`} className="text-cyan-600">{deal.client_email}</a></div>}

@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
+import { syncTaskBlocks, wouldCreateCycle } from '@/components/saleops/taskDependency';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -11,8 +12,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import {
   ArrowLeft, CheckCircle2, Circle, Clock, Loader2,
-  Sparkles, AlertTriangle, AlertOctagon, HelpCircle, Flag
+  Sparkles, AlertTriangle, AlertOctagon, HelpCircle, Flag, Link2
 } from 'lucide-react';
+import { Checkbox } from '@/components/ui/checkbox';
 import { isOverdue, isDueSoon } from '@/components/saleops/saleDecisionModel';
 
 // Chapter 1 P1 — the canonical SaleTasks surface, now PERSISTED (SaleTask entity) with
@@ -49,6 +51,13 @@ export default function SaleTasks() {
   const [teamOptions, setTeamOptions] = useState([]);
   const [blockedTarget, setBlockedTarget] = useState(null);
   const [blockedReason, setBlockedReason] = useState('');
+  // Chapter 13 P1 — task dependencies (blocked_by task/decision/issue references)
+  const [depTarget, setDepTarget] = useState(null);
+  const [depTasks, setDepTasks] = useState([]);
+  const [depDecisions, setDepDecisions] = useState([]);
+  const [depIssues, setDepIssues] = useState([]);
+  const [decisionDeps, setDecisionDeps] = useState([]);
+  const [issueDeps, setIssueDeps] = useState([]);
   // Chapter 8 P0-1 — non-blocking notices replace native alert() dialogs,
   // which froze the page (observed at mobile widths when opened without a saleId).
   const [notice, setNotice] = useState(null);
@@ -145,6 +154,43 @@ export default function SaleTasks() {
       patch.completed_by_name = '';
     }
     await patchTask(task.id, patch);
+    // Chapter 13 P1 — completing a task may unblock its dependents (never auto-completes them)
+    if (newStatus === 'completed') {
+      try { await syncTaskBlocks(sale.id); await loadTasks(sale); } catch (e) { console.error(e); }
+    }
+  };
+
+  // ── Chapter 13 P1 — dependency editor ──
+  const openDepDialog = (task) => {
+    setDepTarget(task);
+    setDepTasks([...(task.blocked_by_task_ids || [])]);
+    setDepDecisions([...(task.blocked_by_decision_ids || [])]);
+    setDepIssues([...(task.blocked_by_issue_ids || [])]);
+  };
+
+  const toggleDep = (list, setList, id) => {
+    setList(list.includes(id) ? list.filter((x) => x !== id) : [...list, id]);
+  };
+
+  const saveDeps = async () => {
+    const t = depTarget;
+    if (!t) return;
+    // Cycle guard (P1-33): the task may not ultimately block itself.
+    if (wouldCreateCycle(tasks, t.id, depTasks)) {
+      setNotice('That would create a circular dependency (this task would ultimately block itself).');
+      return;
+    }
+    const hasDeps = [...depTasks, ...depDecisions, ...depIssues].length > 0;
+    await patchTask(t.id, {
+      blocked_by_task_ids: depTasks,
+      blocked_by_decision_ids: depDecisions,
+      blocked_by_issue_ids: depIssues,
+      blocked: hasDeps,
+      blocked_reason: hasDeps ? 'Waiting on selected dependencies' : '',
+    });
+    try { await syncTaskBlocks(sale.id); } catch (e) { console.error(e); }
+    await loadTasks(sale);
+    setDepTarget(null);
   };
 
   const assignTask = async (task, userId) => {
