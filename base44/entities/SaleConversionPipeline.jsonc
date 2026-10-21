@@ -1,7 +1,7 @@
 {
   "name": "SaleConversionPipeline",
   "type": "object",
-  "description": "Canonical PRE-SALE opportunity record and, once linked, the settlement/commission agreement record. Chapter 4 P1 adds the pre-sale economics block: contractual minimum fee, expected additional service revenue, category-level estimated labor, estimated direct costs, and the operator's internal minimum-revenue/minimum-contribution thresholds. Projected figures are estimates for evaluation only \u2014 authoritative actuals derive from settlement/closeout. Chapter 5 P1 adds the operational distance snapshot (distance_miles, projected from the linked EstateSale when the sale already carries one) and the structured client-fit assessment that feeds the Sale Acceptance Scorecard as advisory, explainable input. Chapter 9 P1 adds the client-facing estimated sale RANGE (low/high \u2014 never auto-invented from a single estimate), the owner-time flag on projected labor rows, and ACCEPTED COMMERCIAL TERMS metadata: the deal remains the ONE settlement-facing source of commercial truth, and commercial_terms_accepted_at records when the client accepted it \u2014 the accepted_terms_snapshot preserves exactly what was accepted so later deal edits never rewrite accepted history. Chapter 10 P1 adds CRM DISCIPLINE to this same record (no second CRM): a canonical NEXT ACTION (what happens next, when \u2014 deterministic seed from an inquiry, operator-owned thereafter), distinct OUTCOME stages (CONTACTED progression; NURTURE = not ready but not lost; REFERRED = directed elsewhere with destination/provenance; LOST with a structured reason), INQUIRY PROVENANCE (source system, source record, inquiry timestamp, first meaningful HUMAN response timestamp), and an optional client Contact link for exact-identity continuity. Inquiry capture NEVER grants marketing consent; consent lives only where it was explicitly captured.",
+  "description": "Canonical PRE-SALE opportunity record and, once linked, the settlement/commission agreement record. Chapter 4 P1 adds the pre-sale economics block: contractual minimum fee, expected additional service revenue, category-level estimated labor, estimated direct costs, and the operator's internal minimum-revenue/minimum-contribution thresholds. Projected figures are estimates for evaluation only \u2014 authoritative actuals derive from settlement/closeout. Chapter 5 P1 adds the operational distance snapshot (distance_miles, projected from the linked EstateSale when the sale already carries one) and the structured client-fit assessment that feeds the Sale Acceptance Scorecard as advisory, explainable input. Chapter 9 P1 adds the client-facing estimated sale RANGE (low/high \u2014 never auto-invented from a single estimate), the owner-time flag on projected labor rows, and ACCEPTED COMMERCIAL TERMS metadata: the deal remains the ONE settlement-facing source of commercial truth, and commercial_terms_accepted_at records when the client accepted it \u2014 the accepted_terms_snapshot preserves exactly what was accepted so later deal edits never rewrite accepted history. Chapter 10 P1 adds CRM DISCIPLINE to this same record (no second CRM): a canonical NEXT ACTION (what happens next, when \u2014 deterministic seed from an inquiry, operator-owned thereafter), distinct OUTCOME stages (CONTACTED progression; NURTURE = not ready but not lost; REFERRED = directed elsewhere with destination/provenance; LOST with a structured reason), INQUIRY PROVENANCE (source system, source record, inquiry timestamp, first meaningful HUMAN response timestamp), and an optional client Contact link for exact-identity continuity. Inquiry capture NEVER grants marketing consent; consent lives only where it was explicitly captured. Chapter 12 P1 adds the CONSULTATION WORKING BLOCK (no second consultation entity): the Chapter 12 audit found these small truths missing, so they live here on the canonical deal \u2014 pre-consultation answers, CLIENT GOALS (what the client wants \u2014 distinct from the operator recommendation), EXTERNAL DEADLINES, room-by-room observations, condition/safety OBSERVATIONS (never diagnoses), preparation-work evidence, CLIENT EXPECTATIONS (what the client said \u2014 never verified truth), the OPERATOR'S structured HUMAN recommendation (the deterministic Sale Acceptance Review is advisory evidence only), explicit ACCEPTANCE CONDITIONS, and PRIVATE consultation photos. Consultation Mode ORCHESTRATES canonical systems; this block never becomes a second source of economics, authority, fit, research, labor or scope truth.",
   "properties": {
     "operator_id": {
       "type": "string",
@@ -161,6 +161,392 @@
         "notes": {
           "type": "string",
           "description": "Optional context where it matters. Not required for every dimension."
+        }
+      },
+      "default": {}
+    },
+    "consultation": {
+      "type": "object",
+      "description": "Chapter 12 P1 \u2014 the CONSULTATION WORKING BLOCK on the canonical deal (no second consultation entity; no second source of truth). Economics, authority, client fit, research, labor and scope remain on their canonical records \u2014 this block holds ONLY the small truths the Chapter 12 audit found missing. OBSERVATIONS ARE OBSERVATIONS: nothing here is ever a verified fact, a value, a diagnosis, or an inventory record. Photos are PRIVATE (private-storage file_uri only; never marketing, public-website, or inventory media; viewing goes through short-lived signed URLs).",
+      "properties": {
+        "started_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "When Consultation Mode was first opened for this deal. Null = consultation not started."
+        },
+        "completed_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "When the operator marked the consultation walkthrough substantially complete. Review remains possible afterwards."
+        },
+        "questionnaire": {
+          "type": "object",
+          "description": "Chapter 12 P1 \u2014 pre-consultation answers (the minimum useful structured pre-consultation information). Reason for sale lives on deal.situation; sale dates on estimated_sale_start/end_date; structured external dates in external_deadlines. Occupancy/previous-removals/special-circumstances answers are ASKED/CONFIRMED information, not verified facts.",
+          "properties": {
+            "occupancy": {
+              "type": "string",
+              "enum": [
+                "occupied",
+                "vacant",
+                "partially_occupied",
+                "unknown"
+              ],
+              "default": "unknown"
+            },
+            "previous_removals": {
+              "type": "string",
+              "description": "What has already been removed from the property, if known."
+            },
+            "merchandise_overview": {
+              "type": "string",
+              "description": "Basic overview of what is in the property (operator's words)."
+            },
+            "special_circumstances": {
+              "type": "string"
+            },
+            "important_dates_note": {
+              "type": "string",
+              "description": "Free-text context for important dates. Structured deadlines live in external_deadlines."
+            }
+          },
+          "default": {}
+        },
+        "client_goals": {
+          "type": "array",
+          "description": "Chapter 12 P1 \u2014 CLIENT GOALS: what the CLIENT wants. Deliberately distinct from the operator recommendation (consultation.recommendation). Multiple priorities allowed.",
+          "items": {
+            "type": "string",
+            "enum": [
+              "maximize_proceeds",
+              "speed",
+              "empty_property",
+              "minimal_client_involvement",
+              "specialized_handling",
+              "other"
+            ]
+          },
+          "default": []
+        },
+        "client_goals_notes": {
+          "type": "string",
+          "description": "Chapter 12 P1 \u2014 concise notes on the client's priorities in their words."
+        },
+        "external_deadlines": {
+          "type": "array",
+          "description": "Chapter 12 P1 \u2014 EXTERNAL deadlines (closing, movers, lease, court...). Timeline VISIBILITY only \u2014 no scheduling engine; conflicts are surfaced, never optimized.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "deadline_id": {
+                "type": "string"
+              },
+              "type": {
+                "type": "string",
+                "enum": [
+                  "property_closing",
+                  "movers",
+                  "travel",
+                  "lease_expiration",
+                  "contractor",
+                  "property_turnover",
+                  "court_probate",
+                  "other"
+                ]
+              },
+              "date": {
+                "type": "string",
+                "format": "date"
+              },
+              "note": {
+                "type": "string"
+              },
+              "is_estimated": {
+                "type": "boolean",
+                "default": false,
+                "description": "Whether the date is estimated rather than confirmed."
+              }
+            }
+          },
+          "default": []
+        },
+        "rooms": {
+          "type": "array",
+          "description": "Chapter 12 P1 \u2014 room-by-room consultation capture. CONSULTATION OBSERVATIONS, never Item inventory records: an observation never becomes an inventory item, and research_needed here preserves context until a formal Item exists \u2014 it never writes Item.research_status.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "room_id": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string",
+                "description": "Operator-defined area (Living Room, Kitchen, Primary Bedroom, Basement, Garage, Attic, Storage, Outbuilding...)."
+              },
+              "merchandise_observation": {
+                "type": "string",
+                "description": "Brief observation of what is in this area."
+              },
+              "prep_level": {
+                "type": "string",
+                "enum": [
+                  "light",
+                  "moderate",
+                  "heavy",
+                  "unknown"
+                ],
+                "default": "unknown",
+                "description": "Preparation level observed for this area. Unknown is honest until assessed."
+              },
+              "access_concern": {
+                "type": "string",
+                "description": "Access/removal concern for this area (stairs, narrow halls, packed path...)."
+              },
+              "condition_note": {
+                "type": "string"
+              },
+              "research_needed": {
+                "type": "boolean",
+                "default": false,
+                "description": "Merchandise in this area needs research before pricing. Preserved here until a formal Item exists."
+              },
+              "research_note": {
+                "type": "string"
+              },
+              "notes": {
+                "type": "string"
+              },
+              "photos": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "default": [],
+                "description": "PRIVATE photo file_uris associated with this room."
+              }
+            }
+          },
+          "default": []
+        },
+        "condition_observations": {
+          "type": "array",
+          "description": "Chapter 12 P1 \u2014 condition/safety OBSERVATIONS. The system NEVER diagnoses: 'possible mold concern' never becomes 'mold present', and no observation certifies the property safe or unsafe. requires_professional_review surfaces PROFESSIONAL REVIEW RECOMMENDED \u2014 never a conclusion.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "observation_id": {
+                "type": "string"
+              },
+              "category": {
+                "type": "string",
+                "enum": [
+                  "dirt_heavy_cleaning",
+                  "damage",
+                  "smoke_odor",
+                  "pests",
+                  "moisture_concern",
+                  "possible_mold_concern",
+                  "missing_parts",
+                  "trip_access_concern",
+                  "structural_property_concern",
+                  "other"
+                ]
+              },
+              "attention": {
+                "type": "string",
+                "enum": [
+                  "watch",
+                  "concern",
+                  "requires_professional_review"
+                ],
+                "default": "watch",
+                "description": "Attention level. requires_professional_review = professional evaluation recommended before relying on the area."
+              },
+              "location": {
+                "type": "string",
+                "description": "Room/area where observed."
+              },
+              "note": {
+                "type": "string",
+                "description": "The operator's observation in their words \u2014 never a diagnosis."
+              },
+              "photo": {
+                "type": "string",
+                "description": "PRIVATE file_uri of an observation photo."
+              },
+              "resolved": {
+                "type": "boolean",
+                "default": false
+              },
+              "resolved_note": {
+                "type": "string",
+                "description": "How/when the observation was resolved or reviewed. Resolution is an operational review \u2014 never a safety certification."
+              }
+            }
+          },
+          "default": []
+        },
+        "preparation_work": {
+          "type": "array",
+          "description": "Chapter 12 P1 \u2014 expected preparation work observed during consultation: EVIDENCE supporting the human labor estimate. The system never auto-manufactures labor hours from these flags.",
+          "items": {
+            "type": "string",
+            "enum": [
+              "sorting",
+              "cleaning",
+              "staging",
+              "research",
+              "pricing",
+              "furniture_movement",
+              "trash",
+              "personal_papers",
+              "clothing",
+              "packed_storage",
+              "display_setup",
+              "other"
+            ]
+          },
+          "default": []
+        },
+        "preparation_notes": {
+          "type": "string"
+        },
+        "client_expectations": {
+          "type": "object",
+          "description": "Chapter 12 P1 \u2014 WHAT THE CLIENT SAID / EXPECTS. Deliberately distinct from operator-verified truth: a stated value is never copied into estimated_value, and an expectation is never client authority.",
+          "properties": {
+            "value": {
+              "type": "string",
+              "description": "What the client expects the sale/items to be worth (their words \u2014 never a verified appraisal)."
+            },
+            "timing": {
+              "type": "string"
+            },
+            "responsibilities": {
+              "type": "string"
+            },
+            "scope": {
+              "type": "string"
+            },
+            "likely_proceeds": {
+              "type": "string"
+            },
+            "company_responsibilities": {
+              "type": "string"
+            },
+            "family_responsibilities": {
+              "type": "string"
+            }
+          },
+          "default": {}
+        },
+        "recommendation": {
+          "type": "object",
+          "description": "Chapter 12 P1 \u2014 the OPERATOR'S structured HUMAN recommendation. The deterministic Sale Acceptance Review is ADVISORY EVIDENCE and can never silently write this. The Chapter 10 CRM outcome (advance/lost/referred/nurture) remains the operator's separate truthful choice on the deal stage.",
+          "properties": {
+            "classification": {
+              "type": "string",
+              "enum": [
+                "strong_candidate",
+                "conditional_candidate",
+                "research_required",
+                "alternative_solution",
+                "decline"
+              ]
+            },
+            "note": {
+              "type": "string",
+              "description": "Operator's recommendation note."
+            },
+            "alternative_type": {
+              "type": "string",
+              "enum": [
+                "donation",
+                "cleanout",
+                "buyout",
+                "auction",
+                "consignment",
+                "specialist",
+                "real_estate_houszu",
+                "other"
+              ],
+              "description": "Set when classification is alternative_solution."
+            },
+            "decline_reason": {
+              "type": "string",
+              "description": "Operator words when classification is decline. The structured Chapter 10 lost_reason is chosen separately, if and when the CRM outcome is LOST \u2014 decline does not force LOST."
+            },
+            "selected_by": {
+              "type": "string",
+              "description": "Operator user ID who made the recommendation."
+            },
+            "selected_at": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          "default": {}
+        },
+        "acceptance_conditions": {
+          "type": "array",
+          "description": "Chapter 12 P1 \u2014 explicit ACCEPTANCE CONDITIONS ('the project works IF...'). Unresolved conditions flow to the proposal handoff and surface as advisory reasons in the Sale Acceptance Review; they never auto-decline or auto-accept anything.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "condition_id": {
+                "type": "string"
+              },
+              "condition": {
+                "type": "string"
+              },
+              "status": {
+                "type": "string",
+                "enum": [
+                  "open",
+                  "resolved"
+                ],
+                "default": "open"
+              },
+              "note": {
+                "type": "string"
+              },
+              "due_date": {
+                "type": "string",
+                "format": "date"
+              },
+              "resolved_at": {
+                "type": "string",
+                "format": "date-time"
+              }
+            }
+          },
+          "default": []
+        },
+        "photos": {
+          "type": "array",
+          "description": "Chapter 12 P1 \u2014 PRIVATE consultation photos (private-storage file_uris) with room/context association. NEVER marketing, public-website, or inventory media; viewing goes through short-lived signed URLs only. Never automatically copied into EstateSale.images.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "file_uri": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "room_id": {
+                "type": "string",
+                "description": "Associated room/area (empty = property-level consultation photo)."
+              },
+              "note": {
+                "type": "string"
+              },
+              "taken_at": {
+                "type": "string",
+                "format": "date-time"
+              }
+            }
+          },
+          "default": []
         }
       },
       "default": {}
