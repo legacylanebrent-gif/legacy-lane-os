@@ -11,13 +11,13 @@
 // omitted, qualified, or asked of the operator — never guessed.
 export const CREDENTIAL_WORDS = ['licensed', 'bonded', 'insured', 'certified', 'certification', 'appraiser', 'realtor', 'broker'];
 
-export const YEARS_RE = /\b\d+\s*\+?\s*(?:years|yrs)\b/i;
+export const YEARS_RE = /\b(?:\d+\s*\+?\s*(?:years|yrs)|decades?\s+(?:of\s+experience|in\s+(?:the\s+)?(?:business|industry|game))|over\s+(?:a\s+decade|many\s+years)|a\s+decade\s+of)\b/i;
 
-export const SUPERLATIVE_RE = /\b(#1|number one|numéro one|best in|the best|largest|biggest|guaranteed|guarantee|award[- ]winning|top[- ]rated)\b/i;
+export const SUPERLATIVE_RE = /(?:\bnumber one\b|\bnuméro one\b|#1\b|(?<=\s)#\s*1|\bbest in\b|\bthe best\b|\blargest\b|\bbiggest\b|\bguaranteed\b|\bguarantee\b|\baward[- ]winning\b|\btop[- ]rated\b)/i;
 
 export const MONEY_RE = /\$\s?\d|\b\d+\s*(?:percent|%|commission)\b/i;
 
-export const VOLUME_RE = /\b\d{2,}\s*\+?\s*(?:sales|estates|families|clients|homes|items|buyers)\b/i;
+export const VOLUME_RE = /\b(?:\d{2,}\s*\+?\s*|hundreds\s+of|thousands\s+of|millions\s+of)\s*(?:sales|estates|families|clients|homes|items|buyers|customers)\b/i;
 
 export const TESTIMONIAL_RE = /\b(five[- ]star|5[- ]star|★★★★★|rave review|glowing review|testimonials?)\b/i;
 
