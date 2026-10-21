@@ -101,7 +101,12 @@ export function publicSale(sale) {
     total_items: sale.total_items || 0,
     parking_info: sale.parking_info || null,
     special_notes: sale.special_notes || null,
-    images: (sale.images || []).map(publicImage)
+    // Chapter 13 P1 — retained-private photos never reach any public payload:
+    // the client kept that merchandise, so the photo stays out of the public gallery,
+    // operator websites, and marketing surfaces.
+    images: (sale.images || [])
+      .filter(img => !img || typeof img === 'string' || img.excluded_from_public !== true)
+      .map(publicImage)
   };
 }
 

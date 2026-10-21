@@ -53,8 +53,10 @@ function eligiblePhotos(sale) {
     url: img && img.url,
     // Chapter 6 sensitive-material guardrails: skipped / do-not-search photos
     // are never marketing-eligible, regardless of approval.
+    // Chapter 13 P1 — retained-private photos (excluded_from_public) are NEVER
+    // marketing-eligible: the client kept that merchandise/photo.
     eligible: !!(img && img.url && img.skip_item !== true && img.skip_serp_search !== true &&
-      img.serp_search_status !== 'do_not_search')
+      img.serp_search_status !== 'do_not_search' && img.excluded_from_public !== true)
   })).filter(p => p.eligible);
 }
 

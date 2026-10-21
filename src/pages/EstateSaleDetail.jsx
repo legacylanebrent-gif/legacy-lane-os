@@ -119,6 +119,13 @@ export default function EstateSaleDetail() {
         }
       }
 
+      // Chapter 13 P1 — retained-private photos never appear in the public gallery:
+      // the client kept that merchandise. Public listing, search, and SEO all read
+      // this filtered list; the operator still sees them in the Retained Register.
+      foundSale.images = (foundSale.images || []).filter(
+        img => !img || typeof img === 'string' || img.excluded_from_public !== true
+      );
+
       setSale(foundSale);
 
       // Try to load Estate Sale Company Owner info and check follow status

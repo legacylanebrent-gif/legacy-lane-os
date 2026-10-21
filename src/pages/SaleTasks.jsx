@@ -358,9 +358,14 @@ Return as a JSON array.`,
             <p className="text-slate-600">Task Management</p>
           </div>
         </div>
-        <Button onClick={generateCustomTasks} disabled={generatingTasks} className="bg-purple-600 hover:bg-purple-700">
-          {generatingTasks ? (<><Loader2 className="w-4 h-4 mr-2 animate-spin" />Generating...</>) : (<><Sparkles className="w-4 h-4 mr-2" />AI Generate Tasks</>)}
-        </Button>
+        <div className="flex flex-wrap gap-2">
+          <Link to={`/ProjectDashboard?saleId=${sale?.id}`}>
+            <Button variant="outline">Project Dashboard</Button>
+          </Link>
+          <Button onClick={generateCustomTasks} disabled={generatingTasks} className="bg-purple-600 hover:bg-purple-700">
+            {generatingTasks ? (<><Loader2 className="w-4 h-4 mr-2 animate-spin" />Generating...</>) : (<><Sparkles className="w-4 h-4 mr-2" />AI Generate Tasks</>)}
+          </Button>
+        </div>
       </div>
 
       {/* Chapter 8 P0-1 — non-blocking notice banner */}
@@ -491,6 +496,65 @@ Return as a JSON array.`,
           <div className="flex justify-end gap-2 pt-1">
             <Button variant="outline" onClick={() => { setBlockedTarget(null); setBlockedReason(''); }}>Cancel</Button>
             <Button onClick={confirmBlocked} disabled={!blockedReason.trim()}>Mark Blocked</Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Chapter 13 P1 — dependency editor dialog */}
+      <Dialog open={!!depTarget} onOpenChange={o => { if (!o) setDepTarget(null); }}>
+        <DialogContent className="max-w-lg max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Task dependencies</DialogTitle>
+          </DialogHeader>
+          <p className="text-sm text-slate-600 -mt-2">
+            This task stays blocked until every selected task, decision, and issue resolves. Resolving them unblocks the task but never completes it.
+          </p>
+          <div className="space-y-4 pt-1">
+            <div>
+              <h5 className="text-xs font-semibold text-slate-500 uppercase mb-2">Waiting on tasks</h5>
+              <div className="space-y-1.5 max-h-48 overflow-y-auto">
+                {tasks.filter(t => t.id !== depTarget?.id).map(t => (
+                  <label key={t.id} className="flex items-start gap-2 text-sm">
+                    <Checkbox checked={depTasks.includes(t.id)} onCheckedChange={() => toggleDep(depTasks, setDepTasks, t.id)} className="mt-0.5" />
+                    <span className={t.status === 'completed' ? 'text-slate-400 line-through' : ''}>{t.name}{t.status !== 'completed' && <span className="text-slate-400"> (open)</span>}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+            <div>
+              <h5 className="text-xs font-semibold text-slate-500 uppercase mb-2">Waiting on client decisions</h5>
+              {decisionDeps.length === 0 ? (
+                <p className="text-sm text-slate-400">No decisions on this sale.</p>
+              ) : (
+                <div className="space-y-1.5 max-h-40 overflow-y-auto">
+                  {decisionDeps.map(d => (
+                    <label key={d.id} className="flex items-start gap-2 text-sm">
+                      <Checkbox checked={depDecisions.includes(d.id)} onCheckedChange={() => toggleDep(depDecisions, setDepDecisions, d.id)} className="mt-0.5" />
+                      <span>{d.subject}{d.status === 'resolved' && <span className="text-slate-400"> (resolved)</span>}</span>
+                    </label>
+                  ))}
+                </div>
+              )}
+            </div>
+            <div>
+              <h5 className="text-xs font-semibold text-slate-500 uppercase mb-2">Waiting on issues</h5>
+              {issueDeps.length === 0 ? (
+                <p className="text-sm text-slate-400">No issues on this sale.</p>
+              ) : (
+                <div className="space-y-1.5 max-h-40 overflow-y-auto">
+                  {issueDeps.map(i => (
+                    <label key={i.id} className="flex items-start gap-2 text-sm">
+                      <Checkbox checked={depIssues.includes(i.id)} onCheckedChange={() => toggleDep(depIssues, setDepIssues, i.id)} className="mt-0.5" />
+                      <span>{i.title}{['RESOLVED', 'CANCELLED'].includes(i.status) && <span className="text-slate-400"> ({i.status.toLowerCase()})</span>}</span>
+                    </label>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+          <div className="flex justify-end gap-2 pt-1">
+            <Button variant="outline" onClick={() => setDepTarget(null)}>Cancel</Button>
+            <Button onClick={saveDeps}>Save Dependencies</Button>
           </div>
         </DialogContent>
       </Dialog>
