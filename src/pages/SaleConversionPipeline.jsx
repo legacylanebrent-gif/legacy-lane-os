@@ -23,44 +23,11 @@ import NextActionPanel from '@/components/saleops/NextActionPanel';
 import DealCommsPanel from '@/components/saleops/DealCommsPanel';
 import DealOutcomeDialog from '@/components/saleops/DealOutcomeDialog';
 import DealCh9Progression from '@/components/saleops/DealCh9Progression';
+import NewDealForm from '@/components/saleops/NewDealForm';
+import TaskRow from '@/components/saleops/TaskRow';
+import { STAGES, STAGE_MAP, ACTIVE_PROGRESS, TERMINAL_STAGES, needsNextAction, isOverdueNextAction, isStaleDeal } from '@/components/saleops/pipelineStages';
 
-// ─── Stage config ────────────────────────────────────────────────────────────
-const STAGES = [
-  { key: 'new_lead',               label: 'New Lead',            color: 'bg-slate-100 text-slate-700',   dot: 'bg-slate-400',   border: 'border-slate-200' },
-  { key: 'contacted',              label: 'Contacted',           color: 'bg-indigo-100 text-indigo-700', dot: 'bg-indigo-500',  border: 'border-indigo-200' },
-  { key: 'consultation_scheduled', label: 'Consultation',        color: 'bg-blue-100 text-blue-700',     dot: 'bg-blue-500',    border: 'border-blue-200' },
-  { key: 'contract_signed',        label: 'Contract Signed',     color: 'bg-purple-100 text-purple-700', dot: 'bg-purple-500',  border: 'border-purple-200' },
-  { key: 'setup_in_progress',      label: 'Setup / Staging',     color: 'bg-orange-100 text-orange-700', dot: 'bg-orange-500',  border: 'border-orange-200' },
-  { key: 'sale_live',              label: 'Sale Live',           color: 'bg-green-100 text-green-700',   dot: 'bg-green-500',   border: 'border-green-200' },
-  { key: 'completed',              label: 'Completed',           color: 'bg-cyan-100 text-cyan-700',     dot: 'bg-cyan-500',    border: 'border-cyan-200' },
-  { key: 'lost',                   label: 'Lost',                color: 'bg-red-100 text-red-700',       dot: 'bg-red-400',     border: 'border-red-200' },
-  { key: 'referred',               label: 'Referred Out',        color: 'bg-amber-100 text-amber-700',   dot: 'bg-amber-500',   border: 'border-amber-200' },
-  { key: 'nurture',                label: 'Nurture',             color: 'bg-teal-100 text-teal-700',     dot: 'bg-teal-500',    border: 'border-teal-200' },
-];
-
-// Chapter 10 P1 — outcome truth on the existing stage axis. WON = completed.
-// NOT READY IS NOT LOST. REFERRED IS NOT LOST.
-const TERMINAL_STAGES = ['completed', 'lost', 'referred', 'nurture'];
-const ACTIVE_PROGRESS = ['new_lead', 'contacted', 'consultation_scheduled', 'contract_signed', 'setup_in_progress', 'sale_live', 'completed'];
-
-// Chapter 10 P1 — deterministic discipline rules (NO AI involvement):
-// NEEDS NEXT ACTION: active opportunity with no pending next action.
-// OVERDUE: pending next action whose date has passed.
-// STALE: pre-consultation active opportunity with no future next action, no
-// future consultation and no accepted commercial terms. Nurture is never stale.
-const needsNextAction = d =>
-  !['completed', 'lost', 'referred', 'nurture'].includes(d.stage) && !(d.next_action && !d.next_action_completed_at);
-const isOverdueNextAction = d =>
-  !!d.next_action && !d.next_action_completed_at && !!d.next_action_at && isPast(parseISO(d.next_action_at)) && !['lost', 'referred'].includes(d.stage);
-const isStaleDeal = d => {
-  if (!['new_lead', 'contacted', 'consultation_scheduled'].includes(d.stage)) return false;
-  if (d.commercial_terms_accepted_at) return false;
-  if (d.next_action && !d.next_action_completed_at && d.next_action_at && !isPast(parseISO(d.next_action_at))) return false;
-  if (d.consultation_date && !isPast(parseISO(d.consultation_date))) return false;
-  return true;
-};
-
-const STAGE_MAP = Object.fromEntries(STAGES.map(s => [s.key, s]));
+// ─── Stage config + Chapter 10 discipline rules live in @/components/saleops/pipelineStages ─
 
 // Map EstateSale status to pipeline stage
 const SALE_STATUS_TO_STAGE = {
@@ -727,6 +694,17 @@ Include 18-24 tasks covering every stage. Order them chronologically by due_date
           </DialogContent>
         </Dialog>
       )}
+
+      {/* ── Chapter 10 P1 outcome dialog (lost reason / referred destination / nurture / post-sale) ── */}
+      <DealOutcomeDialog
+        open={!!outcome}
+        mode={outcome?.stage}
+        deal={outcome?.deal}
+        contacts={outcomeContacts}
+        onApply={applyOutcome}
+        onClose={() => setOutcome(null)}
+        onCreateContact={createReferredContact}
+      />
     </div>
   );
 }
@@ -775,115 +753,6 @@ function DealCard({ deal, onOpen, onAdvance }) {
       <Button size="sm" variant="outline" className="w-full mt-2 h-6 text-xs gap-1" onClick={e => { e.stopPropagation(); onAdvance(); }}>
         <ArrowRight className="w-3 h-3"/> Advance Stage
       </Button>
-    </div>
-  );
-}
-
-// ─── New Deal Form ────────────────────────────────────────────────────────────
-function NewDealForm({ form, setForm, onSave, onCancel, saving, existingDeals }) {
-  const [search, setSearch] = useState('');
-  const [results, setResults] = useState([]);
-  const [showResults, setShowResults] = useState(false);
-  const f = (k, v) => setForm(prev => ({ ...prev, [k]: v }));
-
-  const handleSearch = (value) => {
-    setSearch(value);
-    if (value.trim().length < 2) { setResults([]); setShowResults(false); return; }
-    const q = value.toLowerCase();
-    const matches = (existingDeals || [])
-      .filter(d => d.client_name && d.client_name.toLowerCase().includes(q))
-      .slice(0, 5);
-    setResults(matches);
-    setShowResults(matches.length > 0);
-  };
-
-  const handleSelect = (deal) => {
-    f('client_name', deal.client_name || '');
-    f('client_email', deal.client_email || '');
-    f('client_phone', deal.client_phone || '');
-    f('property_address', deal.property_address || '');
-    f('property_city', deal.property_city || '');
-    f('property_state', deal.property_state || '');
-    f('situation', deal.situation || 'standard');
-    f('estimated_value', deal.estimated_value || '');
-    setSearch('');
-    setShowResults(false);
-  };
-
-  return (
-    <div className="space-y-4">
-      {/* Client search */}
-      <div className="relative">
-        <Label>Search Existing Clients</Label>
-        <div className="relative">
-          <Input
-            value={search}
-            onChange={e => handleSearch(e.target.value)}
-            onFocus={() => results.length > 0 && setShowResults(true)}
-            onBlur={() => setTimeout(() => setShowResults(false), 200)}
-            placeholder="Type client name to auto-fill..."
-            className="pr-8"
-          />
-          {search && (
-            <button onClick={() => { setSearch(''); setShowResults(false); }} className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
-              <X className="w-4 h-4" />
-            </button>
-          )}
-        </div>
-        {showResults && (
-          <div className="absolute z-50 w-full mt-1 bg-white border border-slate-200 rounded-lg shadow-lg max-h-48 overflow-y-auto">
-            {results.map(deal => (
-              <button
-                key={deal.id}
-                onMouseDown={() => handleSelect(deal)}
-                className="w-full text-left px-3 py-2 hover:bg-orange-50 border-b border-slate-100 last:border-0"
-              >
-                <div className="text-sm font-medium text-slate-900">{deal.client_name}</div>
-                {deal.property_city && <div className="text-xs text-slate-500">{deal.property_city}, {deal.property_state} · {STAGE_MAP[deal.stage]?.label || deal.stage}</div>}
-              </button>
-            ))}
-          </div>
-        )}
-      </div>
-
-      <div className="grid sm:grid-cols-2 gap-4">
-        <div><Label>Client Name *</Label><Input value={form.client_name} onChange={e=>f('client_name',e.target.value)} placeholder="Jane Smith"/></div>
-        <div><Label>Phone</Label><Input value={form.client_phone} onChange={e=>f('client_phone',e.target.value)} placeholder="(555) 123-4567"/></div>
-        <div className="sm:col-span-2"><Label>Email</Label><Input type="email" value={form.client_email} onChange={e=>f('client_email',e.target.value)} placeholder="client@email.com"/></div>
-        <div className="sm:col-span-2"><Label>Property Address</Label><Input value={form.property_address} onChange={e=>f('property_address',e.target.value)} placeholder="123 Main St"/></div>
-        <div><Label>City</Label><Input value={form.property_city} onChange={e=>f('property_city',e.target.value)} placeholder="Springfield"/></div>
-        <div><Label>State</Label><Input value={form.property_state} onChange={e=>f('property_state',e.target.value)} placeholder="NJ" maxLength={2}/></div>
-        <div>
-          <Label>Situation</Label>
-          <Select value={form.situation} onValueChange={v=>f('situation',v)}>
-            <SelectTrigger><SelectValue/></SelectTrigger>
-            <SelectContent>
-              {['standard','probate','divorce','downsizing','relocation','foreclosure'].map(s=><SelectItem key={s} value={s} className="capitalize">{s}</SelectItem>)}
-            </SelectContent>
-          </Select>
-        </div>
-        <div>
-          <Label>Deal Stage</Label>
-          <Select value={form.stage} onValueChange={v=>f('stage',v)}>
-            <SelectTrigger><SelectValue/></SelectTrigger>
-            <SelectContent>
-              {STAGES.filter(s => !['lost','referred','nurture'].includes(s.key)).map(s=><SelectItem key={s.key} value={s.key}>{s.label}</SelectItem>)}
-            </SelectContent>
-          </Select>
-        </div>
-        <div><Label>Estimated Value ($)</Label><Input type="number" value={form.estimated_value} onChange={e=>f('estimated_value',e.target.value)} placeholder="25000"/></div>
-        <div><Label>Consultation Date/Time</Label><Input type="datetime-local" value={form.consultation_date} onChange={e=>f('consultation_date',e.target.value)}/></div>
-        <div><Label>Est. Sale Start Date</Label><Input type="date" value={form.estimated_sale_start_date} onChange={e=>f('estimated_sale_start_date',e.target.value)}/></div>
-        <div><Label>Est. Sale End Date</Label><Input type="date" value={form.estimated_sale_end_date} onChange={e=>f('estimated_sale_end_date',e.target.value)}/></div>
-        <div><Label>Commission Rate (%)</Label><Input type="number" value={form.commission_rate} onChange={e=>f('commission_rate',e.target.value)} placeholder="35"/></div>
-      </div>
-      <div><Label>Notes</Label><Textarea value={form.notes} onChange={e=>f('notes',e.target.value)} rows={3} placeholder="Initial notes about the client or property..."/></div>
-      <div className="flex gap-2 justify-end pt-2 border-t">
-        <Button variant="outline" onClick={onCancel}>Cancel</Button>
-        <Button onClick={onSave} disabled={saving} className="bg-orange-600 hover:bg-orange-700">
-          {saving ? <><Loader2 className="w-4 h-4 mr-2 animate-spin"/>Saving...</> : 'Create Deal'}
-        </Button>
-      </div>
     </div>
   );
 }
@@ -1266,36 +1135,4 @@ function DealDetail({ deal, setDeal, onSave, saving, onStageChange, onGenerateTi
   );
 }
 
-// ─── Task Row ─────────────────────────────────────────────────────────────────
-function TaskRow({ task, onStatusChange, editing, onToggleEdit }) {
-  const statusIcon = {
-    completed: <CheckCircle2 className="w-4 h-4 text-green-500 flex-shrink-0"/>,
-    in_progress: <Clock className="w-4 h-4 text-orange-500 flex-shrink-0"/>,
-    not_started: <Circle className="w-4 h-4 text-slate-300 flex-shrink-0"/>,
-  }[task.status] || <Circle className="w-4 h-4 text-slate-300 flex-shrink-0"/>;
-
-  const overdue = task.due_date && isPast(parseISO(task.due_date)) && task.status !== 'completed';
-
-  return (
-    <div className={`flex items-start gap-2 p-2.5 rounded-lg border transition-colors ${task.status==='completed' ? 'bg-green-50 border-green-100' : overdue ? 'bg-red-50 border-red-100' : 'bg-white border-slate-100 hover:bg-slate-50'}`}>
-      <button onClick={() => onStatusChange(task.status === 'completed' ? 'not_started' : task.status === 'not_started' ? 'in_progress' : 'completed')} className="mt-0.5">
-        {statusIcon}
-      </button>
-      <div className="flex-1 min-w-0">
-        <div className={`text-sm font-medium ${task.status==='completed' ? 'line-through text-slate-400' : 'text-slate-800'}`}>{task.task}</div>
-        {editing && <p className="text-xs text-slate-500 mt-0.5">{task.description}</p>}
-      </div>
-      <div className="flex items-center gap-2 flex-shrink-0">
-        {task.due_date && (
-          <span className={`text-xs px-1.5 py-0.5 rounded ${overdue ? 'bg-red-100 text-red-700' : 'bg-slate-100 text-slate-500'}`}>
-            {dateLabel(task.due_date)}
-          </span>
-        )}
-        {task.priority === 'high' && <AlertCircle className="w-3.5 h-3.5 text-red-400 flex-shrink-0"/>}
-        <button onClick={onToggleEdit} className="text-slate-300 hover:text-slate-500">
-          <Edit2 className="w-3.5 h-3.5"/>
-        </button>
-      </div>
-    </div>
-  );
-}
+// ─── Task Row: @/components/saleops/TaskRow ─

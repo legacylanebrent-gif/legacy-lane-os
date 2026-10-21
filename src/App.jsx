@@ -26,6 +26,7 @@ import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import SalePipeline from './pages/SalePipeline';
 import ReferralOutreach from './pages/ReferralOutreach';
 import LeadFunnel from './pages/LeadFunnel';
+import LeadSourcePerformance from './pages/LeadSourcePerformance';
 import TerritoryHeatmap from './pages/TerritoryHeatmap';
 import ContentCalendar from './pages/ContentCalendar';
 import SEOBoostDashboard from './pages/SEOBoostDashboard';
@@ -292,6 +293,7 @@ const AuthenticatedApp = () => {
       <Route path="/SalePipeline" element={<LayoutWrapper currentPageName="SalePipeline"><SalePipeline /></LayoutWrapper>} />
       <Route path="/ReferralOutreach" element={<LayoutWrapper currentPageName="ReferralOutreach"><ReferralOutreach /></LayoutWrapper>} />
       <Route path="/LeadFunnel" element={<LayoutWrapper currentPageName="LeadFunnel"><LeadFunnel /></LayoutWrapper>} />
+      <Route path="/LeadSourcePerformance" element={<LayoutWrapper currentPageName="LeadSourcePerformance"><LeadSourcePerformance /></LayoutWrapper>} />
       <Route path="/TerritoryHeatmap" element={<LayoutWrapper currentPageName="TerritoryHeatmap"><TerritoryHeatmap /></LayoutWrapper>} />
       <Route path="/ContentCalendar" element={<LayoutWrapper currentPageName="ContentCalendar"><ContentCalendar /></LayoutWrapper>} />
       <Route path="/SEOBoostDashboard" element={<LayoutWrapper currentPageName="SEOBoostDashboard"><SEOBoostDashboard /></LayoutWrapper>} />
