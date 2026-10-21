@@ -38,7 +38,8 @@ export default function PrintSigns() {
       const saleId = params.get('saleId');
       
       if (!saleId) {
-        alert('Sale ID not found');
+        // Non-blocking (blocking alert() froze the app elsewhere); just redirect.
+        console.warn('PrintSigns: no saleId provided, redirecting to MySales');
         navigate(createPageUrl('MySales'));
         return;
       }
@@ -56,7 +57,7 @@ export default function PrintSigns() {
       setBrandIdentity(identity);
 
       if (saleData.length === 0) {
-        alert('Sale not found');
+        console.warn('PrintSigns: sale not found, redirecting to MySales');
         navigate(createPageUrl('MySales'));
         return;
       }
@@ -64,7 +65,9 @@ export default function PrintSigns() {
       const s = saleData[0];
       setSale(s);
       setItems(itemsData);
-      await generateQRCodes(s, itemsData);
+      // Fire-and-forget: the page renders immediately; QR generation streams in
+      // with yields so the UI never blocks on a large image set.
+      generateQRCodes(s, itemsData);
     } catch (error) {
       console.error('Error loading sale:', error);
     } finally {
@@ -87,6 +90,8 @@ export default function PrintSigns() {
     setGeneratingQR(true);
     const results = [];
     for (const img of images) {
+      // Yield to the event loop between QRs so a large image set never blocks the page.
+      await new Promise(r => setTimeout(r, 0));
       const imageObj = typeof img === 'string' ? { url: img, name: '' } : img;
       const matchedItemId = imageToItemId[imageObj.url];
       const targetUrl = matchedItemId
