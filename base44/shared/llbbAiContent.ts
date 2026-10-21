@@ -193,25 +193,10 @@ export const OUTPUT_SCHEMA = {
   }
 };
 
-// ── CLAIMS SAFETY (Parts 15/16/19/45/46) ─────────────────────────────────────
-const CREDENTIAL_WORDS = ['licensed', 'bonded', 'insured', 'certified', 'certification', 'appraiser', 'realtor', 'broker'];
-const YEARS_RE = /\b\d+\s*\+?\s*(?:years|yrs)\b/i;
-const SUPERLATIVE_RE = /\b(#1|number one|numéro one|best in|the best|largest|biggest|guaranteed|guarantee|award[- ]winning|top[- ]rated)\b/i;
-const MONEY_RE = /\$\s?\d|\b\d+\s*(?:percent|%|commission)\b/i;
-const VOLUME_RE = /\b\d{2,}\s*\+?\s*(?:sales|estates|families|clients|homes|items|buyer)\b/i;
-
-function textViolations(text, input) {
-  const t = String(text || '');
-  const verified = (input.verified_credentials || []).map(v => String(v).toLowerCase());
-  for (const w of CREDENTIAL_WORDS) {
-    if (new RegExp('\\b' + w + '\\b', 'i').test(t) && !verified.some(v => v.includes(w))) return `credential claim "${w}"`;
-  }
-  if (YEARS_RE.test(t) && !input.business.years_experience) return 'years-in-business claim';
-  if (SUPERLATIVE_RE.test(t)) return 'unsupported superlative/guarantee';
-  if (MONEY_RE.test(t)) return 'price/fee claim';
-  if (VOLUME_RE.test(t)) return 'sales-volume claim';
-  return null;
-}
+// ── CLAIMS SAFETY (Parts 15/16/19/45/46 + Chapter 7 P1) ───────────────────────
+// Canonical rules live in the shared brand-truth guardrail — ONE validation
+// layer across every EstateSalen marketing AI surface. Never fork the rules.
+import { textViolations } from "./brandTruthGuard.ts";
 
 // ── OUTPUT VALIDATION (Part 18) — schema + claims. Violating fields fall back
 // to content-library or neutral deterministic defaults; nothing corrupt persists.

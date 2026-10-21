@@ -145,7 +145,16 @@ Deno.serve(async (req) => {
 
       // Limit to available quota
       const recipientsToSend = recipients.slice(0, available);
-      const senderName = campaign.sender_name || user.company_name || user.full_name || 'EstateSalen';
+      // Chapter 7 P1 — canonical business identity: Company first, documented
+      // legacy User fields only as fallback when canonical data is absent.
+      let canonicalCompanyName = '';
+      if (user.company_id) {
+        try {
+          const comps = await base44.asServiceRole.entities.Company.filter({ id: user.company_id });
+          if (comps.length) canonicalCompanyName = comps[0].display_name || comps[0].legal_name || '';
+        } catch (e) { /* fall back to legacy user fields below */ }
+      }
+      const senderName = campaign.sender_name || canonicalCompanyName || user.company_name || user.full_name || 'EstateSalen';
       const replyTo = campaign.reply_to_email || '';
 
       // Send emails in concurrent batches via CustomerIO transactional email

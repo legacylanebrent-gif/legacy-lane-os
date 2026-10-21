@@ -5,8 +5,9 @@ Deno.serve(async (req) => {
     const base44 = createClientFromRequest(req);
     const user = await base44.auth.me();
 
-    if (!user) {
-      return Response.json({ error: 'Unauthorized' }, { status: 401 });
+    // Chapter 7 P0 (B2-01) — destructive maintenance endpoints are admin-only.
+    if (!user || user.role !== 'admin') {
+      return Response.json({ error: user ? 'Forbidden' : 'Unauthorized' }, { status: user ? 403 : 401 });
     }
 
     console.log('Fetching AZ operators...');

@@ -1,0 +1,141 @@
+{
+  "name": "ClientTestimonial",
+  "type": "object",
+  "description": "Chapter 7 P1 \u2014 ONE authentic client testimonial/proof record. Deliberately NOT a marketplace Review (item reviews) and NOT a company star rating. NEVER created by AI: AI may help format or shorten an operator-provided text, but may not invent language, change meaning, or attribute a quote to someone who did not provide it. Only testimonials with permission_to_publish AND status APPROVED/PUBLISHED may be projected to public surfaces (e.g. the website testimonials section) \u2014 and projection is always an explicit operator action, never automatic. Proof comes from completed work, not unsupported claims.",
+  "properties": {
+    "operator_id": {
+      "type": "string",
+      "description": "Estate Sale Company Owner user ID (RLS anchor)."
+    },
+    "company_id": {
+      "type": "string",
+      "description": "Canonical Company when known (additive projection)."
+    },
+    "sale_id": {
+      "type": "string",
+      "description": "OPTIONAL but strongly preferred \u2014 the completed EstateSale this testimonial is about. Real work is the source of proof."
+    },
+    "contact_id": {
+      "type": "string",
+      "description": "OPTIONAL canonical Contact link for the client who provided it. Does not expand the Contact's own record access."
+    },
+    "client_display_name": {
+      "type": "string",
+      "description": "Internal name of the client who provided the testimonial."
+    },
+    "testimonial_text": {
+      "type": "string",
+      "description": "What the client actually said, as recorded by the operator. The operator's record of the client's words \u2014 not marketing copy."
+    },
+    "source": {
+      "type": "string",
+      "enum": [
+        "PHONE",
+        "EMAIL",
+        "TEXT",
+        "WRITTEN",
+        "IN_PERSON",
+        "CARD",
+        "OTHER"
+      ],
+      "description": "How the testimonial was received."
+    },
+    "received_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the client provided it."
+    },
+    "permission_to_publish": {
+      "type": "boolean",
+      "default": false,
+      "description": "The client explicitly agreed this may be shown publicly. NEVER inferred from the testimonial being given. Revoking flips the record back to private regardless of status."
+    },
+    "permission_recorded_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When publish permission was recorded."
+    },
+    "public_display_name": {
+      "type": "string",
+      "description": "Name shown publicly (defaults to a privacy-safe form, e.g. first name + last initial, when the operator publishes)."
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "CAPTURED",
+        "APPROVED",
+        "PUBLISHED",
+        "ARCHIVED"
+      ],
+      "default": "CAPTURED",
+      "description": "CAPTURED = private record. APPROVED = operator approved it for use. PUBLISHED = projected to a public surface (requires permission_to_publish). ARCHIVED = kept for truth, no longer used."
+    },
+    "notes": {
+      "type": "string",
+      "description": "Operator context (e.g. 'Thank-you card after closeout')."
+    }
+  },
+  "required": [
+    "operator_id",
+    "testimonial_text"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.operator_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "$or": [
+        {
+          "$and": [
+            {
+              "user_condition": {
+                "role": "user"
+              }
+            },
+            {
+              "data.operator_id": "{{user.id}}"
+            }
+          ]
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.operator_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.operator_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

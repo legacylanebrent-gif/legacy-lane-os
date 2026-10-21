@@ -211,7 +211,7 @@ export default function EstateSaleCompanyDirectory() {
           </p>
         )}
         <div className="space-y-1">
-          {op.phone && (
+          {op.phone && isEstateSalenSubscriber(op) && (
             <a href={`tel:${stripHtml(op.phone)}`} className="flex items-center gap-1.5 text-xs text-slate-600 hover:text-cyan-600 transition-colors">
               <Phone className="w-3 h-3" /> {formatPhone(stripHtml(op.phone))}
             </a>
@@ -290,7 +290,7 @@ export default function EstateSaleCompanyDirectory() {
                             <div className="text-sm">
                               <p className="font-bold text-slate-900">{stripHtml(op.company_name)}</p>
                               <p className="text-slate-500">{stripHtml(op.geocoded_city || op.city)}, {stripHtml(op.state)} {stripHtml(op.geocoded_county || op.county || '')}</p>
-                              {op.phone && <p className="text-cyan-700">{formatPhone(op.phone)}</p>}
+                              {op.phone && isEstateSalenSubscriber(op) && <p className="text-cyan-700">{formatPhone(op.phone)}</p>}
                             </div>
                           </Popup>
                         </Marker>

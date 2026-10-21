@@ -5,6 +5,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Badge } from '@/components/ui/badge';
 import { Sparkles, Loader2, Copy, CheckCircle2, Zap, Save, ImageIcon, ChevronRight, Check } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
+import { sanitizeMarketingText } from '@/lib/brandTruth';
 import SalePostImageCompositor from './SalePostImageCompositor';
 
 const POST_NAMES = ['Early Line / VIP Post', "What's Inside? Curiosity Post", 'Final Countdown Post'];
@@ -168,7 +169,13 @@ Suggest best posting times, ad spend recommendations, and one quick tip for the 
         model: actualModel,
         ...(selectedImages.length > 0 ? { file_urls: selectedImages.slice(0, 5) } : {}),
       });
-      setResult(res);
+      // Chapter 7 P1 — brand-truth guardrail strips unsupported claims from
+      // generated marketing content before it is shown or saved.
+      const sanitized = sanitizeMarketingText(typeof res === 'string' ? res : JSON.stringify(res));
+      if (sanitized.removed.length > 0) {
+        console.warn('[AISaleMarketingPackage] Unsupported claims removed:', sanitized.removed);
+      }
+      setResult(sanitized.text);
       setStep('result');
     } catch (err) {
       setResult('Error generating marketing package: ' + err.message);

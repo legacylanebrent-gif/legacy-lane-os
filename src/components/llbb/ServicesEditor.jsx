@@ -22,6 +22,35 @@ export default function ServicesEditor({ websiteTenantId, settings, onSaved }) {
   const set = (k, v) => setSv(s => ({ ...s, [k]: v }));
 
   const existingKeys = new Set((sv.items || []).map(it => it.library_key).filter(Boolean));
+
+  // Chapter 7 P1 — the canonical OperatorService catalog feeds the website:
+  // the operator defines a service once; the website can explain it. Existing
+  // website content is never overwritten — only catalog services not yet
+  // present are added.
+  const importFromCatalog = async () => {
+    try {
+      const user = await base44.auth.me();
+      const catalog = await base44.entities.OperatorService.filter({ operator_id: user.id, enabled: true });
+      const existingIds = new Set((sv.items || []).map(it => it.catalog_service_id).filter(Boolean));
+      const additions = (catalog || []).filter(s => !existingIds.has(s.id)).map(s => ({
+        catalog_service_id: s.id,
+        library_key: `catalog_${s.id}`,
+        title: s.display_name,
+        description: s.public_description || s.description || '',
+        enabled: true,
+        show_on_homepage: true,
+        dedicated_page: false,
+        seo_slug: slugify(s.display_name),
+      }));
+      if (additions.length) {
+        set('items', [...(sv.items || []), ...additions]);
+      } else {
+        alert('All enabled catalog services are already on the website.');
+      }
+    } catch (e) {
+      alert('Could not load your service catalog: ' + e.message);
+    }
+  };
   const addStarter = (st) => set('items', [...(sv.items || []), { ...st, library_key: st.key, enabled: true, show_on_homepage: true, dedicated_page: false, seo_slug: slugify(st.title), description: st.description || '' }]);
   const addCustom = () => set('items', [...(sv.items || []), { title: '', description: '', enabled: true, show_on_homepage: true, dedicated_page: false, seo_slug: '' }]);
 
@@ -66,6 +95,9 @@ export default function ServicesEditor({ websiteTenantId, settings, onSaved }) {
       </SectionCard>
 
       <SectionCard title="Your Services" description="Reorder, edit, enable/disable, and configure dedicated pages. Disabled services never render.">
+        <div className="flex justify-end mb-2">
+          <Button variant="outline" size="sm" onClick={importFromCatalog}><Plus className="w-3.5 h-3.5" /> Import from my Service Catalog</Button>
+        </div>
         {hasDuplicates && <p className="text-sm text-red-600">Two services share the same page link — page links must be unique.</p>}
         <ItemListEditor items={sv.items} onChange={(items) => set('items', items)}
           fields={[

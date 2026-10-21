@@ -9,6 +9,7 @@ import jsPDF from 'jspdf';
 import AuthorityPanel from '@/components/saleops/AuthorityPanel';
 import DecisionsPanel from '@/components/saleops/DecisionsPanel';
 import MerchandiseDecisionPanel from '@/components/saleops/MerchandiseDecisionPanel';
+import SaleScopeSection from '@/components/saleops/SaleScopeSection';
 import { asArray, scopeLabel, fmtDateTime } from '@/components/saleops/saleDecisionModel';
 
 // Chapter 1 P1 — Client Authority & Decisions surface: who is authorized on this
@@ -150,6 +151,12 @@ export default function SaleClientDecisions() {
           {reviewOpen.length > 0 && <Badge className="ml-1.5 bg-amber-100 text-amber-700">{reviewOpen.length}</Badge>}
         </Button>
       </div>
+
+      {/* Chapter 7 P1 — canonical agreed scope: what this client hired us to do.
+          Always visible above the tabs: the scope is the context for every
+          client decision below. Mid-sale changes stay in the Decisions tab;
+          this record preserves the original agreed scope with full history. */}
+      <SaleScopeSection saleId={sale.id} />
 
       {tab === 'makers' && (
         <AuthorityPanel sale={sale} user={user} authorities={authorities} onChanged={refresh} />

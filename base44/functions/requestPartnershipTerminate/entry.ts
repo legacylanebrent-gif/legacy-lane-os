@@ -26,6 +26,12 @@ Deno.serve(async (req) => {
 
     const match = matches[0];
 
+    // Chapter 7 P0 (B5-03) — ownership check: only the operator or agent of
+    // this partnership (or a platform admin) may act on it.
+    if (match.operator_id !== user.id && match.agent_id !== user.id && user.role !== 'admin') {
+      return Response.json({ error: 'Forbidden: you are not a party to this partnership' }, { status: 403 });
+    }
+
     // Check if within 14 days of creation
     const createdDate = new Date(match.created_date);
     const now = new Date();

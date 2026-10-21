@@ -10,6 +10,12 @@ import ClaimCompanyModal from '@/components/operators/ClaimCompanyModal';
 import { ReferByEmailModal, logReferral } from '@/components/operators/ReferOperatorModal';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
+
+// Chapter 7 P0 — scraped-directory PII rule: contact phone is shown ONLY for
+// companies verified-claimed by (or subscribed via) a registered EstateSalen
+// user. Unclaimed scraped records never expose contact PII publicly.
+const isContactAllowed = (op) =>
+  !!op.claimed_by_user_id || op.subscription_status === 'active' || op.subscription_status === 'free_trial';
 import L from 'leaflet';
 import { Search, MapPin, Building2, Phone, Globe, Star, ArrowLeft, Loader2 } from 'lucide-react';
 import { US_STATES } from '@/components/data/USStates';
@@ -293,7 +299,7 @@ export default function StateOperators() {
           ) : null}
         </p>
         <div className="space-y-1">
-          {op.phone && (
+          {op.phone && isContactAllowed(op) && (
             <a href={`tel:${stripHtml(op.phone)}`} className="flex items-center gap-1.5 text-xs text-slate-600 hover:text-cyan-600 transition-colors">
               <Phone className="w-3 h-3" /> {formatPhone(stripHtml(op.phone))}
             </a>
@@ -386,7 +392,7 @@ export default function StateOperators() {
                           <div className="text-sm">
                             <p className="font-bold text-slate-900">{stripHtml(op.company_name)}</p>
                             <p className="text-slate-500">{stripHtml(op.geocoded_city || op.city)}</p>
-                            {op.phone && <p className="text-cyan-700">{formatPhone(op.phone)}</p>}
+                            {op.phone && isContactAllowed(op) && <p className="text-cyan-700">{formatPhone(op.phone)}</p>}
                           </div>
                         </Popup>
                       </Marker>

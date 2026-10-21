@@ -1,0 +1,213 @@
+{
+  "name": "SaleScope",
+  "type": "object",
+  "description": "Chapter 7 P1 \u2014 the ONE canonical AGREED SCOPE for a sale: WHAT THIS CLIENT HIRED US TO DO. Structured operational truth that supports (and never replaces) the signed agreement/contract. Distinctions enforced by design: OperatorService = what the company generally offers; SaleScope (this entity) = what this particular client hired the company to perform; SaleTask = work required to deliver the scope; SaleClientDecision = client instruction/change/authorization; BusinessDocument/contract = legal evidence of the agreement. Mid-sale scope changes are authorized through SaleClientDecision \u2014 never by silently rewriting this record: each save appends the prior version to history and earlier versions are never overwritten. The website shows the operator's general services and must never automatically claim sale-specific scope.",
+  "properties": {
+    "sale_id": {
+      "type": "string",
+      "description": "EstateSale this agreed scope belongs to. One active scope per sale (status ACTIVE)."
+    },
+    "operator_id": {
+      "type": "string",
+      "description": "EstateSale.operator_id projection \u2014 sale owner (RLS anchor). Derived from the sale at creation."
+    },
+    "company_id": {
+      "type": "string",
+      "description": "EstateSale.company_id projection when present."
+    },
+    "sale_team_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "READ-SCOPE PROJECTION of EstateSale.sale_team for RLS. The sale remains the source of truth."
+    },
+    "scope_items": {
+      "type": "array",
+      "default": [],
+      "description": "Selected services with per-sale inclusion truth. Catalog names/values are SNAPSHOTS at selection \u2014 the catalog may evolve without rewriting this history.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "operator_service_id": {
+            "type": "string",
+            "description": "Canonical OperatorService link when the selected service comes from the catalog."
+          },
+          "service_type": {
+            "type": "string",
+            "description": "Snapshot of OperatorService.service_type at selection (free text for a one-off service)."
+          },
+          "display_name": {
+            "type": "string",
+            "description": "Snapshot of the service display name at selection."
+          },
+          "included": {
+            "type": "boolean",
+            "default": false,
+            "description": "Whether this service is INCLUDED in what this client hired us to do. Explicitly false = a recorded boundary (not offered for this engagement)."
+          },
+          "charge_policy": {
+            "type": "string",
+            "enum": [
+              "included",
+              "additional_when_authorized"
+            ],
+            "description": "included = part of the agreed engagement. additional_when_authorized = only performed and charged when a client decision explicitly authorizes it (SaleClientDecision financial)."
+          },
+          "notes": {
+            "type": "string",
+            "description": "Sale-specific boundary or commitment notes for this service."
+          }
+        }
+      }
+    },
+    "included_work": {
+      "type": "string",
+      "description": "Included work and boundaries in the operator's words ('What We Do for this client')."
+    },
+    "excluded_work": {
+      "type": "string",
+      "description": "Explicit exclusions ('What We Do NOT Do for this client'). Honest boundaries prevent estimate-creep into guarantees."
+    },
+    "special_commitments": {
+      "type": "string",
+      "description": "Specific promises made to this client (dates, deliverables, special arrangements)."
+    },
+    "client_expectations": {
+      "type": "string",
+      "description": "Important client expectations/understandings recorded honestly, including uncertainty. An estimate must not quietly become a guarantee."
+    },
+    "effective_date": {
+      "type": "string",
+      "format": "date",
+      "description": "When this scope takes effect."
+    },
+    "agreement_reference": {
+      "type": "string",
+      "description": "Optional reference to the agreement/contract that evidences this scope (BusinessDocument id or contract reference). The structured record supports, never replaces, executed contract language."
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "ACTIVE",
+        "ARCHIVED"
+      ],
+      "default": "ACTIVE",
+      "description": "One ACTIVE scope per sale. ARCHIVED keeps history visible without deleting truth."
+    },
+    "version": {
+      "type": "integer",
+      "default": 1,
+      "description": "Increments on each substantive save. Acknowledgment of what the client hired us to do at a point in time."
+    },
+    "history": {
+      "type": "array",
+      "default": [],
+      "description": "Append-only prior versions. The original agreed scope is never silently rewritten \u2014 each change is preserved as a snapshot with its reason.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "version": {
+            "type": "integer",
+            "description": "The version this snapshot represents."
+          },
+          "snapshot": {
+            "type": "object",
+            "description": "Prior scope_items/included_work/excluded_work/special_commitments/client_expectations as they were."
+          },
+          "changed_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "changed_by": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string",
+            "description": "Why the scope record changed. Client-authorized work changes belong to SaleClientDecision \u2014 this records only corrections/clarifications to the written scope record itself."
+          }
+        }
+      }
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "sale_id"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "data.operator_id": "{{user.id}}"
+        },
+        {
+          "data.sale_team_ids": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "$or": [
+        {
+          "data.operator_id": "{{user.id}}"
+        },
+        {
+          "data.sale_team_ids": {
+            "$in": [
+              "{{user.id}}"
+            ]
+          }
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "data.operator_id": "{{user.id}}"
+        },
+        {
+          "data.sale_team_ids": {
+            "$in": [
+              "{{user.id}}"
+            ]
+          }
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.operator_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

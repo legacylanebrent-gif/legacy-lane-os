@@ -20,6 +20,13 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Sale not found' }, { status: 404 });
     }
 
+    // Chapter 7 P0 (B2-01) — destructive maintenance requires authorization:
+    // a platform admin or the sale's own operator. Fails closed otherwise.
+    const user = await base44.auth.me();
+    if (!user || (user.role !== 'admin' && sale.operator_id !== user.id)) {
+      return Response.json({ error: user ? 'Forbidden' : 'Unauthorized' }, { status: user ? 403 : 401 });
+    }
+
     const images = sale.images || [];
     let cleaned = 0;
     const cleanedImages = images.map((img) => {

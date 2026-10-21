@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { base44 } from '@/api/base44Client';
+import { sanitizeMarketingText } from '@/lib/brandTruth';
 import {
   Loader2, Sparkles, Mail, Calendar, CheckCircle2, ChevronRight,
   Edit3, Send, Clock
@@ -73,7 +74,13 @@ Make each email feel urgent, warm, and local. Use real details. Keep bodies unde
 
     try {
       const res = await base44.integrations.Core.InvokeLLM({ prompt, model: 'claude_sonnet_4_6' });
-      const parsed = parseEmails(typeof res === 'string' ? res : JSON.stringify(res));
+      // Chapter 7 P1 — brand-truth guardrail: unsupported claims are stripped
+      // from marketing copy before it is shown or saved.
+      const sanitized = sanitizeMarketingText(typeof res === 'string' ? res : JSON.stringify(res));
+      if (sanitized.removed.length > 0) {
+        console.warn('[EmailCampaign] Unsupported claims removed:', sanitized.removed);
+      }
+      const parsed = parseEmails(sanitized.text);
       setGeneratedEmails(parsed);
       setStep('review');
     } catch (err) {

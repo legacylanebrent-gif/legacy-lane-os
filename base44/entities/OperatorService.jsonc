@@ -1,0 +1,129 @@
+{
+  "name": "OperatorService",
+  "type": "object",
+  "description": "Chapter 7 P1 \u2014 the ONE canonical operator-level SERVICE CATALOG: what this company generally offers. Deliberately distinct from SaleScope (what a specific client hired us to do), from SaleTask (work required to deliver a scope), and from website service content (a presentation that CONSUMES this catalog). The website explains it, the sale selects from it, agreements reference it, and tasks can eventually flow from it. Service types are a small practical taxonomy \u2014 this is not a national service database.",
+  "properties": {
+    "operator_id": {
+      "type": "string",
+      "description": "Estate Sale Company Owner user ID (RLS anchor)."
+    },
+    "company_id": {
+      "type": "string",
+      "description": "Canonical Company when known (additive projection)."
+    },
+    "service_type": {
+      "type": "string",
+      "enum": [
+        "estate_sale",
+        "downsizing_sale",
+        "moving_sale",
+        "living_estate_sale",
+        "cleanout_coordination",
+        "buyout",
+        "donation_coordination",
+        "specialty"
+      ],
+      "description": "Broad service family. Deliberately small taxonomy; 'specialty' covers anything else the operator actually offers."
+    },
+    "display_name": {
+      "type": "string",
+      "description": "Operator-facing name of the service (also the default public name)."
+    },
+    "description": {
+      "type": "string",
+      "description": "Internal description of what this service is."
+    },
+    "public_description": {
+      "type": "string",
+      "description": "Marketing-safe public explanation used by the website and other public surfaces. Only operator-approved wording; AI assistance on this field must follow the shared brand-truth claims guardrail (marketing may interpret verified facts, never invent them)."
+    },
+    "enabled": {
+      "type": "boolean",
+      "default": true,
+      "description": "Only enabled services are offered: selectable for sale scopes and shown on the website."
+    },
+    "included_by_default": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether this service is typically part of the standard package. ADVISORY only \u2014 the sale-level SaleScope decides what a specific client hired us to do."
+    },
+    "additional_charge_possible": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether this service may carry an additional charge when a client explicitly authorizes it (SaleClientDecision)."
+    },
+    "scope_notes": {
+      "type": "string",
+      "description": "Typical boundaries for this service: what it usually includes and excludes. Copied into a sale scope as a STARTING POINT only \u2014 never silently treated as what a client agreed to."
+    },
+    "sort_order": {
+      "type": "integer",
+      "default": 0,
+      "description": "Display order."
+    }
+  },
+  "required": [
+    "operator_id",
+    "service_type",
+    "display_name"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.operator_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "$or": [
+        {
+          "$and": [
+            {
+              "user_condition": {
+                "role": "user"
+              }
+            },
+            {
+              "data.operator_id": "{{user.id}}"
+            }
+          ]
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.operator_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.operator_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

@@ -1,5 +1,6 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
 import OpenAI from 'npm:openai';
+import { sanitizeMarketingText } from "../../shared/brandTruthGuard.ts";
 
 const openai = new OpenAI({ apiKey: Deno.env.get('OPENAI_API_KEY') });
 
@@ -324,8 +325,19 @@ ${saleContextBlock}`;
       temperature: 0.75,
     });
 
-    const promoReply = promoCompletion.choices[0].message.content;
+    let promoReply = promoCompletion.choices[0].message.content;
     const promoUsage = promoCompletion.usage;
+
+    // ── Chapter 7 P1 brand-truth guardrail: marketing may interpret verified
+    // facts, never invent them. Unsupported claims are stripped pre-delivery.
+    const promoSanitized = sanitizeMarketingText(promoReply, {
+      business: { years_experience: user.years_experience ?? null },
+      verified_credentials: user.verified_credentials || [],
+    });
+    if (promoSanitized.removed.length > 0) {
+      console.log('[aiCoach] Promo package — unsupported claims removed: ' + promoSanitized.removed.join(' | '));
+      promoReply = promoSanitized.text;
+    }
 
     await recordUsage(base44, user.id, creditAccount, {
       aiMode: 'coach',
@@ -957,8 +969,21 @@ Remember: You are NOT a generic chatbot. You are their dedicated 10-person exper
     temperature: 0.7,
   });
 
-  const reply = completion.choices[0].message.content;
+  let reply = completion.choices[0].message.content;
   const usage = completion.usage;
+
+  // ── Chapter 7 P1 brand-truth guardrail on marketing/content AI modes ──
+  const MARKETING_AI_MODES = ['sale_promotion_package', 'social_media_post', 'email_campaign', 'sms_campaign', 'blog_post', 'image_prompt', 'video_script'];
+  if (MARKETING_AI_MODES.includes(ai_mode)) {
+    const sanitized = sanitizeMarketingText(reply, {
+      business: { years_experience: user.years_experience ?? null },
+      verified_credentials: user.verified_credentials || [],
+    });
+    if (sanitized.removed.length > 0) {
+      console.log('[aiCoach] ' + ai_mode + ' — unsupported claims removed: ' + sanitized.removed.join(' | '));
+      reply = sanitized.text;
+    }
+  }
 
   // ── Record usage ──
   await recordUsage(base44, user.id, creditAccount, {

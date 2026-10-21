@@ -86,6 +86,23 @@ export default function SignTheListButton({ saleId, saleTitle, saleDates, user, 
     setMySignUps(existing);
   };
 
+  // Chapter 7 P0 — marketing consent follows the channel and is NEVER inferred
+  // from signing the list. This optional, never-pre-checked checkbox records
+  // the buyer's EXPLICIT opt-in into the canonical preference records only.
+  const [notifyOptIn, setNotifyOptIn] = useState(false);
+  const recordExplicitConsent = async (u) => {
+    try {
+      const prefs = await base44.entities.EmailPreferences.filter({ user_id: u.id });
+      if (prefs.length) await base44.entities.EmailPreferences.update(prefs[0].id, { local_sale_notifications: true });
+      else await base44.entities.EmailPreferences.create({ user_id: u.id, user_email: u.email, local_sale_notifications: true });
+    } catch (e) { /* non-fatal */ }
+    try {
+      const np = await base44.entities.NotificationPreference.filter({ user_id: u.id });
+      if (np.length) await base44.entities.NotificationPreference.update(np[0].id, { sale_alert_enabled: true, sale_alert_email: true });
+      else await base44.entities.NotificationPreference.create({ user_id: u.id, sale_alert_enabled: true, sale_alert_email: true });
+    } catch (e) { /* non-fatal */ }
+  };
+
   const handleSignList = async (date) => {
     if (!user) {
       base44.auth.redirectToLogin(window.location.href);
@@ -114,6 +131,7 @@ export default function SignTheListButton({ saleId, saleTitle, saleDates, user, 
         signed_at: new Date().toISOString(),
       });
 
+      if (notifyOptIn) await recordExplicitConsent(user);
       await refreshPositions();
       if (onSuccess) onSuccess();
     } catch (error) {
@@ -188,6 +206,7 @@ export default function SignTheListButton({ saleId, saleTitle, saleDates, user, 
         <SignedDayBadge date={day.date} saleId={saleId} userEmail={user.email} />
       </div>
     ) : (
+      <>
       <Button
         onClick={() => handleSignList(day.date)}
         disabled={signing}
@@ -196,6 +215,11 @@ export default function SignTheListButton({ saleId, saleTitle, saleDates, user, 
         {signing ? <Loader2 className="w-4 h-4 animate-spin" /> : <ClipboardList className="w-4 h-4" />}
         {signing ? 'Signing...' : `Sign the List — ${dateLabel}`}
       </Button>
+      <label className="flex items-center gap-2 text-xs text-slate-500 justify-center">
+        <input type="checkbox" checked={notifyOptIn} onChange={e => setNotifyOptIn(e.target.checked)} />
+        Keep me posted about sales like this (optional)
+      </label>
+      </>
     );
   }
 
@@ -239,6 +263,12 @@ export default function SignTheListButton({ saleId, saleTitle, saleDates, user, 
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
+      )}
+      {unsignedDays.length > 0 && (
+        <label className="flex items-center gap-2 text-xs text-slate-500 justify-center">
+          <input type="checkbox" checked={notifyOptIn} onChange={e => setNotifyOptIn(e.target.checked)} />
+          Keep me posted about sales like this (optional)
+        </label>
       )}
     </div>
   );

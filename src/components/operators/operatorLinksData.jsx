@@ -62,6 +62,8 @@ export const OPERATOR_LINK_SECTIONS = [
       { page: 'MyBusinessExpenses', label: 'Business Expenses', icon: FileText },
       { page: 'BusinessDocuments', label: 'Business Documents', icon: FileCheck2 },
       { page: 'TeamMembers', label: 'Team Members', icon: UserCog },
+      { page: 'OperatorServices', label: 'Service Catalog', icon: Package },
+      { page: 'ClientTestimonials', label: 'Client Testimonials', icon: FileText },
       { page: 'ComplianceQuestions', label: 'Compliance Questions', icon: ShieldQuestion },
       { page: 'AIAssistant', label: 'AI Assistant', icon: Sparkles },
     ],

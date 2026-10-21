@@ -11,12 +11,14 @@ import { Input } from '@/components/ui/input';
 import QRCode from 'qrcode';
 import { SIGN_TEMPLATES, SIGN_CATEGORIES } from '@/components/signs/signTemplatesData';
 import SignTemplateCard from '@/components/signs/SignTemplateCard';
+import { loadBusinessIdentity } from '@/lib/businessIdentity';
 
 export default function PrintSigns() {
   const navigate = useNavigate();
   const [sale, setSale] = useState(null);
   const [loading, setLoading] = useState(true);
   const [currentUser, setCurrentUser] = useState(null);
+  const [brandIdentity, setBrandIdentity] = useState(null);
   const [qrImages, setQrImages] = useState([]); // { image, qrDataUrl, selected }
   const [generatingQR, setGeneratingQR] = useState(false);
   const [selectedAll, setSelectedAll] = useState(false);
@@ -45,6 +47,10 @@ export default function PrintSigns() {
       ]);
 
       setCurrentUser(userData);
+      // Chapter 7 P1 — canonical business identity (Company first, documented
+      // legacy User fields as fallback).
+      const { identity } = await loadBusinessIdentity(base44, userData);
+      setBrandIdentity(identity);
 
       if (saleData.length === 0) {
         alert('Sale not found');
@@ -360,7 +366,9 @@ export default function PrintSigns() {
             });
 
             const getOperatorLogo = () => {
-              return currentUser?.logo_dark || currentUser?.logo_light || currentUser?.company_logo_url || currentUser?.company_logo || '';
+              // Chapter 7 P1 — canonical Company logo first; legacy User logo
+              // fields are the documented fallback.
+              return brandIdentity?.logoUrl || currentUser?.logo_dark || currentUser?.logo_light || currentUser?.company_logo_url || currentUser?.company_logo || '';
             };
 
             const generateSignHtml = (template, forView = false) => {
