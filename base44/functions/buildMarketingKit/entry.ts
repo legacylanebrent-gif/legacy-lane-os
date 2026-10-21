@@ -387,11 +387,11 @@ async function saveFeaturedItems(service, user, body) {
     .map(id => String(id)).filter(id => saleItemIds.has(id)).slice(0, 12);
   const existing = await findKit(service, loaded.sale.id);
   const kit = existing
-    ? await service.entities.MarketingKit.update(existing.id, { featured_item_ids: picks })
+    ? await service.entities.MarketingKit.update(existing.id, { featured_item_ids: picks, component_status: { ...(existing.component_status || {}), featured: picks.length ? 'draft' : 'not_created' } })
     : await service.entities.MarketingKit.create({
       sale_id: loaded.sale.id, operator_id: loaded.sale.operator_id, company_id: loaded.sale.company_id || null,
       sale_team_ids: loaded.sale.sale_team || [], featured_item_ids: picks,
-      component_status: {}, qr_url: `${PUBLIC_APP_URL}/EstateSaleDetail?id=${loaded.sale.id}`
+      component_status: { featured: picks.length ? 'draft' : 'not_created' }, qr_url: `${PUBLIC_APP_URL}/EstateSaleDetail?id=${loaded.sale.id}`
     });
   const featuredPicks = await featuredItemStatuses(service, kit, items);
   return Response.json({ ok: true, kit, featured: featuredPicks, availability_warnings: availabilityWarnings(featuredPicks) });

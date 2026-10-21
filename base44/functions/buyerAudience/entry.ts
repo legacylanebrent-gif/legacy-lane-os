@@ -66,7 +66,7 @@ async function operatorRecords(service, user) {
     service.entities.VIPInvite.filter({ operator_id: user.id }, { limit: 1000 }).then(pageOf),
     service.entities.OperatorFollowerSubscription.filter({ operator_id: user.id }, { limit: 1000 }).then(pageOf),
     service.entities.Purchase.filter({ seller_id: user.id }, { limit: 1000 }).then(pageOf),
-    service.entities.Order.filter({ seller_id: user.id }, { limit: 1000 }).then(pageOf).catch(() => []),
+    service.entities.Order.filter({ 'items.seller_id': user.id }, { limit: 1000 }).then(pageOf).catch(() => []),
   ]);
   return { sales, saleById, signIns, offers, checkIns, vipInvites, follows, purchases, orders };
 }
@@ -145,7 +145,7 @@ function cardsFrom(records) {
     const c = cardFor(r.buyer_id, null, r.buyer_name);
     if (!c) continue;
     c.observed.purchases += 1;
-    if (r.item_id && c.observed.purchase_item_ids.length < 20) c.observed.purchase_item_ids.push(String(r.item_id));
+    for (const it of (r.items || [])) if (it.item_id && c.observed.purchase_item_ids.length < 20) c.observed.purchase_item_ids.push(String(it.item_id));
     touch(c, r.created_date);
   }
   for (const r of records.vipInvites) {
@@ -308,17 +308,17 @@ async function detail(service, user, body) {
   const extra = await applyConsentAndInterests(service, new Map([[card.key, card]]));
 
   const timeline = [];
-  const matchKey = (uid, email) => keyOf(uid, email) === card.key || (card.user_id && uid === card.user_id) || (!card.user_id && email && normEmail(email) === card.email);
+  const matchKey = (uid, email) => keyOf(uid, email) === card.key || (uid && card.user_id && uid === card.user_id) || (email && normEmail(email) === card.email);
   for (const r of records.signIns) if (matchKey(r.user_id, r.user_email))
     timeline.push({ type: 'early_sign_in', date: r.signed_at || r.created_date, detail: r.sale_title || null, sale_id: r.sale_id || null, source: r.discovery_source || 'unknown' });
   for (const r of records.checkIns) if (matchKey(r.created_by_id, null))
     timeline.push({ type: 'check_in', date: r.created_date, detail: (records.saleById.get(r.location_id) || {}).title || r.location_name || null, sale_id: records.saleById.has(r.location_id) ? r.location_id : null });
-  for (const r of records.offers) if (matchKey(r.user_id || r.created_by_id, r.email))
+  for (const r of records.offers) if (matchKey(r.user_id, r.email))
     timeline.push({ type: 'offer', date: r.created_date, detail: `${r.item_name || 'Item'}${r.offer_amount ? ` — $${r.offer_amount}` : ''}`, status: r.status || null, sale_id: r.sale_id || null });
   for (const r of records.purchases) if (matchKey(r.buyer_id, null))
     timeline.push({ type: 'purchase', date: r.created_date, detail: r.marketplace_item_id || null });
   for (const r of records.orders) if (matchKey(r.buyer_id, null, r.buyer_name))
-    timeline.push({ type: 'order', date: r.created_date, detail: r.item_title || null });
+    timeline.push({ type: 'order', date: r.created_date, detail: ((r.items || [])[0] || {}).item_title || null });
   for (const r of records.vipInvites) if (matchKey(r.user_id, r.email, r.name))
     timeline.push({ type: 'vip_invite', date: r.responded_date || r.invited_date || r.created_date, detail: r.status || 'pending' });
   for (const r of records.follows) if (matchKey(r.consumer_user_id, r.consumer_email, null))
