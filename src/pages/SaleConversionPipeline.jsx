@@ -672,6 +672,7 @@ Include 18-24 tasks covering every stage. Order them chronologically by due_date
       {selectedDeal && (
         <Dialog open={showDetail} onOpenChange={setShowDetail}>
           <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader className="sr-only"><DialogTitle>{selectedDeal.client_name}</DialogTitle></DialogHeader>
             <DealDetail
               deal={selectedDeal}
               setDeal={setSelectedDeal}
