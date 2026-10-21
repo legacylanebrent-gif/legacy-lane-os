@@ -8,9 +8,13 @@ import { Skeleton } from '@/components/ui/skeleton';
 import UnifiedItemForm from '@/components/inventory/UnifiedItemForm';
 import SoldDetailsDialog from '@/components/estate/SoldDetailsDialog';
 import OffersPanel from '@/components/estate/OffersPanel';
-import { Plus, Search, Edit2, Trash2, Package, Globe, AlertCircle, FileText, User, CreditCard, MapPin, PackageCheck, FlaskConical, Eye, Tag } from 'lucide-react';
+import { Plus, Search, Edit2, Trash2, Package, Globe, AlertCircle, FileText, User, CreditCard, MapPin, PackageCheck, FlaskConical, Eye, Tag, Lock, Printer, BookOpen } from 'lucide-react';
 import ResearchFlagDialog from '@/components/inventory/ResearchFlagDialog';
 import DisplayAttentionDialog from '@/components/inventory/DisplayAttentionDialog';
+import ItemCustodyDialog from '@/components/inventory/ItemCustodyDialog';
+import InventoryRulesDialog from '@/components/inventory/InventoryRulesDialog';
+import { formatItemNumber, locationDisplay, LEVEL_META, readinessCues } from '@/components/saleops/inventoryLevels';
+import { logItemChange } from '@/components/saleops/itemHistory';
 import { Link } from 'react-router-dom';
 import { toast } from 'sonner';
 
@@ -30,6 +34,8 @@ export default function SaleInventory() {
   const [researchDialogItem, setResearchDialogItem] = useState(null);
   const [attentionDialogItem, setAttentionDialogItem] = useState(null);
   const [soldDialogItem, setSoldDialogItem] = useState(null);
+  const [custodyItem, setCustodyItem] = useState(null);
+  const [rulesOpen, setRulesOpen] = useState(false);
 
   useEffect(() => {
     loadData();
@@ -66,7 +72,8 @@ export default function SaleInventory() {
       filtered = filtered.filter(
         item =>
           item.title?.toLowerCase().includes(q) ||
-          item.sku?.toLowerCase().includes(q),
+          item.sku?.toLowerCase().includes(q) ||
+          String(item.item_number || '').includes(q),
       );
     }
 
@@ -111,6 +118,7 @@ export default function SaleInventory() {
         }
       }
       await base44.entities.Item.update(item.id, updates);
+      await logItemChange('status', item, `${item.status} → ${newStatus}`, { saleId, operatorId: sale?.operator_id });
       toast.success(`Item marked as ${newStatus}`);
       loadData();
     } catch (error) {
@@ -134,12 +142,17 @@ export default function SaleInventory() {
         updates.buyer_contact = details.buyer_contact || '';
         updates.payment_method_used = details.payment_method_used || '';
         updates.payment_notes = details.payment_notes || '';
+        updates.authorized_pickup = details.authorized_pickup || '';
         if (details.pickup_instructions) {
           updates.pickup_location = { ...(item.pickup_location || {}), instructions: details.pickup_instructions };
         }
       }
       await base44.entities.Item.update(item.id, updates);
+      await logItemChange('status', item, `${item.status} → sold (manual${details?.payment_method_used ? `, ${details.payment_method_used}` : ', no payment record'})`, { saleId, operatorId: sale?.operator_id });
       toast.success(details ? 'Item marked as sold with details' : 'Item marked as sold');
+      if (!details?.payment_method_used) {
+        toast.warning('Manually marked sold — NO payment record. Record the payment at Checkout/POS.');
+      }
       setSoldDialogItem(null);
       loadData();
     } catch (error) {
