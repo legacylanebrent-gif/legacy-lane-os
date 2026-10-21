@@ -681,6 +681,7 @@ export default function MySales() {
                        const btnClass = "h-7 text-[11px] px-2 py-0 w-full justify-start";
                        return (
                          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-1.5 mt-2">
+                           {!isCompleted && (<Button variant="outline" size="sm" asChild className={`${btnClass} border-orange-600 bg-orange-600 text-white hover:bg-orange-700 font-semibold`}><Link to={'/PrepareSale?saleId=' + sale.id}><ClipboardList className="w-3 h-3 mr-1 flex-shrink-0" />Prepare This Sale</Link></Button>)}
                            {!isCompleted && (<Button variant="outline" size="sm" onClick={() => handleEdit(sale)} className={`${btnClass} border-blue-500 text-black hover:bg-blue-50`}><Edit className="w-3 h-3 mr-1 flex-shrink-0" />Edit Sale</Button>)}
 {!isCompleted && (<Button variant="outline" size="sm" asChild className={`${btnClass} border-teal-500 hover:bg-teal-50`}><Link to={createPageUrl('Worksheet') + '?saleId=' + sale.id}><DollarSign className="w-3 h-3 mr-1 flex-shrink-0" />Transactions</Link></Button>)}
                            {!isCompleted && (<Button variant="outline" size="sm" onClick={() => handleLiquidationStart(sale)} className={`${btnClass} border-orange-600 text-orange-700 hover:bg-orange-50`}><Rocket className="w-3 h-3 mr-1 flex-shrink-0" />Create Buyout</Button>)}

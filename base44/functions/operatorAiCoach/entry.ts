@@ -93,7 +93,46 @@ async function recordUsage(base44, operatorId, account, { aiMode, modelUsed, inp
 
 // ── System prompt builder ─────────────────────────────────────────────────────
 
-function buildSystemPrompt({ user, operator, activeSale, aiMemory, screenContext, aiMode, requestedOutputType }) {
+// Chapter 8 P2 — OPERATIONS context loader. Grounds the Operations Coach in
+// REAL records (equipment, load-out, research, controlled display, security/
+// checkout checklist review state, marketing readiness, tasks). The AI may
+// summarize/surface/suggest/prioritize/explain — it may never mark anything
+// done; human/system records stay authoritative.
+async function buildOperationsContext(base44, sale) {
+  const [
+    scopeRes, tasksRes, researchRes, attentionRes, assignRes, kitRes, mkRes, decisionsRes,
+  ] = await Promise.all([
+    base44.asServiceRole.entities.SaleScope.filter({ sale_id: sale.id, status: 'ACTIVE' }),
+    base44.asServiceRole.entities.SaleTask.filter({ sale_id: sale.id }),
+    base44.asServiceRole.entities.Item.filter({ estate_sale_id: sale.id, research_status: { $ne: 'CLEAR' } }),
+    base44.asServiceRole.entities.Item.filter({ estate_sale_id: sale.id, display_attention: { $ne: 'NONE' } }),
+    base44.asServiceRole.entities.SaleEquipmentAssignment.filter({ sale_id: sale.id }),
+    base44.asServiceRole.entities.SaleKitTemplate.filter({ operator_id: sale.operator_id, enabled: true }),
+    base44.asServiceRole.entities.MarketingKit.filter({ sale_id: sale.id }),
+    base44.asServiceRole.entities.SaleClientDecision.filter({ sale_id: sale.id, status: 'open' }),
+  ]);
+  const list = (r) => (Array.isArray(r) ? r : (r?.items || []));
+  const tasks = list(tasksRes);
+  const assignments = list(assignRes);
+  const lines = [];
+  lines.push(`Agreed scope: ${list(scopeRes)[0] ? 'ACTIVE scope record on file' : 'NO scope record — UNKNOWN, do not assume'}.`);
+  lines.push(`Open client decisions: ${list(decisionsRes).map(d => `"${d.subject}"`).join('; ') || 'none from records'}.`);
+  lines.push(`Research-flagged items: ${list(researchRes).map(i => `"${i.title}" (${i.research_status})`).join('; ') || 'none from records'}.`);
+  lines.push(`Display-attention items: ${list(attentionRes).map(i => `"${i.title}" (${i.display_attention})`).join('; ') || 'none from records'}.`);
+  lines.push(`Equipment assignments: ${assignments.length}; packed ${assignments.filter(a => a.packed).length}; unpacked: ${assignments.filter(a => !a.packed).map(a => `"${a.name}"`).join('; ') || 'none'}. Standard kit exists: ${list(kitRes).length > 0 ? 'yes' : 'no'}.`);
+  const sec = tasks.filter(t => (t.name || '').startsWith('Security:'));
+  const chk = tasks.filter(t => (t.name || '').startsWith('Checkout Setup:'));
+  lines.push(`Security walkthrough: ${sec.length === 0 ? 'NOT REVIEWED (no checklist tasks)' : `${sec.filter(t => t.status === 'completed').length}/${sec.length} checklist points reviewed`}.`);
+  lines.push(`Checkout setup: ${chk.length === 0 ? 'NOT REVIEWED (no checklist tasks)' : `${chk.filter(t => t.status === 'completed').length}/${chk.length} checklist points reviewed`}.`);
+  const mk = list(mkRes)[0];
+  lines.push(`Marketing kit: ${mk ? `components ${JSON.stringify(mk.component_status || {})}` : 'NO marketing kit record — UNKNOWN'}.`);
+  const openTasks = tasks.filter(t => t.status !== 'completed');
+  lines.push(`Tasks: ${tasks.length} total, ${openTasks.length} open${openTasks.length ? ` (${openTasks.slice(0, 12).map(t => `"${t.name}"`).join('; ')})` : ''}.`);
+  lines.push('Anything not listed is UNKNOWN from records — never invent it.');
+  return lines.join('\n');
+}
+
+function buildSystemPrompt({ user, operator, activeSale, aiMemory, screenContext, aiMode, requestedOutputType, operationsContext }) {
   const outputInstruction = requestedOutputType === 'json'
     ? 'IMPORTANT: Your response MUST be valid JSON only. No markdown, no preamble.'
     : requestedOutputType === 'list'
@@ -148,6 +187,29 @@ PROFESSIONAL REVIEW — when a professional should be consulted
 ${outputInstruction}
 
 Remember: you organize research. You never answer the legal question, and you never verify anything.`;
+  }
+
+  // Chapter 8 P2 — OPERATIONS mode: grounded sale-operations coaching.
+  if (aiMode === 'operations') {
+    return `You are the Legacy Lane Operations Coach — an advisory operations assistant for estate sale preparation, working inside Legacy Lane OS.
+
+== VERIFIED SALE OPERATIONS FACTS (from records) ==
+${operationsContext || 'No operations context loaded — rely only on what the operator says and say what is UNKNOWN.'}
+
+== YOUR COACHING ROLE ==
+- Reason from the ACTUAL records above about: equipment and load-out/pack-out, security walkthrough review, checkout setup review, research flags, controlled-display/high-value items, tasks, agreed scope, site assessment factors, and marketing readiness.
+- Summarize, surface, suggest, prioritize, and explain.
+- Reference concrete facts (item names, counts, checklist states). Be direct and practical.
+
+== WHAT YOU MUST NOT DO ==
+- Never claim anything is done or certified: do not mark equipment packed, complete security/checkout checklists, approve client decisions, change scope, mark research verified, mark a sale ready, complete tasks, or process transactions. Those are human/system actions.
+- Never certify safety, security, ADA, fire-code, occupancy, or electrical adequacy. Security completion means CHECKLIST REVIEWED only.
+- Never invent issues, items, or facts absent from the records. Say UNKNOWN where the records are silent.
+
+== OUTPUT FORMAT ==
+${outputInstruction}
+
+End with 1-2 specific next actions the operator can take in the platform today.`;
   }
 
   return `You are the Legacy Lane AI Coach — a world-class business coach and strategic advisor embedded inside Legacy Lane OS, the premier estate sale and real estate platform.
@@ -255,7 +317,11 @@ Deno.serve(async (req) => {
     }, { status: 402 });
   }
 
-  // 10. Build system prompt
+  // 10. Build system prompt (operations mode loads grounded Chapter 8 context)
+  let operationsContext = null;
+  if (ai_mode === 'operations' && activeSale) {
+    operationsContext = await buildOperationsContext(base44, activeSale);
+  }
   const systemPrompt = buildSystemPrompt({
     user: operatorUser,
     operator,
@@ -264,6 +330,7 @@ Deno.serve(async (req) => {
     screenContext: screen_context,
     aiMode: ai_mode,
     requestedOutputType: requested_output_type,
+    operationsContext,
   });
 
   // 11. Send to OpenAI

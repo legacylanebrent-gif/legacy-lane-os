@@ -3,6 +3,7 @@ import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
 import { QrCode, CreditCard, AlertCircle, Check, Trash2, RefreshCw } from 'lucide-react';
 import { Html5QrcodeScanner } from 'html5-qrcode';
+import SaleReceipt from '@/components/checkout/SaleReceipt';
 
 export default function CheckoutStation() {
   const [staff, setStaff] = useState(null);
@@ -16,6 +17,7 @@ export default function CheckoutStation() {
   const [paymentMethod, setPaymentMethod] = useState('cash');
   const [completing, setCompleting] = useState(false);
   const [processingOnline, setProcessingOnline] = useState(false);
+  const [lastReceipt, setLastReceipt] = useState(null);
 
   useEffect(() => {
     loadStaff();
@@ -143,6 +145,7 @@ export default function CheckoutStation() {
 
       const syncWarning = failedSync.length > 0 ? ` (Warning: could not mark ${failedSync.length} item(s) sold — check inventory.)` : '';
       setMessage({ type: failedSync.length > 0 ? 'error' : 'success', text: `Order ${order.order_number} completed!${syncWarning}` });
+      setLastReceipt(order);
       setCurrentCart(null);
       setCartUser(null);
       setPaymentMethod('cash');
@@ -266,6 +269,10 @@ export default function CheckoutStation() {
             <h2 className="text-2xl font-bold text-slate-900">
               {currentCart ? `Customer: ${cartUser?.full_name}` : 'No Cart Loaded'}
             </h2>
+
+            {lastReceipt && (
+              <SaleReceipt order={lastReceipt} companyName={staff?.company_name} />
+            )}
 
             {!currentCart ? (
               <div className="bg-slate-100 rounded-lg p-6 text-center text-slate-500 py-12">
