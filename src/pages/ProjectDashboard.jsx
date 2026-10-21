@@ -104,10 +104,10 @@ export default function ProjectDashboard() {
     );
   }
 
-  const { scope, tasks, decisions, issues, authorities, items, researchItems, attentionItems, marketingKit, assignments, kit, linkedDeal, activities } = data || {};
+  const { scope, tasks, decisions, issues, authorities, items, researchItems, attentionItems: attentionInventory, marketingKit, assignments, kit, linkedDeal, activities } = data || {};
   const openTasks = tasks.filter((t) => t.status !== 'completed');
   const prepAnalysis = analyzePreparation({
-    sale, scope, tasks, itemCount: items.length, researchItems, attentionItems,
+    sale, scope, tasks, itemCount: items.length, researchItems, attentionItems: attentionInventory,
     assignments, kit, marketingKit,
     openDecisions: decisions.filter((d) => d.status === 'open'),
     authorities,
