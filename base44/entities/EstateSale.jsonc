@@ -1383,6 +1383,107 @@
         }
       }
     },
+    "prep_zones": {
+      "type": "array",
+      "default": [],
+      "description": "Chapter 14 P1 \u2014 TEAM-READABLE PREP ZONES (rooms / work areas) for preparation. Same projection pattern as excluded_areas: deliberately ON THE SALE (team-readable), NOT on the operator-private Chapter 12 consultation deal. source_type/source_id preserves provenance back to the consultation room a zone originated from WITHOUT exposing private consultation content \u2014 only the room NAME is projected, so the two never drift independently. Zone notes are TEAM-SAFE (no codes/credentials). Prep status is honest human-set state \u2014 no percentage progress anywhere. Discovery counts are DERIVED at read time from SaleDiscovery records, never stored here.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "zone_id": {
+            "type": "string",
+            "description": "Stable zone identifier (referenced by SaleDiscovery.zone_id and work-zone QR signs)."
+          },
+          "name": {
+            "type": "string",
+            "description": "Zone/room name (Living Room, Basement, Garage, Attic...)."
+          },
+          "source_type": {
+            "type": "string",
+            "enum": [
+              "CONSULTATION_ROOM",
+              "EXCLUDED_AREA",
+              "MANUAL"
+            ],
+            "default": "MANUAL",
+            "description": "Chapter 14 P1-7 \u2014 where this zone came from."
+          },
+          "source_id": {
+            "type": "string",
+            "description": "Provenance reference (consultation room_id) when source_type is CONSULTATION_ROOM."
+          },
+          "prep_status": {
+            "type": "string",
+            "enum": [
+              "untouched",
+              "sorting",
+              "waiting_decision",
+              "waiting_research",
+              "ready_for_inventory",
+              "complete"
+            ],
+            "default": "untouched",
+            "description": "Chapter 14 P1-8 \u2014 deterministic preparation state, human-set. WAITING states pair with the canonical open decision/research records; never a percentage."
+          },
+          "assignee_user_id": {
+            "type": "string",
+            "description": "User ID of the responsible team member. Work assignment itself reuses SaleTask (ASSIGN WORK creates a task) \u2014 this is the zone-level responsibility display."
+          },
+          "assignee_name": {
+            "type": "string",
+            "description": "Assignee display-name snapshot."
+          },
+          "access_class": {
+            "type": "string",
+            "enum": [
+              "UNCLASSIFIED",
+              "OPEN_TO_CUSTOMERS",
+              "STAFF_ONLY",
+              "CLOSED_RESTRICTED",
+              "PICKUP_ONLY",
+              "CHECKOUT"
+            ],
+            "default": "UNCLASSIFIED",
+            "description": "Chapter 14 P1-37 \u2014 customer access plan for this area. Reuses the Chapter 8/13 security walkthrough; UNCLASSIFIED is the honest default, never guessed."
+          },
+          "security_flags": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "difficult_to_monitor",
+                "high_value_control_needed",
+                "customer_flow_concern",
+                "other_security_concern"
+              ]
+            },
+            "default": [],
+            "description": "Chapter 14 P1-38 \u2014 sightline/security attention flags. Planning aids only \u2014 never a claim of surveillance or safety."
+          },
+          "removal_route_note": {
+            "type": "string",
+            "description": "Chapter 14 P1-41 \u2014 large-item removal route / special concern for this zone. Chapter 21 transaction/pickup state is untouched."
+          },
+          "protection_note": {
+            "type": "string",
+            "description": "Chapter 14 P1-39 \u2014 property-protection concern for this zone (floors, walls, doors, stairs, landscaping, architectural features)."
+          },
+          "condition_photo_uri": {
+            "type": "string",
+            "description": "Chapter 14 P1-40 \u2014 PRIVATE pre-sale property-condition photo (private storage; viewed via short-lived signed URL). NEVER public gallery or marketing."
+          },
+          "notes": {
+            "type": "string",
+            "description": "Team-safe prep notes (no codes/credentials)."
+          },
+          "completed_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When prep_status was set to complete."
+          }
+        }
+      }
+    },
     "pickup_plan": {
       "type": "object",
       "default": {},

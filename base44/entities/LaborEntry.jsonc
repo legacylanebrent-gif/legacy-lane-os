@@ -1,7 +1,7 @@
 {
   "name": "LaborEntry",
   "type": "object",
-  "description": "Chapter 4 P1 \u2014 canonical labor-hour entry for a sale. An OPERATIONAL dimension (hours worked), NOT an expense line: cash labor cost is always DERIVED (hours x rate for paid/non-owner entries), never stored here. Owner time is tracked as hours only and is never silently counted as cash cost. Distinct from Expense (a cost line) by design \u2014 do not merge them. Chapter 6 P1 adds team_member_id so entries from the operator's worker directory keep a consistent worker identity; the entry's hourly_rate remains a snapshot that never changes when a TeamMember's default rate changes later.",
+  "description": "Chapter 4 P1 \u2014 canonical labor-hour entry for a sale. An OPERATIONAL dimension (hours worked), NOT an expense line: cash labor cost is always DERIVED (hours x rate for paid/non-owner entries), never stored here. Owner time is tracked as hours only and is never silently counted as cash cost. Distinct from Expense (a cost line) by design \u2014 do not merge them. Chapter 6 P1 adds team_member_id so entries from the operator's worker directory keep a consistent worker identity; the entry's hourly_rate remains a snapshot that never changes when a TeamMember's default rate changes later. Chapter 14 P1 adds the optional prep-zone reference (prep_zone_id/prep_zone_name snapshot) and extends the work_category vocabulary with prep activities (sorting, cleaning, pricing, photography, moving) \u2014 additive only; existing records and Chapter 4 economics are unchanged.",
   "properties": {
     "sale_id": {
       "type": "string",
@@ -35,15 +35,28 @@
       "type": "string",
       "enum": [
         "preparation",
+        "sorting",
+        "cleaning",
         "research",
+        "pricing",
         "staging",
+        "photography",
+        "moving",
         "sale_day",
         "pickup",
         "closeout",
         "travel",
         "other"
       ],
-      "description": "What kind of work the hours were spent on."
+      "description": "What kind of work the hours were spent on. Chapter 14 P1-45 adds prep activities (sorting/cleaning/pricing/photography/moving) additively \u2014 existing records keep their original category and Chapter 4 economics never change."
+    },
+    "prep_zone_id": {
+      "type": "string",
+      "description": "Chapter 14 P1-44 \u2014 optional prep zone (EstateSale.prep_zones zone_id) the hours were spent in. Null = not zone-specific."
+    },
+    "prep_zone_name": {
+      "type": "string",
+      "description": "Zone-name snapshot at entry time (the zone may be renamed later; the entry keeps what was true)."
     },
     "entry_date": {
       "type": "string",

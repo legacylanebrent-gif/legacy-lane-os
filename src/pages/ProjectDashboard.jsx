@@ -23,6 +23,9 @@ import DecisionsCard from '@/components/project/DecisionsCard';
 import SaleIssuesPanel from '@/components/project/SaleIssuesPanel';
 import RetainedRegister from '@/components/project/RetainedRegister';
 import ExcludedAreasCard from '@/components/project/ExcludedAreasCard';
+import PrepZonesPanel from '@/components/project/PrepZonesPanel';
+import DiscoveryPanel from '@/components/project/DiscoveryPanel';
+import EndOfDayPanel from '@/components/project/EndOfDayPanel';
 
 const asArr = (r) => (Array.isArray(r) ? r : (r && r.items) || []);
 const money = (n) => (typeof n === 'number' ? `$${n.toLocaleString()}` : '—');
@@ -31,6 +34,7 @@ export default function ProjectDashboard() {
   const navigate = useNavigate();
   const [params] = useState(() => new URLSearchParams(window.location.search));
   const saleId = params.get('saleId');
+  const zoneId = params.get('zoneId'); // Chapter 14 — work-zone QR target highlight
   const [sale, setSale] = useState(null);
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -40,7 +44,7 @@ export default function ProjectDashboard() {
     const saleRows = asArr(await base44.entities.EstateSale.filter({ id: sid }));
     if (saleRows.length === 0) { navigate('/MySales'); return; }
     const s = saleRows[0];
-    const [scopeRes, taskRes, decRes, issRes, authRes, itemRes, researchRes, attentionRes, mkRes, assignRes, kitRes, dealRes, actRes, equipRes] = await Promise.all([
+    const [scopeRes, taskRes, decRes, issRes, authRes, itemRes, researchRes, attentionRes, mkRes, assignRes, kitRes, dealRes, actRes, equipRes, discRes, laborRes] = await Promise.all([
       base44.entities.SaleScope.filter({ sale_id: s.id, status: 'ACTIVE' }),
       base44.entities.SaleTask.filter({ sale_id: s.id }),
       base44.entities.SaleClientDecision.filter({ sale_id: s.id }),
@@ -57,6 +61,8 @@ export default function ProjectDashboard() {
         : base44.entities.SaleConversionPipeline.filter({ estate_sale_id: s.id }),
       base44.entities.Activity.filter({ sale_id: s.id }, '-created_date', 6),
       base44.entities.EquipmentAsset.filter({ operator_id: s.operator_id }, { limit: 1 }),
+      base44.entities.SaleDiscovery.filter({ sale_id: s.id }),
+      base44.entities.LaborEntry.filter({ sale_id: s.id }),
     ]);
     const d = {
       scope: asArr(scopeRes)[0] || null,
@@ -72,6 +78,8 @@ export default function ProjectDashboard() {
       kit: asArr(kitRes)[0] || null,
       linkedDeal: asArr(dealRes)[0] || null,
       activities: asArr(actRes),
+      discoveries: asArr(discRes),
+      laborEntries: asArr(laborRes),
     };
     setSale(s);
     setData(d);
@@ -104,7 +112,7 @@ export default function ProjectDashboard() {
     );
   }
 
-  const { scope, tasks, decisions, issues, authorities, items, researchItems, attentionItems: attentionInventory, marketingKit, assignments, kit, linkedDeal, activities } = data || {};
+  const { scope, tasks, decisions, issues, authorities, items, researchItems, attentionItems: attentionInventory, marketingKit, assignments, kit, linkedDeal, activities, discoveries, laborEntries } = data || {};
   const openTasks = tasks.filter((t) => t.status !== 'completed');
   const prepAnalysis = analyzePreparation({
     sale, scope, tasks, itemCount: items.length, researchItems, attentionItems: attentionInventory,
@@ -193,6 +201,13 @@ export default function ProjectDashboard() {
       <div className="grid lg:grid-cols-2 gap-4">
         <RetainedRegister sale={sale} decisions={decisions} items={items} />
         <ExcludedAreasCard sale={sale} onChanged={refresh} />
+      </div>
+
+      {/* PREPARATION (Chapter 14): team-readable prep zones + discoveries + end-of-day review */}
+      <PrepZonesPanel sale={sale} discoveries={discoveries} linkedDeal={linkedDeal} highlightZoneId={zoneId} onChanged={refresh} />
+      <div className="grid lg:grid-cols-2 gap-4 items-start">
+        <DiscoveryPanel sale={sale} zones={sale.prep_zones || []} discoveries={discoveries} onChanged={refresh} />
+        <EndOfDayPanel sale={sale} zones={sale.prep_zones || []} discoveries={discoveries} tasks={tasks} issues={issues} decisions={decisions} laborEntries={laborEntries} />
       </div>
 
       {/* PREPARATION READINESS (deterministic, Chapter 8 reuse) + POST-SALE PLAN */}

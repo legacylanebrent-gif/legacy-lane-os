@@ -46,4 +46,16 @@ export const CHECKLIST_TEMPLATES = {
       { name: 'Checkout Setup: Signage ready', description: 'Place checkout, payment and pickup signs before buyers arrive.', category: 'Execution' },
     ],
   },
+  // Chapter 14 P1-39 — property protection concerns (reviewed, never a condition certification).
+  PROPERTY_PROTECTION: {
+    label: 'Property Protection',
+    tasks: [
+      { name: 'Property Protection: Floors protected', description: 'Protect floors in high-traffic and heavy-item routes (runners, mats, cardboard) before prep and sale traffic. Review means checked — not a condition certification.', category: 'Preparation' },
+      { name: 'Property Protection: Walls and doorways reviewed', description: 'Walk the large-item removal routes; mark tight doorways/corners and protect trim where needed.', category: 'Preparation' },
+      { name: 'Property Protection: Stairs and railings reviewed', description: 'Review stairs/railings on the removal path and note where extra care or a second person is needed.', category: 'Preparation' },
+      { name: 'Property Protection: Landscaping and exterior reviewed', description: 'Check walkways, plantings and exterior paths buyers and movers will use.', category: 'Preparation' },
+      { name: 'Property Protection: Architectural features noted', description: 'Note built-ins, fixtures, or features that must not be damaged or removed from the sale.', category: 'Preparation' },
+      { name: 'Property Protection: Large-item removal concerns recorded', description: 'Record removal routes and special concerns on the prep zones / pickup plan.', category: 'Preparation' },
+    ],
+  },
 };

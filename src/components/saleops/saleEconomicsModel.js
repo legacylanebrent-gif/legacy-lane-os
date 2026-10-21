@@ -16,8 +16,13 @@ export const num = (v) => (v === '' || v === null || v === undefined ? null : Nu
 
 export const LABOR_CATEGORIES = [
   { key: 'preparation', label: 'Preparation' },
+  { key: 'sorting', label: 'Sorting' },
+  { key: 'cleaning', label: 'Cleaning' },
   { key: 'research', label: 'Research' },
+  { key: 'pricing', label: 'Pricing' },
   { key: 'staging', label: 'Staging' },
+  { key: 'photography', label: 'Photography' },
+  { key: 'moving', label: 'Moving' },
   { key: 'sale_day', label: 'Sale Day' },
   { key: 'pickup', label: 'Pickup' },
   { key: 'closeout', label: 'Closeout' },

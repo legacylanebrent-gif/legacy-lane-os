@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { X, Save, AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
+import { researchBlocked, overridePayload } from '@/components/saleops/researchGuard';
 
 const CATEGORIES = [
   'furniture',
@@ -107,6 +108,10 @@ export default function UnifiedItemForm({
 
   const [errors, setErrors] = useState({});
   const [saving, setSaving] = useState(false);
+  // Chapter 14 P1-13/P1-14 — research-before-pricing guard state
+  const [guardOpen, setGuardOpen] = useState(false);
+  const [overrideReason, setOverrideReason] = useState('');
+  const [overrideApplied, setOverrideApplied] = useState(false);
 
   useEffect(() => {
     if (item) {
@@ -141,6 +146,13 @@ export default function UnifiedItemForm({
 
   const handleSave = async () => {
     if (!validateForm()) return;
+
+    // Chapter 14 P1-13 — RESEARCH BEFORE PRICING: while the item is flagged and
+    // no authorized override has been recorded, saving a price is guarded.
+    if (item?.id && researchBlocked(item).blocked && !overrideApplied) {
+      setGuardOpen(true);
+      return;
+    }
 
     setSaving(true);
     try {
@@ -442,6 +454,23 @@ export default function UnifiedItemForm({
             </div>
           </div>
 
+          {/* Chapter 14 P1-13 — research-before-pricing guard notice */}
+          {item && researchBlocked(item).blocked && !overrideApplied && (
+            <div className="bg-amber-50 border border-amber-300 rounded-lg p-3 text-sm">
+              <p className="font-semibold text-amber-900 flex items-center gap-1.5"><AlertCircle className="w-4 h-4" />RESEARCH BEFORE PRICING</p>
+              <p className="text-xs text-amber-800 mt-0.5">
+                This item is flagged “{item.research_status}”{item.research_reason ? ` — ${item.research_reason}` : ''}.
+                Resolve the research first, or an authorized operator records an explicit override with a reason.
+                Research needed is not low value.
+              </p>
+            </div>
+          )}
+          {item && researchBlocked(item).overridden && (
+            <p className="text-xs text-amber-800 bg-amber-50 border border-amber-200 rounded px-2.5 py-1.5">
+              Research guard overridden{item.research_override_by_name ? ` by ${item.research_override_by_name}` : ''}{item.research_override_reason ? `: “${item.research_override_reason}”` : ''} — the flag stays visible alongside the override.
+            </p>
+          )}
+
           {/* Actions */}
           <div className="flex gap-3 pt-6 border-t">
             <Button variant="outline" onClick={onClose} className="flex-1">
@@ -458,6 +487,38 @@ export default function UnifiedItemForm({
           </div>
         </CardContent>
       </Card>
+
+      {/* Chapter 14 P1-14 — authorized operator override dialog */}
+      {guardOpen && (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-[60] p-4">
+          <Card className="w-full max-w-sm">
+            <CardHeader><CardTitle className="text-base">Research guard</CardTitle></CardHeader>
+            <CardContent className="space-y-3">
+              <p className="text-xs text-slate-600">
+                “{item?.title}” is flagged for research. The honest path is to resolve the research first.
+                To proceed anyway, an authorized operator records an explicit reason — it is saved on the item (who, when, why) and the flag stays visible.
+              </p>
+              <Input value={overrideReason} onChange={e => setOverrideReason(e.target.value)} placeholder="Business reason for proceeding without completed research" />
+              <div className="flex justify-end gap-2">
+                <Button variant="outline" size="sm" onClick={() => { setGuardOpen(false); setOverrideReason(''); }}>Cancel</Button>
+                <Button size="sm" className="bg-amber-600 hover:bg-amber-700" disabled={!overrideReason.trim() || saving}
+                  onClick={async () => {
+                    try {
+                      const user = await base44.auth.me();
+                      await base44.entities.Item.update(item.id, overridePayload(overrideReason.trim(), user.id, user.full_name || user.email || ''));
+                      setOverrideApplied(true);
+                      setGuardOpen(false);
+                      toast.success('Override recorded — saving');
+                      handleSave();
+                    } catch (err) { toast.error('Could not record override: ' + err.message); }
+                  }}>
+                  Record Override & Save
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
     </div>
   );
 }

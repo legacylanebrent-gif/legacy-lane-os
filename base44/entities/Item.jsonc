@@ -1242,7 +1242,7 @@
         "SPECIALIST_REVIEW"
       ],
       "default": "CLEAR",
-      "description": "Chapter 3 P1 \u2014 research attention state. Flags questionable or potentially valuable merchandise for another look instead of pricing to keep moving. INDEPENDENT of Item.status, SaleClientDecision, price and availability \u2014 human-controlled only; AI may suggest but never set it.",
+      "description": "Chapter 3 P1 \u2014 research attention state. Flags questionable or potentially valuable merchandise for another look instead of pricing to keep moving. INDEPENDENT of Item.status, SaleClientDecision, price and availability \u2014 human-controlled only; AI may suggest but never set it. Chapter 14 P1-13: while this is not CLEAR and no authorized override exists, ordinary pricing/publication progression is GUARDED \u2014 resolve the research or record an explicit operator override.",
       "rls": {
         "read": {
           "$or": [
@@ -1567,6 +1567,91 @@
                   }
                 }
               ]
+            },
+            {
+              "user_condition": {
+                "role": "admin"
+              }
+            }
+          ]
+        }
+      }
+    },
+    "research_override_by": {
+      "type": "string",
+      "description": "Chapter 14 P1-14 \u2014 authorized operator who explicitly overrode the research guard (proceeding with pricing/publication without completed research). Explicit human action with recorded who/when/reason \u2014 a casual employee cannot bypass. The research flag itself is never silently cleared; the override is recorded ALONGSIDE it.",
+      "rls": {
+        "read": {
+          "$or": [
+            {
+              "created_by_id": "{{user.id}}"
+            },
+            {
+              "data.operator_id": "{{user.id}}"
+            },
+            {
+              "user_condition": {
+                "role": "admin"
+              }
+            }
+          ]
+        }
+      }
+    },
+    "research_override_by_name": {
+      "type": "string",
+      "description": "Chapter 14 P1-14 \u2014 display-name snapshot of the overriding operator.",
+      "rls": {
+        "read": {
+          "$or": [
+            {
+              "created_by_id": "{{user.id}}"
+            },
+            {
+              "data.operator_id": "{{user.id}}"
+            },
+            {
+              "user_condition": {
+                "role": "admin"
+              }
+            }
+          ]
+        }
+      }
+    },
+    "research_override_reason": {
+      "type": "string",
+      "description": "Chapter 14 P1-14 \u2014 the recorded business reason for overriding the research guard.",
+      "rls": {
+        "read": {
+          "$or": [
+            {
+              "created_by_id": "{{user.id}}"
+            },
+            {
+              "data.operator_id": "{{user.id}}"
+            },
+            {
+              "user_condition": {
+                "role": "admin"
+              }
+            }
+          ]
+        }
+      }
+    },
+    "research_override_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Chapter 14 P1-14 \u2014 when the override was recorded. Presence of this timestamp is what releases the pricing/publication guard.",
+      "rls": {
+        "read": {
+          "$or": [
+            {
+              "created_by_id": "{{user.id}}"
+            },
+            {
+              "data.operator_id": "{{user.id}}"
             },
             {
               "user_condition": {

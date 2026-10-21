@@ -1,0 +1,352 @@
+{
+  "name": "SaleDiscovery",
+  "type": "object",
+  "description": "Chapter 14 P1 \u2014 the ONE discovery record: a significant object/material found during PREPARATION, BEFORE formal Item inventory exists. Deliberately NOT an Item (merchandise managed for sale), NOT a SaleNote, NOT a SaleIssue, and NOT a SaleClientDecision. It answers WHAT WAS FOUND, WHERE, BY WHOM, and WHICH PROCESS IT BELONGS IN (routing), so the team never has to guess, lose a find, prematurely price it, or force sensitive material into inventory. DOCTRINES: DISCOVERED \u2260 INVENTORIED; SORTED \u2260 PRICED; SENSITIVE \u2260 MERCHANDISE (privacy); RESTRICTED \u2260 DISCARDED (processing stops pending review \u2014 never a legality/safety conclusion); CLIENT/FAMILY STATEMENT \u2260 VERIFIED PROVENANCE. A discovery NEVER auto-creates an Item: promotion is an explicit human action that stores promoted_to_item_id (idempotency anchor \u2014 a promoted discovery never promotes again) while this record is preserved as history. Once promoted, the Item is the canonical merchandise record \u2014 this record keeps only discovery/routing/custody history and never a competing price/marketing/sold/pickup state. Photos are PRIVATE by default (private-storage file_uri, short-lived signed-URL viewing) and never enter the public gallery, Marketing Kit, public website, or buyer surfaces. Found cash is NEVER sale revenue and never creates a financial transaction.",
+  "properties": {
+    "sale_id": {
+      "type": "string",
+      "description": "EstateSale this discovery belongs to."
+    },
+    "operator_id": {
+      "type": "string",
+      "description": "EstateSale.operator_id projection \u2014 sale owner (RLS anchor). Derived from the sale at creation."
+    },
+    "company_id": {
+      "type": "string",
+      "description": "EstateSale.company_id projection when present."
+    },
+    "sale_team_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "READ-SCOPE PROJECTION of EstateSale.sale_team for RLS. The sale remains the source of truth."
+    },
+    "zone_id": {
+      "type": "string",
+      "description": "Chapter 14 P1 \u2014 prep zone (EstateSale.prep_zones zone_id) where this was found. Empty = property-level discovery."
+    },
+    "location_note": {
+      "type": "string",
+      "description": "Where within the zone/property it was found, in the finder's words (e.g. 'Basement cabinet, top shelf')."
+    },
+    "description": {
+      "type": "string",
+      "description": "What was found, in the finder's words. NEVER a diagnosis of value, identity, legality, or safety."
+    },
+    "discovery_type": {
+      "type": "string",
+      "enum": [
+        "ordinary_merchandise",
+        "potential_high_value",
+        "cash",
+        "valuable",
+        "important_document",
+        "personal_sensitive",
+        "research_needed",
+        "client_decision",
+        "specialist_review",
+        "donation",
+        "restricted_hold",
+        "other"
+      ],
+      "default": "ordinary_merchandise",
+      "description": "Chapter 14 P1-2 \u2014 what kind of thing this is. Deliberately a small vocabulary; deliberately distinct from routing_status (a watch is type 'valuable', route 'SPECIALIST')."
+    },
+    "routing_status": {
+      "type": "string",
+      "enum": [
+        "UNROUTED",
+        "SELL",
+        "RESEARCH",
+        "FAMILY_KEEP",
+        "CLIENT_DECISION",
+        "SPECIALIST",
+        "SENSITIVE",
+        "DONATION",
+        "RESTRICTED_HOLD",
+        "UNSUITABLE_OTHER"
+      ],
+      "default": "UNROUTED",
+      "description": "Chapter 14 P1-3 \u2014 WHICH PROCESS this discovery belongs in (the first prep rule). UNROUTED = recorded but not yet routed \u2014 surfaced as needing a routing decision, never guessed. The canonical destination for each route is an EXISTING system: SELL \u2192 promote to Item; RESEARCH \u2192 existing research flags; FAMILY_KEEP/CLIENT_DECISION \u2192 SaleClientDecision; SPECIALIST \u2192 Professional Network; DONATION \u2192 existing donation workflow; SENSITIVE \u2192 private controlled handling; RESTRICTED_HOLD \u2192 hold outside ordinary sale flow."
+    },
+    "is_sensitive": {
+      "type": "boolean",
+      "default": false,
+      "description": "Chapter 14 P1-18 \u2014 PRIVATE/PERSONAL material (documents, financial records, family photographs, IDs, keys, devices, account information, mail, medications, data). Sensitive \u2260 merchandise: it must never enter the public gallery, marketing, public website, or ordinary buyer surfaces."
+    },
+    "is_restricted": {
+      "type": "boolean",
+      "default": false,
+      "description": "Chapter 14 P1-19/P1-32 \u2014 ordinary sale processing STOPS pending appropriate review (potentially regulated, hazardous, unsafe, or inappropriate material). NEVER a determination of legal/illegal/safe/unsafe \u2014 language is REVIEW REQUIRED / DO NOT PROCESS. Deliberately distinct from is_sensitive (privacy vs processing stop)."
+    },
+    "cash_amount": {
+      "type": "number",
+      "description": "Chapter 14 P1-23 \u2014 cash amount found, when discovery_type is cash. PRIVATE (least-privilege field). NEVER sale revenue and never a financial transaction; resolution records what happened to it. Not visible to ordinary sale-team members.",
+      "rls": {
+        "read": {
+          "$or": [
+            {
+              "created_by_id": "{{user.id}}"
+            },
+            {
+              "data.operator_id": "{{user.id}}"
+            },
+            {
+              "user_condition": {
+                "role": "admin"
+              }
+            }
+          ]
+        }
+      }
+    },
+    "photo_uri": {
+      "type": "string",
+      "description": "Chapter 14 P1-24/P1-27 \u2014 PRIVATE discovery evidence photo (private-storage file_uri; viewed only through a short-lived signed URL). PRIVATE BY DEFAULT \u2014 an explicit human action is required before any photo becomes public/marketing media, and sensitive evidence never offers casual public promotion."
+    },
+    "photo_privacy_check": {
+      "type": "string",
+      "enum": [
+        "not_run",
+        "screen_passed",
+        "review_required",
+        "cleared_by_human"
+      ],
+      "default": "not_run",
+      "description": "Chapter 14 P1-25/P1-26 \u2014 advisory result of the EXISTING AI sensitive-material screen (analyzeItemImage) run at discovery-photo capture. FAIL-SAFE: a screening failure or a sensitive flag yields review_required \u2014 never silently cleared. An AI flag is ADVISORY, never a verified privacy fact; a human clears it explicitly."
+    },
+    "found_by": {
+      "type": "string",
+      "description": "Platform user ID of the employee/operator who found it."
+    },
+    "found_by_name": {
+      "type": "string",
+      "description": "Display-name snapshot of the finder at capture time."
+    },
+    "found_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When it was found."
+    },
+    "family_statement": {
+      "type": "string",
+      "description": "Chapter 14 P1-31 \u2014 a client/family statement preserved as a RESEARCH LEAD ('Client says her father bought this in Italy in the 1970s'). UNVERIFIED BY DESIGN \u2014 a family story is never provenance; display always labels it CLIENT/FAMILY STATEMENT."
+    },
+    "research_needed": {
+      "type": "boolean",
+      "default": false,
+      "description": "Chapter 14 P1-12 \u2014 route into the EXISTING research workflow without guessing identity or value. After promotion the Item carries the canonical research_status; this flag preserves the pre-inventory research intent. Research needed \u2260 low value."
+    },
+    "specialist_needed": {
+      "type": "boolean",
+      "default": false,
+      "description": "Chapter 14 P1-17 \u2014 professional expertise should look at this. Routing goes through the existing Professional Network (Who Can Help); nothing auto-sends."
+    },
+    "controlled_location": {
+      "type": "string",
+      "description": "Chapter 14 P1-21 \u2014 LEAST-PRIVILEGE record of where sensitive/significant material was secured (locked box, office, operator custody, returned to client). Not visible to ordinary sale-team members.",
+      "rls": {
+        "read": {
+          "$or": [
+            {
+              "created_by_id": "{{user.id}}"
+            },
+            {
+              "data.operator_id": "{{user.id}}"
+            },
+            {
+              "user_condition": {
+                "role": "admin"
+              }
+            }
+          ]
+        }
+      }
+    },
+    "custody_events": {
+      "type": "array",
+      "default": [],
+      "description": "Chapter 14 P1-30 \u2014 lightweight APPEND-ONLY custody trail for cash/valuables/sensitive/significant finds: found \u2192 secured \u2192 notified \u2192 transferred/returned \u2192 resolved. Enough to answer who found it, where it went next, who handled it, and how it resolved. Earlier events are never rewritten \u2014 history cannot silently lose a movement. NOT forensic evidence software.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "event": {
+            "type": "string",
+            "enum": [
+              "FOUND",
+              "MOVED_TO_CONTROLLED_LOCATION",
+              "CLIENT_NOTIFIED",
+              "TRANSFERRED",
+              "RETURNED_TO_CLIENT",
+              "ADDED_TO_SALE",
+              "OTHER"
+            ]
+          },
+          "note": {
+            "type": "string"
+          },
+          "by": {
+            "type": "string",
+            "description": "User ID of the person recording the event."
+          },
+          "by_name": {
+            "type": "string"
+          },
+          "at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      }
+    },
+    "linked_decision_id": {
+      "type": "string",
+      "description": "Chapter 14 P1-15 \u2014 the canonical SaleClientDecision this discovery routed to (the decision is never duplicated here)."
+    },
+    "linked_issue_id": {
+      "type": "string",
+      "description": "Optional SaleIssue created as the operational destination for this discovery."
+    },
+    "linked_task_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "SaleTask record(s) created from this discovery (notify-client, related-item follow-up, prep work)."
+    },
+    "client_notified_status": {
+      "type": "string",
+      "enum": [
+        "not_required",
+        "task_created",
+        "decision_created",
+        "notified"
+      ],
+      "default": "not_required",
+      "description": "Chapter 14 P1-28 \u2014 client-notification state for significant finds. Drafts/tasks only \u2014 nothing is ever auto-sent."
+    },
+    "client_notified_task_id": {
+      "type": "string",
+      "description": "The communication SaleTask created to notify the client (draft \u2014 the operator sends it)."
+    },
+    "resolution_status": {
+      "type": "string",
+      "enum": [
+        "open",
+        "promoted_to_item",
+        "returned_to_client",
+        "family_keep",
+        "research_routed",
+        "specialist_routed",
+        "donated",
+        "restricted_handled",
+        "other"
+      ],
+      "default": "open",
+      "description": "Chapter 14 P1-29 \u2014 how the discovery ended. Resolution PRESERVES this record: the discovery and its custody history remain visible after resolution (no deletion, no rewrite)."
+    },
+    "resolution_note": {
+      "type": "string",
+      "description": "Operator words on how it was resolved."
+    },
+    "resolved_by": {
+      "type": "string",
+      "description": "User ID that recorded the resolution."
+    },
+    "resolved_by_name": {
+      "type": "string"
+    },
+    "resolved_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "promoted_to_item_id": {
+      "type": "string",
+      "description": "Chapter 14 P1-4 \u2014 the ONE canonical Item this discovery was explicitly promoted to. Idempotency anchor: a promoted discovery never promotes again. The discovery is preserved as history; the Item owns all sale/price/marketing/sold/pickup truth afterwards."
+    },
+    "notes": {
+      "type": "string",
+      "description": "Team-safe operational notes (no codes, no credentials)."
+    }
+  },
+  "required": [
+    "sale_id",
+    "description"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "data.operator_id": "{{user.id}}"
+        },
+        {
+          "data.sale_team_ids": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "$or": [
+        {
+          "data.operator_id": "{{user.id}}"
+        },
+        {
+          "data.sale_team_ids": {
+            "$in": [
+              "{{user.id}}"
+            ]
+          }
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "data.operator_id": "{{user.id}}"
+        },
+        {
+          "data.sale_team_ids": {
+            "$in": [
+              "{{user.id}}"
+            ]
+          }
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.operator_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

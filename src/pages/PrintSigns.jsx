@@ -24,6 +24,7 @@ export default function PrintSigns() {
   const [selectedAll, setSelectedAll] = useState(false);
   const [signSearch, setSignSearch] = useState('');
   const [signCategoryFilter, setSignCategoryFilter] = useState('all');
+  const [zoneQrs, setZoneQrs] = useState({}); // Chapter 14 — prep-zone QR signs
 
   useEffect(() => {
     loadSale();
@@ -98,6 +99,46 @@ export default function PrintSigns() {
     setQrImages(results);
     setSelectedAll(true);
     setGeneratingQR(false);
+  };
+
+  // Chapter 14 P1-34 — prep-zone QR signs: the QR opens the sale's authorized
+  // prep view (Project Dashboard, zone highlighted). Authentication still
+  // applies — a QR never exposes private deal data.
+  useEffect(() => {
+    if (!sale) return;
+    const gen = async () => {
+      const out = {};
+      for (const z of (sale.prep_zones || [])) {
+        try {
+          out[z.zone_id] = await QRCode.toDataURL(
+            `${window.location.origin}/ProjectDashboard?saleId=${sale.id}&zoneId=${z.zone_id}`,
+            { width: 200, margin: 1 }
+          );
+        } catch (e) { out[z.zone_id] = null; }
+      }
+      setZoneQrs(out);
+    };
+    gen();
+  }, [sale?.id, (sale?.prep_zones || []).length]);
+
+  const printZoneSign = (zone) => {
+    const qr = zoneQrs[zone.zone_id];
+    const w = window.open('', '', 'width=850,height=1100');
+    w.document.write(`<html><head><title>Prep Zone — ${zone.name}</title><style>
+      body{font-family:Arial,sans-serif;margin:0;padding:48px;text-align:center}
+      h1{font-size:56px;letter-spacing:4px;text-transform:uppercase;color:#1e293b;margin:0 0 10px}
+      p{font-size:20px;color:#334155;margin:6px 0}
+      img.qr{width:280px;height:280px;margin:20px auto;display:block}
+      .small{font-size:12px;color:#94a3b8}
+    </style></head><body>
+      <h1>${zone.name}</h1>
+      <p>PREP STATUS: ${(zone.prep_status || 'untouched').replace(/_/g, ' ').toUpperCase()}</p>
+      <p>ACCESS: ${(zone.access_class || 'UNCLASSIFIED').replace(/_/g, ' ')}</p>
+      ${qr ? `<img class="qr" src="${qr}" alt="QR" />` : ''}
+      <p class="small">Scan to open this zone's prep view (sign-in required — only the authorized sale team sees it).</p>
+      <script>window.onload = () => window.print();</script>
+    </body></html>`);
+    w.document.close();
   };
 
   const toggleSelect = (index) => {
@@ -241,6 +282,10 @@ export default function PrintSigns() {
             <FileText className="w-4 h-4" />
             Sign Templates
           </TabsTrigger>
+          <TabsTrigger value="prepzones" className="flex items-center gap-2">
+            <QrCode className="w-4 h-4" />
+            Prep Zone Signs
+          </TabsTrigger>
         </TabsList>
 
         {/* QR Code Sheet Tab */}
@@ -317,6 +362,34 @@ export default function PrintSigns() {
                 ))}
               </div>
             </>
+          )}
+        </TabsContent>
+
+        {/* Prep Zone Signs (Chapter 14 P1-34) */}
+        <TabsContent value="prepzones" className="space-y-4">
+          {(sale?.prep_zones || []).length === 0 ? (
+            <Card className="p-12 text-center">
+              <QrCode className="w-16 h-16 text-slate-300 mx-auto mb-4" />
+              <p className="text-slate-500 text-lg">No prep zones yet.</p>
+              <p className="text-sm text-slate-400 mt-2">Create prep zones on the Project Dashboard, then print zone signs with a QR that opens that zone's prep view.</p>
+            </Card>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+              {(sale.prep_zones || []).map(z => (
+                <Card key={z.zone_id} className="p-4 space-y-2">
+                  <p className="font-semibold text-slate-900">{z.name}</p>
+                  <p className="text-xs text-slate-500">
+                    Status: {(z.prep_status || 'untouched').replace(/_/g, ' ')} · Access: {(z.access_class || 'UNCLASSIFIED').replace(/_/g, ' ')}
+                  </p>
+                  {zoneQrs[z.zone_id]
+                    ? <img src={zoneQrs[z.zone_id]} alt="Zone QR" className="w-36 h-36 mx-auto border rounded" />
+                    : <div className="w-36 h-36 mx-auto border rounded bg-slate-50 flex items-center justify-center text-xs text-slate-400">generating…</div>}
+                  <Button size="sm" className="w-full bg-orange-600 hover:bg-orange-700" onClick={() => printZoneSign(z)}>
+                    <Printer className="w-4 h-4 mr-1" />Print Zone Sign
+                  </Button>
+                </Card>
+              ))}
+            </div>
           )}
         </TabsContent>
 

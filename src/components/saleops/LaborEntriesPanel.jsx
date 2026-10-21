@@ -23,6 +23,7 @@ const emptyForm = () => ({
   member: 'owner', member_name: '', user_id: '',
   work_category: 'preparation', entry_date: today(),
   hours: '', hourly_rate: '', is_owner_time: false, notes: '',
+  prep_zone_id: 'none',
 });
 
 function LaborSummary({ entries }) {
@@ -83,6 +84,7 @@ export default function LaborEntriesPanel({ saleId }) {
   const [form, setForm] = useState(emptyForm());
   const [editingId, setEditingId] = useState(null);
   const [saving, setSaving] = useState(false);
+  const [zones, setZones] = useState([]); // Chapter 14 P1-44 — prep zones for zone-level labor
 
   useEffect(() => { load(); }, [saleId]);
 
@@ -96,6 +98,7 @@ export default function LaborEntriesPanel({ saleId }) {
       ]);
       const sale = saleRes[0];
       setEntries(asArray(entryRes));
+      setZones((sale?.prep_zones || []).map(z => ({ id: z.zone_id, name: z.name })));
       // Resolve team member names for the picker (best effort; helpers can always be typed by name).
       try {
         const ids = (sale?.sale_team || []).filter(Boolean);
@@ -138,6 +141,8 @@ export default function LaborEntriesPanel({ saleId }) {
         user_id: form.member.startsWith('team:') ? form.member.replace('team:', '')
           : (form.member.startsWith('worker:') ? (workers.find(w => w.id === form.member.replace('worker:', ''))?.user_id || null) : null),
         team_member_id: form.member.startsWith('worker:') ? form.member.replace('worker:', '') : null,
+        prep_zone_id: form.prep_zone_id && form.prep_zone_id !== 'none' ? form.prep_zone_id : null,
+        prep_zone_name: form.prep_zone_id && form.prep_zone_id !== 'none' ? (zones.find(z => z.id === form.prep_zone_id)?.name || '') : null,
       };
       if (editingId) {
         await base44.entities.LaborEntry.update(editingId, payload);
@@ -172,6 +177,7 @@ export default function LaborEntriesPanel({ saleId }) {
       hourly_rate: entry.hourly_rate != null ? String(entry.hourly_rate) : '',
       is_owner_time: !!entry.is_owner_time,
       notes: entry.notes || '',
+      prep_zone_id: entry.prep_zone_id || 'none',
     });
   };
 
@@ -241,6 +247,16 @@ export default function LaborEntriesPanel({ saleId }) {
                 </SelectContent>
               </Select>
             </div>
+            <div>
+              <Label>Prep zone (optional)</Label>
+              <Select value={form.prep_zone_id || 'none'} onValueChange={v => setForm(p => ({ ...p, prep_zone_id: v }))}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">Not zone-specific</SelectItem>
+                  {zones.map(z => <SelectItem key={z.id} value={z.id}>{z.name}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
             {form.member === 'helper' && (
               <div>
                 <Label>Helper name</Label>
@@ -288,6 +304,7 @@ export default function LaborEntriesPanel({ saleId }) {
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-slate-800 truncate">
                   {e.member_name || 'Team member'} · {laborCategoryLabel(e.work_category)} · {(Number(e.hours) || 0).toFixed(1)} hrs
+                  {e.prep_zone_name && <Badge className="ml-2 bg-cyan-50 text-cyan-700 border border-cyan-200">{e.prep_zone_name}</Badge>}
                   {e.is_owner_time && <Badge className="ml-2 bg-orange-100 text-orange-700">OWNER TIME</Badge>}
                 </p>
                 <p className="text-xs text-slate-500">

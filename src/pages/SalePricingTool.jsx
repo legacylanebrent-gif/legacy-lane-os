@@ -84,7 +84,18 @@ export default function SalePricingTool() {
     setProcessingAll(false);
   };
 
+  // Chapter 14 P1-13 — RESEARCH/PRIVACY HOLD guard: a photo marked do-not-search
+  // (research or privacy hold) cannot receive an ordinary sale price.
+  const heldPhoto = (imageUrl) => {
+    const imgObj = (selectedSale?.images || []).find(i => (typeof i === 'string' ? i : i.url) === imageUrl);
+    return !!(imgObj && typeof imgObj === 'object' && (imgObj.serp_search_status === 'do_not_search' || imgObj.skip_item));
+  };
+
   const saveUserPrice = async (imageUrl, price) => {
+    if (heldPhoto(imageUrl)) {
+      alert('RESEARCH / PRIVACY HOLD: this photo is marked do-not-search. Resolve the hold before pricing — research needed is not low value.');
+      return;
+    }
     const existing = savedPricings.find(p => p.image_url === imageUrl);
     if (existing) {
       await base44.entities.SaleItemPricing.update(existing.id, { user_price: parseFloat(price) });
@@ -246,18 +257,24 @@ export default function SalePricingTool() {
 
                       <div>
                         <p className="text-xs text-slate-500 mb-1">Set Your Sale Price</p>
-                        <div className="flex gap-2">
-                          <Input
-                            type="number"
-                            placeholder="Enter price..."
-                            value={userPrices[currentPhoto] || ''}
-                            onChange={e => setUserPrices(prev => ({ ...prev, [currentPhoto]: e.target.value }))}
-                            className="h-8 text-sm"
-                          />
-                          <Button size="sm" onClick={() => saveUserPrice(currentPhoto, userPrices[currentPhoto])} className="bg-slate-800">
-                            <DollarSign className="w-3 h-3 mr-1" />Save
-                          </Button>
-                        </div>
+                        {heldPhoto(currentPhoto) ? (
+                          <div className="bg-amber-50 border border-amber-300 rounded-md px-2.5 py-2 text-xs text-amber-800">
+                            RESEARCH / PRIVACY HOLD — this photo is marked do-not-search. Pricing is blocked until the hold is resolved.
+                          </div>
+                        ) : (
+                          <div className="flex gap-2">
+                            <Input
+                              type="number"
+                              placeholder="Enter price..."
+                              value={userPrices[currentPhoto] || ''}
+                              onChange={e => setUserPrices(prev => ({ ...prev, [currentPhoto]: e.target.value }))}
+                              className="h-8 text-sm"
+                            />
+                            <Button size="sm" onClick={() => saveUserPrice(currentPhoto, userPrices[currentPhoto])} className="bg-slate-800">
+                              <DollarSign className="w-3 h-3 mr-1" />Save
+                            </Button>
+                          </div>
+                        )}
                       </div>
 
                       <div className="space-y-2 max-h-36 overflow-y-auto">

@@ -9,6 +9,7 @@ export const SIGN_CATEGORIES = [
   { id: 'room', name: 'Room / Area Signs', color: 'bg-cyan-50 text-cyan-700 border-cyan-200' },
   { id: 'dot-pricing', name: 'DOT Pricing Signs', color: 'bg-rose-50 text-rose-700 border-rose-200' },
   { id: 'template', name: 'Templates', color: 'bg-amber-50 text-amber-700 border-amber-200' },
+  { id: 'prep-sorting', name: 'Prep Sorting Signs', color: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
 ];
 
 export const SIGN_TEMPLATES = [
@@ -127,4 +128,16 @@ export const SIGN_TEMPLATES = [
   { id: 'template-fb-ads', name: 'Sample FB Ads', category: 'template', content: '' },
   { id: 'template-fb-marketplace', name: 'Sample FB Marketplace', category: 'template', content: '' },
   { id: 'template-sample-letter', name: 'Sample Letter', category: 'template', content: '' },
+
+  // ── Prep Sorting Signs (Chapter 14 P1-33) — physical wording matches the
+  // canonical digital routing states exactly; no sign exists without a
+  // digital destination. ──
+  { id: 'sorting-sell', name: 'SELL — Ready for Sale', category: 'prep-sorting', content: 'Sorted for sale. Ready for inventory and pricing.' },
+  { id: 'sorting-research', name: 'RESEARCH BEFORE PRICING', category: 'prep-sorting', content: 'Do not price or publish until research is resolved. Research needed is not low value.' },
+  { id: 'sorting-client-decision', name: 'CLIENT DECISION', category: 'prep-sorting', content: 'Awaiting the client decision-maker. Do not sell, discard, or donate.' },
+  { id: 'sorting-family-keep', name: 'FAMILY KEEP — NOT FOR SALE', category: 'prep-sorting', content: 'The client/family retains this. Not for sale. Do not remove.' },
+  { id: 'sorting-specialist', name: 'SPECIALIST REVIEW', category: 'prep-sorting', content: 'Professional review required before any sale decision. Nothing is auto-sent.' },
+  { id: 'sorting-sensitive', name: 'SENSITIVE MATERIAL — PRIVATE', category: 'prep-sorting', content: 'Private personal material. Never photographed for marketing, displayed, or sold.' },
+  { id: 'sorting-donation', name: 'DONATION', category: 'prep-sorting', content: 'Routed for donation through the donation workflow.' },
+  { id: 'sorting-restricted', name: 'RESTRICTED — HOLD — DO NOT PROCESS', category: 'prep-sorting', content: 'Ordinary sale processing STOPPED pending review. Never a legality or safety conclusion — the operator or an appropriate professional decides.' },
 ];

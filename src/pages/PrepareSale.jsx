@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, Loader2, RefreshCw, ExternalLink } from 'lucide-react';
 import { asList } from '@/components/equipment/equipmentModel';
-import { analyzePreparation, prepFactsString, STATUS_STYLES } from '@/components/saleops/prepareModel';
+import { analyzePreparation, prepFactsString, STATUS_STYLES, checklistState } from '@/components/saleops/prepareModel';
 import PrepChecklistSection from '@/components/saleops/PrepChecklistSection';
 import PrepCoachPanel from '@/components/saleops/PrepCoachPanel';
 import AiStagingCoachPanel from '@/components/saleops/AiStagingCoachPanel';
@@ -87,6 +87,8 @@ export default function PrepareSale() {
     assignments: data.assignments, openDecisions: data.openDecisions, tasks: data.tasks,
   });
   const { summary, timing } = analysis;
+  // Chapter 14 P1-39 — property protection checklist state (existing SaleTask system).
+  const protection = checklistState(data.tasks, 'Property Protection:');
 
   const timingBadge = {
     'EARLY PREP': 'bg-sky-50 text-sky-700 border-sky-200',
@@ -179,6 +181,14 @@ export default function PrepareSale() {
         sale={sale}
         templateKey="CHECKOUT_SETUP"
         checklist={analysis.checkout}
+        onChanged={refresh}
+        tone="text-slate-800"
+      />
+      {/* Chapter 14 P1-39 — property protection (floors/walls/stairs/features) */}
+      <PrepChecklistSection
+        sale={sale}
+        templateKey="PROPERTY_PROTECTION"
+        checklist={protection}
         onChanged={refresh}
         tone="text-slate-800"
       />
