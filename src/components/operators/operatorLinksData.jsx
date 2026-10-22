@@ -1,5 +1,5 @@
 import {
-  Home, BookOpen, Calendar, Package, User, BarChart2, Award, GitBranch, DollarSign, Briefcase, Users,
+  Home, BookOpen, Calendar, Package, User, BarChart2, Award, GitBranch, DollarSign, Briefcase, Users, BookMarked,
   Trash2, Heart, UserPlus, Warehouse, ShoppingBag, HandCoins,
   Megaphone, Zap, BarChart3, TrendingUp, FileText, FileCheck2, UserCog,
   Sparkles, GraduationCap, Network, MapPin, ShieldQuestion,
@@ -74,6 +74,7 @@ export const OPERATOR_LINK_SECTIONS = [
       { page: 'IncomeTracker', label: 'Income Tracker', icon: TrendingUp },
       { page: 'MyBusinessExpenses', label: 'Business Expenses', icon: FileText },
       { page: 'BusinessDocuments', label: 'Business Documents', icon: FileCheck2 },
+      { page: 'KnowledgeManager', label: 'Company Knowledge', icon: BookMarked },
       { page: 'TeamMembers', label: 'Team Members', icon: UserCog },
       { page: 'OperatorServices', label: 'Service Catalog', icon: Package },
       { page: 'ClientTestimonials', label: 'Client Testimonials', icon: FileText },

@@ -1,6 +1,7 @@
 // Chapter 19 P1-13 — My Sale Day: company policies with my acknowledgment
 // state. Files open through short-lived private links.
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { FileCheck2, ShieldAlert } from 'lucide-react';
@@ -11,6 +12,7 @@ export default function MyPoliciesCard({ policies }) {
       <CardHeader className="pb-2">
         <CardTitle className="text-base flex items-center gap-2"><FileCheck2 className="w-5 h-5 text-cyan-700" /> Company policies</CardTitle>
         <p className="text-xs text-slate-500">Private documents — the links work for a few minutes. Ask the operator for a paper copy if a link has expired.</p>
+        <Link to="/CompanyKnowledge" className="text-xs text-cyan-600 underline">Browse approved company knowledge →</Link>
       </CardHeader>
       <CardContent className="space-y-2">
         {(!policies || policies.length === 0) && <p className="text-sm text-slate-400">No active policy documents on record.</p>}

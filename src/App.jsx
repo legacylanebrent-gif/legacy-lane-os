@@ -124,6 +124,8 @@ import BlogIndex from './pages/BlogIndex';
 import CompanyProfilePage from './pages/CompanyProfilePage';
 import SaleRecapPage from './pages/SaleRecapPage';
 import ManualFallbackKit from './pages/ManualFallbackKit';
+import CompanyKnowledge from './pages/CompanyKnowledge';
+import KnowledgeManager from './pages/KnowledgeManager';
 import PriceGuidePage from './pages/PriceGuidePage';
 import WantedItemsPage from './pages/WantedItemsPage';
 import WeeklyVideoIntelligence from './pages/WeeklyVideoIntelligence';
@@ -452,6 +454,8 @@ const AuthenticatedApp = () => {
       <Route path="/blog-post" element={<BlogPost />} />
       <Route path="/companies" element={<CompanyProfilePage />} />
       <Route path="/ManualFallbackKit" element={<LayoutWrapper currentPageName="ManualFallbackKit"><ManualFallbackKit /></LayoutWrapper>} />
+      <Route path="/CompanyKnowledge" element={<LayoutWrapper currentPageName="CompanyKnowledge"><CompanyKnowledge /></LayoutWrapper>} />
+      <Route path="/KnowledgeManager" element={<LayoutWrapper currentPageName="KnowledgeManager"><KnowledgeManager /></LayoutWrapper>} />
       <Route path="/sale-recap" element={<SaleRecapPage />} />
       <Route path="/SaleRecap" element={<SaleRecapPage />} />
       <Route path="/price-guide" element={<PriceGuidePage />} />

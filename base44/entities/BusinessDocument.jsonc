@@ -1,7 +1,7 @@
 {
   "name": "BusinessDocument",
   "type": "object",
-  "description": "Chapter 6 P1 \u2014 the ONE canonical business document vault record (insurance, formation, agreements, policies, registrations, permits, certifications, professional documents \u2014 no separate vaults). Files live in PRIVATE storage (file_uri); viewing/downloading always goes through a short-lived signed URL. The document owns its expiration_date; a missing expiration_date means NO EXPIRATION KNOWN (never 'never expires'). version is the acknowledgment-truth anchor: it increments when the file is replaced, so an old acknowledgment never silently covers a new version. Chapter 16 P1-25 adds the 'item' scope so a client-provided APPRAISAL (or other item evidence document) attaches to a canonical Item \u2014 no Appraisal entity; an appraisal is EVIDENCE/CONTEXT and its value is never copied into Item.price.",
+  "description": "Chapter 6 P1 \u2014 the ONE canonical business document vault record (insurance, formation, agreements, policies, registrations, permits, certifications, professional documents \u2014 no separate vaults). Files live in PRIVATE storage (file_uri); viewing/downloading always goes through a short-lived signed URL. The document owns its expiration_date; a missing expiration_date means NO EXPIRATION KNOWN (never 'never expires'). version is the acknowledgment-truth anchor: it increments when the file is replaced, so an old acknowledgment never silently covers a new version. Chapter 16 P1-25 adds the 'item' scope so a client-provided APPRAISAL (or other item evidence document) attaches to a canonical Item \u2014 no Appraisal entity; an appraisal is EVIDENCE/CONTEXT and its value is never copied into Item.price. Chapter 25 P1 adds the knowledge block (structured SOP/company-knowledge lifecycle) and the SOP/TRAINING/CHECKLIST categories \u2014 no second SOP entity; file_uri is no longer required because a structured procedure record may be fileless (uploaded files keep it).",
   "properties": {
     "operator_id": {
       "type": "string",
@@ -26,10 +26,13 @@
         "CERTIFICATION",
         "PROFESSIONAL",
         "APPRAISAL",
+        "SOP",
+        "TRAINING",
+        "CHECKLIST",
         "OTHER"
       ],
       "default": "OTHER",
-      "description": "Document category. Deliberately small taxonomy. Chapter 16 APPRAISAL = a client-provided or commissioned appraisal document attached to an Item \u2014 evidence/context only, never a price the system applies."
+      "description": "Document category. Deliberately small taxonomy. Chapter 16 APPRAISAL = a client-provided or commissioned appraisal document attached to an Item \u2014 evidence/context only, never a price the system applies. Chapter 25 P1 adds SOP (a structured operating procedure), TRAINING, and CHECKLIST \u2014 these carry the knowledge block lifecycle; there is no second SOP repository."
     },
     "policy_type": {
       "type": "string",
@@ -65,7 +68,7 @@
     },
     "file_uri": {
       "type": "string",
-      "description": "PRIVATE storage URI (UploadPrivateFile). Never a public URL."
+      "description": "PRIVATE storage URI (UploadPrivateFile). Never a public URL. Chapter 25 P1: optional \u2014 a structured SOP/knowledge record may be fileless; uploaded files keep it."
     },
     "file_name": {
       "type": "string",
@@ -88,7 +91,7 @@
         "REVIEW"
       ],
       "default": "ACTIVE",
-      "description": "No status implies a legal retention conclusion."
+      "description": "No status implies a legal retention conclusion. Distinct from the Chapter 25 knowledge lifecycle (knowledge.sop_status): a CURRENT approved SOP is ACTIVE + sop_status APPROVED; an archived one is ARCHIVED."
     },
     "notes": {
       "type": "string"
@@ -96,11 +99,199 @@
     "version": {
       "type": "integer",
       "default": 1,
-      "description": "Incremented when the file is replaced. Acknowledgment truth anchor: an acknowledgment records the version acknowledged, so a replaced policy is never silently considered acknowledged."
+      "description": "Incremented when the file is replaced. Acknowledgment truth anchor: an acknowledgment records the version acknowledged, so a replaced policy is never silently considered acknowledged. Chapter 25 P1: SOP revisions create a NEW record (knowledge.supersedes_document_id) with version = previous + 1, so prior approved versions are preserved as SUPERSEDED, never overwritten."
     },
     "template_text": {
       "type": "string",
       "description": "Chapter 9 P0 \u2014 for operator-designated AGREEMENT templates only: the operator's own attorney-reviewed agreement TEXT containing {{MERGE_VARIABLE}} placeholders (e.g. {{CLIENT_NAME}}, {{COMMISSION_RATE}}). EstateSalen populates approved variables from structured records; it never authors, edits, or AI-generates legal language, and a placeholder with no source is flagged MISSING VALUE \u2014 never fabricated."
+    },
+    "knowledge": {
+      "type": "object",
+      "default": {},
+      "description": "Chapter 25 P1 \u2014 the COMPANY KNOWLEDGE / SOP lifecycle block. A DRAFT PROCEDURE IS NOT APPROVED POLICY: only the explicit human approval path (companyKnowledge 'approve' \u2014 operator/admin only) writes sop_status APPROVED, and AI can never set approval truth (ai_generated drafts stay DRAFT until a human approves). Employees never read the operator's vault directly: the companyKnowledge server seam is the ONLY employee surface, and it returns ONLY employee_visible APPROVED records as safe projections. employee_visible defaults false \u2014 fail-safe; nothing becomes employee knowledge implicitly.",
+      "properties": {
+        "sop_status": {
+          "type": "string",
+          "enum": [
+            "DRAFT",
+            "IN_REVIEW",
+            "APPROVED",
+            "SUPERSEDED"
+          ],
+          "description": "Chapter 25 P1 \u2014 the SOP/knowledge lifecycle. DRAFT/IN_REVIEW are operator-private working states. APPROVED = the CURRENT human-approved version (at most ONE APPROVED version per procedure lineage \u2014 approving supersedes the previous APPROVED record). SUPERSEDED = a prior approved version, preserved for history, never deleted or rewritten."
+        },
+        "purpose": {
+          "type": "string",
+          "description": "WHAT IS THIS PROCEDURE FOR? One or two plain sentences."
+        },
+        "audience_roles": {
+          "type": "array",
+          "default": [],
+          "description": "Chapter 19 role vocabulary reuse (NO parallel role system). Empty = all staff of the company. Restricts which employees the knowledge seam surfaces this record to (server-side filter, never just UI).",
+          "items": {
+            "type": "string",
+            "enum": [
+              "ENTRY",
+              "CHECKOUT",
+              "FLOOR_ZONE",
+              "HIGH_VALUE",
+              "NEGOTIATION",
+              "FURNITURE",
+              "PICKUP",
+              "CUSTOMER_ISSUES",
+              "SALE_FLOOR_RECOVERY",
+              "ALL_STAFF"
+            ]
+          }
+        },
+        "steps": {
+          "type": "array",
+          "default": [],
+          "description": "The NORMAL PATH \u2014 ordered plain steps. Structured content, deliberately not a workflow engine.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "text": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "decision_points": {
+          "type": "array",
+          "default": [],
+          "description": "IF X \u2192 DO Y / IF NOT \u2192 DO Z. Advisory structured branches for humans \u2014 never auto-executed.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "condition": {
+                "type": "string"
+              },
+              "if_yes": {
+                "type": "string"
+              },
+              "if_no": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "exceptions": {
+          "type": "array",
+          "default": [],
+          "description": "When the normal path does NOT apply.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "escalation": {
+          "type": "object",
+          "description": "WHEN TO STOP, WHO/WHICH ROLE to escalate to, and WHAT INFORMATION to provide. Reuses the Chapter 19 Ask-for-Help path \u2014 the procedure makes escalation visible but NEVER grants authority.",
+          "properties": {
+            "stop_when": {
+              "type": "string"
+            },
+            "escalate_to": {
+              "type": "string"
+            },
+            "provide": {
+              "type": "string"
+            }
+          }
+        },
+        "completion_standard": {
+          "type": "string",
+          "description": "WHAT MUST BE TRUE before this procedure is finished. A procedure without an ending is not a complete procedure."
+        },
+        "change_reason": {
+          "type": "string",
+          "description": "WHY this version exists (near miss, recurring issue, employee improvement, client problem, efficiency, successful practice, policy change...)."
+        },
+        "supersedes_document_id": {
+          "type": "string",
+          "description": "The prior version's BusinessDocument ID this revision replaces. Approving this record supersedes that one (SUPERSEDED)."
+        },
+        "approved_by": {
+          "type": "string",
+          "description": "User ID of the authorized human who approved. HUMAN APPROVAL ONLY \u2014 AI and employee suggestions can never set approval truth."
+        },
+        "approved_by_name": {
+          "type": "string"
+        },
+        "approved_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "review_date": {
+          "type": "string",
+          "format": "date",
+          "description": "Effectiveness review date \u2014 did this change actually help? A date on the record; no automated mining."
+        },
+        "effectiveness_reviews": {
+          "type": "array",
+          "default": [],
+          "description": "Human assessments recorded at review. History preserved; earlier reviews never rewritten.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "outcome": {
+                "type": "string",
+                "enum": [
+                  "BETTER",
+                  "NO_CHANGE",
+                  "WORSE",
+                  "INSUFFICIENT_EVIDENCE"
+                ]
+              },
+              "note": {
+                "type": "string"
+              },
+              "by_name": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "source_type": {
+          "type": "string",
+          "enum": [
+            "EMPLOYEE_OBSERVATION",
+            "SALE_ISSUE",
+            "NEAR_MISS",
+            "SALE_RECAP",
+            "MANAGER_OBSERVATION",
+            "MANUAL"
+          ],
+          "default": "MANUAL",
+          "description": "Provenance \u2014 where this procedure/improvement came from."
+        },
+        "source_id": {
+          "type": "string",
+          "description": "Canonical source record ID (SaleIssue, SaleRecap...) when applicable."
+        },
+        "source_label": {
+          "type": "string",
+          "description": "Short human label of the source \u2014 no sensitive full text copied."
+        },
+        "contributor_name": {
+          "type": "string",
+          "description": "Knowledge attribution \u2014 who contributed the lesson (employee experience should survive the employee)."
+        },
+        "ai_generated": {
+          "type": "boolean",
+          "default": false,
+          "description": "Chapter 24 governance \u2014 an AI-DRAFTED procedure is labeled as such forever; it still requires explicit human approval and never becomes policy on its own."
+        },
+        "employee_visible": {
+          "type": "boolean",
+          "default": false,
+          "description": "Explicit operator choice to publish this record to the employee knowledge surface. False = stays operator-private even when APPROVED. Fail-safe default."
+        }
+      }
     },
     "uploaded_by": {
       "type": "string",
@@ -127,8 +318,7 @@
   "required": [
     "operator_id",
     "title",
-    "category",
-    "file_uri"
+    "category"
   ],
   "rls": {
     "read": {
