@@ -1,6 +1,7 @@
 {
   "name": "UserReward",
   "type": "object",
+  "description": "Reward ledger record (engagement points, software-affiliate referral rewards). Referral Rebuild Phase 1: a user reads only their own rewards and may create reward records only for THEMSELVES (matching the platform's user-action rewards flows, e.g. purchases and check-ins); rewards for OTHER users and all mutations are admin-only. Referral rewards are created exclusively by admin backend functions through the ONE canonical path (action_id `referral_<id>`).",
   "properties": {
     "user_id": {
       "type": "string",
@@ -36,5 +37,41 @@
     "action_id",
     "points_earned",
     "month"
-  ]
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "$or": [
+        {
+          "data.user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
 }

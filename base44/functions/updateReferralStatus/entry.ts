@@ -16,6 +16,13 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Referral ID and status required' }, { status: 400 });
     }
 
+    // Referral Rebuild Phase 1: status is validated against the canonical
+    // enum — the admin may not write arbitrary qualifying-state strings.
+    const ALLOWED_STATUSES = ['pending', 'signed_up', 'subscribed', 'converted', 'paid'];
+    if (!ALLOWED_STATUSES.includes(status)) {
+      return Response.json({ error: `Invalid status. Allowed: ${ALLOWED_STATUSES.join(', ')}` }, { status: 400 });
+    }
+
     // Get the referral
     const referrals = await base44.asServiceRole.entities.Referral.filter({ id: referralId });
     if (referrals.length === 0) {
@@ -44,9 +51,9 @@ Deno.serve(async (req) => {
         await base44.asServiceRole.entities.UserReward.create({
           user_id: referral.referrer_id,
           action_id: `referral_${referralId}`,
-          action_name: 'Referral Commission',
+          action_name: 'Referral Reward',
           points_earned: referral.reward_amount || 25,
-          description: `$${referral.reward_amount || 25} earned for referring ${referral.referred_user_name || referral.referred_user_email}`
+          notes: `$${referral.reward_amount || 25} software-affiliate reward for referring ${referral.referred_user_name || referral.referred_user_email}`
         });
 
         // Update referral reward status

@@ -15,11 +15,11 @@ const TESTIMONIALS_BY_TYPE = {
         highlight: "Efficiency & Time Savings"
       },
       {
-        quote: "I just got paid my first referral commission from linking up a realtor with my client. I can't believe that over 5 years of referring clients to realtors that now I finally have a way to make money doing so.",
+        quote: "Connecting my clients with the right real estate professional used to be an afterthought. Now every introduction I make is tracked, and the family always knows who helped them.",
         author: "Michael Torres",
         company: "Coastal Estate Liquidations",
         location: "Tampa, FL",
-        highlight: "Referral Commission Income"
+        highlight: "Tracked Introductions"
       },
       {
         quote: "The use of AI is blowing my mind for titles, descriptions and pricing. Beyond the time savings, I feel like I no longer have to KNOW EVERYTHING. Instead, I lean on the AI and if I disagree at first, at least I have some content now to make my own educated assumptions.",

@@ -1,6 +1,7 @@
 {
   "name": "Referral",
   "type": "object",
+  "description": "SOFTWARE-AFFILIATE referral record (company signups / subscription referrals) \u2014 deliberately distinct from real-estate referral compensation. Referral Rebuild Phase 1 access rules: a participant reads only referrals they gave or received; a signed-in user may CREATE only their OWN outgoing PENDING invite records (referrer_id = self, status pending) \u2014 qualifying state (subscribed/paid, first_payment_date, reward_status) is written only by admin backend functions; updates and deletes are admin-only.",
   "properties": {
     "referrer_id": {
       "type": "string",
@@ -84,5 +85,51 @@
   "required": [
     "referrer_id",
     "referral_code"
-  ]
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.referrer_id": "{{user.id}}"
+        },
+        {
+          "data.referred_user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "$or": [
+        {
+          "$and": [
+            {
+              "data.referrer_id": "{{user.id}}"
+            },
+            {
+              "data.status": "pending"
+            }
+          ]
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
 }

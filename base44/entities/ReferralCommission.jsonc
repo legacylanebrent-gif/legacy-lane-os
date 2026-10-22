@@ -1,6 +1,7 @@
 {
   "name": "ReferralCommission",
   "type": "object",
+  "description": "Legacy referral exchange commission record. Referral Rebuild Phase 1 adds the 'recorded' status: an INFORMATIONAL closing record created by the Houszu closed-deal callback while legacy compensation is paused \u2014 it preserves closing information and creates NO monetary entitlement (no wallet credit, nothing payable). The deal's agent and operator may read their own records; all writes are admin-only / service-role.",
   "properties": {
     "commission_id": {
       "type": "string",
@@ -59,15 +60,20 @@
       "enum": [
         "pending",
         "confirmed",
-        "paid"
+        "paid",
+        "recorded"
       ],
       "default": "pending",
-      "description": "Commission payment status"
+      "description": "Commission payment status. 'recorded' = informational closing record only \u2014 NO compensation entitlement (Referral Rebuild Phase 1)."
     },
     "closing_date": {
       "type": "string",
       "format": "date-time",
       "description": "Date when the transaction closed"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Context for informational 'recorded' entries (provenance, paused-program note)."
     }
   },
   "required": [
@@ -78,5 +84,37 @@
     "operator_id",
     "referral_agent_name",
     "status"
-  ]
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.operator_id": "{{user.id}}"
+        },
+        {
+          "data.agent_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
 }

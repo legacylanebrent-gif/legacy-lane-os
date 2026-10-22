@@ -1,4 +1,13 @@
+// Referral Rebuild Phase 1: releasing legacy pending wallet credits is
+// centrally DISABLED (shared/referralCompensationControl). Existing pending
+// transactions and wallet balances are PRESERVED untouched — this function
+// now refuses to release new amounts while the program is paused.
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
+import {
+  LEGACY_REFERRAL_COMPENSATION_ENABLED,
+  LEGACY_COMPENSATION_PAUSED_CODE,
+  LEGACY_COMPENSATION_PAUSED_MESSAGE,
+} from '../../shared/referralCompensationControl.ts';
 
 Deno.serve(async (req) => {
   if (req.method !== 'POST') {
@@ -10,11 +19,25 @@ Deno.serve(async (req) => {
   if (!user || user.role !== 'admin') {
     return Response.json({ error: 'Admin access required' }, { status: 403 });
   }
+
+  if (!LEGACY_REFERRAL_COMPENSATION_ENABLED) {
+    return Response.json(
+      {
+        success: false,
+        error: LEGACY_COMPENSATION_PAUSED_CODE,
+        message: LEGACY_COMPENSATION_PAUSED_MESSAGE,
+        released_count: 0,
+        released_amount: 0
+      },
+      { status: 409 }
+    );
+  }
+
   const now = new Date();
 
   // Find all pending transactions where available_after <= now
   const pendingTransactions = await base44.asServiceRole.entities.WalletTransaction.filter({ status: 'pending' });
-  
+
   const eligibleTransactions = pendingTransactions.filter(txn => {
     if (!txn.available_after) return false;
     const availableDate = new Date(txn.available_after);

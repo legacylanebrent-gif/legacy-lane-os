@@ -1,6 +1,7 @@
 {
   "name": "ReferralDealAgreement",
   "type": "object",
+  "description": "Legacy referral exchange deal agreement record. Referral Rebuild Phase 1: acceptance that creates new agreements is paused server-side; a record is never evidence of a signed or executed agreement (contract_generated stays false until a real executed document exists). The deal's agent and operator may read their own agreements; all writes are admin-only / service-role. Existing documents and status history are preserved.",
   "properties": {
     "deal_id": {
       "type": "string",
@@ -42,11 +43,11 @@
     "contract_generated": {
       "type": "boolean",
       "default": false,
-      "description": "Whether a contract has been generated for this deal"
+      "description": "Whether a real contract document has been generated for this deal. Generating a record never sets this \u2014 only an actual document does."
     },
     "contract_url": {
       "type": "string",
-      "description": "URL to the generated contract document"
+      "description": "URL to the generated contract document (only ever set to a real document URL \u2014 never a placeholder)"
     },
     "status": {
       "type": "string",
@@ -69,5 +70,37 @@
     "referral_agent_brokerage",
     "acceptance_timestamp",
     "status"
-  ]
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.agent_id": "{{user.id}}"
+        },
+        {
+          "data.operator_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
 }

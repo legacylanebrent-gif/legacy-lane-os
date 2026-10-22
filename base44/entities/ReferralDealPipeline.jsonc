@@ -1,6 +1,7 @@
 {
   "name": "ReferralDealPipeline",
   "type": "object",
+  "description": "Legacy real-estate referral exchange deal pipeline. Referral Rebuild Phase 1: the deal's agent and operator may read their own deal records; all writes are admin-only (server functions operate as service role). Estimated vs actual fields are informational only and never feed any wallet.",
   "properties": {
     "deal_id": {
       "type": "string",
@@ -85,5 +86,37 @@
     "agent_id",
     "operator_id",
     "stage"
-  ]
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.agent_id": "{{user.id}}"
+        },
+        {
+          "data.operator_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
 }

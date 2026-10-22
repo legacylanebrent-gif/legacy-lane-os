@@ -1,4 +1,9 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
+import {
+  LEGACY_REFERRAL_COMPENSATION_ENABLED,
+  LEGACY_COMPENSATION_PAUSED_CODE,
+  LEGACY_COMPENSATION_PAUSED_MESSAGE,
+} from '../../shared/referralCompensationControl.ts';
 
 Deno.serve(async (req) => {
   if (req.method !== 'POST') {
@@ -35,6 +40,24 @@ Deno.serve(async (req) => {
 
   if (txn.type !== 'withdrawal') {
     return Response.json({ error: 'Only withdrawal transactions can be approved' }, { status: 400 });
+  }
+
+  // Idempotency: an already-approved withdrawal is never counted twice.
+  if (txn.status === 'completed') {
+    return Response.json({ success: true, message: 'Withdrawal already approved', transaction_id });
+  }
+
+  // Referral Rebuild Phase 1: legacy-program payout approvals are centrally
+  // blocked while the program is paused. Existing records are preserved.
+  if (!LEGACY_REFERRAL_COMPENSATION_ENABLED) {
+    return Response.json(
+      {
+        success: false,
+        error: LEGACY_COMPENSATION_PAUSED_CODE,
+        message: 'Legacy referral payout approvals are paused. ' + LEGACY_COMPENSATION_PAUSED_MESSAGE
+      },
+      { status: 409 }
+    );
   }
 
   // Update transaction

@@ -1,6 +1,7 @@
 {
   "name": "OperatorWallet",
   "type": "object",
+  "description": "Legacy referral-program wallet. Referral Rebuild Phase 1: ALL mutations are admin-only (backend functions operate as service role with explicit authorization); operators may READ their own wallet only \u2014 they can no longer create wallets or edit balances, hold dates, or payout status directly. Existing balances and history are preserved.",
   "properties": {
     "operator_id": {
       "type": "string",
@@ -64,28 +65,14 @@
       ]
     },
     "create": {
-      "$or": [
-        {
-          "data.operator_id": "{{user.id}}"
-        },
-        {
-          "user_condition": {
-            "role": "admin"
-          }
-        }
-      ]
+      "user_condition": {
+        "role": "admin"
+      }
     },
     "update": {
-      "$or": [
-        {
-          "data.operator_id": "{{user.id}}"
-        },
-        {
-          "user_condition": {
-            "role": "admin"
-          }
-        }
-      ]
+      "user_condition": {
+        "role": "admin"
+      }
     },
     "delete": {
       "user_condition": {

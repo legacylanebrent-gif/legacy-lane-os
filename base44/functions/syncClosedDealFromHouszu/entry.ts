@@ -1,4 +1,29 @@
+// Legacy Houszu closed-deal callback (server-to-server, LEGACY_SHARED_API_KEY).
+//
+// Referral Rebuild Phase 1: the legacy compensation program is centrally
+// DISABLED (shared/referralCompensationControl). Valid incoming closing
+// information is still recorded — as an INFORMATIONAL ReferralCommission
+// record (status 'recorded') that creates NO monetary entitlement — but no
+// wallet credit is created and no operator email is sent. If the callback
+// cannot be safely recorded, an explicit NON-SUCCESS response is returned so
+// the sender can retry: an unrecorded event is never acknowledged as
+// successfully processed.
+//
+// What Houszu observes while compensation is paused:
+//   - HTTP 200 with { recorded: true, compensation_credits_created: false,
+//     code: 'legacy_referral_compensation_paused' } when closing info is
+//     recorded (idempotent per deal).
+//   - HTTP 500 { success: false, error: 'recording_failed' } when the closing
+//     info could NOT be recorded — the event was NOT processed and is safe
+//     to retry.
+//   - The original operator-credit response shape is preserved for the
+//     already-credited deals (duplicate prevention is unchanged).
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
+import {
+  LEGACY_REFERRAL_COMPENSATION_ENABLED,
+  LEGACY_COMPENSATION_PAUSED_CODE,
+  LEGACY_COMPENSATION_PAUSED_MESSAGE,
+} from '../../shared/referralCompensationControl.ts';
 
 Deno.serve(async (req) => {
   if (req.method !== 'POST') {
@@ -25,10 +50,19 @@ Deno.serve(async (req) => {
     return Response.json({ error: 'Missing required fields' }, { status: 400 });
   }
 
-  const base44 = createClientFromRequest(req);
+  if (
+    typeof referral_amount_due_to_brent !== 'number' ||
+    !Number.isFinite(referral_amount_due_to_brent) ||
+    referral_amount_due_to_brent < 0
+  ) {
+    return Response.json({ error: 'referral_amount_due_to_brent must be a non-negative number' }, { status: 400 });
+  }
 
-  // Check for existing credit transaction for this deal
-  const existingCredits = await base44.asServiceRole.entities.WalletTransaction.filter({
+  const base44 = createClientFromRequest(req);
+  const service = base44.asServiceRole;
+
+  // Duplicate prevention: a credit for this deal is never created twice.
+  const existingCredits = await service.entities.WalletTransaction.filter({
     deal_id,
     operator_id,
     type: 'credit'
@@ -44,6 +78,59 @@ Deno.serve(async (req) => {
     });
   }
 
+  // ── Phase 1: compensation disabled — record closing info, create NO credit ──
+  if (!LEGACY_REFERRAL_COMPENSATION_ENABLED) {
+    try {
+      const existingRecord = await service.entities.ReferralCommission.filter({
+        deal_id,
+        status: 'recorded'
+      });
+
+      if (existingRecord.length === 0) {
+        const commissionId = `RC-${Date.now()}-${String(deal_id).slice(-6).toUpperCase()}`;
+        await service.entities.ReferralCommission.create({
+          commission_id: commissionId,
+          deal_id,
+          property_address: property_address || '',
+          agent_id: '',
+          operator_id,
+          referral_agent_name: 'Unverified (recorded by Houszu closed-deal callback)',
+          status: 'recorded',
+          closing_date: closing_date ? new Date(closing_date).toISOString() : new Date().toISOString(),
+          notes: `Informational closing record only — no compensation entitlement. referral_amount_due_to_brent=${referral_amount_due_to_brent}. Legacy referral compensation is paused (Referral Rebuild Phase 1).`
+        });
+      }
+
+      console.log(
+        `[syncClosedDealFromHouszu] deal=${deal_id} recorded without credit (legacy compensation paused)`
+      );
+
+      return Response.json({
+        success: true,
+        recorded: true,
+        compensation_credits_created: false,
+        code: LEGACY_COMPENSATION_PAUSED_CODE,
+        message:
+          'Closing information recorded. ' + LEGACY_COMPENSATION_PAUSED_MESSAGE
+      });
+    } catch (err) {
+      console.error('[syncClosedDealFromHouszu] Failed to record closing info:', err?.message);
+      // Explicit non-success so the sender retries — never acknowledge an
+      // unrecorded event as successfully processed.
+      return Response.json(
+        {
+          success: false,
+          error: 'recording_failed',
+          message:
+            'Closing information could not be recorded and no credit was created. This event was NOT processed — safe to retry.'
+        },
+        { status: 500 }
+      );
+    }
+  }
+
+  // ── Compensation enabled path (only reachable when the central control is
+  // deliberately re-enabled; kept for operational continuity) ──
   // Estate Sale Company Owner receives 30% of amount due to Brent Cramp
   const operatorCredit = Math.round(referral_amount_due_to_brent * 0.30);
 
@@ -53,7 +140,7 @@ Deno.serve(async (req) => {
 
   // Create wallet transaction
   const transactionId = `TXN-${Date.now()}-${operator_id.slice(-6).toUpperCase()}`;
-  await base44.asServiceRole.entities.WalletTransaction.create({
+  await service.entities.WalletTransaction.create({
     transaction_id: transactionId,
     operator_id,
     deal_id,
@@ -66,18 +153,18 @@ Deno.serve(async (req) => {
   });
 
   // Update or create Estate Sale Company Owner wallet
-  const wallets = await base44.asServiceRole.entities.OperatorWallet.filter({ operator_id });
+  const wallets = await service.entities.OperatorWallet.filter({ operator_id });
   const now = new Date().toISOString();
 
   if (wallets.length > 0) {
     const wallet = wallets[0];
-    await base44.asServiceRole.entities.OperatorWallet.update(wallet.id, {
+    await service.entities.OperatorWallet.update(wallet.id, {
       pending_balance: (wallet.pending_balance || 0) + operatorCredit,
       total_credits: (wallet.total_credits || 0) + operatorCredit,
       last_updated: now
     });
   } else {
-    await base44.asServiceRole.entities.OperatorWallet.create({
+    await service.entities.OperatorWallet.create({
       operator_id,
       pending_balance: operatorCredit,
       total_credits: operatorCredit,
@@ -87,64 +174,6 @@ Deno.serve(async (req) => {
       wallet_status: 'active',
       last_updated: now
     });
-  }
-
-  // Notify Estate Sale Company Owner of new pending credit
-  try {
-    const users = await base44.asServiceRole.entities.User.filter({ id: operator_id });
-    const operatorUser = users[0];
-    const creditFormatted = `$${(operatorCredit / 100).toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
-    const availableDate = new Date(availableAfter).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-    if (operatorUser?.email) {
-      const emailHtml = `<!DOCTYPE html>
-<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/></head>
-<body style="margin:0;padding:0;background:#f1f5f9;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
-<table width="100%" cellpadding="0" cellspacing="0" style="background:#f1f5f9;padding:32px 16px;">
-<tr><td align="center">
-<table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.08);">
-<tr><td style="background:linear-gradient(135deg,#1e293b 0%,#334155 100%);padding:28px 32px;text-align:center;">
-  <div style="font-family:Georgia,serif;font-size:26px;font-weight:bold;color:#ffffff;letter-spacing:1px;">Legacy Lane</div>
-  <div style="font-size:12px;color:#f97316;margin-top:4px;letter-spacing:2px;text-transform:uppercase;">OS Platform &nbsp;·&nbsp; Wallet</div>
-</td></tr>
-<tr><td style="padding:36px 32px;">
-  <div style="text-align:center;margin-bottom:24px;">
-    <div style="font-size:40px;">🎉</div>
-  </div>
-  <h2 style="margin:0 0 8px 0;font-size:22px;color:#1e293b;font-family:Georgia,serif;text-align:center;">New Platform Credit Earned</h2>
-  <p style="margin:0 0 24px 0;font-size:15px;color:#475569;line-height:1.7;text-align:center;">Hi ${operatorUser.full_name || 'there'},<br/>A deal just closed and platform credits have been added to your wallet.</p>
-
-  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;margin-bottom:24px;">
-    <tr><td style="padding:10px 16px;font-size:13px;color:#64748b;font-weight:600;width:45%;">Property</td><td style="padding:10px 16px;font-size:14px;color:#1e293b;">${property_address || 'N/A'}</td></tr>
-    <tr style="background:#fff;"><td style="padding:10px 16px;font-size:13px;color:#64748b;font-weight:600;">Deal ID</td><td style="padding:10px 16px;font-size:13px;color:#1e293b;font-family:monospace;">${deal_id}</td></tr>
-    <tr><td style="padding:10px 16px;font-size:13px;color:#64748b;font-weight:600;">Credits Added</td><td style="padding:10px 16px;font-size:22px;font-weight:800;color:#f97316;">${creditFormatted}</td></tr>
-    <tr style="background:#fff;"><td style="padding:10px 16px;font-size:13px;color:#64748b;font-weight:600;">Status</td><td style="padding:10px 16px;"><span style="background:#fffbeb;color:#d97706;border:1px solid #fde68a;border-radius:20px;padding:3px 12px;font-size:12px;font-weight:700;">Pending — 10-day hold</span></td></tr>
-    <tr><td style="padding:10px 16px;font-size:13px;color:#64748b;font-weight:600;">Available On</td><td style="padding:10px 16px;font-size:14px;color:#1e293b;">${availableDate}</td></tr>
-  </table>
-
-  <p style="margin:0 0 24px 0;font-size:13px;color:#64748b;line-height:1.6;background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:12px 16px;">
-    <strong>Important:</strong> These are Legacy Lane platform credits — not real estate commissions. Credits are held for 10 days before becoming available for withdrawal. Amounts may be subject to 1099 reporting.
-  </p>
-
-  <div style="text-align:center;margin:28px 0;">
-    <a href="https://estatesalen.com/OperatorWalletDashboard" style="display:inline-block;background:#f97316;color:#ffffff;padding:14px 32px;border-radius:8px;font-size:15px;font-weight:700;text-decoration:none;">View My Wallet</a>
-  </div>
-</td></tr>
-<tr><td style="background:#f8fafc;padding:20px 32px;border-top:1px solid #e2e8f0;text-align:center;">
-  <p style="margin:0 0 6px 0;font-size:13px;color:#64748b;">Legacy Lane OS &nbsp;|&nbsp; Referral Exchange Platform</p>
-  <p style="margin:0;font-size:12px;color:#94a3b8;">This is an automated message. Questions? <a href="mailto:support@estatesalen.com" style="color:#f97316;text-decoration:none;">support@estatesalen.com</a></p>
-</td></tr>
-</table></td></tr></table>
-</body></html>`;
-
-      await base44.asServiceRole.integrations.Core.SendEmail({
-        to: operatorUser.email,
-        from_name: 'Legacy Lane OS',
-        subject: `${creditFormatted} in platform credits added to your wallet`,
-        body: emailHtml,
-      });
-    }
-  } catch (err) {
-    console.warn('[syncClosedDealFromHouszu] Email notify failed:', err.message);
   }
 
   return Response.json({

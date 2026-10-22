@@ -148,7 +148,7 @@ export default function PortalAgreementsTab({ user }) {
       <Card className="border-slate-200">
         <CardContent className="p-5">
           <h4 className="font-bold text-slate-800 mb-4 text-sm flex items-center gap-2">
-            <DollarSign className="w-4 h-4 text-slate-500" /> Referral Commission Detail ({commissions.length})
+            <DollarSign className="w-4 h-4 text-slate-500" /> Referral Commission Records — Historical ({commissions.length})
           </h4>
           {commissions.length === 0 ? (
             <p className="text-sm text-slate-400 text-center py-8">No commission records yet.</p>

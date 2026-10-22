@@ -26,7 +26,7 @@ const WITH_SYSTEM_ITEMS = [
   'You partner with an exclusive agent',
   'Every referral is tracked',
   'Clients are introduced professionally',
-  'You receive a referral fee when deals close',
+  'Every introduction is recorded and attributed',
 ];
 
 const BUILT_IN_ITEMS = [
@@ -34,7 +34,7 @@ const BUILT_IN_ITEMS = [
   'Client tagging by life stage',
   'Agent partnership management',
   'Follow-up reminders',
-  'Revenue tracking',
+  'Introduction tracking',
 ];
 
 const QUESTIONS = [
@@ -95,7 +95,7 @@ function getResult(total) {
     level: 'Low Opportunity',
     levelColor: 'text-yellow-600',
     levelBg: 'bg-yellow-50 border-yellow-200',
-    insight: 'You may not yet be consistently in position to generate referral income, but improving client capture and tracking could change that.',
+    insight: 'You may not yet be consistently in position to make trackable real estate introductions, but improving client capture and tracking could change that.',
   };
   if (total <= 14) return {
     level: 'Moderate Opportunity',
@@ -107,7 +107,7 @@ function getResult(total) {
     level: 'High Opportunity',
     levelColor: 'text-green-600',
     levelBg: 'bg-green-50 border-green-200',
-    insight: 'Your company is strongly positioned to generate consistent referral income through a structured agent partnership.',
+    insight: 'Your company is strongly positioned to make consistent, well-tracked real estate introductions through a structured agent partnership.',
   };
 }
 
@@ -139,7 +139,7 @@ function QuizScreen({ onComplete }) {
     <div className="space-y-6">
       <div>
         <h2 className="text-2xl font-serif font-bold text-slate-900">Referral Opportunity Assessment</h2>
-        <p className="text-slate-500 mt-1 text-sm">Find out whether your estate sale company is positioned to generate referral income through agent partnerships.</p>
+        <p className="text-slate-500 mt-1 text-sm">Find out whether your estate sale company is positioned to make trackable real estate introductions through agent partnerships.</p>
       </div>
 
       <div className="space-y-1">
@@ -184,7 +184,7 @@ function QuizScreen({ onComplete }) {
       >
         {currentQ < QUESTIONS.length - 1
           ? <span className="flex items-center gap-2">Next <ChevronRight className="w-4 h-4" /></span>
-          : 'See My Referral Potential'}
+          : 'See My Introduction Potential'}
       </Button>
     </div>
   );
@@ -218,10 +218,10 @@ function LeadCaptureScreen({ score, onSubmit }) {
   return (
     <div className="space-y-6">
       <div className="bg-green-50 border border-green-200 rounded-xl px-4 py-3 text-sm text-green-800 font-medium">
-        ✓ Assessment complete — enter your info to see your referral potential.
+        ✓ Assessment complete — enter your info to see your introduction potential.
       </div>
       <div>
-        <h2 className="text-2xl font-serif font-bold text-slate-900">See Your Referral Potential</h2>
+        <h2 className="text-2xl font-serif font-bold text-slate-900">See Your Introduction Potential</h2>
       </div>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
@@ -251,7 +251,7 @@ function ResultScreen({ result, onRetake }) {
   return (
     <div className="space-y-6">
       <div className="text-center space-y-1">
-        <p className="text-sm font-semibold text-slate-500 uppercase tracking-wide">Your Referral Revenue Potential</p>
+        <p className="text-sm font-semibold text-slate-500 uppercase tracking-wide">Your Introduction Potential</p>
         <h2 className="text-2xl font-serif font-bold text-slate-900">Here Is Where You Stand</h2>
       </div>
 
@@ -267,7 +267,7 @@ function ResultScreen({ result, onRetake }) {
         </div>
         <div className="bg-slate-50 border border-slate-200 rounded-xl p-4">
           <p className="text-xs font-bold text-slate-500 uppercase tracking-wide mb-1">Recommendation</p>
-          <p className="text-sm text-slate-700 leading-relaxed">EstateSalen can help structure, track, and scale this opportunity into a repeatable revenue stream.</p>
+          <p className="text-sm text-slate-700 leading-relaxed">EstateSalen can help structure, track, and attribute these introductions into a repeatable professional-referral practice. Any referral compensation depends on individual licensure, brokerage affiliation, and written agreements between the licensed parties.</p>
         </div>
       </div>
 
@@ -336,13 +336,13 @@ export default function LandingPageReferralEngine() {
       <section className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white py-20 px-6">
         <div className="max-w-4xl mx-auto text-center space-y-6">
           <div className="inline-flex items-center gap-2 bg-green-500/20 border border-green-500/40 text-green-300 text-sm font-semibold px-4 py-1.5 rounded-full">
-            Estate Sale Referral Revenue System
+            Estate Sale Introduction System
           </div>
           <h1 className="text-4xl md:text-5xl font-serif font-bold leading-tight">
-            Turn Your Estate Sales Into a Second Revenue Stream
+            Turn Your Estate Sale Introductions Into a Tracked, Professional Practice
           </h1>
           <p className="text-xl text-slate-300 max-w-2xl mx-auto">
-            Every estate sale client is connected to a real estate transaction. EstateSalen helps you structure, track, and monetize those referrals through an exclusive agent partnership.
+            Every estate sale client is navigating a life transition that often includes a real estate decision. EstateSalen helps you structure, track, and attribute those introductions through a vetted professional partnership.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
             <Button
@@ -365,7 +365,7 @@ export default function LandingPageReferralEngine() {
       {/* Already Sitting On */}
       <section id="opportunities" className="py-16 px-6 bg-white">
         <div className="max-w-4xl mx-auto space-y-6">
-          <h2 className="text-3xl font-serif font-bold text-slate-900">You're Already Sitting on These Opportunities</h2>
+          <h2 className="text-3xl font-serif font-bold text-slate-900">You're Already Sitting on These Introduction Opportunities</h2>
           <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-3">
             {OPPORTUNITIES.map(item => (
               <div key={item} className="flex items-center gap-3 bg-green-50 border border-green-100 rounded-lg px-4 py-3 text-sm text-slate-700 font-medium">
@@ -431,9 +431,9 @@ export default function LandingPageReferralEngine() {
       {/* Final CTA */}
       <section className="py-20 px-6 bg-green-50 text-center">
         <div className="max-w-3xl mx-auto space-y-6">
-          <h2 className="text-3xl font-serif font-bold text-slate-900">Could This Add Meaningful Revenue to Your Business?</h2>
+          <h2 className="text-3xl font-serif font-bold text-slate-900">Could Structured Introductions Strengthen Your Business?</h2>
           <p className="text-slate-600 text-lg max-w-xl mx-auto">
-            Take the quick assessment to see whether your company is positioned to benefit from a real estate referral system.
+            Take the quick assessment to see whether your company is positioned to benefit from a structured introduction system.
           </p>
           <Button
             onClick={() => setStep('quiz')}

@@ -1,6 +1,7 @@
 {
   "name": "ReferralLead",
   "type": "object",
+  "description": "Legacy real-estate referral exchange lead (Houszu / Legacy Lane). Holds client PII. Referral Rebuild Phase 1: reads are limited to the lead's source, assigned agent, assigned operator, and admins \u2014 unassigned leads are no longer visible to ordinary exchange participants while compensated acceptance is paused; all writes are admin-only (server functions operate as service role).",
   "properties": {
     "lead_id": {
       "type": "string",
@@ -53,5 +54,40 @@
     "source_user_id",
     "source_type",
     "status"
-  ]
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.source_user_id": "{{user.id}}"
+        },
+        {
+          "data.assigned_agent_id": "{{user.id}}"
+        },
+        {
+          "data.assigned_operator_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
 }

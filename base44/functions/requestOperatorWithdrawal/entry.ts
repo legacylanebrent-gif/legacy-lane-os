@@ -1,4 +1,9 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
+import {
+  LEGACY_REFERRAL_COMPENSATION_ENABLED,
+  LEGACY_COMPENSATION_PAUSED_CODE,
+  LEGACY_COMPENSATION_PAUSED_MESSAGE,
+} from '../../shared/referralCompensationControl.ts';
 
 const MIN_WITHDRAWAL = 10000; // $100 in cents
 
@@ -30,6 +35,20 @@ Deno.serve(async (req) => {
   // Verify Estate Sale Company Owner owns the request
   if (user.id !== operator_id && user.role !== 'admin') {
     return Response.json({ error: 'Unauthorized' }, { status: 403 });
+  }
+
+  // Referral Rebuild Phase 1: all wallet funds belong to the legacy referral
+  // program — withdrawal requests are centrally blocked while it is paused.
+  // Checked BEFORE any mutation; existing balances are preserved.
+  if (!LEGACY_REFERRAL_COMPENSATION_ENABLED) {
+    return Response.json(
+      {
+        success: false,
+        error: LEGACY_COMPENSATION_PAUSED_CODE,
+        message: 'Withdrawals from the legacy referral program are paused. ' + LEGACY_COMPENSATION_PAUSED_MESSAGE
+      },
+      { status: 403 }
+    );
   }
 
   // Validation

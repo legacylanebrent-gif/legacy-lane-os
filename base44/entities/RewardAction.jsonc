@@ -1,6 +1,7 @@
 {
   "name": "RewardAction",
   "type": "object",
+  "description": "Platform reward catalog (points per action). Referral Rebuild Phase 1: the catalog is readable by all authenticated users; creating, changing point values, or retiring actions is admin-only so participants cannot mint reward definitions.",
   "properties": {
     "action_id": {
       "type": "string",
@@ -52,5 +53,23 @@
     "action_name",
     "points",
     "category"
-  ]
+  ],
+  "rls": {
+    "read": {},
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
 }

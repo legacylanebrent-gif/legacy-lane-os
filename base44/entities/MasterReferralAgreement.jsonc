@@ -1,6 +1,7 @@
 {
   "name": "MasterReferralAgreement",
   "type": "object",
+  "description": "Legacy referral exchange master participation agreement (self-signed electronic signature). Referral Rebuild Phase 1: a user may read only their own signed agreements and may create (sign) only an agreement for THEMSELVES; revocation and all other mutations are admin-only. Signed agreements are historical records and are preserved unchanged.",
   "properties": {
     "agreement_id": {
       "type": "string",
@@ -52,5 +53,41 @@
     "signed_email",
     "signed_timestamp",
     "status"
-  ]
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "$or": [
+        {
+          "data.user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
 }
