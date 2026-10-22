@@ -30,19 +30,10 @@ export default function JoinReferralExchange() {
 
   const handleSubmit = async ({ signed_name }) => {
     setSubmitting(true);
-    const now = new Date().toISOString();
-    const agreementId = `MRA-${Date.now()}-${user.id.slice(-6).toUpperCase()}`;
 
-    await base44.entities.MasterReferralAgreement.create({
-      agreement_id: agreementId,
-      user_id: user.id,
-      user_type: user.primary_account_type === 'real_estate_agent' ? 'agent' : 'Estate Sale Company Owner',
-      signed_name,
-      signed_email: user.email,
-      signed_timestamp: now,
-      signed_ip: '',
-      status: 'active',
-    });
+    // Server-signed submission: identity, timestamp, and terms version are
+    // bound server-side — never asserted by the client.
+    await base44.functions.invoke('signMasterReferralAgreement', { signed_name });
 
     setSubmitting(false);
     setDone(true);

@@ -147,16 +147,18 @@ export default function RewardsCheckins() {
                           checkInData.longitude = longitude;
                         }
                         
-                        await base44.entities.CheckIn.create(checkInData);
+                        const checkIn = await base44.entities.CheckIn.create(checkInData);
                         
-                        const user = await base44.auth.me();
-                        await base44.entities.UserReward.create({
-                          user_id: user.id,
-                          action_id: 'qr_check_in',
-                          action_name: 'QR Code Check-in Bonus',
-                          points_earned: 15,
-                          description: `QR check-in at ${saleTitle || 'Estate Sale'}`
-                        });
+                        // Award points through the sanctioned server path
+                        try {
+                          await base44.functions.invoke('completeRewardAction', {
+                            action_id: 'qr_check_in',
+                            reference_id: checkIn?.id,
+                            notes: `QR check-in at ${saleTitle || 'Estate Sale'}`
+                          });
+                        } catch (rewardErr) {
+                          console.error('Reward not recorded:', rewardErr);
+                        }
                         
                         setShowQRScanner(false);
                         loadData();
@@ -479,47 +481,50 @@ function CheckInForm({ onSuccess, onCancel }) {
               longitude: position.coords.longitude,
               verified: true
             };
-            await base44.entities.CheckIn.create(checkInData);
+            const checkIn = await base44.entities.CheckIn.create(checkInData);
             
-            // Also create a user reward
-            const user = await base44.auth.me();
-            await base44.entities.UserReward.create({
-              user_id: user.id,
-              action_id: 'check_in',
-              action_name: 'Check-in Bonus',
-              points_earned: formData.points_earned,
-              description: `Check-in at ${formData.location_name}`
-            });
+            // Award points through the sanctioned server path
+            try {
+              await base44.functions.invoke('completeRewardAction', {
+                action_id: 'check_in',
+                reference_id: checkIn?.id,
+                notes: `Check-in at ${formData.location_name}`
+              });
+            } catch (rewardErr) {
+              console.error('Reward not recorded:', rewardErr);
+            }
             
             onSuccess();
           },
           async () => {
             // Location not available, create without coords
-            await base44.entities.CheckIn.create(formData);
-            
-            const user = await base44.auth.me();
-            await base44.entities.UserReward.create({
-              user_id: user.id,
-              action_id: 'check_in',
-              action_name: 'Check-in Bonus',
-              points_earned: formData.points_earned,
-              description: `Check-in at ${formData.location_name}`
-            });
+            const checkIn = await base44.entities.CheckIn.create(formData);
+            // Award points through the sanctioned server path
+            try {
+              await base44.functions.invoke('completeRewardAction', {
+                action_id: 'check_in',
+                reference_id: checkIn?.id,
+                notes: `Check-in at ${formData.location_name}`
+              });
+            } catch (rewardErr) {
+              console.error('Reward not recorded:', rewardErr);
+            }
             
             onSuccess();
           }
         );
       } else {
-        await base44.entities.CheckIn.create(formData);
-        
-        const user = await base44.auth.me();
-        await base44.entities.UserReward.create({
-          user_id: user.id,
-          action_id: 'check_in',
-          action_name: 'Check-in Bonus',
-          points_earned: formData.points_earned,
-          description: `Check-in at ${formData.location_name}`
-        });
+        const checkIn = await base44.entities.CheckIn.create(formData);
+        // Award points through the sanctioned server path
+        try {
+          await base44.functions.invoke('completeRewardAction', {
+            action_id: 'check_in',
+            reference_id: checkIn?.id,
+            notes: `Check-in at ${formData.location_name}`
+          });
+        } catch (rewardErr) {
+          console.error('Reward not recorded:', rewardErr);
+        }
         
         onSuccess();
       }

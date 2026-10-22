@@ -1,5 +1,10 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
 
+// Phase 1B: the software-affiliate reward amount is SERVER-CONTROLLED.
+// A client-supplied Referral.reward_amount is informational only and is
+// never honored — participants cannot inflate their own reward.
+const SOFTWARE_REFERRAL_REWARD_DOLLARS = 25;
+
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
@@ -52,8 +57,8 @@ Deno.serve(async (req) => {
           user_id: referral.referrer_id,
           action_id: `referral_${referralId}`,
           action_name: 'Referral Reward',
-          points_earned: referral.reward_amount || 25,
-          notes: `$${referral.reward_amount || 25} software-affiliate reward for referring ${referral.referred_user_name || referral.referred_user_email}`
+          points_earned: SOFTWARE_REFERRAL_REWARD_DOLLARS,
+          notes: `$${SOFTWARE_REFERRAL_REWARD_DOLLARS} software-affiliate reward for referring ${referral.referred_user_name || referral.referred_user_email}`
         });
 
         // Update referral reward status

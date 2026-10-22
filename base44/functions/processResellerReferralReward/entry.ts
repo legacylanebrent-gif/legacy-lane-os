@@ -11,6 +11,11 @@
 // dangling field with no consumer) is removed.
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
 
+// Phase 1B: the software-affiliate reward amount is SERVER-CONTROLLED.
+// A client-supplied Referral.reward_amount is informational only and is
+// never honored — participants cannot inflate their own reward.
+const SOFTWARE_REFERRAL_REWARD_DOLLARS = 25;
+
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
@@ -58,12 +63,12 @@ Deno.serve(async (req) => {
     if (existingRewards.length > 0) {
       await base44.asServiceRole.entities.Referral.update(referral.id, {
         reward_status: 'sent',
-        reward_amount: referral.reward_amount || 25
+        reward_amount: SOFTWARE_REFERRAL_REWARD_DOLLARS
       });
       return Response.json({ success: true, status: 'already_rewarded' });
     }
 
-    const amount = referral.reward_amount || 25;
+    const amount = SOFTWARE_REFERRAL_REWARD_DOLLARS;
 
     await base44.asServiceRole.entities.UserReward.create({
       user_id: referral.referrer_id,

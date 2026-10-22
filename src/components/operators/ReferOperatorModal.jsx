@@ -8,7 +8,7 @@ import { Gift, Mail, CheckCircle } from 'lucide-react';
 // Shared helper: log referral + award points
 export async function logReferral({ currentUser, operator, contactEmail }) {
   const referralCode = currentUser.id.slice(-8).toUpperCase();
-  await base44.entities.Referral.create({
+  const referral = await base44.entities.Referral.create({
     referrer_id: currentUser.id,
     referrer_name: currentUser.full_name,
     referrer_email: currentUser.email,
@@ -16,19 +16,19 @@ export async function logReferral({ currentUser, operator, contactEmail }) {
     referred_email: contactEmail || '',
     referred_company_name: operator.company_name,
     account_type: 'estate_sale_operator',
-    status: 'pending',
-    reward_amount: 25,
-    reward_status: 'pending',
+    status: 'pending'
   });
-  const now = new Date();
-  await base44.entities.UserReward.create({
-    user_id: currentUser.id,
-    action_id: 'operator_referral_sent',
-    action_name: 'Estate Sale Company Owner Referral Sent',
-    points_earned: 100,
-    description: `Referred ${operator.company_name} to join EstateSalen.com`,
-    month: `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`,
-  });
+  // Award points through the sanctioned server path — points are derived
+  // server-side from this referral record; the client never sets them.
+  try {
+    await base44.functions.invoke('completeRewardAction', {
+      action_id: 'operator_referral_sent',
+      reference_id: referral?.id,
+      notes: `Referred ${operator.company_name} to join EstateSalen.com`
+    });
+  } catch (rewardErr) {
+    console.error('Reward not recorded:', rewardErr);
+  }
 }
 
 // Email modal — collects email address then sends

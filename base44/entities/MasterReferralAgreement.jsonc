@@ -1,7 +1,7 @@
 {
   "name": "MasterReferralAgreement",
   "type": "object",
-  "description": "Legacy referral exchange master participation agreement (self-signed electronic signature). Referral Rebuild Phase 1: a user may read only their own signed agreements and may create (sign) only an agreement for THEMSELVES; revocation and all other mutations are admin-only. Signed agreements are historical records and are preserved unchanged.",
+  "description": "Legacy referral exchange master participation agreement (electronic signature). Referral Rebuild Phase 1B: signatures are created ONLY through the sanctioned signMasterReferralAgreement backend function, which binds the AUTHENTICATED user (server-side identity), a SERVER-GENERATED timestamp, and the SERVER-PINNED terms version \u2014 a client can never assert a timestamp, a different terms version, an executed status, or someone else's signature. Direct client creation is closed (admin-only RLS). A signed acknowledgement is NOT verified licensing, broker approval, or an executed brokerage referral agreement. Historical records are preserved unchanged; a null terms_version means 'version not recorded' (pre-versioning historical record) and is NEVER backfilled or upgraded.",
   "properties": {
     "agreement_id": {
       "type": "string",
@@ -9,7 +9,7 @@
     },
     "user_id": {
       "type": "string",
-      "description": "User ID of the signer"
+      "description": "User ID of the signer (server-derived from the authenticated session)"
     },
     "user_type": {
       "type": "string",
@@ -25,16 +25,20 @@
     },
     "signed_email": {
       "type": "string",
-      "description": "Email at time of signing"
+      "description": "Email at time of signing (server-derived from the authenticated user)"
     },
     "signed_timestamp": {
       "type": "string",
       "format": "date-time",
-      "description": "ISO timestamp when agreement was signed"
+      "description": "SERVER-GENERATED timestamp when the agreement was accepted"
     },
     "signed_ip": {
       "type": "string",
-      "description": "IP address at time of signing"
+      "description": "IP address at time of signing (best-effort from request headers; may be empty)"
+    },
+    "terms_version": {
+      "type": "string",
+      "description": "The EXACT terms version the signer acknowledged (pinned server-side at signing time by signMasterReferralAgreement). Changing the displayed terms requires bumping this server constant; a signature never silently covers a different version. Null on historical records = version not recorded \u2014 never backfilled."
     },
     "status": {
       "type": "string",
@@ -68,16 +72,9 @@
       ]
     },
     "create": {
-      "$or": [
-        {
-          "data.user_id": "{{user.id}}"
-        },
-        {
-          "user_condition": {
-            "role": "admin"
-          }
-        }
-      ]
+      "user_condition": {
+        "role": "admin"
+      }
     },
     "update": {
       "user_condition": {

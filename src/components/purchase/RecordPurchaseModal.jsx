@@ -41,7 +41,7 @@ export default function RecordPurchaseModal({ open, onClose, onSuccess }) {
       const pointsEarned = Math.floor(formData.purchase_amount / 10);
       
       // Create purchase record as income (negative to track spending)
-      await base44.entities.Income.create({
+      const income = await base44.entities.Income.create({
         income_date: new Date().toISOString().split('T')[0],
         source: formData.sale_location || 'Estate Sale Purchase',
         amount: -Math.abs(formData.purchase_amount),
@@ -50,15 +50,18 @@ export default function RecordPurchaseModal({ open, onClose, onSuccess }) {
         is_automated: true
       });
       
-      // Award points for purchase
-      if (pointsEarned > 0) {
-        await base44.entities.UserReward.create({
-          user_id: user.id,
-          action_id: 'purchase_reward',
-          action_name: 'Purchase Reward',
-          points_earned: pointsEarned,
-          description: `Earned ${pointsEarned} points for $${formData.purchase_amount} purchase`
-        });
+      // Award points through the sanctioned server path — points are derived
+      // server-side from the recorded purchase; the client never sets them.
+      if (pointsEarned > 0 && income?.id) {
+        try {
+          await base44.functions.invoke('completeRewardAction', {
+            action_id: 'purchase_reward',
+            reference_id: income.id,
+            notes: `Purchase: ${formData.item_name}`
+          });
+        } catch (rewardErr) {
+          console.error('Reward not recorded:', rewardErr);
+        }
       }
       
       alert(`Purchase recorded! You earned ${pointsEarned} points!`);

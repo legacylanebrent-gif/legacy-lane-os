@@ -1,7 +1,7 @@
 {
   "name": "UserReward",
   "type": "object",
-  "description": "Reward ledger record (engagement points, software-affiliate referral rewards). Referral Rebuild Phase 1: a user reads only their own rewards and may create reward records only for THEMSELVES (matching the platform's user-action rewards flows, e.g. purchases and check-ins); rewards for OTHER users and all mutations are admin-only. Referral rewards are created exclusively by admin backend functions through the ONE canonical path (action_id `referral_<id>`).",
+  "description": "Reward ledger record (engagement points, software-affiliate referral rewards). Referral Rebuild Phase 1B: ALL creation goes through sanctioned backend paths \u2014 the admin reward functions (referral rewards via the ONE canonical action_id 'referral_<id>' path) and completeRewardAction, which derives points SERVER-SIDE from a qualifying record the user actually created and deduplicates per event. Direct client creation is closed (admin-only RLS) so a participant can never mint points, forge a qualifying event, or duplicate a reward. A user reads only their own rewards; all other mutations are admin-only. Points feed monthly prize-draw eligibility \u2014 they are fulfillment-relevant, never client-assertable.",
   "properties": {
     "user_id": {
       "type": "string",
@@ -52,16 +52,9 @@
       ]
     },
     "create": {
-      "$or": [
-        {
-          "data.user_id": "{{user.id}}"
-        },
-        {
-          "user_condition": {
-            "role": "admin"
-          }
-        }
-      ]
+      "user_condition": {
+        "role": "admin"
+      }
     },
     "update": {
       "user_condition": {

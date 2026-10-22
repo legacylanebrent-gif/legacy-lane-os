@@ -796,15 +796,18 @@ export default function Home() {
                           checkInData.longitude = longitude;
                         }
 
-                        await base44.entities.CheckIn.create(checkInData);
+                        const checkIn = await base44.entities.CheckIn.create(checkInData);
 
-                        await base44.entities.UserReward.create({
-                          user_id: currentUser.id,
-                          action_id: 'qr_check_in',
-                          action_name: 'QR Code Check-in Bonus',
-                          points_earned: 15,
-                          description: `QR check-in at ${saleTitle || 'Estate Sale'}`
-                        });
+                        // Award points through the sanctioned server path
+                        try {
+                          await base44.functions.invoke('completeRewardAction', {
+                            action_id: 'qr_check_in',
+                            reference_id: checkIn?.id,
+                            notes: `QR check-in at ${saleTitle || 'Estate Sale'}`
+                          });
+                        } catch (rewardErr) {
+                          console.error('Reward not recorded:', rewardErr);
+                        }
 
                         setShowQRScanner(false);
                         alert('Check-in successful! +15 points earned');

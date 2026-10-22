@@ -189,7 +189,7 @@ export default function RecordPurchase() {
       const amount = parseFloat(formData.purchase_amount);
       
       // Record the purchase
-      await base44.entities.Transaction.create({
+      const transaction = await base44.entities.Transaction.create({
         sale_id: 'user_purchase',
         item_name: formData.item_name,
         quantity: 1,
@@ -200,17 +200,17 @@ export default function RecordPurchase() {
         transaction_date: new Date(formData.purchase_date).toISOString()
       });
 
-      // Award points for purchase
-      const purchaseMonth = formData.purchase_date.substring(0, 7); // YYYY-MM format
-      await base44.entities.UserReward.create({
-        user_id: user.id,
-        action_id: 'purchase',
-        action_name: 'Purchase at Estate Sale',
-        points_earned: 10,
-        month: purchaseMonth,
-        reference_id: finalLocation,
-        notes: `Purchase: ${formData.item_name}`
-      });
+      // Award points through the sanctioned server path — points are derived
+      // server-side from the recorded purchase; the client never sets them.
+      try {
+        await base44.functions.invoke('completeRewardAction', {
+          action_id: 'purchase',
+          reference_id: transaction?.id,
+          notes: `Purchase: ${formData.item_name} at ${finalLocation}`
+        });
+      } catch (rewardErr) {
+        console.error('Reward not recorded:', rewardErr);
+      }
 
       alert('Purchase recorded successfully! +10 points earned');
       navigate(createPageUrl('MyPurchases'));
