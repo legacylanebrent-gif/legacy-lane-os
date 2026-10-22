@@ -181,7 +181,8 @@
       }
     },
     "price": {
-      "type": "number"
+      "type": "number",
+      "description": "The single CURRENT asking price. Chapter 19 P0: price changes on HIGH_VALUE merchandise are enforceably operator/seller/admin-only through the Item update rule (the gate reads the record's CURRENT inventory_level, so an employee cannot downgrade a HIGH_VALUE item to unlock it), and the canonical changeItemPrice path continues to require an explicit reason for HIGH_VALUE changes."
     },
     "sold_price": {
       "type": "number",
@@ -2527,6 +2528,11 @@
             },
             {
               "created_by_id": "{{user.id}}"
+            },
+            {
+              "data.inventory_level": {
+                "$ne": "HIGH_VALUE"
+              }
             }
           ]
         },
@@ -2566,6 +2572,11 @@
                 "$in": [
                   "{{user.id}}"
                 ]
+              }
+            },
+            {
+              "data.inventory_level": {
+                "$ne": "HIGH_VALUE"
               }
             }
           ]
