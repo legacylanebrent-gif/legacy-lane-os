@@ -128,6 +128,32 @@ export default function SaleConversionPipeline() {
       // Auto-sync stages for linked deals
       const synced = syncDealStages(pipelineData || [], salesData || []);
       setDeals(synced);
+      // Deep link: ?saleId= opens the linked deal directly (Agreement Readiness cards).
+      // If this sale has no pipeline deal yet, create one (same auto-create the Sync
+      // button performs) so the operator lands on THIS sale's economics, not a blank board.
+      const deepSaleId = new URLSearchParams(window.location.search).get('saleId');
+      if (deepSaleId) {
+        let linked = synced.find(d => d.estate_sale_id === deepSaleId);
+        if (!linked) {
+          const sale = (salesData || []).find(s => s.id === deepSaleId);
+          if (sale) {
+            linked = await base44.entities.SaleConversionPipeline.create({
+              operator_id: u.id,
+              estate_sale_id: sale.id,
+              client_name: sale.title || 'Unnamed Sale',
+              property_address: sale.property_address?.formatted_address || sale.property_address?.street || '',
+              property_city: sale.property_address?.city || '',
+              property_state: sale.property_address?.state || '',
+              stage: SALE_STATUS_TO_STAGE[sale.status] || 'new_lead',
+              estimated_value: sale.estimated_value || null,
+              estimated_sale_start_date: sale.sale_dates?.[0]?.date || '',
+              situation: 'standard',
+            });
+            setDeals(prev => [linked, ...prev]);
+          }
+        }
+        if (linked) { setSelectedDeal({ ...linked }); setShowDetail(true); }
+      }
     } catch (e) { console.error(e); }
     finally { setLoading(false); }
   };

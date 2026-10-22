@@ -159,7 +159,7 @@ export function analyzeAgreementReadiness({ sale, deal, scope, authorities, open
     const includedCount = asArray(scope.scope_items).filter(s => s.included).length;
     push('scope', 'Agreed Scope', 'COMPLETE', `Agreed scope on file (version ${scope.version || 1}; ${includedCount} included service${includedCount === 1 ? '' : 's'}).`);
   } else {
-    push('scope', 'Agreed Scope', 'NEEDS_REVIEW', 'No agreed-scope record — UNKNOWN, not "no scope".', `/SaleEditor?saleId=${sale?.id}`, 'Record Scope');
+    push('scope', 'Agreed Scope', 'NEEDS_REVIEW', 'No agreed-scope record — UNKNOWN, not "no scope".', `/SaleClientDecisions?saleId=${sale?.id}`, 'Record Scope');
   }
 
   // 4 — COMMERCIAL TERMS
@@ -172,7 +172,7 @@ export function analyzeAgreementReadiness({ sale, deal, scope, authorities, open
         'Terms are recorded but NOT marked accepted — projected terms are not accepted terms.', saleLink, 'Open Proposal & Agreement');
     }
   } else {
-    push('commercial_terms', 'Commercial Terms', 'NEEDS_REVIEW', 'No commission/minimum recorded on the deal — UNKNOWN.', `/SaleConversionPipeline`, 'Open Deal Economics');
+    push('commercial_terms', 'Commercial Terms', 'NEEDS_REVIEW', 'No commission/minimum recorded on the deal — UNKNOWN.', `/SaleConversionPipeline?saleId=${sale?.id}`, 'Open Deal Economics');
   }
 
   // 5 — ESTIMATE / RANGE
@@ -183,7 +183,7 @@ export function analyzeAgreementReadiness({ sale, deal, scope, authorities, open
       : `${money(deal.estimated_value)} (working estimate)`;
     push('estimate', 'Estimated Sale Range', 'COMPLETE', `${range} — an estimate for planning, not a guarantee.`);
   } else {
-    push('estimate', 'Estimated Sale Range', 'NEEDS_REVIEW', 'No estimated sale value recorded — UNKNOWN, not zero.', `/SaleConversionPipeline`, 'Open Deal Economics');
+    push('estimate', 'Estimated Sale Range', 'NEEDS_REVIEW', 'No estimated sale value recorded — UNKNOWN, not zero.', `/SaleConversionPipeline?saleId=${sale?.id}`, 'Open Deal Economics');
   }
 
   // 6 — SALE DATES
@@ -216,7 +216,7 @@ export function analyzeAgreementReadiness({ sale, deal, scope, authorities, open
   if (scope?.discount_approach) {
     push('discount', 'Discount Approach', 'COMPLETE', 'Discount approach recorded on the agreed scope.');
   } else {
-    push('discount', 'Discount Approach', 'NEEDS_REVIEW', 'No discount approach recorded — UNKNOWN, not "no discounts". Record what was discussed.', `/SaleEditor?saleId=${sale?.id}`, 'Record Scope');
+    push('discount', 'Discount Approach', 'NEEDS_REVIEW', 'No discount approach recorded — UNKNOWN, not "no discounts". Record what was discussed.', `/SaleClientDecisions?saleId=${sale?.id}`, 'Record Discount Approach');
   }
 
   // 10 — POST-SALE PLAN
