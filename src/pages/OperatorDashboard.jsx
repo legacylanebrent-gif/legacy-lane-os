@@ -67,7 +67,9 @@ export default function OperatorDashboard() {
           };
         }
         
-        monthlyData[monthKey].revenue += sale.actual_revenue || 0;
+        // Chapter 23 P0-4 — this is COMPANY REVENUE (compensation actually earned),
+        // never gross merchandise sales. actual_revenue on the sale stores gross.
+        monthlyData[monthKey].revenue += sale.commission_earned || 0;
       }
     });
 
@@ -180,7 +182,7 @@ export default function OperatorDashboard() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-slate-600 mb-1">Total Revenue</p>
+                <p className="text-sm text-slate-600 mb-1">Company Revenue</p>
                 <p className="text-3xl font-bold text-slate-900">
                   ${metrics.totalRevenue.toLocaleString()}
                 </p>
@@ -234,7 +236,7 @@ export default function OperatorDashboard() {
         {/* Revenue Growth */}
         <Card>
           <CardHeader>
-            <CardTitle>Revenue Growth</CardTitle>
+            <CardTitle>Company Revenue Growth</CardTitle>
           </CardHeader>
           <CardContent>
             {chartDataRevenue.length > 0 ? (

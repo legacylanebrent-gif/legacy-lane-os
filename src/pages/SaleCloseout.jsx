@@ -6,24 +6,31 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Textarea } from '@/components/ui/textarea';
 import {
   ArrowLeft, Package, CheckCircle2, AlertTriangle, Info, PackageCheck,
-  Users, DollarSign, Landmark, ClipboardCheck, ListChecks, Loader2
+  Users, DollarSign, Landmark, ClipboardCheck, ListChecks, Loader2, KeyRound
 } from 'lucide-react';
 import { asArray, fmtDateTime } from '@/components/saleops/saleDecisionModel';
-import { actualSaleEconomics } from '@/components/saleops/saleEconomicsModel';
+import { toast } from 'sonner';
+import { actualSaleEconomics, settlementReadiness, money } from '@/components/saleops/saleEconomicsModel';
 import { postSaleAuthorizationWarning } from '@/components/agreements/agreementModel';
 import SaleEconomicsPanel from '@/components/saleops/SaleEconomicsPanel';
 import TenMoreReflection from '@/components/saleops/TenMoreReflection';
+import ReconciliationPanel from '@/components/saleops/ReconciliationPanel';
+import PostSaleReviewCard from '@/components/saleops/PostSaleReviewCard';
+import ClosingFileCard from '@/components/saleops/ClosingFileCard';
 import ReleasePickupDialog from '@/components/pickup/ReleasePickupDialog';
 
-// Chapter 1 P1 — Guided Closeout: an ORCHESTRATION surface over the existing
-// canonical closeout systems (Item, Donation, Cleanout, buyout, Expense,
+// Chapter 1 P1 / Chapter 23 — Guided Closeout: an ORCHESTRATION surface over the
+// existing canonical closeout systems (Item, Donation, Cleanout, buyout, Expense,
 // SaleConversionPipeline/SettlementStatement, SaleTask, SaleClientDecision,
-// SaleRecap workflow). It creates no duplicate records and replaces no lifecycle:
-// EstateSale.status remains the single project lifecycle.
-
-const money = (n) => `$${(n || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+// SaleRecap, TransitionCompletion). It creates no duplicate records and replaces
+// no lifecycle: EstateSale.status remains the single project lifecycle.
+//
+// Chapter 23 P0-3 PROJECT CLOSE GATE: FINANCIALLY COMPLETE + TRANSITION COMPLETE
+// + ACCESS CLOSEOUT CONFIRMED + required endings = READY FOR HUMAN PROJECT CLOSE.
+// CLIENT PAID ≠ PROJECT CLOSED; FINANCIAL COMPLETE ≠ TRANSITION COMPLETE.
 
 function StepIcon({ state }) {
   if (state === 'done') return <CheckCircle2 className="w-5 h-5 text-green-600" />;
@@ -32,6 +39,14 @@ function StepIcon({ state }) {
   return <Info className="w-5 h-5 text-slate-400" />;
 }
 
+const ACCESS_STATUSES = [
+  ['NOT_APPLICABLE', 'Not applicable — no company-held devices'],
+  ['UNRESOLVED', 'Unresolved — a device is still outstanding'],
+  ['RETURNED', 'Returned to client/agent'],
+  ['TRANSFERRED', 'Transferred to the new owner'],
+  ['DISABLED', 'Disabled / codes deactivated'],
+];
+
 export default function SaleCloseout() {
   const navigate = useNavigate();
   const [sale, setSale] = useState(null);
@@ -39,8 +54,9 @@ export default function SaleCloseout() {
   const [data, setData] = useState(null);
   const [showCloseConfirm, setShowCloseConfirm] = useState(false);
   const [closing, setClosing] = useState(false);
-  const [pickedUpIds, setPickedUpIds] = useState([]);
   const [releaseItem, setReleaseItem] = useState(null);
+  const [accessBusy, setAccessBusy] = useState(false);
+  const [accessDraft, setAccessDraft] = useState({ status: '', note: '' });
 
   useEffect(() => {
     loadData();
@@ -55,8 +71,9 @@ export default function SaleCloseout() {
       if (!saleData.length) { alert('Sale not found'); navigate(createPageUrl('MySales')); return; }
       const sale = saleData[0];
       setSale(sale);
+      setAccessDraft({ status: sale.access_closeout?.status || '', note: sale.access_closeout?.note || '' });
 
-      const [itemsRes, decisionsRes, tasksRes, expensesRes, dealsRes, donationsRes, cleanoutsRes, laborRes, equipRes, scopeRes] = await Promise.all([
+      const [itemsRes, decisionsRes, tasksRes, expensesRes, dealsRes, donationsRes, cleanoutsRes, laborRes, equipRes, scopeRes, ordersRes, refundsRes, attemptsRes, issuesRes, cashRes] = await Promise.all([
         base44.entities.Item.filter({ estate_sale_id: sale.id }),
         base44.entities.SaleClientDecision.filter({ sale_id: sale.id }),
         base44.entities.SaleTask.filter({ sale_id: sale.id }),
@@ -66,7 +83,12 @@ export default function SaleCloseout() {
         base44.entities.Cleanout.filter({ operator_id: sale.operator_id }),
         base44.entities.LaborEntry.filter({ sale_id: sale.id }),
         base44.entities.SaleEquipmentAssignment.filter({ sale_id: sale.id }),
-        base44.entities.SaleScope.filter({ sale_id: sale.id, status: 'ACTIVE' }),
+        base44.entities.SaleScope.filter({ sale_id: sale.id, status: 'ACTIVE' }).catch(() => []),
+        base44.entities.Order.filter({ sale_id: sale.id }).catch(() => []),
+        base44.entities.SaleRefund.filter({ sale_id: sale.id }).catch(() => []),
+        base44.entities.PaymentAttempt.filter({ sale_id: sale.id }).catch(() => []),
+        base44.entities.SaleIssue.filter({ sale_id: sale.id }).catch(() => []),
+        base44.entities.CashSession.filter({ sale_id: sale.id }).catch(() => []),
       ]);
       const items = asArray(itemsRes);
       const decisions = asArray(decisionsRes);
@@ -77,15 +99,19 @@ export default function SaleCloseout() {
       const cleanouts = asArray(cleanoutsRes);
       const laborEntries = asArray(laborRes);
       const equipmentAssignments = asArray(equipRes);
+      const orders = asArray(ordersRes);
+      const refunds = asArray(refundsRes);
+      const attempts = asArray(attemptsRes);
+      const issues = asArray(issuesRes);
+      const cashSessions = asArray(cashRes);
 
       // Chapter 22 P0-2 — match donation/cleanout records by the CANONICAL sale link.
-      // Address is descriptive only; legacy unlinked records surface for review.
       const saleDonations = donations.filter((d) => d.sale_id === sale.id);
       const saleCleanouts = cleanouts.filter((c) => c.sale_id === sale.id);
       const legacyUnlinked = donations.filter((d) => !d.sale_id).length + cleanouts.filter((c) => !c.sale_id).length;
       const scope = asArray(scopeRes)[0] || null;
 
-      setData({ items, decisions, tasks, expenses, deals, saleDonations, saleCleanouts, legacyUnlinked, laborEntries, equipmentAssignments, sale, scope });
+      setData({ items, decisions, tasks, expenses, deals, saleDonations, saleCleanouts, legacyUnlinked, laborEntries, equipmentAssignments, orders, refunds, attempts, issues, cashSessions, sale, scope });
     } catch (e) {
       console.error('Error loading closeout data:', e);
     } finally {
@@ -105,8 +131,8 @@ export default function SaleCloseout() {
   }
   if (!sale || !data) return <div className="p-8 text-slate-500">Could not load closeout data.</div>;
 
-  const { items, decisions, tasks, expenses, deals, saleDonations, saleCleanouts, legacyUnlinked, laborEntries, equipmentAssignments, scope } = data;
-  const isPickedUp = (i) => !!i.pickup_completed_at || pickedUpIds.includes(i.id);
+  const { items, decisions, tasks, expenses, deals, saleDonations, saleCleanouts, legacyUnlinked, laborEntries, equipmentAssignments, orders, refunds, attempts, issues, cashSessions, scope } = data;
+  const isPickedUp = (i) => !!i.pickup_completed_at;
 
   // 1 — Sold merchandise
   const soldItems = items.filter(i => i.status === 'sold');
@@ -123,17 +149,12 @@ export default function SaleCloseout() {
   const reviewOpen = merchDecisions.filter(d => d.current_decision === 'review' && d.status === 'open');
   const openGeneral = decisions.filter(d => d.decision_type !== 'merchandise' && d.status === 'open');
 
-  // 4 — Financials (Chapter 4 P1 canonical economics model: gross ≠ company revenue;
-  //     fee = MAX(commission, minimum); company revenue adds authorized service charges only)
+  // 4 — Financials (Chapter 23 canonical waterfall incl. refunds + reimbursables)
   const financialDecisions = decisions.filter(d => d.decision_type === 'financial');
   const deal = deals[0];
-  const econ = actualSaleEconomics({ items, deal, financialDecisions, expenses, laborEntries });
-  const expenseTotal = econ.expenses.total;
+  const econ = actualSaleEconomics({ items, deal, financialDecisions, expenses, laborEntries, refunds });
 
-  // 5 — Settlement (existing SaleConversionPipeline / SettlementStatement logic)
-  const gross = econ.gross;
-  const rate = deal?.commission_rate ?? 35;
-  const commission = econ.fee.commission;
+  // 5 — Settlement
   const netDueToClient = econ.netDueToClient;
   const paid = deal?.total_paid_to_client || 0;
   const remaining = netDueToClient - paid;
@@ -148,41 +169,74 @@ export default function SaleCloseout() {
   // 6 — Final check
   const openTasks = tasks.filter(t => t.status !== 'completed');
   const blockedTasks = tasks.filter(t => t.blocked && t.status !== 'completed');
-
-  // Chapter 8 P1 — every company asset that leaves should have an ending.
   const unresolvedEquipment = (equipmentAssignments || []).filter(
     a => a.packed && a.entry_type === 'REUSABLE_EQUIPMENT' && (a.packout_state || 'PENDING') === 'PENDING'
   );
+
+  // Chapter 23 — payment-truth readiness (P0-2 reused for financial completion)
+  const paymentIssues = issues.filter(i => i.category === 'payment');
+  const finReady = settlementReadiness({ attempts, issues: paymentIssues, cashSessions, refunds });
+
+  // Chapter 23 P0-3 — completion states kept distinct:
+  const financialComplete = deal ? (!!deal.settlement_finalized && remaining <= 0.005 && finReady.ready) : null;
+  const transitionComplete = !!sale.transition?.transition_completed_at;
+  const access = sale.access_closeout || {};
+  const accessConfirmed = ['RETURNED', 'TRANSFERRED', 'DISABLED', 'NOT_APPLICABLE'].includes(access.status);
 
   // Step states: done | warning | blocker | info
   const step1 = awaitingPickup.length > 0 ? 'blocker' : (missingPaymentMethod.length > 0 ? 'warning' : 'done');
   const step2 = unsoldItems.length === 0 ? 'done' : (dispositionScheduled ? 'done' : 'warning');
   const step3 = reviewOpen.length > 0 ? 'blocker' : (openGeneral.length > 0 ? 'warning' : 'done');
   const step4 = 'done';
-  const step5 = !deal ? 'info' : (deal.settlement_finalized ? 'done' : (remaining > 0.005 ? 'blocker' : 'warning'));
+  const step5 = !deal ? 'info' : (financialComplete ? 'done' : 'blocker');
   const step6 = (openTasks.length > 0 || blockedTasks.length > 0) ? 'warning' : 'done';
+  const step7 = transitionComplete ? 'done' : 'blocker';
+  const step8 = accessConfirmed ? 'done' : 'blocker';
 
   const stepScore = (s) => (s === 'done' ? 1 : s === 'warning' ? 0.5 : 0);
-  const scored = [step1, step2, step3, step4, step5, step6];
+  const scored = [step1, step2, step3, step4, step5, step6, step7, step8];
   const readiness = Math.round((scored.reduce((a, s) => a + stepScore(s), 0) / scored.length) * 100);
 
   const blockers = [];
   if (awaitingPickup.length > 0) blockers.push(`${awaitingPickup.length} sold item(s) awaiting pickup — paid merchandise still under company custody`);
   if (reviewOpen.length > 0) blockers.push(`${reviewOpen.length} unresolved merchandise client decision(s) (REVIEW)`);
-  if (step5 === 'blocker') blockers.push(`Client settlement incomplete — ${money(remaining)} still due to client`);
+  if (deal && !deal.settlement_finalized) blockers.push('Settlement not finalized — the settlement statement must be finalized before project close');
+  if (deal && remaining > 0.005) blockers.push(`Client settlement incomplete — ${money(remaining)} still due to client`);
+  finReady.blockers.forEach(b => blockers.push(b));
+  if (!transitionComplete) blockers.push('TRANSITION COMPLETE = NO — complete the Chapter 22 Transition Completion before closing the project');
+  if (!accessConfirmed) blockers.push('Access closeout not confirmed — record what happened to keys / lockbox / access devices (or mark NOT APPLICABLE)');
   const warnings = [];
   if (missingPaymentMethod.length > 0) warnings.push(`${missingPaymentMethod.length} sold item(s) with no payment method recorded`);
   if (step2 === 'warning') warnings.push(`${unsoldItems.length} unsold item(s) with no disposition scheduled (donation / cleanout / buyout)`);
   if (openGeneral.length > 0) warnings.push(`${openGeneral.length} open client decision(s)`);
-  if (openTasks.length > 0) warnings.push(`${openTasks.length} open task(s)${blockedTasks.length ? `, ${blockedTasks.length} blocked` : ''}`);
+  if (openTasks.length > 0) warnings.push(`Open task(s): ${openTasks.length}${blockedTasks.length ? `, ${blockedTasks.length} blocked` : ''}`);
   if (unresolvedEquipment.length > 0) warnings.push(`EQUIPMENT STILL UNRESOLVED: ${unresolvedEquipment.length} company asset(s) with no pack-out ending — open Sale Equipment (My Sales) to record returns`);
   const psaWarning = postSaleAuthorizationWarning(scope, { donations: saleDonations, cleanouts: saleCleanouts });
   if (psaWarning) warnings.push(psaWarning);
-  if (step5 === 'warning' && deal && !deal.settlement_finalized) warnings.push('Settlement payouts look complete — finalize the settlement record');
+  if (!deal) warnings.push('No settlement deal record linked to this sale — financial completion cannot be verified');
 
-  // Chapter 21 P1 — releases go through the sanctioned recordItemRelease path
-  // (backend-enforced: only SOLD merchandise releases; who/whom/what/partial
-  // truth preserved — never a bare timestamp write). See releaseItem state above.
+  const saveAccess = async () => {
+    if (!accessDraft.status) { alert('Choose an access closeout status first.'); return; }
+    setAccessBusy(true);
+    try {
+      const me = await base44.auth.me();
+      await base44.entities.EstateSale.update(sale.id, {
+        access_closeout: {
+          status: accessDraft.status,
+          note: accessDraft.note.trim(),
+          closed_at: new Date().toISOString(),
+          closed_by_name: me?.full_name || '',
+        },
+      });
+      toast.success('Access closeout recorded');
+      await loadData();
+    } catch (e) {
+      console.error(e);
+      alert('Could not save the access closeout');
+    } finally {
+      setAccessBusy(false);
+    }
+  };
 
   const completeProject = async () => {
     setClosing(true);
@@ -227,10 +281,11 @@ export default function SaleCloseout() {
     {
       n: 4, title: 'Reconcile Financials', icon: DollarSign, state: step4,
       lines: [
-        `Gross merchandise sales: ${money(gross)}`,
-        `Company fee applied: ${money(econ.fee.applied)}${econ.fee.minimumApplied ? ' (contract minimum)' : ` (${rate}%)`}`,
+        `Gross merchandise sales: ${money(econ.gross)}`,
+        ...(econ.refundsTotal > 0 ? [`Completed refunds: −${money(econ.refundsTotal)}`, `Net merchandise proceeds: ${money(econ.netMerchandiseProceeds)}`] : []),
+        `Company fee applied: ${money(econ.fee.applied)}${econ.fee.minimumApplied ? ' (contract minimum)' : ` (${econ.terms.commissionRate}%)`}`,
         `Authorized service charges: ${econ.charges.length} (${money(econ.serviceRevenue)})`,
-        `Direct expenses recorded: ${expenses.length} (${money(expenseTotal)})`,
+        `Direct expenses recorded: ${expenses.length} (${money(econ.expenses.total)})`,
         `Cash labor cost: ${money(econ.cashLaborTotal)} · Owner time: ${econ.ownerHours.toFixed(1)} hrs (not cash)`,
         `Sale contribution: ${money(econ.contribution)} (not net profit)`,
       ],
@@ -238,9 +293,10 @@ export default function SaleCloseout() {
     {
       n: 5, title: 'Client Settlement', icon: Landmark, state: step5,
       lines: deal ? [
-        `Gross: ${money(gross)} · Net due to client: ${money(netDueToClient)}`,
+        `Gross: ${money(econ.gross)} · Net due to client: ${money(netDueToClient)}`,
         `Paid to client: ${money(paid)} · Remaining: ${money(remaining)}`,
         `Status: ${settlementState}`,
+        `Financially complete: ${financialComplete ? 'YES' : 'NO'}${!finReady.ready ? ` — ${finReady.blockers.length} payment blocker(s)` : ''}`,
       ] : ['No settlement deal record linked to this sale.'],
     },
     {
@@ -253,10 +309,28 @@ export default function SaleCloseout() {
       ],
     },
     {
-      n: 7, title: 'Project Close', icon: ListChecks,
+      n: 7, title: 'Transition Completion (Chapter 22)', icon: ListChecks, state: step7,
+      lines: [
+        `Transition complete: ${transitionComplete ? 'YES' : 'NO'}`,
+        transitionComplete
+          ? `Approved ${sale.transition.completed_by_name ? `by ${sale.transition.completed_by_name}` : ''}${sale.transition.transition_completed_at ? ` · ${new Date(sale.transition.transition_completed_at).toLocaleDateString()}` : ''}`
+          : 'Sale complete ≠ transition complete — the property transition must conclude before project close.',
+      ],
+    },
+    {
+      n: 8, title: 'Access Closeout (Keys / Devices)', icon: KeyRound, state: step8,
+      lines: [
+        access.status
+          ? `Status: ${access.status.replace('_', ' ')}${access.note ? ` — ${access.note}` : ''}`
+          : 'Not yet confirmed — record what happened to keys, lockbox, and access devices.',
+        access.closed_at ? `Confirmed ${fmtDateTime(access.closed_at)}${access.closed_by_name ? ` by ${access.closed_by_name}` : ''}` : '',
+      ].filter(Boolean),
+    },
+    {
+      n: 9, title: 'Project Close', icon: ListChecks,
       state: sale.status === 'completed' ? 'done' : (blockers.length ? 'blocker' : 'done'),
       lines: [
-        sale.status === 'completed' ? 'Project already completed.' : 'SaleRecap generates automatically via the existing completion workflow.',
+        sale.status === 'completed' ? 'Project already completed.' : 'All endings recorded → ready for human project close.',
         'Marking the project complete sets the existing EstateSale status to "completed".',
       ],
     },
@@ -290,8 +364,8 @@ export default function SaleCloseout() {
           ['Open tasks', openTasks.length, 'text-slate-700'],
           ['Expenses recorded', expenses.length, 'text-slate-700'],
           ['Settlement', settlementState, 'text-slate-700'],
-          ['Donation', saleDonations.length ? 'Scheduled' : 'Not scheduled', 'text-slate-700'],
-          ['Cleanout', saleCleanouts.length ? 'Scheduled' : (buyout ? 'Not required' : 'Not scheduled'), 'text-slate-700'],
+          ['Transition', transitionComplete ? 'Complete' : 'Open', transitionComplete ? 'text-emerald-600' : 'text-red-600'],
+          ['Financially complete', financialComplete == null ? 'No deal' : (financialComplete ? 'YES' : 'NO'), financialComplete ? 'text-emerald-600' : 'text-red-600'],
         ].map(([label, value, cls]) => (
           <Card key={String(label)}>
             <CardContent className="p-3">
@@ -306,7 +380,7 @@ export default function SaleCloseout() {
       {blockers.length > 0 && (
         <Card className="border-red-300 bg-red-50">
           <CardContent className="p-4">
-            <p className="font-semibold text-red-800 mb-1">Closeout blockers</p>
+            <p className="font-semibold text-red-800 mb-1">Project close blockers</p>
             <ul className="list-disc list-inside text-sm text-red-700 space-y-0.5">
               {blockers.map((b, i) => <li key={i}>{b}</li>)}
             </ul>
@@ -316,13 +390,25 @@ export default function SaleCloseout() {
       {warnings.length > 0 && (
         <Card className="border-amber-200 bg-amber-50">
           <CardContent className="p-4">
-            <p className="font-semibold text-amber-800 mb-1">Warnings (project can still close)</p>
+            <p className="font-semibold text-amber-800 mb-1">Warnings (surfaced, not blocking)</p>
             <ul className="list-disc list-inside text-sm text-amber-700 space-y-0.5">
               {warnings.map((w, i) => <li key={i}>{w}</li>)}
             </ul>
           </CardContent>
         </Card>
       )}
+
+      {/* Reconciliation (Chapter 23 P1) */}
+      <ReconciliationPanel
+        sale={sale}
+        items={items}
+        orders={orders}
+        refunds={refunds}
+        attempts={attempts}
+        issues={issues}
+        cashSessions={cashSessions}
+        onChanged={loadData}
+      />
 
       {/* Guided steps */}
       <div className="space-y-3">
@@ -348,7 +434,6 @@ export default function SaleCloseout() {
                       {step.lines.map((l, i) => <li key={i}>· {l}</li>)}
                     </ul>
 
-                    {/* Step-specific inline actions */}
                     {step.n === 1 && awaitingPickup.length > 0 && (
                       <div className="mt-3 space-y-1.5">
                         {awaitingPickup.map(i => (
@@ -358,9 +443,6 @@ export default function SaleCloseout() {
                           </div>
                         ))}
                       </div>
-                    )}
-                    {step.n === 2 && (
-                      <p className="text-xs text-slate-500 mt-1">Dispositions are created and managed from My Sales (Donation / Cleanout / Buyout) — this view only reports their status.</p>
                     )}
                     {step.n === 3 && (
                       <Button size="sm" variant="outline" className="mt-2 text-xs" asChild>
@@ -377,6 +459,34 @@ export default function SaleCloseout() {
                         <Link to={createPageUrl('SaleTasks') + '?saleId=' + sale.id}>Open Tasks</Link>
                       </Button>
                     )}
+                    {step.n === 7 && !transitionComplete && (
+                      <Button size="sm" variant="outline" className="mt-2 text-xs" asChild>
+                        <Link to={'/TransitionCompletion?saleId=' + sale.id}>Open Transition Completion</Link>
+                      </Button>
+                    )}
+                    {step.n === 8 && (
+                      <div className="mt-3 space-y-2 border border-slate-200 rounded-md p-2.5">
+                        <select
+                          className="text-xs border rounded p-1.5 w-full sm:w-auto"
+                          value={accessDraft.status}
+                          onChange={e => setAccessDraft(d => ({ ...d, status: e.target.value }))}
+                        >
+                          <option value="">Choose status…</option>
+                          {ACCESS_STATUSES.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
+                        </select>
+                        <Textarea
+                          rows={2}
+                          className="text-xs"
+                          placeholder="What was returned/transferred, to whom — never codes or credentials"
+                          value={accessDraft.note}
+                          onChange={e => setAccessDraft(d => ({ ...d, note: e.target.value }))}
+                        />
+                        <Button size="sm" className="h-7 text-xs" onClick={saveAccess} disabled={accessBusy}>
+                          {accessBusy ? <Loader2 className="w-3 h-3 mr-1 animate-spin" /> : null} Save access closeout
+                        </Button>
+                        <p className="text-[10px] text-slate-400">Human confirmation only — the system never claims a device was physically returned.</p>
+                      </div>
+                    )}
                   </div>
                   <div className="flex-shrink-0 pt-0.5"><StepIcon state={step.state} /></div>
                 </div>
@@ -386,18 +496,24 @@ export default function SaleCloseout() {
         })}
       </div>
 
-      {/* Chapter 4 P1 — internal sale economics (company money only; never client-facing) */}
+      {/* Closing file index (Chapter 23 P1) */}
+      <ClosingFileCard sale={sale} deal={deal} econ={econ} readiness={finReady} accessCloseout={sale.access_closeout} />
+
+      {/* Internal sale economics (company money only; never client-facing) */}
       <SaleEconomicsPanel
         sale={sale}
         items={items}
         expenses={expenses}
-        deal={deals[0]}
+        deal={deal}
         laborEntries={laborEntries}
         financialDecisions={financialDecisions}
       />
 
       {/* Chapter 5 P1 — "Would you want ten more?" owner reflection (canonical home: SaleRecap) */}
       <TenMoreReflection sale={sale} />
+
+      {/* Chapter 23 P1 — five-minute review + near miss (canonical home: SaleRecap / SaleIssue) */}
+      <PostSaleReviewCard sale={sale} />
 
       {/* Project close */}
       <Card className={blockers.length ? 'border-red-300' : 'border-green-300'}>
@@ -407,7 +523,7 @@ export default function SaleCloseout() {
             <p className="text-sm text-slate-600">
               {sale.status === 'completed' ? 'This project is already completed.'
                 : blockers.length ? 'Resolve the blockers above before closing this project.'
-                : 'This project is ready to close.'}
+                : 'Financially complete + transition complete + access closed — ready for human project close.'}
             </p>
           </div>
           <div className="flex flex-col sm:flex-row gap-2">

@@ -139,6 +139,26 @@ export default function SaleEconomicsPanel({ sale, items, expenses, deal, laborE
         </CardContent>
       </Card>
 
+      {/* Chapter 23 P1 — project economics metrics (unknown stays unknown, never 0-as-fact) */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        {[
+          ['Margin (contribution / company revenue)', econ.margin != null ? `${(econ.margin * 100).toFixed(1)}%` : '—'],
+          ['Revenue / labor hour', econ.revenuePerLaborHour != null ? money(econ.revenuePerLaborHour) : '— (no hours recorded)'],
+          ['Contribution / labor hour', econ.contributionPerLaborHour != null ? money(econ.contributionPerLaborHour) : '— (no hours recorded)'],
+          ['Owner share of labor', econ.ownerSharePct != null ? `${Math.round(econ.ownerSharePct * 100)}%` : '—'],
+        ].map(([label, value]) => (
+          <Card key={label}>
+            <CardContent className="p-3">
+              <div className="text-xs text-slate-500">{label}</div>
+              <div className="text-sm font-semibold text-slate-900">{value}</div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+      <p className="text-xs text-slate-400">
+        Owner time ({econ.ownerHours.toFixed(1)} hrs) is a real economic input and is never silently converted into payroll expense. Where apparent contribution depends heavily on unpaid owner time, that dependence is visible here — not hidden.
+      </p>
+
       {/* Projected vs actual */}
       <Card>
         <CardHeader className="pb-2">
@@ -181,6 +201,11 @@ export default function SaleEconomicsPanel({ sale, items, expenses, deal, laborE
               <p className="text-xs text-slate-400 mt-2">
                 Estimates are pre-sale projections from the opportunity record; actuals come from sold inventory, labor entries and sale-scoped expenses.
               </p>
+              {econ.charges.length > 0 && (
+                <p className="text-xs text-slate-500 mt-1">
+                  Scope-change context: {econ.charges.length} client-authorized additional service decision(s) totaling {money(econ.serviceRevenue)} were recorded on this project — variance may reflect authorized added scope, not an estimating miss.
+                </p>
+              )}
             </div>
           )}
         </CardContent>

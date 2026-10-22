@@ -225,7 +225,7 @@ export default function SaleStatistics() {
         <CardContent>
           <div className="grid md:grid-cols-3 gap-6">
             <div className="p-6 bg-slate-50 rounded-lg">
-              <p className="text-sm text-slate-600 mb-2">Total Revenue</p>
+              <p className="text-sm text-slate-600 mb-2">Gross Merchandise Sales</p>
               <p className="text-4xl font-bold text-slate-900">${stats.actualRevenue.toLocaleString()}</p>
             </div>
             <div className="p-6 bg-green-50 rounded-lg">

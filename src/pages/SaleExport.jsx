@@ -439,7 +439,7 @@ export default function SaleExport() {
         doc.setFontSize(11);
         doc.setFont('helvetica', 'normal');
         const lines = [
-          `Total Revenue: $${sale.actual_revenue || 0}`,
+          `Gross Merchandise Sales: $${sale.actual_revenue || 0}`,
           `Commission Rate: ${sale.commission_rate || 0}%`,
           `Commission Earned: $${sale.commission_earned || 0}`,
           `Total Items: ${sale.total_items || 0}`,

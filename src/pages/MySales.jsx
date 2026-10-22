@@ -593,7 +593,7 @@ export default function MySales() {
         </Card>
         <Card>
           <CardContent className="p-4">
-            <div className="text-sm text-slate-600 mb-1">Total Revenue</div>
+            <div className="text-sm text-slate-600 mb-1">Gross Merchandise Sales</div>
             <div className="text-2xl font-bold text-cyan-600">
               ${stats.totalRevenue.toLocaleString()}
             </div>
