@@ -15,6 +15,7 @@ import MyPoliciesCard from '@/components/mysaleday/MyPoliciesCard';
 import MyAuthoritiesCard from '@/components/mysaleday/MyAuthoritiesCard';
 import MyIssuesCard from '@/components/mysaleday/MyIssuesCard';
 import OpeningBriefCard from '@/components/staffing/OpeningBriefCard';
+import MyDayContextCard from '@/components/mysaleday/MyDayContextCard';
 
 export default function MySaleDay() {
   const [loading, setLoading] = useState(true);
@@ -111,6 +112,7 @@ export default function MySaleDay() {
       {view && (
         <>
           <MyResponsibilitiesCard responsibilities={view.my_responsibilities} zones={view.my_zones} />
+          <MyDayContextCard entry={view.entry_procedure} clientDay={view.client_day} />
           <MyDayTasksCard tasks={view.my_tasks} />
           <OpeningBriefCard sale={view.sale} />
           <MyAuthoritiesCard authorities={view.authorities} />

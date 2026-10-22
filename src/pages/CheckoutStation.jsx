@@ -4,6 +4,8 @@ import { Button } from '@/components/ui/button';
 import { QrCode, CreditCard, AlertCircle, Check, Trash2, RefreshCw } from 'lucide-react';
 import { Html5QrcodeScanner } from 'html5-qrcode';
 import SaleReceipt from '@/components/checkout/SaleReceipt';
+import AskForHelpDialog from '@/components/staffing/AskForHelpDialog';
+import { currentDiscountStage } from '@/components/livesale/liveSaleModel';
 
 export default function CheckoutStation() {
   const [staff, setStaff] = useState(null);
@@ -18,6 +20,9 @@ export default function CheckoutStation() {
   const [completing, setCompleting] = useState(false);
   const [processingOnline, setProcessingOnline] = useState(false);
   const [lastReceipt, setLastReceipt] = useState(null);
+  const [guidance, setGuidance] = useState(null);
+  const [liveSale, setLiveSale] = useState(null);
+  const [helpOpen, setHelpOpen] = useState(false);
 
   useEffect(() => {
     loadStaff();
@@ -76,6 +81,7 @@ export default function CheckoutStation() {
             setCurrentCart(cartData);
             setCartUser(user);
             stopScanning();
+            loadGuidance(cartData);
 
             setMessage({ type: 'success', text: `Cart loaded for ${user?.full_name || 'Customer'}` });
             setTimeout(() => setMessage(null), 2000);
@@ -97,6 +103,41 @@ export default function CheckoutStation() {
       setQrScanner(null);
     }
     setScanning(false);
+  };
+
+  // Chapter 20 P1-25..P1-27 — cashier discount GUIDANCE assembled from the
+  // canonical sale record (schedule + per-item exclusions + authority policy).
+  // GUIDANCE ONLY: the system never applies a discount; a human makes any
+  // authorized price change through the normal price-change path.
+  const loadGuidance = async (cartData) => {
+    setGuidance(null);
+    setLiveSale(null);
+    try {
+      const ids = [...new Set(cartData.items.map((ci) => ci.item_id))];
+      const fresh = await Promise.all(ids.map((id) => base44.entities.Item.get(id).catch(() => null)));
+      const excluded = fresh.filter((i) => i && i.excluded_from_discounts).map((i) => i.title);
+      const first = fresh.find((i) => i && i.estate_sale_id);
+      if (!first) { setGuidance({ excluded, stage: null, policyNote: '' }); return; }
+      const sales = await base44.entities.EstateSale.filter({ id: first.estate_sale_id });
+      const sale = sales[0] || null;
+      if (!sale) { setGuidance({ excluded, stage: null, policyNote: '' }); return; }
+      let policyNote = '';
+      try {
+        const companies = await base44.entities.Company.filter({ primary_contact_user_id: sale.operator_id });
+        const np = companies[0] && companies[0].negotiation_policy;
+        if (np && np.policy === 'NO_NEGOTIATION') policyNote = 'Company policy: no negotiation';
+        else if (np && np.policy === 'OPERATOR_ONLY') policyNote = 'Company policy: operator-only pricing';
+        else if (np && np.policy === 'MANAGER_APPROVAL_THRESHOLD') policyNote = 'Company policy: manager approval above the threshold';
+        else if (np && np.policy === 'EMPLOYEE_AUTHORITY_LIMIT') policyNote = np.employee_authority_max
+          ? `Employee authority: up to ${np.employee_authority_unit === 'percent' ? `${np.employee_authority_max}%` : `$${np.employee_authority_max}`} off${np.escalation_threshold ? `; above $${np.escalation_threshold} ask the manager` : ''}`
+          : 'Employee authority limit — see the posted policy';
+      } catch (e) { /* policy is optional guidance */ }
+      setLiveSale(sale);
+      setGuidance({ excluded, stage: currentDiscountStage(sale), policyNote });
+    } catch (e) {
+      console.error('guidance load failed:', e);
+      setGuidance({ excluded: [], stage: null, policyNote: '' });
+    }
   };
 
   const completeCheckout = async () => {
@@ -213,6 +254,9 @@ export default function CheckoutStation() {
     setCurrentCart(null);
     setCartUser(null);
     setMessage(null);
+    setGuidance(null);
+    setLiveSale(null);
+    setHelpOpen(false);
   };
 
   if (loading) {
@@ -346,6 +390,34 @@ export default function CheckoutStation() {
                     </span>
                   </div>
                 </div>
+
+                {/* Chapter 20 P1-25..P1-27 — cashier discount GUIDANCE (the
+                    system never applies a discount) + P1-45 floor-support routing */}
+                {guidance && (
+                  <div className="border border-slate-200 rounded-lg p-3 space-y-1">
+                    <p className="text-xs font-semibold text-slate-900">Discount guidance — you apply the discount; the system never changes prices.</p>
+                    {guidance.stage && guidance.stage.hasSchedule ? (
+                      <p className="text-xs text-slate-700">
+                        {guidance.stage.active
+                          ? `Current stage: ${guidance.stage.active.name}${guidance.stage.active.discount_percent ? ` (${guidance.stage.active.discount_percent}% off guidance)` : ''}${guidance.stage.active.note ? ` — ${guidance.stage.active.note}` : ''}`
+                          : 'First stage has not started — full asking prices apply.'}
+                      </p>
+                    ) : (
+                      <p className="text-xs text-slate-500">No discount schedule recorded for this sale.</p>
+                    )}
+                    {guidance.excluded.length > 0 && (
+                      <p className="text-xs text-red-700">Excluded from discounts: {guidance.excluded.join(', ')}</p>
+                    )}
+                    {guidance.policyNote && <p className="text-xs text-slate-600">Authority: {guidance.policyNote}</p>}
+                    <p className="text-[10px] text-slate-400">Apply an authorized discount only through the normal price-change path.</p>
+                  </div>
+                )}
+                <Button variant="outline" className="w-full" disabled={!liveSale} onClick={() => setHelpOpen(true)}>
+                  Request floor support / help
+                </Button>
+                {helpOpen && liveSale && (
+                  <AskForHelpDialog sale={liveSale} defaultCategory="checkout" onClose={() => setHelpOpen(false)} />
+                )}
 
                 {/* Payment Method */}
                 <div className="space-y-2">

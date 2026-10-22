@@ -20,6 +20,7 @@ export default function Attendance() {
   const [loading, setLoading] = useState(true);
   const [manualCount, setManualCount] = useState(0);
   const [checkins, setCheckins] = useState([]);
+  const [exits, setExits] = useState([]);
   const [selectedDate, setSelectedDate] = useState(null);
   const [qrDataUrl, setQrDataUrl] = useState(null);
   const [qrLoading, setQrLoading] = useState(false);
@@ -53,9 +54,12 @@ export default function Attendance() {
 
       setSale(saleData[0]);
 
-      // Load QR check-ins for this sale
-      const checkInData = await base44.entities.CheckIn.filter({ location_id: saleId, check_in_type: 'sale_visit' }, '-created_date', 100);
+      // Load QR check-ins for this sale. Chapter 20 P1-11: entries (sale_visit)
+      // plus operator-recorded exits (sale_exit) give an APPROXIMATE inside count.
+      const checkInData = await base44.entities.CheckIn.filter({ location_id: saleId, check_in_type: 'sale_visit' }, '-created_date', 200);
+      const exitData = await base44.entities.CheckIn.filter({ location_id: saleId, check_in_type: 'sale_exit' }, '-created_date', 200);
       setCheckins(checkInData);
+      setExits(exitData);
 
       // Auto-generate QR code for this sale
       setQrLoading(true);
@@ -89,8 +93,24 @@ export default function Attendance() {
     }
   };
 
-  const handleDecrement = () => {
+  // Chapter 20 P1-11 — record an EXIT event (a person leaving). Manual
+  // counting is involved, so any derived inside-count is APPROXIMATE —
+  // never a certification of occupancy.
+  const handleDecrement = async () => {
     setManualCount(prev => Math.max(0, prev - 1));
+    const params = new URLSearchParams(window.location.search);
+    const saleId = params.get('saleId');
+    if (saleId) {
+      await base44.entities.CheckIn.create({
+        check_in_type: 'sale_exit',
+        location_id: saleId,
+        location_name: sale?.title || '',
+        notes: 'Exit counted',
+        verified: true,
+      });
+      const exitData = await base44.entities.CheckIn.filter({ location_id: saleId, check_in_type: 'sale_exit' }, '-created_date', 200);
+      setExits(exitData);
+    }
   };
 
   const handleDeduplicateCheckins = async () => {
@@ -118,12 +138,20 @@ export default function Attendance() {
     a.click();
   };
 
+  // Chapter 20 P1-11/P1-49 — honest approximate occupancy: today's entries
+  // minus today's exits, manually counted. ATTENDANCE ≠ OCCUPANCY: the label
+  // says APPROXIMATE, the formula is shown, and no fake metric is displayed.
+  const dayStart = new Date(); dayStart.setHours(0, 0, 0, 0);
+  const entriesToday = checkins.filter((c) => c.created_date && new Date(c.created_date) >= dayStart).length + manualCount;
+  const exitsToday = exits.filter((c) => c.created_date && new Date(c.created_date) >= dayStart).length;
+  const approxInside = Math.max(0, entriesToday - exitsToday);
   const stats = {
     totalToday: manualCount + checkins.length,
     qrCheckins: checkins.length,
     manualCount: manualCount,
-    peakHour: '10:00 AM',
-    avgDuration: '45 min'
+    entriesToday,
+    exitsToday,
+    approxInside,
   };
 
   if (loading) {
@@ -173,10 +201,11 @@ export default function Attendance() {
             <div className="text-3xl font-bold text-orange-600">{stats.manualCount}</div>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="border-cyan-300 bg-cyan-50">
           <CardContent className="p-4">
-            <div className="text-sm text-slate-600 mb-1">Peak Hour</div>
-            <div className="text-xl font-bold text-slate-900">{stats.peakHour}</div>
+            <div className="text-sm text-slate-600 mb-1">Approx. People Inside <span className="text-[10px] font-bold text-cyan-800">APPROX</span></div>
+            <div className="text-3xl font-bold text-cyan-700">{stats.approxInside}</div>
+            <div className="text-[10px] text-slate-500">{stats.entriesToday} entries − {stats.exitsToday} exits today (manually counted)</div>
           </CardContent>
         </Card>
       </div>

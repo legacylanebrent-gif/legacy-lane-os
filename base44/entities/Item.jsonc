@@ -2065,6 +2065,47 @@
       "default": false,
       "description": "Chapter 16 P1-40 \u2014 this item is EXCLUDED from the sale's planned discount schedule (EstateSale.discount_schedule). Typical for HIGH_VALUE, specialist-reviewed, or client-restricted merchandise. A stage that would discount this item surfaces it for explicit human handling instead."
     },
+    "hold": {
+      "type": "object",
+      "default": {},
+      "description": "Chapter 20 P1-20..P1-23 \u2014 the operational HOLD detail block for merchandise currently held for a buyer (Item.status 'reserved' / 'pending' or display_attention CHECKOUT_HOLD). There is NO separate Hold entity: the ITEM remains the single merchandise truth and this block records the who/when/expiry of a temporary hold. Doctrine: HOLD \u2260 SOLD \u2260 PAID \u2260 RELEASED \u2014 a hold NEVER records payment and never alters price. Authority is enforced by the sanctioned itemHold backend function: any sale-team member may hold AVAILABLE non-HIGH_VALUE merchandise; HIGH_VALUE holds and hold EXTENSIONS require the operator/seller/admin. expires_at is optional; an expired hold displays EXPIRED (never as an active commitment) and the item returns to AVAILABLE when cleared. Buyer info here is operational truth only \u2014 it NEVER creates marketing consent (Chapter 18 doctrine).",
+      "properties": {
+        "held_by": {
+          "type": "string",
+          "description": "User ID of the person who created the hold."
+        },
+        "held_by_name": {
+          "type": "string",
+          "description": "Display-name snapshot of the hold creator."
+        },
+        "buyer_name": {
+          "type": "string",
+          "description": "Buyer the merchandise is held for (factual, as stated)."
+        },
+        "buyer_contact": {
+          "type": "string",
+          "description": "Optional buyer phone/contact for THIS hold \u2014 operational truth, never marketing consent."
+        },
+        "buyer_user_id": {
+          "type": "string",
+          "description": "Optional canonical platform User ID when the buyer has an account."
+        },
+        "reason": {
+          "type": "string",
+          "description": "Factual reason for the hold (e.g. 'getting cash from car')."
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "When the hold was created."
+        },
+        "expires_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Optional expiration. Past expires_at = EXPIRED hold (display only; clearing is a human action)."
+        }
+      }
+    },
     "high_consequence_research": {
       "type": "boolean",
       "default": false,

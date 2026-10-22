@@ -10,7 +10,7 @@ import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { AlertTriangle, ArrowLeft, Building2, ExternalLink, LayoutDashboard, Loader2, MessageSquare, PackageSearch, RefreshCw, Users, Wrench } from 'lucide-react';
+import { AlertTriangle, ArrowLeft, Building2, ExternalLink, LayoutDashboard, Loader2, MessageSquare, PackageSearch, RadioTower, RefreshCw, Users, Wrench } from 'lucide-react';
 import { format } from 'date-fns';
 import { analyzePreparation } from '@/components/saleops/prepareModel';
 import { computeMilestones, attentionItems, timelineEntries } from '@/components/saleops/projectModel';
@@ -154,6 +154,7 @@ export default function ProjectDashboard() {
           </Button>
           <Link to={`/SaleEditor?saleId=${sale.id}`}><Button size="sm" variant="outline"><ExternalLink className="w-3.5 h-3.5 mr-1" />Sale Editor</Button></Link>
           <Link to={`/PrepareSale?saleId=${sale.id}`}><Button size="sm" variant="outline"><Wrench className="w-3.5 h-3.5 mr-1" />Prepare</Button></Link>
+          <Link to={`/LiveSale?saleId=${sale.id}`}><Button size="sm" className="bg-orange-600 hover:bg-orange-700"><RadioTower className="w-3.5 h-3.5 mr-1" />LIVE SALE</Button></Link>
           <Link to={`/SellerOnboarding?saleId=${sale.id}`}><Button size="sm" variant="outline">Seller Onboarding</Button></Link>
           <Link to={`/OperatorWorkload`}><Button size="sm" variant="outline"><Users className="w-3.5 h-3.5 mr-1" />Workload</Button></Link>
         </div>

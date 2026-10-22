@@ -6,12 +6,13 @@
       "type": "string",
       "enum": [
         "sale_visit",
+        "sale_exit",
         "event_attendance",
         "daily",
         "milestone",
         "custom"
       ],
-      "description": "Type of check-in"
+      "description": "Type of check-in. Chapter 20 P1-11 adds 'sale_exit': an operator-recorded EXIT event at an estate sale (location_id = EstateSale id), paired with 'sale_visit' entries so the sale can display an APPROXIMATE people-inside figure (entries minus exits). Manual counting is involved, so the derived number is approximate and never a certification of occupancy."
     },
     "location_name": {
       "type": "string",

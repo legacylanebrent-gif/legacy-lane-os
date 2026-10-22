@@ -164,6 +164,21 @@ export default function SaleIssuesPanel({ sale, issues, onChanged }) {
           {i.answer_by && <span>Answer by: <span className={`font-medium ${overdue ? 'text-red-600' : 'text-slate-700'}`}>{i.answer_by}</span></span>}
           <span className="capitalize">{(i.category || 'other').replace(/_/g, ' ')}</span>
         </div>
+        {(i.is_incident || i.item_id) && (
+          <div className="text-[10px] text-slate-600 bg-slate-50 border border-slate-200 rounded px-2 py-1 space-y-0.5">
+            {i.is_incident && (
+              <>
+                <p><span className="font-semibold">Incident — {(i.incident_type || 'OTHER').replace(/_/g, ' ').toLowerCase()}</span>
+                  {i.occurred_at ? ` · ${new Date(i.occurred_at).toLocaleString()}` : ''}{i.location_note ? ` · ${i.location_note}` : ''}</p>
+                {i.people_involved && <p>People involved: {i.people_involved}</p>}
+                {i.witnesses && <p>Witnesses: {i.witnesses}</p>}
+                {i.immediate_action_taken && <p>Immediate action: {i.immediate_action_taken}</p>}
+                <p className="text-slate-400">Facts only — incident issues are private from ordinary team members.</p>
+              </>
+            )}
+            {i.item_id && <p>Linked item: {i.item_id}</p>}
+          </div>
+        )}
         {(i.status === 'OPEN' || i.status === 'WAITING') ? (
           <div className="flex flex-wrap gap-2">
             <Button size="sm" variant="outline" onClick={() => { setResolveTarget(i); setResolve({ resolution: '', resolution_source: 'answer_only' }); }}>

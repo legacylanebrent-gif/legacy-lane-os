@@ -297,6 +297,20 @@ export default async function(req) {
         verification_status: a.verification_status || 'UNRESOLVED',
       })),
       policies,
+      entry_procedure: sale.entry_management && sale.entry_management.mode ? {
+        mode: sale.entry_management.mode,
+        capacity_target: sale.entry_management.capacity_target || null,
+        one_out_one_in: !!sale.entry_management.one_out_one_in,
+        procedure_note: sale.entry_management.procedure_note || '',
+        instructions: sale.entry_management.instructions || '',
+      } : null,
+      client_day: sale.client_day_plan ? {
+        client_expected: !!sale.client_day_plan.client_expected,
+        client_on_site: !!sale.client_day_plan.client_on_site,
+        expected_time: sale.client_day_plan.expected_time || '',
+        boundaries_note: sale.client_day_plan.boundaries_note || '',
+        instructions: sale.client_day_plan.instructions || '',
+      } : null,
       brief,
       brief_reviewed_today_by: reviewedToday,
     });

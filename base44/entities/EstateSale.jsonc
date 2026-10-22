@@ -1564,10 +1564,69 @@
         }
       }
     },
+    "entry_management": {
+      "type": "object",
+      "default": {},
+      "description": "Chapter 20 P1-8/P1-9 \u2014 the sale's ENTRY OPERATING MODE and capacity PROCEDURE, operator-defined. This is the operator's own procedure \u2014 NEVER a legal or fire-code occupancy certification, and capacity_target is the operator's own working number, not a code limit. Team-visible (shown to the entry staffer in My Sale Day). Absent mode = not yet decided (honest unknown).",
+      "properties": {
+        "mode": {
+          "type": "string",
+          "enum": [
+            "OPEN_ENTRY",
+            "CAPACITY_CONTROLLED"
+          ],
+          "description": "OPEN_ENTRY = customers enter freely. CAPACITY_CONTROLLED = the operator manages the flow per the procedure below."
+        },
+        "capacity_target": {
+          "type": "integer",
+          "description": "Operator's own working target for approximate people inside at once (operator procedure \u2014 never a code/legal capacity)."
+        },
+        "one_out_one_in": {
+          "type": "boolean",
+          "default": false,
+          "description": "Operator procedure: one-out-one-in when the target is reached."
+        },
+        "procedure_note": {
+          "type": "string",
+          "description": "The operator's entry procedure in their own words (group entry, stroller/bag rules, line management...)."
+        },
+        "instructions": {
+          "type": "string",
+          "description": "Any other team-facing entry instructions (team-safe \u2014 no access codes; those stay in the operator-only access plan)."
+        }
+      }
+    },
+    "client_day_plan": {
+      "type": "object",
+      "default": {},
+      "description": "Chapter 20 P1-53/P1-55 \u2014 the sale-day CLIENT PRESENCE PLAN: whether the client/family is expected or on site, and TEAM-SAFE sale-day instructions/boundaries. Deliberately holds NO private contact information (routine communication identity lives in communication_plan; private notes stay private) \u2014 only what the team operationally needs: CLIENT EXPECTED / CLIENT ON SITE plus the operator's team-safe instructions. A client's presence is NEVER client authority (decision-makers live in SaleAuthority; Chapter 19 P0 decision enforcement is untouched).",
+      "properties": {
+        "client_expected": {
+          "type": "boolean",
+          "description": "The client/family is expected to visit during the sale."
+        },
+        "expected_time": {
+          "type": "string",
+          "description": "When they are expected (free text \u2014 'Sat morning', 'after 1pm')."
+        },
+        "client_on_site": {
+          "type": "boolean",
+          "description": "Operator-set: the client is currently on site. Team-visible operational fact only."
+        },
+        "boundaries_note": {
+          "type": "string",
+          "description": "Team-safe boundaries while the client is present (merchandise conversations, pricing involvement, private areas) \u2014 stated so any staffer can read it. No private client notes."
+        },
+        "instructions": {
+          "type": "string",
+          "description": "Other team-safe sale-day instructions tied to the client visit (e.g. 'let the operator know when they arrive')."
+        }
+      }
+    },
     "discount_schedule": {
       "type": "array",
       "default": [],
-      "description": "Chapter 16 P1-39/P1-40 \u2014 the operator's PLANNED discount stages for this sale (Day 1 full price, Day 2, final hours...). OPERATOR-DEFINED PLAN ONLY: the system never applies a discount automatically; a stage is guidance for the team, and an Item marked excluded_from_discounts is never silently discounted \u2014 applying a stage to such an item is an explicit human price change through the normal price-change path (changeItemPrice), never a batch effect. Chapter 17 P1: discount SIGNS may be printed from this plan \u2014 a printed sign is a SNAPSHOT and never modifies Item.price.",
+      "description": "Chapter 16 P1-39/P1-40 \u2014 the operator's PLANNED discount stages for this sale (Day 1 full price, Day 2, final hours...). OPERATOR-DEFINED PLAN ONLY: the system never applies a discount automatically; a stage is guidance for the team, and an Item marked excluded_from_discounts is never silently discounted \u2014 applying a stage to such an item is an explicit human price change through the normal price-change path (changeItemPrice), never a batch effect. Chapter 17 P1: discount SIGNS may be printed from this plan \u2014 a printed sign is a SNAPSHOT and never modifies Item.price. Chapter 20 P1-25/P1-26: checkout and the Live Sale Command Center DISPLAY the current stage as cashier guidance; a human still applies any authorized discount.",
       "items": {
         "type": "object",
         "properties": {
