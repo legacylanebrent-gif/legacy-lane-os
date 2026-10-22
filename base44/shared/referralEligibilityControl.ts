@@ -126,20 +126,40 @@ export function computeEffectiveEligibility(profile, jurisdiction, nowIso) {
   const v = profile.verified;
   const nowMs = Date.parse(nowIso || new Date().toISOString());
 
-  if (v.eligibility_effective_start &&
-      nowMs < Date.parse(v.eligibility_effective_start)) {
-    reasons.push({ code: 'not_yet_effective', detail: v.eligibility_effective_start });
+  // TRUST ONLY SERVER-CONTROLLED DATA: expiration is read from the
+  // SERVER-PINNED verified snapshot (written by the admin review seam),
+  // never from the live applicant-editable self_submitted claim. If the
+  // applicant block has drifted from the pinned snapshot at all, the
+  // profile is not effectively eligible regardless of stored status
+  // (defense in depth behind the material-change flag).
+  const snap = v.verified_snapshot || {};
+  if (Object.keys(snap).length && isMaterialChange(snap, profile.self_submitted || {})) {
+    reasons.push({
+      code: 'reverification_pending',
+      detail: 'self-submitted information no longer matches the verified snapshot',
+    });
   }
-  if (v.eligibility_effective_end &&
-      nowMs > Date.parse(v.eligibility_effective_end)) {
-    reasons.push({ code: 'eligibility_window_ended', detail: v.eligibility_effective_end });
-  }
-  const licExp = (profile.self_submitted || {}).license_expiration;
+  const licExp = snap.license_expiration || (profile.self_submitted || {}).license_expiration;
   if (licExp && nowMs > Date.parse(`${licExp}T23:59:59Z`)) {
     reasons.push({ code: 'license_expired', detail: licExp });
   }
   if (v.license_status !== 'active') {
     reasons.push({ code: 'license_not_active', detail: v.license_status || 'unknown' });
+  }
+  // REQUIRED AFFILIATION + AGREEMENT CONDITIONS (server-written fields only):
+  // a confirmed brokerage legal identity and at least one referenced
+  // agreement must back the verification.
+  if (!String(v.brokerage_legal_name || '').trim()) {
+    reasons.push({
+      code: 'brokerage_not_confirmed',
+      detail: 'no confirmed brokerage legal identity on the verified block',
+    });
+  }
+  if (!(v.agreement_references || []).length) {
+    reasons.push({
+      code: 'no_agreement_reference',
+      detail: 'no referenced agreement applicable to this verification',
+    });
   }
   if (!(v.approved_jurisdictions || []).length) {
     reasons.push({ code: 'no_approved_jurisdiction', detail: 'none recorded' });

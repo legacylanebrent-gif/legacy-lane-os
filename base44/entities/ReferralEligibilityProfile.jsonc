@@ -1,7 +1,7 @@
 {
   "name": "ReferralEligibilityProfile",
   "type": "object",
-  "description": "Referral Rebuild Phase 2B \u2014 INDIVIDUAL licensee eligibility profile (Referral Phase 2 design Part 2B). ONE profile per individual platform user (licensee). Two STRICTLY SEPARATED blocks: self_submitted (operator-writable through the sanctioned referralEligibility server function ONLY) and verified (written ONLY by authorized administrators through referralEligibilityAdmin with SERVER-DERIVED reviewer identity and timestamps). SELF-SUBMITTED INFORMATION IS NEVER VERIFIED TRUTH: submitting an application is not approval. A VERIFIED PROFILE NEVER ACTIVATES COMPENSATION BY ITSELF \u2014 eligibility status is deliberately SEPARATE from the global LEGACY_REFERRAL_COMPENSATION_ENABLED control, which stays disabled until broker/legal activation. A COMPANY NEVER BECOMES LICENSED BECAUSE ONE ASSOCIATED PERSON IS: licensure is individual, never propagated to Company or team members, and joining a team establishes NO licensure, brokerage affiliation, or compensation eligibility. Material changes to verified license/brokerage information set reverification_required \u2014 the prior verified block and history are PRESERVED, never overwritten. Effective eligibility is COMPUTED SERVER-SIDE AT THE TIME OF USE (computeEffectiveEligibility), never just a scheduled job or a stale stored status; unknown/unsupported jurisdiction stays ineligible for compensated activation. NO RETROACTIVITY: eligibility starts at verification time, never earlier \u2014 no old seller introduction becomes payable.",
+  "description": "Referral Rebuild Phase 2B \u2014 INDIVIDUAL licensee eligibility profile (Referral Phase 2 design Part 2B). ONE profile per individual platform user (licensee). Two STRICTLY SEPARATED blocks: self_submitted (operator-writable through the sanctioned referralEligibility server function ONLY) and verified (written ONLY by authorized administrators through referralEligibilityAdmin with SERVER-DERIVED reviewer identity and timestamps). DIRECT CLIENT CREATION IS CLOSED: create/update/delete are admin-only (service-role server functions bypass RLS to write) \u2014 a non-admin client can never mint a profile carrying verified state, history, jurisdictions, effective dates, or a pinned snapshot, and can never self-verify. SELF-SUBMITTED INFORMATION IS NEVER VERIFIED TRUTH: submitting an application is not approval. A VERIFIED PROFILE NEVER ACTIVATES COMPENSATION BY ITSELF \u2014 eligibility status is deliberately SEPARATE from the global LEGACY_REFERRAL_COMPENSATION_ENABLED control, which stays disabled until broker/legal activation. A COMPANY NEVER BECOMES LICENSED BECAUSE ONE ASSOCIATED PERSON IS: licensure is individual, never propagated to Company or team members, and joining a team establishes NO licensure, brokerage affiliation, or compensation eligibility. Material changes to verified license/brokerage information set reverification_required \u2014 the prior verified block and history are PRESERVED, never overwritten. Effective eligibility is COMPUTED SERVER-SIDE AT THE TIME OF USE (computeEffectiveEligibility) from the SERVER-WRITTEN verified block and pinned snapshot only \u2014 never from applicant-editable claims \u2014 and additionally requires a confirmed brokerage legal identity and at least one referenced agreement; unknown/unsupported jurisdiction stays ineligible for compensated activation. NO RETROACTIVITY: eligibility starts at verification time, never earlier \u2014 no old seller introduction becomes payable.",
   "properties": {
     "user_id": {
       "type": "string",
@@ -41,7 +41,7 @@
         "license_expiration": {
           "type": "string",
           "format": "date",
-          "description": "License expiration as submitted. Expiration is CHECKED AT TIME OF USE, never only stored."
+          "description": "License expiration as submitted. Expiration is CHECKED AT TIME OF USE against the SERVER-PINNED verified snapshot value, never the live applicant-editable claim."
         },
         "brokerage_name": {
           "type": "string",
@@ -123,7 +123,7 @@
         },
         "brokerage_legal_name": {
           "type": "string",
-          "description": "Brokerage LEGAL identity as confirmed by the reviewer (placeholder-free only after confirmation)."
+          "description": "Brokerage LEGAL identity as confirmed by the reviewer (placeholder-free only after confirmation). Effective eligibility requires this \u2014 an unconfirmed brokerage affiliation never qualifies."
         },
         "approved_jurisdictions": {
           "type": "array",
@@ -136,7 +136,7 @@
         "agreement_references": {
           "type": "array",
           "default": [],
-          "description": "Referenced agreement identifiers/versions applicable to this verification.",
+          "description": "Referenced agreement identifiers/versions applicable to this verification. Effective eligibility requires at least one \u2014 no agreement reference, no compensated-eligibility condition met.",
           "items": {
             "type": "string"
           }
@@ -154,7 +154,7 @@
         "verified_snapshot": {
           "type": "object",
           "default": {},
-          "description": "Snapshot of the EXACT self-submitted values that were verified. Material change against this snapshot requires re-verification."
+          "description": "Snapshot of the EXACT self-submitted values that were verified. Material change against this snapshot requires re-verification. computeEffectiveEligibility reads license expiration from THIS snapshot (server-pinned), never from live applicant-editable claims."
         }
       }
     },
@@ -237,25 +237,9 @@
       ]
     },
     "create": {
-      "$or": [
-        {
-          "$and": [
-            {
-              "user_condition": {
-                "role": "user"
-              }
-            },
-            {
-              "data.user_id": "{{user.id}}"
-            }
-          ]
-        },
-        {
-          "user_condition": {
-            "role": "admin"
-          }
-        }
-      ]
+      "user_condition": {
+        "role": "admin"
+      }
     },
     "update": {
       "user_condition": {

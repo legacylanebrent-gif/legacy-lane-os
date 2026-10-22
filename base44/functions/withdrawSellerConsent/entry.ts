@@ -48,11 +48,29 @@ Deno.serve(async (req: Request): Promise<Response> => {
       return Response.json({ ok: false, error: 'consent_not_found' }, { status: 404 });
     }
 
-    // Authorization: admin, the consent's operator, or an intended recipient
-    // — all resolved from the RECORD, never from caller input.
+    // ACTUAL RECORDED FORWARDING DESTINATION: if forwarding completed to a
+    // canonical deal, the deal's operator ALSO received the seller's
+    // information — reconcile them (from the RECORD, never caller input)
+    // into both authorization and the notification recipient set.
+    const tracking = record.intake_tracking || {};
+    let dealOperatorId: string | null = null;
+    if (tracking.deal_id) {
+      try {
+        const deal = await service.entities.SaleConversionPipeline.get(tracking.deal_id);
+        dealOperatorId = deal?.operator_id || null;
+      } catch {
+        dealOperatorId = null;
+      }
+    }
+
+    // Authorization: admin, the consent's operator, an intended recipient,
+    // or the operator of the deal the inquiry was actually forwarded to —
+    // all resolved from the RECORD, never from caller input. A consent ID,
+    // an attribution token, or an unrelated account authorizes NOTHING.
     const isAdmin = user.role === 'admin';
     const isRecipient =
       record.operator_id === user.id ||
+      dealOperatorId === user.id ||
       (record.intended_recipient_ids || []).includes(user.id);
     if (!isAdmin && !isRecipient) {
       return Response.json({ ok: false, error: 'not_authorized_for_this_consent' }, { status: 403 });
@@ -62,11 +80,13 @@ Deno.serve(async (req: Request): Promise<Response> => {
     const byName = user.full_name || user.email || 'Authorized recipient';
     const history = record.downstream_notifications || [];
 
-    // Recipients from the record's delivery fields only. Already-queued
+    // Recipients from the record's delivery fields only (consent list
+    // RECONCILED with the actual forwarding destination). Already-queued
     // recipients are never re-notified; only failed/missing ones are
     // (re)attempted, and each attempt APPENDS history.
     const recipientIds = [...new Set(
-      [record.operator_id, ...(record.intended_recipient_ids || [])].filter(Boolean)
+      [record.operator_id, dealOperatorId, ...(record.intended_recipient_ids || [])]
+        .filter(Boolean)
     )];
     const alreadyQueuedFor = new Set(
       history.filter((e: any) => e.state === 'queued')

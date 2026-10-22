@@ -91,6 +91,13 @@ export default async function(req: Request): Promise<Response> {
         { partner_submission_id: submissionId });
       lead = (existing.items || existing || [])[0] || null;
       intakeReused = !!lead;
+      if (lead && String(lead.email || '').toLowerCase() !== email) {
+        // An idempotency key belongs to ONE seller's request. A different
+        // seller reusing it must never attach to, overwrite, or piggyback on
+        // the recorded inquiry — reject instead of processing.
+        return Response.json(
+          { ok: false, error: 'submission_id_conflict' }, { status: 400 });
+      }
     }
     if (!lead) {
       lead = await service.entities.EstateTransitionLead.create({
