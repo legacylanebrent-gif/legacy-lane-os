@@ -15,6 +15,7 @@ import { actualSaleEconomics } from '@/components/saleops/saleEconomicsModel';
 import { postSaleAuthorizationWarning } from '@/components/agreements/agreementModel';
 import SaleEconomicsPanel from '@/components/saleops/SaleEconomicsPanel';
 import TenMoreReflection from '@/components/saleops/TenMoreReflection';
+import ReleasePickupDialog from '@/components/pickup/ReleasePickupDialog';
 
 // Chapter 1 P1 — Guided Closeout: an ORCHESTRATION surface over the existing
 // canonical closeout systems (Item, Donation, Cleanout, buyout, Expense,
@@ -39,6 +40,7 @@ export default function SaleCloseout() {
   const [showCloseConfirm, setShowCloseConfirm] = useState(false);
   const [closing, setClosing] = useState(false);
   const [pickedUpIds, setPickedUpIds] = useState([]);
+  const [releaseItem, setReleaseItem] = useState(null);
 
   useEffect(() => {
     loadData();
@@ -181,15 +183,9 @@ export default function SaleCloseout() {
   if (psaWarning) warnings.push(psaWarning);
   if (step5 === 'warning' && deal && !deal.settlement_finalized) warnings.push('Settlement payouts look complete — finalize the settlement record');
 
-  const markPickedUp = async (item) => {
-    try {
-      await base44.entities.Item.update(item.id, { pickup_completed_at: new Date().toISOString() });
-      setPickedUpIds(prev => [...prev, item.id]);
-    } catch (e) {
-      console.error(e);
-      alert('Could not mark picked up');
-    }
-  };
+  // Chapter 21 P1 — releases go through the sanctioned recordItemRelease path
+  // (backend-enforced: only SOLD merchandise releases; who/whom/what/partial
+  // truth preserved — never a bare timestamp write). See releaseItem state above.
 
   const completeProject = async () => {
     setClosing(true);
@@ -360,7 +356,7 @@ export default function SaleCloseout() {
                         {awaitingPickup.map(i => (
                           <div key={i.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-2 bg-slate-50 border border-slate-200 rounded-md">
                             <span className="text-sm text-slate-700 truncate">{i.title}{i.buyer_name ? ` — ${i.buyer_name}` : ''}</span>
-                            <Button size="sm" variant="outline" className="text-xs flex-shrink-0" onClick={() => markPickedUp(i)}>Mark picked up</Button>
+                            <Button size="sm" variant="outline" className="text-xs flex-shrink-0" onClick={() => setReleaseItem(i)}>Record pickup / release</Button>
                           </div>
                         ))}
                       </div>
@@ -448,6 +444,11 @@ export default function SaleCloseout() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {releaseItem && (
+        <ReleasePickupDialog item={releaseItem} open={!!releaseItem}
+          onClose={() => setReleaseItem(null)} onChanged={() => loadData()} />
+      )}
     </div>
   );
 }

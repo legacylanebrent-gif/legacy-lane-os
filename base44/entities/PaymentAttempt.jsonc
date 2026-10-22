@@ -1,0 +1,176 @@
+{
+  "name": "PaymentAttempt",
+  "type": "object",
+  "description": "Chapter 21 P0 \u2014 the ONE canonical PAYMENT ATTEMPT record: what the processor was ASKED to do, and what the provider said. One Order/cart may have 0..N attempts; attempts are IMMUTABLE HISTORY \u2014 a retry creates a NEW attempt and NEVER overwrites an earlier one (a mutable latest-attempt pointer may exist for UI convenience but is never the resolution truth). Webhook resolution goes through the attempt's provider reference, so a late webhook for attempt A still finds A after attempt B exists. APPROVED truth comes ONLY from the provider webhook (or an authorized merchant verification recorded with who/when \u2014 resolution_via). Never stores full card numbers, CVV, or processor credentials; failure_info is safe operator-facing text only.",
+  "properties": {
+    "sale_id": {
+      "type": "string",
+      "description": "EstateSale this attempt belongs to."
+    },
+    "operator_id": {
+      "type": "string",
+      "description": "EstateSale.operator_id projection \u2014 sale owner (RLS anchor). Derived from the cart's merchandise at attempt creation."
+    },
+    "company_id": {
+      "type": "string",
+      "description": "EstateSale.company_id projection when present."
+    },
+    "sale_team_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "READ-SCOPE PROJECTION of EstateSale.sale_team for RLS. The sale remains the source of truth."
+    },
+    "cart_id": {
+      "type": "string",
+      "description": "The Cart this attempt charges. The attempt survives the cart's deletion \u2014 it is the attempt history, not a cart pointer."
+    },
+    "order_id": {
+      "type": "string",
+      "description": "The Order created when this attempt completed successfully (absent until the money is confirmed). IDEMPOTENCY + duplicate guard: presence means the financial effect already happened."
+    },
+    "provider": {
+      "type": "string",
+      "description": "Payment provider identity (e.g. 'base44_payments'). Provider-neutral truth \u2014 core business records never depend on one processor's UI."
+    },
+    "provider_session_id": {
+      "type": "string",
+      "description": "Chapter 21 P0-2 \u2014 the provider checkout/session reference. PERMANENT EVIDENCE and the WEBHOOK RESOLUTION KEY: a webhook resolves the attempt through this reference, never through a mutable latest-attempt pointer."
+    },
+    "provider_order_id": {
+      "type": "string",
+      "description": "Chapter 21 P0-5 \u2014 the provider's order identifier returned on approval, preserved permanently for investigation/dispute."
+    },
+    "provider_payment_ref": {
+      "type": "string",
+      "description": "Chapter 21 P0-5 \u2014 the provider payment/charge/transaction reference when the provider returns one."
+    },
+    "provider_event_id": {
+      "type": "string",
+      "description": "Chapter 21 P0-3 \u2014 the provider event identifier (idempotency truth): a repeated webhook delivery carrying the same provider event must have zero additional financial effect."
+    },
+    "amount": {
+      "type": "number",
+      "description": "The amount this attempt asked the processor to charge."
+    },
+    "currency": {
+      "type": "string",
+      "default": "USD"
+    },
+    "payment_method": {
+      "type": "string",
+      "description": "Method/type of the attempt (e.g. 'online')."
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "PROCESSING",
+        "UNKNOWN",
+        "DECLINED",
+        "FAILED",
+        "APPROVED",
+        "VOIDED"
+      ],
+      "default": "PROCESSING",
+      "description": "Chapter 21 P0-8 \u2014 HONEST attempt state. PROCESSING = provider has not answered. UNKNOWN = ambiguous/unresolved result \u2014 UNKNOWN IS DATA, never paid and never erased. DECLINED/FAILED = provider (or verified merchant record) said no. APPROVED = provider-confirmed success (webhook) or authorized merchant verification (resolution_via). An attempt may fail without the Order failing; an Order may have multiple attempts."
+    },
+    "failure_info": {
+      "type": "string",
+      "description": "Safe operator-facing failure/decline context. NEVER full card numbers, CVV, or credentials."
+    },
+    "resolution_via": {
+      "type": "string",
+      "enum": [
+        "webhook",
+        "merchant_verification"
+      ],
+      "description": "How APPROVED/DECLINED/FAILED truth was established: the provider webhook, or an authorized human verifying the merchant record (Base44 Payments dashboard) after an ambiguous result. A customer's phone/screenshot is never a resolution source."
+    },
+    "resolution_note": {
+      "type": "string",
+      "description": "Operator note on how an ambiguous attempt was resolved (what the merchant record showed)."
+    },
+    "resolved_by": {
+      "type": "string",
+      "description": "User ID of the authorized human who resolved an ambiguous attempt (merchant verification path)."
+    },
+    "resolved_by_name": {
+      "type": "string"
+    },
+    "resolved_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "fee_amount": {
+      "type": "number",
+      "description": "Chapter 21 \u2014 the provider-ACTUAL processing fee when the provider returns one. Absent/UNKNOWN when it does not: the system never estimates a fee and calls it actual."
+    }
+  },
+  "required": [
+    "sale_id",
+    "operator_id",
+    "cart_id",
+    "provider",
+    "provider_session_id",
+    "amount",
+    "status"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "data.operator_id": "{{user.id}}"
+        },
+        {
+          "data.sale_team_ids": {
+            "$in": [
+              "{{user.id}}"
+            ]
+          }
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "data.operator_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.operator_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

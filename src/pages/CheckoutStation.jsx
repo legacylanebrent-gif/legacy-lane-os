@@ -23,6 +23,9 @@ export default function CheckoutStation() {
   const [guidance, setGuidance] = useState(null);
   const [liveSale, setLiveSale] = useState(null);
   const [helpOpen, setHelpOpen] = useState(false);
+  const [unresolved, setUnresolved] = useState(null);
+  const [resolveNote, setResolveNote] = useState('');
+  const [resolving, setResolving] = useState(false);
 
   useEffect(() => {
     loadStaff();
@@ -178,6 +181,7 @@ export default function CheckoutStation() {
         buyer_id: currentCart.user_id,
         buyer_name: cartUser.full_name || 'Customer',
         items: currentCart.items,
+        sale_id: liveSale?.id || null,
         subtotal: currentCart.total,
         total: currentCart.total,
         status: 'paid',
@@ -239,14 +243,53 @@ export default function CheckoutStation() {
 
       if (response.data?.redirectUrl) {
         window.location.href = response.data.redirectUrl;
+      } else if (response.data?.unresolved_attempt) {
+        // Chapter 21 P0-9 — retry stopped at the write layer; show the facts.
+        setUnresolved(response.data.unresolved_attempt);
+        setMessage({ type: 'error', text: response.data.error || 'An earlier payment attempt for this cart is still unresolved.' });
       } else {
         setMessage({ type: 'error', text: response.data?.error || 'Failed to start checkout' });
       }
     } catch (error) {
-      console.error('Online checkout error:', error);
-      setMessage({ type: 'error', text: 'Failed to start checkout: ' + error.message });
+      const data = error?.response?.data;
+      if (data?.unresolved_attempt) {
+        setUnresolved(data.unresolved_attempt);
+        setMessage({ type: 'error', text: data.error || 'An earlier payment attempt for this cart is still unresolved.' });
+      } else {
+        console.error('Online checkout error:', error);
+        setMessage({ type: 'error', text: 'Failed to start checkout: ' + error.message });
+      }
     } finally {
       setProcessingOnline(false);
+    }
+  };
+
+  // Chapter 21 P1 — payment verification workflow (operator/admin): verify the
+  // MERCHANT RECORD (Dashboard → Payments), then resolve. The customer's phone
+  // is never the merchant record.
+  const resolveAttempt = async (action) => {
+    if (!unresolved) return;
+    setResolving(true);
+    try {
+      const res = await base44.functions.invoke('resolvePaymentAttempt', {
+        attempt_id: unresolved.id,
+        action,
+        note: resolveNote,
+      });
+      const d = res.data || {};
+      setUnresolved(null);
+      setResolveNote('');
+      setMessage({ type: 'success', text: d.message || 'Attempt resolved.' });
+      if (d.result === 'completed') {
+        clearCart();
+      } else {
+        setTimeout(() => setMessage(null), 4000);
+      }
+    } catch (error) {
+      const msg = error?.response?.data?.error || error.message;
+      setMessage({ type: 'error', text: msg });
+    } finally {
+      setResolving(false);
     }
   };
 
@@ -257,6 +300,8 @@ export default function CheckoutStation() {
     setGuidance(null);
     setLiveSale(null);
     setHelpOpen(false);
+    setUnresolved(null);
+    setResolveNote('');
   };
 
   if (loading) {
@@ -342,7 +387,7 @@ export default function CheckoutStation() {
             </h2>
 
             {lastReceipt && (
-              <SaleReceipt order={lastReceipt} companyName={staff?.company_name} />
+              <SaleReceipt order={lastReceipt} companyName={staff?.company_name} sale={liveSale} />
             )}
 
             {!currentCart ? (
@@ -417,6 +462,43 @@ export default function CheckoutStation() {
                 </Button>
                 {helpOpen && liveSale && (
                   <AskForHelpDialog sale={liveSale} defaultCategory="checkout" onClose={() => setHelpOpen(false)} />
+                )}
+
+                {/* Chapter 21 P0-9/P1 — unresolved payment attempt: stop, verify, resolve */}
+                {unresolved && (
+                  <div className="border border-amber-300 bg-amber-50 rounded-lg p-3 space-y-1.5">
+                    <p className="text-xs font-semibold text-amber-900">Earlier payment attempt unresolved — do NOT charge again</p>
+                    <p className="text-[11px] text-amber-900">
+                      ${Number(unresolved.amount).toFixed(2)} · {unresolved.status} · started{' '}
+                      {unresolved.created_at ? new Date(unresolved.created_at).toLocaleString() : '—'} · session {unresolved.provider_session_id || '—'}
+                    </p>
+                    <p className="text-[11px] text-amber-800">
+                      Verify the merchant record: Dashboard → Payments → All Payments. A pending bank charge or the customer's phone is NEVER payment; do not release merchandise.
+                    </p>
+                    {(staff?.role === 'admin' || staff?.id === unresolved.operator_id) ? (
+                      <div className="space-y-1.5">
+                        <input
+                          value={resolveNote}
+                          onChange={(e) => setResolveNote(e.target.value)}
+                          placeholder="What the merchant record showed"
+                          className="w-full px-2 py-1.5 border border-amber-300 rounded text-xs"
+                        />
+                        <div className="flex flex-wrap gap-1.5">
+                          <Button size="sm" disabled={resolving} onClick={() => resolveAttempt('verified_approved')} className="h-7 text-xs bg-emerald-600 hover:bg-emerald-700">
+                            Verified paid — complete order
+                          </Button>
+                          <Button size="sm" variant="outline" disabled={resolving} onClick={() => resolveAttempt('merchant_declined')} className="h-7 text-xs">
+                            Merchant says declined
+                          </Button>
+                          <Button size="sm" variant="outline" disabled={resolving} onClick={() => resolveAttempt('merchant_failed')} className="h-7 text-xs">
+                            Merchant says failed
+                          </Button>
+                        </div>
+                      </div>
+                    ) : (
+                      <p className="text-[11px] text-amber-800">Ask the operator to verify with the payment provider and resolve this attempt.</p>
+                    )}
+                  </div>
                 )}
 
                 {/* Payment Method */}

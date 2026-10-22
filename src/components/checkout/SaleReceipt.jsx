@@ -5,10 +5,12 @@ import { Printer } from 'lucide-react';
 // Chapter 8 P2 — RECEIPT (small extension of the existing Order truth; no new
 // financial record, no refunds/voids). Everything renders from the Order that
 // checkout already created. Print opens a plain receipt window.
-export default function SaleReceipt({ order, companyName }) {
+export default function SaleReceipt({ order, companyName, sale }) {
   if (!order) return null;
   const when = order.created_date ? new Date(order.created_date) : new Date();
   const items = order.items || [];
+  const plan = (sale && sale.pickup_plan) || {};
+  const pickupBits = [plan.pickup_window, plan.pickup_location, plan.instructions].filter(Boolean);
   const printReceipt = () => {
     const rows = items.map(it => (
       `<tr><td>${(it.item_title || '').replace(/</g, '&lt;')}</td><td style="text-align:center">${it.quantity || 1}</td><td style="text-align:right">$${(it.quantity * it.price).toFixed(2)}</td></tr>`
@@ -28,8 +30,9 @@ export default function SaleReceipt({ order, companyName }) {
       <div>Payment: ${order.payment_method || '—'}</div>
       <table><thead><tr><th>Item</th><th style="text-align:center">Qty</th><th style="text-align:right">Amount</th></tr></thead><tbody>${rows}</tbody></table>
       <p class="total" style="text-align:right;margin-top:8px">Total: $${(order.total || 0).toFixed(2)}</p>
+      ${pickupBits.length ? `<div><b>Pickup:</b> ${pickupBits.join(' · ').replace(/</g, '&lt;')}</div>` : ''}
       <hr/>
-      <div class="muted">Please keep this receipt. Purchased items should be picked up during the sale per staff directions; hold this receipt for any pickup questions.</div>
+      <div class="muted">Please keep this receipt. Purchased items must be picked up per the pickup terms above or during the sale per staff directions; hold this receipt for any pickup questions. All sales final per posted policy.</div>
       <script>window.onload = () => window.print();</script>
     </body></html>`;
     const w = window.open('', '_blank', 'width=380,height=640');
@@ -45,7 +48,8 @@ export default function SaleReceipt({ order, companyName }) {
         </div>
         <Button size="sm" variant="outline" onClick={printReceipt}><Printer className="w-4 h-4 mr-1" />Print</Button>
       </div>
-      <p className="text-xs text-slate-500">Derived from the completed order — no separate financial record is created.</p>
+      <p className="text-xs text-slate-500">Derived from the completed order — no separate financial record is created. Printable receipt — EstateSalen does not email or text receipts.</p>
+      {pickupBits.length > 0 && <p className="text-xs text-slate-600">Pickup: {pickupBits.join(' · ')}</p>}
     </div>
   );
 }

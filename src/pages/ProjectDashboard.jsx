@@ -30,6 +30,8 @@ import StaffingPanel from '@/components/staffing/StaffingPanel';
 import OpeningBriefCard from '@/components/staffing/OpeningBriefCard';
 import ZoneStagingPanel from '@/components/staging/ZoneStagingPanel';
 import StagingReadinessCard from '@/components/staging/StagingReadinessCard';
+import CashControlPanel from '@/components/cash/CashControlPanel';
+import SaleOrdersPanel from '@/components/saleops/SaleOrdersPanel';
 
 const asArr = (r) => (Array.isArray(r) ? r : (r && r.items) || []);
 const money = (n) => (typeof n === 'number' ? `$${n.toLocaleString()}` : '—');
@@ -225,6 +227,14 @@ export default function ProjectDashboard() {
           readiness, zone staging layer — assembled from canonical records only. */}
       <StagingReadinessCard sale={sale} zones={sale.prep_zones || []} items={data.items} issues={data.issues} tasks={data.tasks} laborEntries={data.laborEntries} linkedDeal={data.linkedDeal} onChanged={refresh} />
       <ZoneStagingPanel sale={sale} items={data.items} tasks={data.tasks} onChanged={refresh} />
+
+      {/* Chapter 21 P1 — sale-day money & custody: cash control (opening bank,
+          drops, expected vs actual, honest variance) + per-sale transactions
+          (search, evidence, refund records). */}
+      <div className="grid lg:grid-cols-2 gap-4 items-start">
+        <CashControlPanel sale={sale} onChanged={refresh} />
+        <SaleOrdersPanel sale={sale} />
+      </div>
 
       {/* PREPARATION READINESS (deterministic, Chapter 8 reuse) + POST-SALE PLAN */}
       <div className="grid lg:grid-cols-2 gap-4">

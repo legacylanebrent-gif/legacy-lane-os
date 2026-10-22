@@ -15,6 +15,7 @@ import AttentionQueueCard from '@/components/livesale/AttentionQueueCard';
 import OffersCard from '@/components/livesale/OffersCard';
 import HoldsCard from '@/components/livesale/HoldsCard';
 import CheckoutCard from '@/components/livesale/CheckoutCard';
+import MoneyHealthCard from '@/components/livesale/MoneyHealthCard';
 import PickupsCard from '@/components/livesale/PickupsCard';
 import SignalsCard from '@/components/livesale/SignalsCard';
 import ClosingCard from '@/components/livesale/ClosingCard';
@@ -43,7 +44,7 @@ export default function LiveSale() {
       const s = saleRows[0];
       if (!s) { setSale(null); setData(null); return; }
       setSale(s);
-      const [itemsRes, offersRes, issuesRes, assignmentsRes, tasksRes, decisionsRes, checkinRes, ordersRes, briefActRes] = await Promise.all([
+      const [itemsRes, offersRes, issuesRes, assignmentsRes, tasksRes, decisionsRes, checkinRes, ordersRes, briefActRes, attemptsRes] = await Promise.all([
         base44.entities.Item.filter({ estate_sale_id: sid }, { limit: 500 }),
         base44.entities.Offer.filter({ sale_id: sid }, '-created_date', 300),
         base44.entities.SaleIssue.filter({ sale_id: sid }, '-created_date', 200),
@@ -53,10 +54,11 @@ export default function LiveSale() {
         base44.entities.CheckIn.filter({ location_id: sid }, '-created_date', 500),
         base44.entities.Order.filter({ created_date: { $gte: todayStartIso() } }, { sort: '-created_date', limit: 200 }),
         base44.entities.Activity.filter({ sale_id: sid, subject: 'Opening brief reviewed' }, { sort: '-created_date', limit: 5 }),
+        base44.entities.PaymentAttempt.filter({ sale_id: sid }, '-created_date', 100),
       ]);
       const items = asArr(itemsRes), offers = asArr(offersRes), issues = asArr(issuesRes);
       const assignments = asArr(assignmentsRes), tasks = asArr(tasksRes), decisions = asArr(decisionsRes);
-      const checkins = asArr(checkinRes), ordersAll = asArr(ordersRes), briefActs = asArr(briefActRes);
+      const checkins = asArr(checkinRes), ordersAll = asArr(ordersRes), briefActs = asArr(briefActRes), attempts = asArr(attemptsRes);
 
       const dayStart = todayStartIso();
       const itemIds = new Set(items.map((i) => i.id));
@@ -78,7 +80,7 @@ export default function LiveSale() {
         || new Date(Date.now() - 24 * 3600 * 1000).toISOString();
 
       setData({
-        items, offers, issues, assignments, tasks, decisions, ordersToday, gaps,
+        items, offers, issues, assignments, tasks, decisions, ordersToday, attempts, gaps,
         changes: changesSince({ items, offers, issues, decisions, assignments, since }),
         metrics: {
           attendanceToday: entriesToday,
@@ -198,6 +200,7 @@ export default function LiveSale() {
 
       <Section title="Checkout">
         <CheckoutCard sale={sale} ordersToday={data.ordersToday} />
+        <MoneyHealthCard sale={sale} attempts={data.attempts} issues={data.issues} onChanged={() => load(sale.id)} />
       </Section>
 
       <Section title="Live Signals">

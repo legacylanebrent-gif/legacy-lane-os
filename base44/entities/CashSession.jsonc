@@ -1,0 +1,189 @@
+{
+  "name": "CashSession",
+  "type": "object",
+  "description": "Chapter 21 P1 \u2014 the ONE sale-day CASH CONTROL record (opening bank, drops, authorized adjustments, closing count, expected vs actual, variance). Semantically distinct from Expense by design: an opening bank is not a cost, a drop is not an expense, and variance is not a line item \u2014 cash truth is NEVER forced into Expense. Cash SALES are NOT stored here: canonical Order/Transaction cash records contribute to expected cash. Cash is handled only by the operator (operator/admin access by RLS). UNKNOWN stays unknown: expected cash is computable only from recorded truth, variance is never silently zeroed, and the physical closing count is always the human's own number.",
+  "properties": {
+    "sale_id": {
+      "type": "string",
+      "description": "EstateSale this cash session belongs to."
+    },
+    "operator_id": {
+      "type": "string",
+      "description": "EstateSale.operator_id projection \u2014 sale owner (RLS anchor)."
+    },
+    "sale_team_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "READ-SCOPE PROJECTION of EstateSale.sale_team for RLS. The sale remains the source of truth."
+    },
+    "session_date": {
+      "type": "string",
+      "format": "date",
+      "description": "The operating day this session covers (one session per sale+date+register)."
+    },
+    "register_label": {
+      "type": "string",
+      "description": "Optional register/station label when more than one drawer operates."
+    },
+    "opening_bank": {
+      "type": "number",
+      "description": "Chapter 21 \u2014 the ACTUAL starting cash the human counted and recorded. Never assumed."
+    },
+    "opened_by": {
+      "type": "string",
+      "description": "User ID who recorded the opening bank."
+    },
+    "opened_by_name": {
+      "type": "string"
+    },
+    "opened_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "movements": {
+      "type": "array",
+      "default": [],
+      "description": "Chapter 21 \u2014 CASH MOVEMENTS other than sales: DROP (cash removed from the active drawer and secured) and signed ADJUSTMENT (authorized corrections). Append-only; cash sales/refunds are derived from canonical Order/Transaction/SaleRefund truth and are deliberately NOT duplicated here.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "movement_id": {
+            "type": "string"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "DROP",
+              "ADJUSTMENT"
+            ],
+            "description": "DROP = cash removed from the drawer and secured (reduces cash on hand by amount). ADJUSTMENT = signed authorized correction (+/-)."
+          },
+          "amount": {
+            "type": "number",
+            "description": "DROP: positive amount removed. ADJUSTMENT: signed amount (+/-)."
+          },
+          "note": {
+            "type": "string",
+            "description": "Who removed it / where it was secured (DROP), or the authorized reason (ADJUSTMENT). Team-safe \u2014 no codes or credentials."
+          },
+          "by": {
+            "type": "string"
+          },
+          "by_name": {
+            "type": "string"
+          },
+          "at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      }
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "OPEN",
+        "CLOSED"
+      ],
+      "default": "OPEN",
+      "description": "OPEN = active operating session. CLOSED = physical closing count recorded."
+    },
+    "closing_count": {
+      "type": "number",
+      "description": "Chapter 21 \u2014 the ACTUAL physical cash the human counted at close. Never silently changed to expected."
+    },
+    "closed_by": {
+      "type": "string"
+    },
+    "closed_by_name": {
+      "type": "string"
+    },
+    "closed_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "expected_cash": {
+      "type": "number",
+      "description": "DETERMINISTIC expected-cash SNAPSHOT captured at close: opening bank + cash sales (canonical Order/Transaction) - cash refunds (SaleRefund) - drops + signed adjustments. Absent while the session is OPEN (live expected is derived at read time from the same formula)."
+    },
+    "variance": {
+      "type": "number",
+      "description": "closing_count - expected_cash at close. Honest difference \u2014 may be negative; never auto-zeroed."
+    },
+    "variance_status": {
+      "type": "string",
+      "enum": [
+        "OPEN",
+        "EXPLAINED",
+        "RESOLVED"
+      ],
+      "description": "Chapter 21 \u2014 a discrepancy stays visible until the operator explains or resolves it. OPEN = unexplained. EXPLAINED = cause recorded (still visible). RESOLVED = handled (record remains)."
+    },
+    "variance_note": {
+      "type": "string",
+      "description": "The operator's explanation/resolution of the variance, in their own words."
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "sale_id",
+    "operator_id",
+    "session_date",
+    "opening_bank"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.operator_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "$or": [
+        {
+          "data.operator_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.operator_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.operator_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

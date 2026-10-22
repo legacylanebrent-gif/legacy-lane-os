@@ -1,5 +1,6 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
 import jwt from 'npm:jsonwebtoken@9.0.2';
+import { completeApprovedPosAttempt } from '../../shared/posPayment.ts';
 
 // ─────────────────────────────────────────────
 // wix-payments-webhook
@@ -267,50 +268,59 @@ Deno.serve(async (req) => {
       }
 
       // ── Try 4: POS cart checkout ──
+      // Chapter 21 P0-1/P0-2: resolve through the canonical PaymentAttempt's
+      // provider reference (per-attempt, immutable) so a late webhook for
+      // attempt A still resolves after attempt B exists. Replays have zero
+      // additional financial effect, provider references are preserved, and
+      // canonical Item availability is re-checked at the write layer (P0-6).
+      const attemptRows = await base44.asServiceRole.entities.PaymentAttempt.filter({
+        provider_session_id: checkoutId,
+      });
+
+      if (attemptRows.length > 0) {
+        const attempt = attemptRows[0];
+        // P0-3 idempotency: this attempt already produced its financial effect.
+        if (attempt.status === 'APPROVED' && attempt.order_id) {
+          console.log(`[webhook] POS attempt ${attempt.id} already completed — replay ignored`);
+          return new Response('OK', { status: 200 });
+        }
+        const cartRows = await base44.asServiceRole.entities.Cart.filter({ id: attempt.cart_id });
+        const attemptCart = cartRows[0] || null;
+        let attemptBuyerName = 'Customer';
+        try {
+          const buyerRows = await base44.asServiceRole.entities.User.filter({ id: attemptCart ? attemptCart.user_id : null });
+          if (buyerRows[0]?.full_name) attemptBuyerName = buyerRows[0].full_name;
+        } catch (e) { /* display name only */ }
+        const attemptResult = await completeApprovedPosAttempt(base44.asServiceRole, {
+          attempt,
+          cart: attemptCart,
+          buyerName: attemptBuyerName,
+          providerRefs: { provider_order_id: order.id || null, provider_event_id: order.id || null },
+          resolutionVia: 'webhook',
+        });
+        console.log(`[webhook] POS attempt ${attempt.id}: ${attemptResult.result} — ${attemptResult.message}`);
+        return new Response('OK', { status: 200 });
+      }
+
+      // LEGACY fallback: pre-Chapter-21 carts (no attempt record) still resolve —
+      // through the SAME shared path, so the do-not-sell guard and provider
+      // reference preservation now apply to legacy sessions too.
       const cartRecords = await base44.asServiceRole.entities.Cart.filter({
         pending_checkout_id: checkoutId,
       });
 
       if (cartRecords.length > 0) {
         const cart = cartRecords[0];
-
-        // Fetch buyer name
         const buyerUsers = await base44.asServiceRole.entities.User.filter({ id: cart.user_id });
         const buyerName = buyerUsers[0]?.full_name || 'Customer';
-
-        // Create the order from the cart
-        const order = await base44.asServiceRole.entities.Order.create({
-          order_number: `POS-${Date.now()}`,
-          buyer_id: cart.user_id,
-          buyer_name: buyerName,
-          items: cart.items,
-          subtotal: cart.total,
-          total: cart.total,
-          status: 'paid',
-          payment_method: 'online',
-          fulfillment_method: 'pickup',
-          escrow_status: 'released',
+        const legacyResult = await completeApprovedPosAttempt(base44.asServiceRole, {
+          attempt: null,
+          cart,
+          buyerName,
+          providerRefs: { provider_order_id: order.id || null, provider_event_id: order.id || null },
+          resolutionVia: 'webhook',
         });
-
-        // Mark items as sold
-        for (const ci of (cart.items || [])) {
-          if (ci.item_id) {
-            const itemRecords = await base44.asServiceRole.entities.Item.filter({ id: ci.item_id });
-            if (itemRecords[0]) {
-              await base44.asServiceRole.entities.Item.update(itemRecords[0].id, {
-                status: 'sold',
-                sold_date: new Date().toISOString(),
-                buyer_name: cart.user_id,
-                payment_method_used: 'online',
-              });
-            }
-          }
-        }
-
-        // Clear the cart
-        await base44.asServiceRole.entities.Cart.delete(cart.id);
-
-        console.log(`[webhook] POS order completed: ${order.id}`);
+        console.log(`[webhook] POS legacy cart: ${legacyResult.result} — ${legacyResult.message}`);
         return new Response('OK', { status: 200 });
       }
 

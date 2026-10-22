@@ -337,6 +337,29 @@ Deno.serve(async (req) => {
       if (!cart) return Response.json({ error: 'Cart not found' }, { status: 404 });
       if (!cart.items || cart.items.length === 0) return Response.json({ error: 'Cart is empty' }, { status: 400 });
 
+      // Chapter 21 P0-1/P0-9 — RETRY PROTECTION: while a previous attempt for
+      // this cart is PROCESSING or UNKNOWN, refuse to create another provider
+      // session. Retrying a payment is a financial action, not a UI convenience;
+      // an authorized human resolves the unresolved attempt first (verify the
+      // merchant record), which unblocks a safe new attempt.
+      const priorAttempts = await base44.asServiceRole.entities.PaymentAttempt.filter({ cart_id: cart.id });
+      const unresolved = (priorAttempts || []).filter((a) => ['PROCESSING', 'UNKNOWN'].includes(a.status));
+      if (unresolved.length > 0) {
+        const u = unresolved[unresolved.length - 1];
+        return Response.json({
+          error: `An online payment attempt for this cart is still unresolved ($${u.amount}, started ${u.created_date}, status ${u.status}). Do not charge again — verify with the payment provider (Dashboard → Payments → All Payments) and resolve that attempt first.`,
+          unresolved_attempt: {
+            id: u.id,
+            amount: u.amount,
+            status: u.status,
+            created_at: u.created_date,
+            provider: u.provider,
+            provider_session_id: u.provider_session_id,
+            operator_id: u.operator_id || '',
+          },
+        }, { status: 409 });
+      }
+
       const total = cart.total || 0;
       if (total < 0.50) {
         return Response.json({ error: 'Total must be at least $0.50' }, { status: 400 });
@@ -388,7 +411,47 @@ Deno.serve(async (req) => {
         return Response.json({ error: 'Invalid checkout response' }, { status: 500 });
       }
 
-      // Store pending checkout on the cart so the webhook can find it
+      // Chapter 21 P0-1 — create the canonical PAYMENT ATTEMPT (immutable
+      // history: a retry creates a NEW attempt and NEVER overwrites this one).
+      // Sale scope is derived from the cart's merchandise.
+      let attemptSaleId = '', attemptOperatorId = '', attemptCompanyId = null, attemptTeamIds = [];
+      try {
+        const firstItemId = (cart.items || []).map((ci) => ci.item_id).find(Boolean);
+        if (firstItemId) {
+          const itemRows = await base44.asServiceRole.entities.Item.filter({ id: firstItemId });
+          const firstItem = itemRows[0];
+          if (firstItem?.estate_sale_id) {
+            attemptSaleId = firstItem.estate_sale_id;
+            const saleRows = await base44.asServiceRole.entities.EstateSale.filter({ id: attemptSaleId });
+            const saleRow = saleRows[0];
+            if (saleRow) {
+              attemptOperatorId = saleRow.operator_id || '';
+              attemptCompanyId = saleRow.company_id || null;
+              attemptTeamIds = saleRow.sale_team || [];
+            }
+          }
+        }
+      } catch (e) {
+        console.error('[create-checkout] sale scope derivation failed:', e.message);
+      }
+
+      await base44.asServiceRole.entities.PaymentAttempt.create({
+        sale_id: attemptSaleId,
+        operator_id: attemptOperatorId,
+        company_id: attemptCompanyId,
+        sale_team_ids: attemptTeamIds,
+        cart_id: cart.id,
+        provider: 'base44_payments',
+        provider_session_id: checkoutId,
+        amount: total,
+        currency: 'USD',
+        payment_method: 'online',
+        status: 'PROCESSING',
+      });
+      console.log(`[create-checkout] PaymentAttempt created for cart ${cart.id}: session ${checkoutId}, $${total}`);
+
+      // Convenience pointer ONLY (P0-2: webhook resolution goes through the
+      // PaymentAttempt's provider reference — never this mutable field alone).
       await base44.asServiceRole.entities.Cart.update(cart.id, {
         pending_checkout_id: checkoutId,
       });

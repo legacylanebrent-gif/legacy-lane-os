@@ -856,7 +856,7 @@
     "pickup_completed_at": {
       "type": "string",
       "format": "date-time",
-      "description": "When sold merchandise was picked up / released to the buyer (guided closeout tracking). Absent = pickup still pending. Independent of selling status.",
+      "description": "When sold merchandise was FULLY picked up / released to the buyer (guided closeout tracking). Absent = pickup still pending (including PARTIAL releases \u2014 Chapter 21: custody closes only when the remaining count reaches zero). Independent of selling status.",
       "rls": {
         "read": {
           "$or": [
@@ -2356,6 +2356,180 @@
         "special_handling": {
           "type": "string",
           "description": "Chapter 17 P1-12 \u2014 special procedure / handling note, stated so it is safe to show a buyer when it describes what THEY must do."
+        }
+      }
+    },
+    "pickup_due_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Chapter 21 P1 \u2014 operator-recorded pickup deadline for SOLD merchandise remaining at the property. A past due date with the merchandise not fully released is a MISSED PICKUP (deterministic display, never an automated chase). Absent = no deadline recorded \u2014 unknown stays unknown.",
+      "rls": {
+        "read": {
+          "$or": [
+            {
+              "$and": [
+                {
+                  "user_condition": {
+                    "role": "user"
+                  }
+                },
+                {
+                  "created_by_id": "{{user.id}}"
+                }
+              ]
+            },
+            {
+              "$and": [
+                {
+                  "user_condition": {
+                    "role": "user"
+                  }
+                },
+                {
+                  "data.seller_id": "{{user.id}}"
+                }
+              ]
+            },
+            {
+              "$and": [
+                {
+                  "user_condition": {
+                    "role": "user"
+                  }
+                },
+                {
+                  "data.operator_id": "{{user.id}}"
+                }
+              ]
+            },
+            {
+              "$and": [
+                {
+                  "user_condition": {
+                    "role": "user"
+                  }
+                },
+                {
+                  "data.sale_team_ids": {
+                    "$in": [
+                      "{{user.id}}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "user_condition": {
+                "role": "admin"
+              }
+            }
+          ]
+        }
+      }
+    },
+    "releases": {
+      "type": "array",
+      "default": [],
+      "description": "Chapter 21 P1 \u2014 APPEND-ONLY RELEASE / PICKUP truth: each entry records what physically left the property, when, who released it, and to whom (the buyer or the NAMED authorized collector \u2014 a name only; the system never collects ID documents). The Item remains the single custody truth \u2014 there is NO second pickup entity. Remaining merchandise = quantity minus the sum of released quantities; the purchase is RELEASED (pickup_completed_at set) only when the remaining count reaches zero \u2014 a PARTIAL release never closes custody. Earlier release entries are never rewritten.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "release_id": {
+            "type": "string"
+          },
+          "released_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When this portion physically left."
+          },
+          "released_by": {
+            "type": "string",
+            "description": "User ID of the employee who released it."
+          },
+          "released_by_name": {
+            "type": "string",
+            "description": "Display-name snapshot of the releasing employee."
+          },
+          "released_to": {
+            "type": "string",
+            "description": "Who collected it \u2014 the buyer or the named authorized collector."
+          },
+          "quantity": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "How many units/components left in this release (partial pickup for grouped merchandise)."
+          },
+          "component_note": {
+            "type": "string",
+            "description": "Which components left, when the grouping matters (e.g. 'table + 4 chairs')."
+          },
+          "notes": {
+            "type": "string",
+            "description": "Only where necessary. Team-safe \u2014 no codes or credentials."
+          }
+        }
+      },
+      "rls": {
+        "read": {
+          "$or": [
+            {
+              "$and": [
+                {
+                  "user_condition": {
+                    "role": "user"
+                  }
+                },
+                {
+                  "created_by_id": "{{user.id}}"
+                }
+              ]
+            },
+            {
+              "$and": [
+                {
+                  "user_condition": {
+                    "role": "user"
+                  }
+                },
+                {
+                  "data.seller_id": "{{user.id}}"
+                }
+              ]
+            },
+            {
+              "$and": [
+                {
+                  "user_condition": {
+                    "role": "user"
+                  }
+                },
+                {
+                  "data.operator_id": "{{user.id}}"
+                }
+              ]
+            },
+            {
+              "$and": [
+                {
+                  "user_condition": {
+                    "role": "user"
+                  }
+                },
+                {
+                  "data.sale_team_ids": {
+                    "$in": [
+                      "{{user.id}}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "user_condition": {
+                "role": "admin"
+              }
+            }
+          ]
         }
       }
     },

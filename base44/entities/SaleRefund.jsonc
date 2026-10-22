@@ -1,0 +1,158 @@
+{
+  "name": "SaleRefund",
+  "type": "object",
+  "description": "Chapter 21 P1 \u2014 the ONE REFUND RECORD for a sale transaction: an authorized, evidenced financial reversal that is ALWAYS connected to its original Order (and its canonical PaymentAttempt when one exists). A refund is NEVER a disconnected negative sale. This record is the APP'S REFUND TRUTH (operator-authorized, provider-reference-preserving); EstateSalen does not execute provider refunds \u2014 the provider action happens in the merchant's payment dashboard and its result is recorded here (status). FINANCIAL REVERSAL IS NEVER PHYSICAL RETURN: recording a refund never automatically makes merchandise available for resale \u2014 custody and company policy decide that, recorded in item_consequence.",
+  "properties": {
+    "sale_id": {
+      "type": "string",
+      "description": "EstateSale this refund belongs to."
+    },
+    "operator_id": {
+      "type": "string",
+      "description": "EstateSale.operator_id projection \u2014 sale owner (RLS anchor)."
+    },
+    "company_id": {
+      "type": "string",
+      "description": "EstateSale.company_id projection when present."
+    },
+    "sale_team_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "READ-SCOPE PROJECTION of EstateSale.sale_team for RLS. The sale remains the source of truth."
+    },
+    "order_id": {
+      "type": "string",
+      "description": "The ORIGINAL Order being refunded. Required \u2014 a refund never floats free of its transaction."
+    },
+    "payment_attempt_id": {
+      "type": "string",
+      "description": "The canonical PaymentAttempt that carried the money being refunded (the APPROVED attempt of this Order), when one exists."
+    },
+    "amount": {
+      "type": "number",
+      "description": "The refund amount. Partial refunds never rewrite the original Order/attempt."
+    },
+    "refund_type": {
+      "type": "string",
+      "enum": [
+        "FULL",
+        "PARTIAL"
+      ],
+      "default": "PARTIAL",
+      "description": "PARTIAL refunds are supported truthfully \u2014 the original transaction is untouched."
+    },
+    "refund_method": {
+      "type": "string",
+      "enum": [
+        "cash",
+        "credit_card",
+        "venmo",
+        "zelle",
+        "check",
+        "online",
+        "other"
+      ],
+      "description": "How the money was returned. Cash refunds reduce expected cash in the day's CashSession reconciliation."
+    },
+    "reason": {
+      "type": "string",
+      "description": "Why the refund was authorized, in the authorizer's words."
+    },
+    "provider": {
+      "type": "string",
+      "description": "Provider the original charge ran through (e.g. 'base44_payments'), when known."
+    },
+    "provider_ref": {
+      "type": "string",
+      "description": "The provider's refund/void reference when the merchant dashboard supplies one \u2014 permanent evidence."
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "RECORDED",
+        "PROVIDER_PENDING",
+        "PROVIDER_COMPLETED",
+        "CANCELLED"
+      ],
+      "default": "RECORDED",
+      "description": "RECORDED = the operator authorized and recorded it. PROVIDER_PENDING/COMPLETED = the operator recorded the provider-side state from the merchant dashboard. EstateSalen records provider refund truth; it does not execute it."
+    },
+    "requested_by_name": {
+      "type": "string",
+      "description": "Who asked for the refund (staff or customer), as reported."
+    },
+    "authorized_by": {
+      "type": "string",
+      "description": "User ID of the authorized operator/admin who approved the refund. Consequential financial action \u2014 enforced at the backend write layer."
+    },
+    "authorized_by_name": {
+      "type": "string"
+    },
+    "item_consequence": {
+      "type": "string",
+      "description": "Operator note on what happens to the merchandise (buyer keeps it, merchandise returned to sale after custody check, pickup cancelled...). The system NEVER auto-flips Item status from a refund."
+    },
+    "notes": {
+      "type": "string",
+      "description": "Other context. NEVER full card numbers, CVV, or credentials (refused at the write layer)."
+    },
+    "refunded_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the refund was authorized/recorded."
+    }
+  },
+  "required": [
+    "sale_id",
+    "operator_id",
+    "order_id",
+    "amount",
+    "status"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.operator_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "$or": [
+        {
+          "data.operator_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.operator_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

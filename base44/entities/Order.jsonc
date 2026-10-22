@@ -38,6 +38,14 @@
       },
       "default": []
     },
+    "sale_id": {
+      "type": "string",
+      "description": "Chapter 21 P1 \u2014 the EstateSale this Order belongs to (set at POS/marketplace checkout). Per-sale money truth groups through this link; legacy orders created before Chapter 21 lack it and are matched by item overlap only."
+    },
+    "provider_order_id": {
+      "type": "string",
+      "description": "Chapter 21 P0-2 \u2014 the PROVIDER's order reference for online payments, copied from the APPROVED PaymentAttempt at completion. Permanent financial evidence for investigation/dispute; never a transient payload dependency."
+    },
     "subtotal": {
       "type": "number"
     },
@@ -63,14 +71,15 @@
         "cancelled",
         "disputed"
       ],
-      "default": "pending_payment"
+      "default": "pending_payment",
+      "description": "Chapter 21 doctrine: for POS sales, 'paid' is written ONLY when money is confirmed (provider webhook for online; the cashier's completed offline tender). pending_payment/processing are never paid."
     },
     "payment_method": {
       "type": "string"
     },
     "pending_checkout_id": {
       "type": "string",
-      "description": "Wix checkout session ID when online payment is in progress"
+      "description": "Wix checkout session ID when online payment is in progress. LEGACY/convenience pointer only \u2014 Chapter 21 canonical attempt truth lives on PaymentAttempt; webhook resolution never depends solely on this mutable field."
     },
     "escrow_status": {
       "type": "string",
