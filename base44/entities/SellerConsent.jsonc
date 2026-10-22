@@ -1,11 +1,10 @@
 {
   "name": "SellerConsent",
   "type": "object",
-  "description": "Referral Rebuild Phase 2A \u2014 VERSIONED record of a seller's permission to be contacted for an introduction (Referral Phase 2 design Part 2A). Records are created ONLY by sanctioned server functions at inquiry submission time: the SERVER generates the timestamp and pins the consent text version, storing the EXACT displayed text snapshot. Phase 2B hardening: when the rollout is ENABLED, the seller must AFFIRMATIVELY ACCEPT the exact versioned text (a version mismatch is rejected and acceptance is never inferred from a timestamp or referral token), the consent is stored BEFORE any forwarding to recipients, a consent-storage failure prevents forwarding, and a STABLE SUBMISSION ID makes every step idempotent (retry reuses the same consent and inquiry and re-attempts only failed stages \u2014 tracked separately in intake_tracking). A seller (usually no platform account) never writes this record directly. OPTIONAL marketing consent is a SEPARATE block \u2014 withdrawing either never affects the other, and inquiry capture alone NEVER grants marketing consent. ABSENCE OF A RECORD = NOT RECORDED (historical submissions are never backfilled to affirmative or to withdrawn; unknown stays unknown). This is a consent record, NOT verified licensing, NOT broker approval, and NOT an executed brokerage referral agreement. It creates NO compensation entitlement of any kind.",
+  "description": "Versioned seller introduction consent. Production rollout remains disabled. Requests received by staff are unverified reports in SellerConsentWithdrawalEvent and do not change consent. Only the explicitly designated administrator may confirm a relay through withdrawSellerConsent; its single-record conditional update appends withdrawal_history and changes status together. Queued notices never prove delivery. Historical fields and records are preserved. No compensation entitlement. Unique creation and cross-record transactions are not supported; initial-create concurrency remains an activation blocker.",
   "properties": {
     "consent_id": {
-      "type": "string",
-      "description": "Server-generated unique consent identifier (SC-<epoch>-<suffix>)."
+      "type": "string"
     },
     "source_type": {
       "type": "string",
@@ -14,20 +13,20 @@
         "partner_referred_inquiry",
         "website_lead",
         "manual"
-      ],
-      "description": "Which canonical inquiry source record this consent was captured on."
+      ]
     },
     "source_id": {
-      "type": "string",
-      "description": "ID of the source inquiry record (e.g. EstateTransitionLead id)."
+      "type": "string"
     },
     "submission_id": {
+      "type": "string"
+    },
+    "submission_identity": {
       "type": "string",
-      "description": "Referral Rebuild Phase 2B \u2014 STABLE client-generated submission identifier (uuid, reused across retries). The retry/idempotency anchor: a retried submission reuses the SAME consent record; consent, intake, and forwarding states are tracked separately in intake_tracking."
+      "description": "Private server-derived SHA-256 of normalized seller information and operator/referrer scope. Never supplied by callers."
     },
     "operator_id": {
-      "type": "string",
-      "description": "Derived OPERATOR recipient of the consent (resolved server-side from the inquiry context, never client-supplied)."
+      "type": "string"
     },
     "intended_recipient_ids": {
       "type": "array",
@@ -35,7 +34,7 @@
         "type": "string"
       },
       "default": [],
-      "description": "ALL user IDs of intended recipients of the seller's contact information. Brokerage recipients are ADDED ONLY after broker/legal confirmation of identities (Phase 2 step 4) \u2014 never invented placeholders here."
+      "description": "Intended audience only. Not evidence of delivery or withdrawal authority."
     },
     "contact_purpose": {
       "type": "string",
@@ -43,67 +42,114 @@
         "introduction_only",
         "other"
       ],
-      "default": "introduction_only",
-      "description": "The purpose the seller consented to: an INTRODUCTION ONLY. Never broadens silently."
+      "default": "introduction_only"
     },
     "consent_text_version": {
-      "type": "string",
-      "description": "The EXACT consent text version the seller acknowledged, pinned SERVER-SIDE at submission time (shared sellerConsentControl constant). Changing the displayed text requires bumping this version \u2014 a stored consent never silently covers different wording."
+      "type": "string"
     },
     "consent_text_snapshot": {
-      "type": "string",
-      "description": "The EXACT text displayed to the seller at submission, stored verbatim as historical truth."
+      "type": "string"
     },
     "submitted_at": {
       "type": "string",
-      "format": "date-time",
-      "description": "SERVER-GENERATED timestamp when consent was captured. Never client-supplied."
+      "format": "date-time"
     },
     "attribution_source": {
-      "type": "string",
-      "description": "How the seller reached the operator (source page/link as known at submission)."
+      "type": "string"
     },
     "marketing_consent": {
       "type": "object",
       "default": {},
-      "description": "SEPARATE, OPTIONAL marketing consent block. Defaults to ABSENT \u2014 inquiry capture never grants it, and withdrawing it (or the introduction consent) never affects the other block.",
+      "description": "Separate optional marketing permission; introduction withdrawal never changes this block.",
       "properties": {
         "granted": {
-          "type": "boolean",
-          "description": "Whether the seller separately granted marketing consent. Absent/false = not granted."
+          "type": "boolean"
         },
         "scope_note": {
-          "type": "string",
-          "description": "What the seller agreed to receive, in the seller's own displayed terms."
+          "type": "string"
         },
         "captured_at": {
           "type": "string",
-          "format": "date-time",
-          "description": "SERVER timestamp when the separate marketing consent was captured."
+          "format": "date-time"
         }
       }
     },
     "withdrawn_at": {
       "type": "string",
       "format": "date-time",
-      "description": "SERVER timestamp when the seller withdrew consent (recorded by an authorized recipient relaying the seller's request). Absent = active."
+      "description": "Server confirmation time. Historical relay timestamps are preserved until explicitly reverified."
     },
     "withdrawal_reason": {
       "type": "string",
-      "description": "Factual reason for the withdrawal as relayed."
+      "description": "Historical reason preserved; new relay notes are minimal evidence references, never private documents."
     },
     "withdrawn_by": {
-      "type": "string",
-      "description": "User ID of the authorized person who recorded the withdrawal (server-derived from the authenticated session)."
+      "type": "string"
     },
     "withdrawn_by_name": {
-      "type": "string",
-      "description": "Display-name snapshot of the withdrawing recorder."
+      "type": "string"
+    },
+    "withdrawal_confirmation": {
+      "type": "object",
+      "description": "Server-derived designated-administrator confirmation, not an operator report. No default, so absence can be checked atomically.",
+      "properties": {
+        "event_type": {
+          "type": "string"
+        },
+        "request_id": {
+          "type": "string"
+        },
+        "actor_id": {
+          "type": "string"
+        },
+        "actor_name": {
+          "type": "string"
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "consent_record_id": {
+          "type": "string"
+        },
+        "consent_id": {
+          "type": "string"
+        },
+        "verification_method": {
+          "type": "string"
+        },
+        "verification_reference": {
+          "type": "string"
+        },
+        "representative_authority_verified": {
+          "type": "boolean"
+        }
+      }
+    },
+    "withdrawal_history": {
+      "type": "array",
+      "default": [],
+      "description": "Append-only confirmation audit, appended in the SAME atomic write as withdrawal state. Earlier entries never replaced by sanctioned functions.",
+      "items": {
+        "type": "object"
+      }
+    },
+    "processing_lock": {
+      "type": "boolean",
+      "default": false
+    },
+    "processing_version": {
+      "type": "integer",
+      "default": 0
+    },
+    "propagation_lock": {
+      "type": "boolean",
+      "default": false
     },
     "downstream_notifications": {
       "type": "array",
       "default": [],
-      "description": "APPEND-ONLY log of which recipients were notified of this withdrawal (who, when, notification id, explicit state). Earlier entries are never rewritten or removed. A 'queued' in-app notification row is NOT a delivery receipt \u2014 recipient acknowledgement is not tracked here.",
+      "description": "Historical queued/failed log, never overwritten. New attempts are append-only SellerConsentWithdrawalEvent records. Queued is not delivery.",
       "items": {
         "type": "object",
         "properties": {
@@ -122,8 +168,7 @@
             "enum": [
               "queued",
               "failed"
-            ],
-            "description": "queued = the recipient's in-app notification row exists (not a delivery receipt); failed = the notification could not be created and a retry is required."
+            ]
           },
           "note": {
             "type": "string"
@@ -134,34 +179,28 @@
     "intake_tracking": {
       "type": "object",
       "default": {},
-      "description": "Phase 2B \u2014 EXPLICIT, RECOVERABLE intake/forwarding states for the submission this consent belongs to, written ONLY by the sanctioned intake seam (never the client). Consent status, intake status, and forwarding status are tracked SEPARATELY; forwarding is never claimed complete until the bridge actually returned success, and a forwarding failure is marked retry_required so a retry re-attempts ONLY forwarding (no duplicate consent or inquiry).",
       "properties": {
         "submission_id": {
-          "type": "string",
-          "description": "The stable submission identifier this consent was captured on."
+          "type": "string"
         },
         "consent_status": {
           "type": "string",
           "enum": [
             "granted",
             "storage_failed"
-          ],
-          "description": "Consent-storage state for this submission."
+          ]
         },
         "intake_status": {
           "type": "string",
           "enum": [
             "completed"
-          ],
-          "description": "Source inquiry intake state (the source record exists)."
+          ]
         },
         "lead_id": {
-          "type": "string",
-          "description": "The source inquiry record id (idempotent reuse anchor)."
+          "type": "string"
         },
         "deal_id": {
-          "type": "string",
-          "description": "The canonical opportunity the inquiry was forwarded to, once forwarding completed."
+          "type": "string"
         },
         "forwarding_status": {
           "type": "string",
@@ -169,21 +208,18 @@
             "pending",
             "completed",
             "retry_required"
-          ],
-          "description": "Forwarding state, tracked separately from consent. retry_required = a retry must re-attempt forwarding only."
+          ]
         },
         "forwarding_attempts": {
           "type": "integer",
-          "default": 0,
-          "description": "Number of forwarding attempts (server-incremented)."
+          "default": 0
         },
         "last_attempt_at": {
           "type": "string",
           "format": "date-time"
         },
         "last_error": {
-          "type": "string",
-          "description": "Factual last forwarding error, if any."
+          "type": "string"
         }
       }
     },
@@ -193,8 +229,7 @@
         "granted",
         "withdrawn"
       ],
-      "default": "granted",
-      "description": "Current consent status. Withdrawal is recorded by the sanctioned withdrawSellerConsent function only."
+      "default": "granted"
     }
   },
   "required": [
@@ -225,17 +260,17 @@
     },
     "create": {
       "user_condition": {
-        "role": "admin"
+        "collaborator_role": "editor"
       }
     },
     "update": {
       "user_condition": {
-        "role": "admin"
+        "collaborator_role": "editor"
       }
     },
     "delete": {
       "user_condition": {
-        "role": "admin"
+        "collaborator_role": "editor"
       }
     }
   }
