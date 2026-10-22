@@ -53,7 +53,19 @@ All certification fixtures deleted by explicit ID (verified zero remaining):
 
 ## Residual items
 
-1. **Second-company isolation live test** — the server-side filter is enforced by construction and prior-run deny tests passed, but a live second-account pass was not re-run this session. Recommended before public launch of the knowledge surfaces.
+1. **Second-company isolation** — STATIC AUDIT PASSED this session (see below); a live second-account pass remains optional belt-and-braces before public launch of the knowledge surfaces.
+
+### Static audit of the `companyKnowledge` seam (2026-10-22)
+
+| Control | Location | Finding |
+|---|---|---|
+| Authentication required | entry gate | 401 for anonymous callers — authorize-first |
+| Identity derived server-side | identity resolution | Operator set derived ONLY from the caller's TeamMember records and sale-team memberships; a client-supplied `operator_id` is honored only if it is inside that derived set — otherwise **403 Not your company**. Forging an ID cannot reach another company's corpus |
+| Corpus-first, never search-everything | `list` / `search` / `get` | All three fetch `operator_id === targetOperatorId` documents BEFORE any matching — no cross-record leakage path exists in search |
+| Fetch-by-ID ownership check | `loadOwn` | A record fetched by id is returned only if `doc.operator_id === operatorId`; otherwise 404 — no cross-company get-by-id |
+| Manager gate on every management action | `requireManager` | `propose`, `ai_draft`, `submit_review`, `approve`, `review_effectiveness`, `suggestions`, `audit`, `manage_list` all require the operator of the derived set (or platform admin) — an employee can never approve or draft |
+| Observation path | `observe` | Sale-team membership (or operator/admin) verified before a suggestion is created |
+| Platform admin | identity resolution | Admins may inspect any operator's knowledge set — by design, consistent with all vault doctrine |
 2. **AI-drafted procedures are labeled but unlabeled AI output cannot exist** — a draft created via `ai_draft` carries `ai_generated: true` permanently; the label survives approval (doctrine: labeled forever). No action needed; documented for auditors.
 3. Effectiveness reviews are date-driven reminders only — no automated mining occurs (per doctrine). The "Due for review" metric reads `review_date`; scheduling a digest is a possible future P2.
 
