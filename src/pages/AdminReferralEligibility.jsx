@@ -10,6 +10,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Alert } from "@/components/ui/alert";
 import { Loader2, ShieldCheck, Info, Ban, PauseCircle, CheckCircle2, Undo2, ListChecks } from "lucide-react";
+import { validateEligibilityResponse } from "@/lib/eligibilityResponse";
+import WithdrawalRelayPanel from "@/components/referral/WithdrawalRelayPanel";
 
 // Referral Rebuild Phase 2B — ADMIN individual-eligibility review screen.
 // Review submissions and evidence, approve/reject/suspend/request
@@ -48,10 +50,11 @@ export default function AdminReferralEligibility() {
   const load = async () => {
     try {
       const res = await base44.functions.invoke("referralEligibilityAdmin", { action: "list" });
-      setProfiles(res.data?.profiles || []);
-      setCompensationEnabled(!!res.data?.compensation_enabled);
+      const data = validateEligibilityResponse(res.data, "list");
+      setProfiles(data.profiles);
+      setCompensationEnabled(data.compensation_enabled);
     } catch {
-      setError("Could not load eligibility submissions.");
+      setError("Could not load eligibility submissions. No listing was changed.");
     } finally {
       setLoading(false);
     }
@@ -96,16 +99,16 @@ export default function AdminReferralEligibility() {
         };
       }
       const res = await base44.functions.invoke("referralEligibilityAdmin", payload);
-      if (!res.data?.ok) {
-        setError(res.data?.error === "reason_required"
-          ? "A factual reason is required for this action."
-          : `Action failed: ${res.data?.error || "unknown error"}`);
-      } else {
-        setSelected(null);
-        await load();
-      }
-    } catch {
-      setError("Something went wrong. Please try again.");
+      // A malformed or unexpected response (e.g. a LIST body to a review
+      // action) is a VISIBLE failure — it can never look like an approval.
+      validateEligibilityResponse(res.data, `review.${reviewAction}`, selected.user_id);
+      setSelected(null);
+      await load();
+    } catch (e) {
+      const code = e?.response?.data?.error || e?.message || "";
+      setError(code === "reason_required"
+        ? "A factual reason is required for this action."
+        : (e?.response?.data?.error ? `Action failed: ${code}` : (code || "Action failed — nothing was changed.")));
     } finally {
       setBusy(false);
     }
@@ -135,6 +138,8 @@ export default function AdminReferralEligibility() {
           </p>
         </div>
       </Alert>
+
+      <WithdrawalRelayPanel />
 
       {loading ? (
         <div className="flex items-center text-slate-500 p-4">

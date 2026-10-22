@@ -50,7 +50,7 @@ export async function runConsentIntake(input, deps) {
     return { ok: true, created: false, replayed: true, consent_recorded: true, intake_reused: true, stage: 'completed' };
   }
   // CAS on an EXISTING consent serializes forwarding retries, not first creates.
-  if (consent && !await storage.claim(consent)) {
+  if (consent && !await storage.claim(consent, clock())) {
     return { ok: false, error: 'submission_in_progress', retryable: true, consent_recorded: true, stage: 'forwarding' };
   }
   let result;

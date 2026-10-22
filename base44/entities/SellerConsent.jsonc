@@ -138,6 +138,10 @@
       "type": "boolean",
       "default": false
     },
+    "processing_locked_at": {
+      "type": "string",
+      "format": "date-time"
+    },
     "processing_version": {
       "type": "integer",
       "default": 0
@@ -145,6 +149,10 @@
     "propagation_lock": {
       "type": "boolean",
       "default": false
+    },
+    "propagation_locked_at": {
+      "type": "string",
+      "format": "date-time"
     },
     "downstream_notifications": {
       "type": "array",

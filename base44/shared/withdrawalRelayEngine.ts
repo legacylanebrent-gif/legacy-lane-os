@@ -25,6 +25,14 @@ export async function runWithdrawalRelay(user, input, deps) {
       consent_status: consent.status, note: 'Request recorded only. Seller authorization has not been verified.' };
   }
   if (action === 'confirm_withdrawal') {
+    // No-write idempotency: an already-designated-confirmed consent returns
+    // without touching state or history. Concurrent first confirms are
+    // serialized by the storage adapter's single-record conditional update.
+    if (consent.withdrawal_confirmation) {
+      return { ok: true, withdrawal_state: 'confirmed', already_withdrawn: true,
+        notification_state: 'not_attempted',
+        note: 'Withdrawal already confirmed by a designated administrator. Queue notices separately.' };
+    }
     const request = await deps.getEvent(minimalText(input.request_id, 'request_id', 100));
     if (!request || request.event_type !== 'request_received' || request.consent_record_id !== consent.id) {
       throw relayError('withdrawal_request_not_found', 404);

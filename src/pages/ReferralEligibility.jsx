@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert } from "@/components/ui/alert";
 import { Loader2, ShieldCheck, UploadCloud, Info, AlertTriangle, CheckCircle2, Clock } from "lucide-react";
+import { validateEligibilityResponse } from "@/lib/eligibilityResponse";
 
 // Referral Rebuild Phase 2B — operator-facing INDIVIDUAL eligibility portal.
 // The operator submits/corrects their OWN license & brokerage application
@@ -59,10 +60,11 @@ export default function ReferralEligibility() {
   const load = async () => {
     try {
       const res = await base44.functions.invoke("referralEligibility", { action: "get" });
-      const p = res.data?.profile;
+      const data = validateEligibilityResponse(res.data, "get");
+      const p = data.profile;
       setProfile(p);
-      setEffective(res.data?.effective);
-      setCompensationEnabled(!!res.data?.compensation_enabled);
+      setEffective(data.effective);
+      setCompensationEnabled(data.compensation_enabled);
       const s = p?.self_submitted || {};
       setForm({
         legal_name: s.legal_name || "", license_number: s.license_number || "",
@@ -109,22 +111,23 @@ export default function ReferralEligibility() {
           evidence_file_uris: evidence,
         },
       });
-      if (res.data?.ok) {
-        setProfile(res.data.profile);
-        setEffective(res.data.effective);
+      try {
+        const data = validateEligibilityResponse(res.data, "submit");
+        setProfile(data.profile);
+        setEffective(data.effective);
         setSavedMsg(
           "Your application information was submitted. Submission is not approval — an administrator reviews it."
         );
-        const s = res.data.profile?.self_submitted || {};
+        const s = data.profile?.self_submitted || {};
         setForm((f) => ({ ...f, affiliation_attested: s.affiliation_attested === true }));
-      } else {
-        setMissing(res.data?.missing || []);
-        setError(res.data?.error === "incomplete_application"
-          ? "Please complete the highlighted fields before submitting."
-          : "Something went wrong saving your information. Please try again.");
+      } catch (e) {
+        if (e?.response?.data?.missing || e?.response?.data?.error === "incomplete_application") {
+          setMissing(e.response.data.missing || []);
+          setError("Please complete the highlighted fields before submitting.");
+        } else {
+          setError("Something went wrong saving your information. Nothing was saved — please try again.");
+        }
       }
-    } catch {
-      setError("Something went wrong saving your information. Please try again.");
     } finally {
       setSaving(false);
     }

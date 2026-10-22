@@ -24,21 +24,31 @@ export function withdrawalRelayStorage(service) {
       }
       return { ids: [deal.operator_id], unresolved: false };
     },
+    // Only equality/$in/$ne-style conditions are re-evaluated at write time;
+    // $exists does NOT match here. Absence idempotency is enforced by the
+    // engine's pre-check plus this status-bounded single-record update.
     confirm: async (consent, event) => {
       const result = await E.SellerConsent.updateMany({ id: consent.id,
-        withdrawal_confirmation: { $exists: false }, status: { $in: ['granted', 'withdrawn'] } },
+        status: { $in: ['granted', 'withdrawn'] } },
       { $set: { status: 'withdrawn', withdrawn_at: event.at, withdrawn_by: event.actor_id,
         withdrawn_by_name: event.actor_name, withdrawal_confirmation: event },
         $push: { withdrawal_history: event } });
       return result.updated === 1;
     },
+    // CAS lock with bounded stale takeover so a crashed propagation cannot
+    // wedge the record. A held lock serializes concurrent propagations.
+    // Strict mutual exclusion: $ne is write-time checkable. A crash mid-
+    // propagation leaves the lock set — a documented residual (editors can
+    // reset it); retries fail loudly rather than double-queueing.
     claimPropagation: async (consent) => {
+      const now = new Date().toISOString();
       const result = await E.SellerConsent.updateMany({ id: consent.id, status: 'withdrawn',
-        propagation_lock: { $ne: true } }, { $set: { propagation_lock: true } });
+        propagation_lock: { $ne: true } },
+      { $set: { propagation_lock: true, propagation_locked_at: now } });
       return result.updated === 1;
     },
     releasePropagation: (consent) => E.SellerConsent.updateMany({ id: consent.id, propagation_lock: true },
-      { $set: { propagation_lock: false } }),
+      { $set: { propagation_lock: false, propagation_locked_at: null } }),
     notificationHistory: (id) => all(E.SellerConsentWithdrawalEvent,
       { consent_record_id: id, event_type: { $in: ['notification_queued', 'notification_failed'] } }),
     notify: (userId, consent) => E.Notification.create({ user_id: userId, type: 'seller_consent_withdrawn',

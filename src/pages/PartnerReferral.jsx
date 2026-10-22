@@ -135,6 +135,9 @@ export default function PartnerReferral() {
             <p className="text-sm text-emerald-800 mt-1">
               Your inquiry has been received{partner ? ` via ${partner.name}` : ""}. The estate sale team will contact you shortly.
             </p>
+            <p className="text-xs text-emerald-700 mt-2">
+              You can withdraw your permission to be contacted at any time. Tell the team that contacted you, or reach EstateSalen through the app's support ticket page — a platform administrator verifies every withdrawal request before anything changes.
+            </p>
           </div>
         ) : (
           <form onSubmit={submit} className="mt-5 border rounded-lg p-4 bg-white space-y-3">
