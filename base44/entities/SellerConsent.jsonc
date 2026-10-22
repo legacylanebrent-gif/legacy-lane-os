@@ -1,7 +1,7 @@
 {
   "name": "SellerConsent",
   "type": "object",
-  "description": "Referral Rebuild Phase 2A \u2014 VERSIONED record of a seller's permission to be contacted for an introduction (Referral Phase 2 design Part 2A). Records are created ONLY by sanctioned server functions at inquiry submission time: the SERVER generates the timestamp and pins the consent text version, storing the EXACT displayed text snapshot. A seller (usually no platform account) never writes this record directly. OPTIONAL marketing consent is a SEPARATE block \u2014 withdrawing either never affects the other, and inquiry capture alone NEVER grants marketing consent. ABSENCE OF A RECORD = NOT RECORDED (historical submissions are never backfilled to affirmative or to withdrawn; unknown stays unknown). This is a consent record, NOT verified licensing, NOT broker approval, and NOT an executed brokerage referral agreement. It creates NO compensation entitlement of any kind.",
+  "description": "Referral Rebuild Phase 2A \u2014 VERSIONED record of a seller's permission to be contacted for an introduction (Referral Phase 2 design Part 2A). Records are created ONLY by sanctioned server functions at inquiry submission time: the SERVER generates the timestamp and pins the consent text version, storing the EXACT displayed text snapshot. Phase 2B hardening: when the rollout is ENABLED, the seller must AFFIRMATIVELY ACCEPT the exact versioned text (a version mismatch is rejected and acceptance is never inferred from a timestamp or referral token), the consent is stored BEFORE any forwarding to recipients, a consent-storage failure prevents forwarding, and a STABLE SUBMISSION ID makes every step idempotent (retry reuses the same consent and inquiry and re-attempts only failed stages \u2014 tracked separately in intake_tracking). A seller (usually no platform account) never writes this record directly. OPTIONAL marketing consent is a SEPARATE block \u2014 withdrawing either never affects the other, and inquiry capture alone NEVER grants marketing consent. ABSENCE OF A RECORD = NOT RECORDED (historical submissions are never backfilled to affirmative or to withdrawn; unknown stays unknown). This is a consent record, NOT verified licensing, NOT broker approval, and NOT an executed brokerage referral agreement. It creates NO compensation entitlement of any kind.",
   "properties": {
     "consent_id": {
       "type": "string",
@@ -20,6 +20,10 @@
     "source_id": {
       "type": "string",
       "description": "ID of the source inquiry record (e.g. EstateTransitionLead id)."
+    },
+    "submission_id": {
+      "type": "string",
+      "description": "Referral Rebuild Phase 2B \u2014 STABLE client-generated submission identifier (uuid, reused across retries). The retry/idempotency anchor: a retried submission reuses the SAME consent record; consent, intake, and forwarding states are tracked separately in intake_tracking."
     },
     "operator_id": {
       "type": "string",
@@ -99,7 +103,7 @@
     "downstream_notifications": {
       "type": "array",
       "default": [],
-      "description": "APPEND-ONLY log of which recipients were notified of this withdrawal (who, when, notification id). Earlier entries are never rewritten or removed.",
+      "description": "APPEND-ONLY log of which recipients were notified of this withdrawal (who, when, notification id, explicit state). Earlier entries are never rewritten or removed. A 'queued' in-app notification row is NOT a delivery receipt \u2014 recipient acknowledgement is not tracked here.",
       "items": {
         "type": "object",
         "properties": {
@@ -113,9 +117,73 @@
           "notification_id": {
             "type": "string"
           },
+          "state": {
+            "type": "string",
+            "enum": [
+              "queued",
+              "failed"
+            ],
+            "description": "queued = the recipient's in-app notification row exists (not a delivery receipt); failed = the notification could not be created and a retry is required."
+          },
           "note": {
             "type": "string"
           }
+        }
+      }
+    },
+    "intake_tracking": {
+      "type": "object",
+      "default": {},
+      "description": "Phase 2B \u2014 EXPLICIT, RECOVERABLE intake/forwarding states for the submission this consent belongs to, written ONLY by the sanctioned intake seam (never the client). Consent status, intake status, and forwarding status are tracked SEPARATELY; forwarding is never claimed complete until the bridge actually returned success, and a forwarding failure is marked retry_required so a retry re-attempts ONLY forwarding (no duplicate consent or inquiry).",
+      "properties": {
+        "submission_id": {
+          "type": "string",
+          "description": "The stable submission identifier this consent was captured on."
+        },
+        "consent_status": {
+          "type": "string",
+          "enum": [
+            "granted",
+            "storage_failed"
+          ],
+          "description": "Consent-storage state for this submission."
+        },
+        "intake_status": {
+          "type": "string",
+          "enum": [
+            "completed"
+          ],
+          "description": "Source inquiry intake state (the source record exists)."
+        },
+        "lead_id": {
+          "type": "string",
+          "description": "The source inquiry record id (idempotent reuse anchor)."
+        },
+        "deal_id": {
+          "type": "string",
+          "description": "The canonical opportunity the inquiry was forwarded to, once forwarding completed."
+        },
+        "forwarding_status": {
+          "type": "string",
+          "enum": [
+            "pending",
+            "completed",
+            "retry_required"
+          ],
+          "description": "Forwarding state, tracked separately from consent. retry_required = a retry must re-attempt forwarding only."
+        },
+        "forwarding_attempts": {
+          "type": "integer",
+          "default": 0,
+          "description": "Number of forwarding attempts (server-incremented)."
+        },
+        "last_attempt_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "last_error": {
+          "type": "string",
+          "description": "Factual last forwarding error, if any."
         }
       }
     },

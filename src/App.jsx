@@ -34,6 +34,8 @@ import ProfessionalNetwork from './pages/ProfessionalNetwork';
 import ConsultationMode from './pages/ConsultationMode';
 import ProjectDashboard from './pages/ProjectDashboard';
 import PartnerReferral from './pages/PartnerReferral';
+import ReferralEligibility from './pages/ReferralEligibility';
+import AdminReferralEligibility from './pages/AdminReferralEligibility';
 import TerritoryHeatmap from './pages/TerritoryHeatmap';
 import ContentCalendar from './pages/ContentCalendar';
 import SEOBoostDashboard from './pages/SEOBoostDashboard';
@@ -321,6 +323,8 @@ const AuthenticatedApp = () => {
       <Route path="/AdminLeadImporter" element={<LayoutWrapper currentPageName="AdminLeadImporter"><AdminLeadImporter /></LayoutWrapper>} />
       <Route path="/CompanyLanding" element={<CompanyLanding />} />
       <Route path="/PartnerReferral" element={<PartnerReferral />} />
+      <Route path="/ReferralEligibility" element={<LayoutWrapper currentPageName="ReferralEligibility"><ReferralEligibility /></LayoutWrapper>} />
+      <Route path="/AdminReferralEligibility" element={<LayoutWrapper currentPageName="AdminReferralEligibility"><AdminReferralEligibility /></LayoutWrapper>} />
       <Route path="/CompareEstateSales" element={<LayoutWrapper currentPageName="CompareEstateSales"><CompareEstateSales /></LayoutWrapper>} />
       <Route path="/ReferralDashboard" element={<LayoutWrapper currentPageName="ReferralDashboard"><ReferralDashboard /></LayoutWrapper>} />
       <Route path="/ReferralBatchInvite" element={<LayoutWrapper currentPageName="ReferralBatchInvite"><ReferralBatchInvite /></LayoutWrapper>} />

@@ -4,7 +4,7 @@ import {
   Merge, Database, Award, Shield, Briefcase, Search, Upload, Mail,
   MapPin, Network, TrendingUp, Scale, Film, Bot, Zap, Brain, BarChart3,
   DollarSign, Banknote, Megaphone, Package, Share2, Gift, GraduationCap,
-  MessageSquare, ShoppingBag
+  MessageSquare, ShoppingBag, BadgeCheck
 } from 'lucide-react';
 
 // Single source of truth for every admin page link, organized by section.
@@ -34,6 +34,7 @@ export const ADMIN_LINK_SECTIONS = [
       { page: 'AdminMasterOperatorDirectory', label: 'Master Operator Directory', icon: Database },
       { page: 'AdminRealEstateAgentDirectory', label: 'Real Estate Agent Directory', icon: Database },
       { page: 'AdminAgentApplications', label: 'Agent Applications', icon: Award },
+      { page: 'AdminReferralEligibility', label: 'Referral Eligibility Review', icon: BadgeCheck },
       { page: 'AdminPageAccess', label: 'Page Permissions', icon: Shield },
       { page: 'BizInABox', label: 'Biz in a Box', icon: Briefcase },
     ],

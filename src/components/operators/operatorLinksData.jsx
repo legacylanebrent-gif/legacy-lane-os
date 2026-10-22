@@ -3,7 +3,7 @@ import {
   Trash2, Heart, UserPlus, Warehouse, ShoppingBag, HandCoins,
   Megaphone, Zap, BarChart3, TrendingUp, FileText, FileCheck2, UserCog,
   Sparkles, GraduationCap, Network, MapPin, ShieldQuestion,
-  Globe, Camera, ClipboardList, Wrench, Rocket
+  Globe, Camera, ClipboardList, Wrench, Rocket, BadgeCheck
 } from 'lucide-react';
 
 // Single source of truth for every operator page link, organized by section.
@@ -38,6 +38,7 @@ export const OPERATOR_LINK_SECTIONS = [
       { page: 'OperatorCommissions', label: 'Commissions', icon: DollarSign },
       { page: 'AgentOperatorPortal', label: 'Owner Partnerships', icon: Briefcase },
       { page: 'AgentPartnerships', label: 'Agent Partnerships', icon: Users },
+      { page: 'ReferralEligibility', label: 'Referral Eligibility', icon: BadgeCheck },
     ],
   },
   {

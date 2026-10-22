@@ -1,0 +1,271 @@
+{
+  "name": "ReferralEligibilityProfile",
+  "type": "object",
+  "description": "Referral Rebuild Phase 2B \u2014 INDIVIDUAL licensee eligibility profile (Referral Phase 2 design Part 2B). ONE profile per individual platform user (licensee). Two STRICTLY SEPARATED blocks: self_submitted (operator-writable through the sanctioned referralEligibility server function ONLY) and verified (written ONLY by authorized administrators through referralEligibilityAdmin with SERVER-DERIVED reviewer identity and timestamps). SELF-SUBMITTED INFORMATION IS NEVER VERIFIED TRUTH: submitting an application is not approval. A VERIFIED PROFILE NEVER ACTIVATES COMPENSATION BY ITSELF \u2014 eligibility status is deliberately SEPARATE from the global LEGACY_REFERRAL_COMPENSATION_ENABLED control, which stays disabled until broker/legal activation. A COMPANY NEVER BECOMES LICENSED BECAUSE ONE ASSOCIATED PERSON IS: licensure is individual, never propagated to Company or team members, and joining a team establishes NO licensure, brokerage affiliation, or compensation eligibility. Material changes to verified license/brokerage information set reverification_required \u2014 the prior verified block and history are PRESERVED, never overwritten. Effective eligibility is COMPUTED SERVER-SIDE AT THE TIME OF USE (computeEffectiveEligibility), never just a scheduled job or a stale stored status; unknown/unsupported jurisdiction stays ineligible for compensated activation. NO RETROACTIVITY: eligibility starts at verification time, never earlier \u2014 no old seller introduction becomes payable.",
+  "properties": {
+    "user_id": {
+      "type": "string",
+      "description": "Platform User ID of the individual licensee. ONE profile per user (identity anchor for RLS)."
+    },
+    "company_id": {
+      "type": "string",
+      "description": "Best-effort linked Company (primary contact or membership). Linkage is CONTEXT ONLY \u2014 company association NEVER confers licensure or eligibility on the company, its owner, or other members."
+    },
+    "self_submitted": {
+      "type": "object",
+      "default": {},
+      "description": "Phase 2B \u2014 the APPLICANT-ASSERTED block (operator-submitted, correctable). Deliberately distinct from the verified block: these values are claims, never verification truth, and never display as verified.",
+      "properties": {
+        "legal_name": {
+          "type": "string",
+          "description": "Applicant's legal name as submitted."
+        },
+        "license_number": {
+          "type": "string",
+          "description": "Applicant's real-estate license number as submitted."
+        },
+        "license_state": {
+          "type": "string",
+          "description": "Two-letter licensing state as submitted."
+        },
+        "license_type": {
+          "type": "string",
+          "enum": [
+            "salesperson",
+            "broker",
+            "broker_associate",
+            "other"
+          ],
+          "description": "License type as submitted."
+        },
+        "license_expiration": {
+          "type": "string",
+          "format": "date",
+          "description": "License expiration as submitted. Expiration is CHECKED AT TIME OF USE, never only stored."
+        },
+        "brokerage_name": {
+          "type": "string",
+          "description": "Brokerage name as submitted (placeholder until verified)."
+        },
+        "brokerage_state": {
+          "type": "string",
+          "description": "Brokerage state as submitted."
+        },
+        "affiliation_attested": {
+          "type": "boolean",
+          "default": false,
+          "description": "Applicant's own attestation of current brokerage affiliation \u2014 a CLAIM, not verified affiliation."
+        },
+        "evidence_file_uris": {
+          "type": "array",
+          "default": [],
+          "description": "PRIVATE storage file_uris of license/brokerage evidence uploaded by the applicant (viewed only through short-lived signed URLs). Sensitive verification evidence \u2014 never public.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "notes": {
+          "type": "string",
+          "description": "Applicant notes to the reviewer."
+        },
+        "submitted_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "SERVER timestamp of the latest application submission."
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "SERVER timestamp of the latest self-service edit."
+        }
+      }
+    },
+    "verified": {
+      "type": "object",
+      "default": {},
+      "description": "Phase 2B \u2014 the ADMIN-VERIFIED block, written ONLY by referralEligibilityAdmin with server-derived reviewer identity/timestamps. An operator can NEVER write any of it. The prior verified block is PRESERVED on material change (status becomes reverification_required) \u2014 history is never rewritten. verified_snapshot pins the EXACT self-submitted values that were verified, so later applicant edits never silently inherit verification.",
+      "properties": {
+        "verification_source": {
+          "type": "string",
+          "enum": [
+            "state_registry",
+            "broker_confirmation",
+            "document_review",
+            "other"
+          ],
+          "description": "How verification was performed."
+        },
+        "verification_reference": {
+          "type": "string",
+          "description": "Reviewer's evidence reference (registry lookup ref, confirmation id, document id)."
+        },
+        "reviewer_user_id": {
+          "type": "string",
+          "description": "User ID of the authorizing admin reviewer (SERVER-DERIVED)."
+        },
+        "reviewer_name": {
+          "type": "string",
+          "description": "Display-name snapshot of the reviewer."
+        },
+        "verified_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "SERVER timestamp of verification."
+        },
+        "license_status": {
+          "type": "string",
+          "enum": [
+            "active",
+            "inactive",
+            "unknown"
+          ],
+          "description": "License status AS OF VERIFICATION. Re-checked at time of use against expiration; never a permanent claim."
+        },
+        "brokerage_legal_name": {
+          "type": "string",
+          "description": "Brokerage LEGAL identity as confirmed by the reviewer (placeholder-free only after confirmation)."
+        },
+        "approved_jurisdictions": {
+          "type": "array",
+          "default": [],
+          "description": "Uppercase two-letter states where compensated referral activity is approved for this individual. Empty = none. Unknown/unsupported jurisdiction stays ineligible \u2014 NJ rules are NEVER assumed national.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "agreement_references": {
+          "type": "array",
+          "default": [],
+          "description": "Referenced agreement identifiers/versions applicable to this verification.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "eligibility_effective_start": {
+          "type": "string",
+          "format": "date-time",
+          "description": "SERVER-set effective start \u2014 always the verification moment or later. NEVER retroactive: no old introduction becomes payable by a later approval."
+        },
+        "eligibility_effective_end": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Optional effective end (e.g. affiliation termination). Absent = no recorded end; expiration is still checked at time of use."
+        },
+        "verified_snapshot": {
+          "type": "object",
+          "default": {},
+          "description": "Snapshot of the EXACT self-submitted values that were verified. Material change against this snapshot requires re-verification."
+        }
+      }
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "submitted",
+        "under_review",
+        "corrections_required",
+        "verified",
+        "rejected",
+        "suspended",
+        "reverification_required"
+      ],
+      "default": "draft",
+      "description": "Application/eligibility status. Deliberately SEPARATE from the global compensation-disabled control: 'verified' NEVER activates payments. reverification_required is set server-side when a verified profile's material license/brokerage fields change."
+    },
+    "status_reason": {
+      "type": "string",
+      "description": "Factual reason for the latest rejection, suspension, corrections request, or re-verification flag (admin- or server-supplied, never applicant-supplied)."
+    },
+    "eligibility_history": {
+      "type": "array",
+      "default": [],
+      "description": "APPEND-ONLY immutable status history. Entries are created ONLY by authorized server functions with server-derived identity/timestamps \u2014 never by clients, never rewritten or deleted. Prior verifications are PRESERVED here, not overwritten.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "by": {
+            "type": "string",
+            "description": "Acting user ID (server-derived)."
+          },
+          "by_name": {
+            "type": "string",
+            "description": "Display-name snapshot."
+          },
+          "from_status": {
+            "type": "string"
+          },
+          "to_status": {
+            "type": "string"
+          },
+          "action": {
+            "type": "string",
+            "description": "application_submitted | material_change_reverification | verified | rejected | suspended | corrections_requested | reinstated"
+          },
+          "reason": {
+            "type": "string",
+            "description": "Factual reason as supplied with the action."
+          }
+        }
+      }
+    },
+    "last_activity_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "SERVER timestamp of the latest profile activity."
+    }
+  },
+  "required": [
+    "user_id",
+    "status"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "$or": [
+        {
+          "$and": [
+            {
+              "user_condition": {
+                "role": "user"
+              }
+            },
+            {
+              "data.user_id": "{{user.id}}"
+            }
+          ]
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

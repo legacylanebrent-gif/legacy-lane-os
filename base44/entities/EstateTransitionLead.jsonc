@@ -112,6 +112,10 @@
     "source_page_type": {
       "type": "string"
     },
+    "partner_submission_id": {
+      "type": "string",
+      "description": "Referral Rebuild Phase 2B \u2014 STABLE submission identifier (client-generated uuid, reused across retries of the same submission). The idempotency anchor for partner-referred intake: a retried submission reuses the SAME inquiry record (and the same consent) instead of duplicating. Absent on historical records."
+    },
     "lead_score": {
       "type": "integer",
       "default": 0

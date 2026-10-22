@@ -6,6 +6,10 @@ import { Label } from "@/components/ui/label";
 import SharedFooter from "@/components/layout/SharedFooter";
 import { CheckCircle, Loader2 } from "lucide-react";
 
+// Phase 2B consent seam: when the introduction-consent rollout is ENABLED,
+// the exact versioned text is displayed and must be affirmatively accepted
+// before submission. While disabled (today), the form behaves as before.
+
 // Chapter 11 P1 — PUBLIC partner-attributed seller intake. The opaque prf
 // token resolves the referring professional server-side; the seller never
 // selects or types the referrer, sees no internal IDs, and grants no
@@ -18,6 +22,8 @@ export default function PartnerReferral() {
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(false);
   const [error, setError] = useState("");
+  const [consentAccepted, setConsentAccepted] = useState(false);
+  const [consentCfg, setConsentCfg] = useState(null);
   const [form, setForm] = useState({
     first_name: "", last_name: "", email: "", phone: "",
     city: "", county: "", state: "", zip_code: "", need_notes: "",
@@ -25,6 +31,18 @@ export default function PartnerReferral() {
   const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
 
   const token = React.useMemo(() => new URLSearchParams(window.location.search).get("prf") || "", []);
+
+  // Phase 2B — STABLE submission identifier: generated once per form fill
+  // and reused across retries of the same submission, so a failed submit
+  // followed by "try again" never duplicates the inquiry (or the consent
+  // once the rollout is enabled). The server deduplicates on it.
+  const submissionId = React.useMemo(
+    () =>
+      (typeof crypto !== "undefined" && crypto.randomUUID)
+        ? crypto.randomUUID()
+        : `prf-${Date.now()}-${Math.random().toString(16).slice(2)}`,
+    []
+  );
 
   useEffect(() => {
     (async () => {
@@ -43,13 +61,32 @@ export default function PartnerReferral() {
     })();
   }, [token]);
 
+  useEffect(() => {
+    // Whether the introduction-consent step is active, and the EXACT
+    // versioned text if so. While disabled, this returns no text and the
+    // form renders exactly as before.
+    (async () => {
+      try {
+        const res = await base44.functions.invoke("sellerConsentConfig", {});
+        if (res.data?.ok) setConsentCfg(res.data.config || {});
+      } catch { /* consent step stays hidden on config failure */ }
+    })();
+  }, []);
+
   const submit = async (e) => {
     e.preventDefault();
     setError("");
+    if (consentCfg?.rollout_enabled && !consentAccepted) {
+      setError("Please confirm you agree to be contacted about this inquiry.");
+      return;
+    }
     setSubmitting(true);
     try {
       const res = await base44.functions.invoke("submitPartnerReferredInquiry", {
         token,
+        submission_id: submissionId,
+        consent_accepted: consentCfg?.rollout_enabled ? consentAccepted : undefined,
+        consent_text_version: consentCfg?.rollout_enabled ? consentCfg.text_version : undefined,
         first_name: form.first_name,
         last_name: form.last_name,
         email: form.email,
@@ -146,6 +183,21 @@ export default function PartnerReferral() {
                 className="w-full text-sm rounded-md border border-slate-200 px-2 py-2 mt-1 h-20"
                 placeholder="e.g. We need to empty and sell my mother's house…" />
             </div>
+            {consentCfg?.rollout_enabled && (
+              <div className="border border-cyan-200 bg-cyan-50 rounded-md p-3">
+                <p className="text-xs uppercase tracking-wide text-cyan-700 font-semibold">Your permission to be contacted</p>
+                <p className="text-sm text-slate-700 mt-1 whitespace-pre-wrap">{consentCfg.text}</p>
+                <label className="flex items-start gap-2 mt-2">
+                  <input
+                    type="checkbox"
+                    checked={consentAccepted}
+                    onChange={(e) => setConsentAccepted(e.target.checked)}
+                    className="mt-0.5"
+                  />
+                  <span className="text-sm text-slate-700">I agree to be contacted about this inquiry as described above.</span>
+                </label>
+              </div>
+            )}
             {error && <p className="text-sm text-red-600">{error}</p>}
             <Button type="submit" disabled={submitting} className="w-full bg-cyan-600 hover:bg-cyan-700 text-white h-11">
               {submitting ? "Sending…" : "Request Help"}

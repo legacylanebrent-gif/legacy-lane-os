@@ -1,19 +1,28 @@
-// Referral Rebuild — Phase 2A: withdraw a seller's recorded consent.
+// Referral Rebuild — Phase 2A/2B: withdraw a seller's recorded consent.
 //
 // The seller (usually no platform account) withdraws through an authorized
 // recipient relaying their request, so:
 //   - identity is derived from the AUTHENTICATED session (never client-
 //     supplied), and the caller must be an admin, the consent's operator, or
-//     one of its intended recipients;
+//     one of its intended recipients resolved from the CONSENT RECORD itself
+//     — an operator attribution link, a referral token, or mere knowledge
+//     of a consent ID authorizes NOTHING;
 //   - the timestamp is SERVER-generated;
-//   - withdrawal APPENDS a notification for every other recipient (propagates
-//     to the recipient notification queue) and logs each one in the consent's
-//     append-only downstream_notifications history — earlier entries are
-//     never rewritten;
-//   - withdrawing an already-withdrawn consent is an idempotent no-op (no
-//     duplicate notifications);
+//   - recipients are resolved from the record's own delivery fields — never
+//     caller-supplied recipient IDs;
+//   - each recipient's notification carries an EXPLICIT state: 'queued'
+//     (an in-app notification row exists — which is NOT proof the recipient
+//     has seen it) or 'failed' (retry required). The overall response
+//     reports withdrawal_state and notification_state separately:
+//     withdrawal recorded ≠ notifications queued ≠ notifications delivered;
+//   - repeat withdrawal is IDEMPOTENT: the withdrawal itself never
+//     duplicates, already-queued recipients are never re-notified, and a
+//     repeat call RETRIES only failed/missing recipients — each retry
+//     APPENDS new history entries (earlier entries are never rewritten);
 //   - this touches ONLY consent state. It never alters deals, contacts, or
-//     any compensation/financial record.
+//     any compensation/financial record, never deletes transaction records,
+//     and never asserts that withdrawal reverses processing already
+//     completed.
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.54';
 
 Deno.serve(async (req: Request): Promise<Response> => {
@@ -39,7 +48,8 @@ Deno.serve(async (req: Request): Promise<Response> => {
       return Response.json({ ok: false, error: 'consent_not_found' }, { status: 404 });
     }
 
-    // Authorization: admin, the consent's operator, or an intended recipient.
+    // Authorization: admin, the consent's operator, or an intended recipient
+    // — all resolved from the RECORD, never from caller input.
     const isAdmin = user.role === 'admin';
     const isRecipient =
       record.operator_id === user.id ||
@@ -48,21 +58,37 @@ Deno.serve(async (req: Request): Promise<Response> => {
       return Response.json({ ok: false, error: 'not_authorized_for_this_consent' }, { status: 403 });
     }
 
-    // Idempotent: re-withdrawing does nothing and notifies nobody again.
-    if (record.status === 'withdrawn') {
-      return Response.json({ ok: true, already_withdrawn: true, consent_id: record.consent_id });
-    }
-
     const now = new Date().toISOString();
     const byName = user.full_name || user.email || 'Authorized recipient';
+    const history = record.downstream_notifications || [];
 
-    // Propagate to every OTHER recipient's notification queue.
+    // Recipients from the record's delivery fields only. Already-queued
+    // recipients are never re-notified; only failed/missing ones are
+    // (re)attempted, and each attempt APPENDS history.
     const recipientIds = [...new Set(
       [record.operator_id, ...(record.intended_recipient_ids || [])].filter(Boolean)
-    )].filter((id: string) => id !== user.id);
+    )];
+    const alreadyQueuedFor = new Set(
+      history.filter((e: any) => e.state === 'queued')
+        .map((e: any) => e.recipient_user_id));
+    const toNotify = recipientIds.filter((id: string) => !alreadyQueuedFor.has(id));
 
-    const logged: any[] = [];
-    for (const recipientId of recipientIds) {
+    if (record.status === 'withdrawn' && toNotify.length === 0) {
+      // Idempotent repeat: nothing to do, nothing duplicated.
+      return Response.json({
+        ok: true,
+        already_withdrawn: true,
+        consent_id: record.consent_id,
+        withdrawn_at: record.withdrawn_at,
+        notification_state: 'all_queued_or_none_required',
+        notification_note:
+          'Queued in-app notifications are not delivery receipts — recipient acknowledgement is not tracked here.',
+      });
+    }
+
+    const appended: any[] = [];
+    let failedCount = 0;
+    for (const recipientId of toNotify) {
       try {
         const notification = await service.entities.Notification.create({
           user_id: recipientId,
@@ -74,38 +100,54 @@ Deno.serve(async (req: Request): Promise<Response> => {
           related_entity_type: 'SellerConsent',
           related_entity_id: record.id,
         });
-        logged.push({
+        // QUEUED — the notification row exists; this is NOT a delivery
+        // receipt and the response never claims delivered.
+        appended.push({
           at: now,
           recipient_user_id: recipientId,
           notification_id: notification.id,
-          note: 'Withdrawal propagated in-app.',
+          state: 'queued',
+          note: 'Withdrawal queued to the recipient notification center. Queued is not delivery.',
         });
       } catch (e) {
-        logged.push({
+        failedCount += 1;
+        appended.push({
           at: now,
           recipient_user_id: recipientId,
-          note: `Notification failed: ${(e as Error).message}`,
+          state: 'failed',
+          note: `Notification failed, retry required: ${(e as Error).message}`,
         });
       }
     }
 
     // Append-only history: prior entries preserved verbatim.
-    const history = [...(record.downstream_notifications || []), ...logged];
+    const updatedHistory = [...history, ...appended];
 
     await service.entities.SellerConsent.update(record.id, {
       status: 'withdrawn',
-      withdrawn_at: now,
-      withdrawal_reason: reason || null,
-      withdrawn_by: user.id,
-      withdrawn_by_name: byName,
-      downstream_notifications: history,
+      withdrawn_at: record.withdrawn_at || now,
+      withdrawal_reason: record.withdrawal_reason || reason || null,
+      withdrawn_by: record.withdrawn_by || user.id,
+      withdrawn_by_name: record.withdrawn_by_name || byName,
+      downstream_notifications: updatedHistory,
     });
+
+    const notificationState = failedCount > 0
+      ? (appended.length > failedCount ? 'partial_failure' : 'failed_retry_required')
+      : 'queued';
 
     return Response.json({
       ok: true,
       consent_id: record.consent_id,
-      withdrawn_at: now,
-      notified: logged.length,
+      withdrawn_at: record.withdrawn_at || now,
+      withdrawal_state: 'recorded',
+      notification_state: notificationState,
+      notified_this_attempt: appended.filter((e) => e.state === 'queued').length,
+      failed_this_attempt: failedCount,
+      notification_note:
+        notificationState === 'queued'
+          ? 'Notifications are queued in-app; queued is not delivered — recipient acknowledgement is not tracked here.'
+          : 'One or more notifications failed. Repeat this request to retry only the failed recipients; already-queued recipients are never duplicated.',
     });
   } catch (error) {
     console.error('withdrawSellerConsent error:', (error as Error).message);
