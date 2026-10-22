@@ -1,7 +1,7 @@
 {
   "name": "SaleIssue",
   "type": "object",
-  "description": "Chapter 13 P1 \u2014 AN IMPORTANT UNANSWERED OPERATIONAL QUESTION OR ISSUE THAT NEEDS RESOLUTION on a sale. It is deliberately NOT a SaleTask (work to do), NOT a SaleClientDecision (a matter requiring client/authority instruction), NOT a SaleNote (narrative team memory), and NOT a research flag (merchandise needing another look). It is the ONE new Chapter 13 operational entity: the home for unresolved questions that may block work ('Who is removing the piano?', 'Will the HOA permit Saturday?'). Resolution records REFERENCES to canonical destinations \u2014 answer only, a SaleClientDecision, a SaleTask, or both \u2014 final truth is never duplicated inside the issue. PENDING (unresolved) issues surface as operational warnings; an issue NEVER certifies, authorizes, or decides anything by itself. Chapter 17 P1 extends the category vocabulary with sale-floor categories (safety, customer_flow, signage, display, pricing, checkout, lighting) \u2014 reuse of the SAME entity; there is NO StagingIssue. Chapter 19 P1 reuses this same entity as the ONE employee HELP/ESCALATION path ('Ask for Help'): a team member who hits the edge of their authority creates an issue (optionally URGENT, optionally with a private photo), and can see whether it was resolved and the answer. There is no second escalation entity. Chapter 20 P1 extends the SAME record additively (NO Incident entity) with incident classification and factual incident detail fields, plus an optional canonical Item link for merchandise questions: an incident-class issue records FACTS ONLY (what happened, where, when, who was involved, witnesses, immediate action taken) \u2014 never fault, blame, legal conclusion, or speculation. Incident-class issues are NOT readable by ordinary sale-team members through team membership (created_by, operator, admin only) \u2014 least privilege.",
+  "description": "Chapter 13 P1 \u2014 AN IMPORTANT UNANSWERED OPERATIONAL QUESTION OR ISSUE THAT NEEDS RESOLUTION on a sale. It is deliberately NOT a SaleTask (work to do), NOT a SaleClientDecision (a matter requiring client/authority instruction), NOT a SaleNote (narrative team memory), and NOT a research flag (merchandise needing another look). It is the ONE new Chapter 13 operational entity: the home for unresolved questions that may block work ('Who is removing the piano?', 'Will the HOA permit Saturday?'). Resolution records REFERENCES to canonical destinations \u2014 answer only, a SaleClientDecision, a SaleTask, or both \u2014 final truth is never duplicated inside the issue. PENDING (unresolved) issues surface as operational warnings; an issue NEVER certifies, authorizes, or decides anything by itself. Chapter 17 P1 extends the category vocabulary with sale-floor categories (safety, customer_flow, signage, display, pricing, checkout, lighting) \u2014 reuse of the SAME entity; there is NO StagingIssue. Chapter 19 P1 reuses this same entity as the ONE employee HELP/ESCALATION path ('Ask for Help'): a team member who hits the edge of their authority creates an issue (optionally URGENT, optionally with a private photo), and can see whether it was resolved and the answer. There is no second escalation entity. Chapter 20 P1 extends the SAME record additively (NO Incident entity) with incident classification and factual incident detail fields, plus an optional canonical Item link for merchandise questions: an incident-class issue records FACTS ONLY (what happened, where, when, who was involved, witnesses, immediate action taken) \u2014 never fault, blame, legal conclusion, or speculation. Incident-class issues are NOT readable by ordinary sale-team members through team membership (created_by, operator, admin only) \u2014 least privilege. Chapter 23 P1 extends the SAME record additively with the NEAR-MISS layer (is_near_miss, control weakness, impact avoided, corrective action) \u2014 there is NO NearMiss entity.",
   "properties": {
     "sale_id": {
       "type": "string",
@@ -119,6 +119,61 @@
       "type": "string",
       "description": "Chapter 20 P1-33 \u2014 what was done immediately (factual: called operator, area closed, emergency services called). Never a conclusion about adequacy."
     },
+    "is_near_miss": {
+      "type": "boolean",
+      "default": false,
+      "description": "Chapter 23 P1 \u2014 TRUE when this issue records a NEAR MISS: a problem caught BEFORE meaningful loss (no duplicate entity). The guard/control that prevented the loss is recorded in control_weakness; the impact avoided in impact_avoided_note. Factual record only \u2014 never a claim about what would have happened beyond the operator's stated judgment."
+    },
+    "control_weakness": {
+      "type": "string",
+      "enum": [
+        "process",
+        "policy",
+        "training",
+        "system",
+        "authority",
+        "communication",
+        "other"
+      ],
+      "description": "Chapter 23 P1 \u2014 the factual control/process category the near miss exposed (which control was weak or which guard caught it). A category, never a fault assignment."
+    },
+    "impact_avoided_note": {
+      "type": "string",
+      "description": "Chapter 23 P1 \u2014 what loss was avoided, as far as honestly known. Unknown stays unknown."
+    },
+    "corrective_action": {
+      "type": "object",
+      "default": {},
+      "description": "Chapter 23 P1 \u2014 the corrective action the lesson became, reusing existing destinations (a linked SaleTask, a policy/SOP suggestion, a training item, or a system-improvement note). A suggestion or draft only \u2014 the system NEVER automatically changes company policy.",
+      "properties": {
+        "action_type": {
+          "type": "string",
+          "enum": [
+            "SALE_TASK",
+            "POLICY_SUGGESTION",
+            "TRAINING_ITEM",
+            "SYSTEM_IMPROVEMENT",
+            "NONE"
+          ],
+          "default": "NONE"
+        },
+        "task_id": {
+          "type": "string",
+          "description": "Linked SaleTask when action_type is SALE_TASK."
+        },
+        "note": {
+          "type": "string",
+          "description": "The suggestion/draft text (policy wording, training scenario idea, system improvement)."
+        },
+        "recorded_by_name": {
+          "type": "string"
+        },
+        "recorded_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
     "status": {
       "type": "string",
       "enum": [
@@ -200,7 +255,7 @@
         "type": "string"
       },
       "default": [],
-      "description": "SaleTask record(s) created as the operational resolution. Provenance flows the other way too \u2014 the created task carries source_type SALE_ISSUE. Chapter 17 P1-6: staging corrections reuse this same Issue \u2192 Task path. Chapter 20 P1-35: incident hazard-mitigation/repair/follow-up tasks reuse this same path."
+      "description": "SaleTask record(s) created as the operational resolution. Provenance flows the other way too \u2014 the created task carries source_type SALE_ISSUE. Chapter 17 P1-6: staging corrections reuse this same Issue \u2192 Task path. Chapter 20 P1-35: incident hazard-mitigation/repair/follow-up tasks reuse this same path. Chapter 23 P1: near-miss corrective actions reuse this same path."
     },
     "resolved_at": {
       "type": "string",
