@@ -70,9 +70,11 @@ export default async function(req) {
       update.original_price = oldPrice != null ? oldPrice : newPrice;
     }
 
-    // Service-role write AFTER the stricter authority checks above — the RLS
-    // update rule alone would let any team member change any price, so this
-    // function is the enforcement layer (P0-6), not just a hidden button.
+    // Service-role write AFTER the stricter authority checks above. Chapter
+    // 19 P0-1 makes price protection a two-layer defense: the Item update
+    // rule now also blocks sale-team/creator edits on HIGH_VALUE records at
+    // the data layer, while this function remains the sanctioned price-change
+    // path with its own authority + reason checks and recorded history.
     await base44.asServiceRole.entities.Item.update(item.id, update);
 
     // P0-5/P1-19 — history: old → new, who, when, reason (reuses Activity).

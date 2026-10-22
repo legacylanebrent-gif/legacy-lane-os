@@ -27,6 +27,9 @@ export default function TaskRow({ task, onStatusChange, editing, onToggleEdit })
       </button>
       <div className="flex-1 min-w-0">
         <div className={`text-sm font-medium ${task.status==='completed' ? 'line-through text-slate-400' : 'text-slate-800'}`}>{task.task}</div>
+        {task.definition_of_done && task.status !== 'completed' && (
+          <p className="text-xs text-cyan-700 mt-0.5">Done means: {task.definition_of_done}</p>
+        )}
         {editing && <p className="text-xs text-slate-500 mt-0.5">{task.description}</p>}
       </div>
       <div className="flex items-center gap-2 flex-shrink-0">

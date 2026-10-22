@@ -118,6 +118,19 @@ export default function CheckoutStation() {
         return;
       }
 
+      // Chapter 19 P0-1 — HIGH VALUE checkout requires the operator: the data
+      // layer blocks sale-team updates on HIGH_VALUE items, so an employee
+      // completing this checkout would leave the Order and the Item out of
+      // sync. Stop deterministically BEFORE creating the Order.
+      const hvBlocked = freshItems.filter(it => it && it.inventory_level === 'HIGH_VALUE'
+        && it.operator_id !== staff?.id && it.seller_id !== staff?.id && staff?.role !== 'admin');
+      if (hvBlocked.length > 0) {
+        const hvNames = hvBlocked.map(it => titleById[it.id] || it.title).join(', ');
+        setMessage({ type: 'error', text: `High Value merchandise (${hvNames}) is checked out by the operator. Ask the operator to complete or authorize this checkout.` });
+        setCompleting(false);
+        return;
+      }
+
       // Create order from cart
       const order = await base44.entities.Order.create({
         order_number: `ORD-${Date.now()}`,

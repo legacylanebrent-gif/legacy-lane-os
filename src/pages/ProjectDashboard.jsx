@@ -26,6 +26,8 @@ import ExcludedAreasCard from '@/components/project/ExcludedAreasCard';
 import PrepZonesPanel from '@/components/project/PrepZonesPanel';
 import DiscoveryPanel from '@/components/project/DiscoveryPanel';
 import EndOfDayPanel from '@/components/project/EndOfDayPanel';
+import StaffingPanel from '@/components/staffing/StaffingPanel';
+import OpeningBriefCard from '@/components/staffing/OpeningBriefCard';
 import ZoneStagingPanel from '@/components/staging/ZoneStagingPanel';
 import StagingReadinessCard from '@/components/staging/StagingReadinessCard';
 
@@ -210,6 +212,12 @@ export default function ProjectDashboard() {
       <div className="grid lg:grid-cols-2 gap-4 items-start">
         <DiscoveryPanel sale={sale} zones={sale.prep_zones || []} discoveries={discoveries} onChanged={refresh} />
         <EndOfDayPanel sale={sale} zones={sale.prep_zones || []} discoveries={discoveries} tasks={tasks} issues={issues} decisions={decisions} laborEntries={laborEntries} />
+      </div>
+
+      {/* Chapter 19 P1 — sale-day staffing + opening brief */}
+      <div className="grid lg:grid-cols-2 gap-4 items-start">
+        <StaffingPanel sale={sale} items={items} linkedDeal={linkedDeal} onChanged={refresh} />
+        <OpeningBriefCard sale={sale} />
       </div>
 
       {/* SALE-FLOOR STAGING (Chapter 17 P1): customer path, deterministic opening

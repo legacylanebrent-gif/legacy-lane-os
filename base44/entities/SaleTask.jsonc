@@ -1,7 +1,7 @@
 {
   "name": "SaleTask",
   "type": "object",
-  "description": "Chapter 1 P1 \u2014 persisted operator task for the canonical SaleTasks workflow (15-step template). Adds accountability to the existing task system: assignee, due date, blocked state, priority, attention flag, and completion audit. NOT a parallel task-management application \u2014 SaleTasks (page) remains the single task surface. Chapter 13 P1 adds the smallest real DEPENDENCY MODEL (blocked_by_task_ids / blocked_by_decision_ids / blocked_by_issue_ids \u2014 references, never a graph engine) and TASK PROVENANCE (source_type/source_id/source_label answers WHY DOES THIS TASK EXIST). The boolean blocked flag remains the display cache; when any dependency is unresolved the task is blocked and the UI shows WHAT IT IS WAITING FOR. Resolving all dependencies unblocks the task but NEVER auto-completes it.",
+  "description": "Chapter 1 P1 \u2014 persisted operator task for the canonical SaleTasks workflow (15-step template). Adds accountability to the existing task system: assignee, due date, blocked state, priority, attention flag, and completion audit. NOT a parallel task-management application \u2014 SaleTasks (page) remains the single task surface. Chapter 13 P1 adds the smallest real DEPENDENCY MODEL (blocked_by_task_ids / blocked_by_decision_ids / blocked_by_issue_ids \u2014 references, never a graph engine) and TASK PROVENANCE (source_type/source_id/source_label answers WHY DOES THIS TASK EXIST). The boolean blocked flag remains the display cache; when any dependency is unresolved the task is blocked and the UI shows WHAT IT IS WAITING FOR. Resolving all dependencies unblocks the task but NEVER auto-completes it. Chapter 19 P1 adds definition_of_done \u2014 the plain acceptance criteria the assignee can read in My Sale Day before starting work.",
   "properties": {
     "sale_id": {
       "type": "string",
@@ -24,6 +24,10 @@
     },
     "description": {
       "type": "string"
+    },
+    "definition_of_done": {
+      "type": "string",
+      "description": "Chapter 19 P1-4 \u2014 acceptance criteria in plain words: what must be TRUE for this task to count as complete ('All zone tables labeled with prices; photos of each display taken'). Honest criteria the assignee can verify themselves; optional, and never a substitute for the human completion decision."
     },
     "category": {
       "type": "string",

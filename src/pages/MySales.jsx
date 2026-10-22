@@ -416,6 +416,14 @@ export default function MySales() {
         <div className="flex gap-2 md:self-start flex-wrap">
           <Button
             variant="outline"
+            onClick={() => navigate('/MySaleDay')}
+            className="border-slate-300 text-slate-700 hover:bg-slate-50"
+          >
+            <UserCheck className="w-4 h-4 mr-2" />
+            My Sale Day
+          </Button>
+          <Button
+            variant="outline"
             onClick={() => navigate('/OperatorCalendar')}
             className="border-slate-300 text-slate-700 hover:bg-slate-50"
           >

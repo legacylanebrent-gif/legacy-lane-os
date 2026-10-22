@@ -1,0 +1,154 @@
+{
+  "name": "SaleStaffAssignment",
+  "type": "object",
+  "description": "Chapter 19 P1 \u2014 sale-scoped STAFF RESPONSIBILITY assignment: who is responsible for a named sale-day function (entry, checkout, floor zones, high-value watch, negotiation, furniture, pickup, customer issues, recovery). FACTUAL ASSIGNMENT TRUTH only \u2014 it confers NO authority beyond it and is NOT payroll (LaborEntry remains the canonical labor record; hours/cost are derived there). Terminology is deliberately honest: STAFFING PLAN = who SHOULD be working; LABOR = who ACTUALLY worked; expected hours per role is a PLANNING ASSUMPTION compared against actuals at closeout. Assignment history is factual record (CLEARED keeps the record); the operator assigns and clears responsibilities. This is the ONE assignment record for sale-day functions \u2014 zone-level work assignment continues to reuse SaleTask.",
+  "properties": {
+    "sale_id": {
+      "type": "string",
+      "description": "EstateSale this assignment belongs to."
+    },
+    "operator_id": {
+      "type": "string",
+      "description": "EstateSale.operator_id projection \u2014 sale owner (RLS anchor). Derived from the sale at creation."
+    },
+    "company_id": {
+      "type": "string",
+      "description": "EstateSale.company_id projection when present."
+    },
+    "sale_team_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "READ-SCOPE PROJECTION of EstateSale.sale_team for RLS. The sale remains the source of truth."
+    },
+    "responsibility_type": {
+      "type": "string",
+      "enum": [
+        "ENTRY",
+        "CHECKOUT",
+        "FLOOR_ZONE",
+        "HIGH_VALUE",
+        "NEGOTIATION",
+        "FURNITURE",
+        "PICKUP",
+        "CUSTOMER_ISSUES",
+        "SALE_FLOOR_RECOVERY",
+        "OTHER"
+      ],
+      "description": "Chapter 19 P1-1 \u2014 the named sale-day function this person is responsible for."
+    },
+    "zone_id": {
+      "type": "string",
+      "description": "Chapter 19 P1-2 \u2014 prep/floor zone (EstateSale.prep_zones zone_id) for FLOOR_ZONE or area-specific responsibilities. Empty = whole-sale scope."
+    },
+    "zone_name": {
+      "type": "string",
+      "description": "Zone-name snapshot at assignment time."
+    },
+    "primary_team_member_id": {
+      "type": "string",
+      "description": "Chapter 19 P1-3 \u2014 canonical TeamMember primarily responsible. They own the function and decisions within their authority level."
+    },
+    "primary_member_name": {
+      "type": "string",
+      "description": "Display-name snapshot of the primary at assignment."
+    },
+    "primary_user_id": {
+      "type": "string",
+      "description": "Platform User ID of the primary when the worker has an account (drives My Sale Day)."
+    },
+    "backup_team_member_id": {
+      "type": "string",
+      "description": "Chapter 19 P1-3 \u2014 canonical TeamMember backup/second. Support, breaks, coverage \u2014 not a second owner."
+    },
+    "backup_member_name": {
+      "type": "string",
+      "description": "Display-name snapshot of the backup at assignment."
+    },
+    "backup_user_id": {
+      "type": "string",
+      "description": "Platform User ID of the backup when the worker has an account."
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "ACTIVE",
+        "CLEARED"
+      ],
+      "default": "ACTIVE",
+      "description": "Chapter 19 P1-8 \u2014 ACTIVE = the person currently holds the responsibility; CLEARED = the responsibility ended (person left, role closed). CLEARED records are kept as factual assignment history."
+    },
+    "planned_hours": {
+      "type": "number",
+      "description": "Chapter 19 P1-4 \u2014 PLANNING ASSUMPTION for expected hours in this role. A planning input compared against actual LaborEntry hours at closeout \u2014 never payroll truth."
+    },
+    "notes": {
+      "type": "string",
+      "description": "Operator context for this assignment (team-safe \u2014 no codes or credentials)."
+    }
+  },
+  "required": [
+    "sale_id",
+    "operator_id",
+    "responsibility_type"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.operator_id": "{{user.id}}"
+        },
+        {
+          "data.sale_team_ids": {
+            "$in": [
+              "{{user.id}}"
+            ]
+          }
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "$or": [
+        {
+          "data.operator_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.operator_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.operator_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

@@ -19,6 +19,7 @@ export default function CreateTaskDialog({ open, onClose, sale, source, defaultN
   // source: { type: 'SALE_NOTE' | 'CLIENT_DECISION' | 'SALE_ISSUE' | 'ACCEPTANCE_CONDITION' | 'COMMUNICATION' | 'CONSULTATION' | 'MANUAL', id, label }
   const [name, setName] = useState(defaultName || '');
   const [description, setDescription] = useState(defaultDescription || '');
+  const [definitionOfDone, setDefinitionOfDone] = useState('');
   const [category, setCategory] = useState('Preparation');
   const [dueDate, setDueDate] = useState('');
   const [assignee, setAssignee] = useState('unassigned');
@@ -29,6 +30,7 @@ export default function CreateTaskDialog({ open, onClose, sale, source, defaultN
     if (!open) return;
     setName(defaultName || '');
     setDescription(defaultDescription || '');
+    setDefinitionOfDone('');
     setDueDate('');
     setAssignee('unassigned');
     (async () => {
@@ -53,6 +55,7 @@ export default function CreateTaskDialog({ open, onClose, sale, source, defaultN
         sale_team_ids: sale.sale_team || [],
         name: name.trim(),
         description: description.trim(),
+        definition_of_done: definitionOfDone.trim(),
         category,
         status: 'not_started',
         priority: 'medium',
@@ -88,6 +91,9 @@ export default function CreateTaskDialog({ open, onClose, sale, source, defaultN
             <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="What will the team do?" /></div>
           <div><Label>Description</Label>
             <Textarea rows={2} value={description} onChange={(e) => setDescription(e.target.value)} /></div>
+          <div><Label>Definition of done</Label>
+            <Textarea rows={2} value={definitionOfDone} onChange={(e) => setDefinitionOfDone(e.target.value)}
+              placeholder="What must be TRUE for this task to count as complete (the assignee sees this)" /></div>
           <div className="grid grid-cols-2 gap-3">
             <div><Label>Category</Label>
               <Select value={category} onValueChange={setCategory}>

@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Loader2, X, ShieldOff } from 'lucide-react';
+import TeamMemberProfileSection from '@/components/team/TeamMemberProfileSection';
 
 // Add/edit a minimal worker record (person directory — not payroll, not an
 // HRIS). Deliberately no fields for SSN, tax IDs, bank details, medical
@@ -25,8 +26,14 @@ export default function TeamMemberModal({ open, member, operatorId, platformUser
       phone: member.phone || '',
       email: member.email || '',
       notes: member.notes || '',
+      preferred_roles: member.preferred_roles || [],
+      skills_detail: member.skills_detail || [],
+      availability: member.availability || [],
+      training_records: member.training_records || [],
+      document_checklist: member.document_checklist || [],
     } : {
       name: '', role: '', user_id: '', default_hourly_rate: '', skills: '', status: 'ACTIVE', phone: '', email: '', notes: '',
+      preferred_roles: [], skills_detail: [], availability: [], training_records: [], document_checklist: [],
     });
   }, [open, member]);
 
@@ -47,6 +54,11 @@ export default function TeamMemberModal({ open, member, operatorId, platformUser
         phone: (form.phone || '').trim(),
         email: (form.email || '').trim(),
         notes: (form.notes || '').trim(),
+        preferred_roles: form.preferred_roles || [],
+        skills_detail: (form.skills_detail || []).filter(s => (s.skill || '').trim()),
+        availability: form.availability || [],
+        training_records: (form.training_records || []).filter(t => (t.name || '').trim()),
+        document_checklist: form.document_checklist || [],
       };
       if (member) {
         const updated = await base44.entities.TeamMember.update(member.id, payload);
@@ -133,6 +145,17 @@ export default function TeamMemberModal({ open, member, operatorId, platformUser
           <Label>Notes</Label>
           <Input value={form.notes} onChange={e => set('notes', e.target.value)} placeholder="Optional notes" />
         </div>
+
+        <TeamMemberProfileSection
+          profile={{
+            preferred_roles: form.preferred_roles,
+            skills_detail: form.skills_detail,
+            availability: form.availability,
+            training_records: form.training_records,
+            document_checklist: form.document_checklist,
+          }}
+          onChange={(patch) => setForm(p => ({ ...p, ...patch }))}
+        />
 
         <div className="flex items-start gap-2 rounded-lg bg-slate-50 p-2.5 text-[11px] text-slate-500">
           <ShieldOff className="w-3.5 h-3.5 mt-0.5 flex-shrink-0 text-slate-400" />

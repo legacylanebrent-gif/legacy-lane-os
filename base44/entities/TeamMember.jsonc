@@ -1,7 +1,7 @@
 {
   "name": "TeamMember",
   "type": "object",
-  "description": "Chapter 6 P1 \u2014 minimal operator-level worker/helper DIRECTORY record. Person/worker directory only: NOT a duplicate of platform User, NOT payroll, NOT an HRIS. Deliberately excludes Social Security numbers, tax IDs, bank/routing numbers, medical records, payroll credentials, IDs/licenses, and background-check data. LaborEntry remains the canonical PROJECT labor record; this record supplies worker selection, consistent identity (team_member_id), and a default hourly rate convenience (snapshot doctrine: historical LaborEntry rates never change when the default changes). Non-platform helpers simply have no user_id; they cannot join EstateSale.sale_team (which requires a platform account) \u2014 their identity is carried by LaborEntry.team_member_id/member_name.",
+  "description": "Chapter 6 P1 \u2014 minimal operator-level worker/helper DIRECTORY record. Person/worker directory only: NOT a duplicate of platform User, NOT payroll, NOT an HRIS. Deliberately excludes Social Security numbers, tax IDs, bank/routing numbers, medical records, payroll credentials, IDs/licenses, and background-check data. LaborEntry remains the canonical PROJECT labor record; this record supplies worker selection, consistent identity (team_member_id), and a default hourly rate convenience (snapshot doctrine: historical LaborEntry rates never change when the default changes). Non-platform helpers simply have no user_id; they cannot join EstateSale.sale_team (which requires a platform account) \u2014 their identity is carried by LaborEntry.team_member_id/member_name. Chapter 19 P1 extends the SAME directory record (no second staffing entity) with the STAFFING PLAN layer: preferred roles, availability windows, skill strengths with honest sources, training history, and the operator's per-member document checklist. All of it is OPERATOR-RECORDED OBSERVATION AND PLANNING \u2014 never a certification, qualification, or employment-law conclusion. A skill source is how the operator knows: it never claims verified professional competence.",
   "properties": {
     "operator_id": {
       "type": "string",
@@ -22,9 +22,25 @@
       "type": "string",
       "description": "Free-text job role (e.g. Crew lead, Cashier, Mover). Not a platform permission."
     },
-    "default_hourly_rate": {
-      "type": "number",
-      "description": "Convenience default copied into new LaborEntries at creation (the entry's rate is a snapshot; it never changes when this default changes later)."
+    "preferred_roles": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "ENTRY",
+          "CHECKOUT",
+          "FLOOR_ZONE",
+          "HIGH_VALUE",
+          "NEGOTIATION",
+          "FURNITURE",
+          "PICKUP",
+          "CUSTOMER_ISSUES",
+          "SALE_FLOOR_RECOVERY",
+          "OTHER"
+        ]
+      },
+      "default": [],
+      "description": "Chapter 19 P1-5 \u2014 the sale-day functions this person is PREFERRED for (matches SaleStaffAssignment.responsibility_type vocabulary). Operator-recorded preference \u2014 the assignment itself lives on SaleStaffAssignment."
     },
     "skills": {
       "type": "array",
@@ -33,6 +49,122 @@
       },
       "default": [],
       "description": "Shorthand capabilities (e.g. heavy lifting, POS, staging)."
+    },
+    "skills_detail": {
+      "type": "array",
+      "default": [],
+      "description": "Chapter 19 P1-6 \u2014 skill strengths with an HONEST SOURCE for each (how the operator knows this person has the skill). Never a certification or verified professional qualification.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "skill": {
+            "type": "string",
+            "description": "The skill (staging, POS checkout, heavy lifting, customer service...)."
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "PREFERRED",
+              "EXPERIENCED",
+              "TRAINED",
+              "MANAGER_OBSERVED"
+            ],
+            "description": "How the operator knows. PREFERRED = the worker says they like it. EXPERIENCED = they say they have done it. TRAINED = training was done and recorded. MANAGER_OBSERVED = the operator saw them do it."
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "availability": {
+      "type": "array",
+      "default": [],
+      "description": "Chapter 19 P1-7 \u2014 the worker's KNOWN availability windows (operator-recorded dates or date ranges they said they can work). Absent = UNKNOWN availability \u2014 the system never assumes a worker is available or unavailable. Planning input only \u2014 never a schedule, a shift system, or payroll truth.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "availability_id": {
+            "type": "string"
+          },
+          "start_date": {
+            "type": "string",
+            "format": "date",
+            "description": "First date of the window (inclusive)."
+          },
+          "end_date": {
+            "type": "string",
+            "format": "date",
+            "description": "Last date of the window (inclusive). Empty = open-ended from start_date."
+          },
+          "note": {
+            "type": "string",
+            "description": "Context (weekends only, mornings...)."
+          }
+        }
+      }
+    },
+    "training_records": {
+      "type": "array",
+      "default": [],
+      "description": "Chapter 19 P1-13 \u2014 the operator's own record of training done (what, when, optionally which company document/version). FACTUAL HISTORY ONLY: it records that training happened, never that a person is certified, qualified, or competent. When training references a BusinessDocument, the acknowledgment state itself lives in PolicyAcknowledgment \u2014 this is the directory-level history.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "training_id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string",
+            "description": "What the training was (Checkout practice, Opening procedures, Customer service)."
+          },
+          "completed_at": {
+            "type": "string",
+            "format": "date",
+            "description": "When it was completed/recorded."
+          },
+          "document_id": {
+            "type": "string",
+            "description": "Optional BusinessDocument the training was based on (e.g. a POLICY)."
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "document_checklist": {
+      "type": "array",
+      "default": [],
+      "description": "Chapter 19 P1-5 \u2014 the operator's per-member DOCUMENT CHECKLIST (what should be collected for this worker: signed policy acknowledgment, W-9 from the worker, etc. \u2014 labels only, the documents themselves live in BusinessDocument / PolicyAcknowledgment). A checklist entry is an operator memory aid \u2014 NEVER a compliance conclusion; incomplete stays incomplete, honestly.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "checklist_item_id": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string",
+            "description": "What the item is (e.g. 'Signed confidentiality policy')."
+          },
+          "business_document_id": {
+            "type": "string",
+            "description": "Optional link to the related BusinessDocument when one exists."
+          },
+          "completed": {
+            "type": "boolean",
+            "default": false,
+            "description": "Operator's record that this item is handled."
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "default_hourly_rate": {
+      "type": "number",
+      "description": "Convenience default copied into new LaborEntries at creation (the entry's rate is a snapshot; it never changes when this default changes later)."
     },
     "status": {
       "type": "string",

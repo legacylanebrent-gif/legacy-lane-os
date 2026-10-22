@@ -1,7 +1,7 @@
 {
   "name": "SaleIssue",
   "type": "object",
-  "description": "Chapter 13 P1 \u2014 AN IMPORTANT UNANSWERED OPERATIONAL QUESTION OR ISSUE THAT NEEDS RESOLUTION on a sale. It is deliberately NOT a SaleTask (work to do), NOT a SaleClientDecision (a matter requiring client/authority instruction), NOT a SaleNote (narrative team memory), and NOT a research flag (merchandise needing another look). It is the ONE new Chapter 13 operational entity: the home for unresolved questions that may block work ('Who is removing the piano?', 'Will the HOA permit Saturday?'). Resolution records REFERENCES to canonical destinations \u2014 answer only, a SaleClientDecision, a SaleTask, or both \u2014 final truth is never duplicated inside the issue. PENDING (unresolved) issues surface as operational warnings; an issue NEVER certifies, authorizes, or decides anything by itself. Chapter 17 P1 extends the category vocabulary with sale-floor categories (safety, customer_flow, signage, display, pricing, checkout, lighting) \u2014 reuse of the SAME entity; there is NO StagingIssue.",
+  "description": "Chapter 13 P1 \u2014 AN IMPORTANT UNANSWERED OPERATIONAL QUESTION OR ISSUE THAT NEEDS RESOLUTION on a sale. It is deliberately NOT a SaleTask (work to do), NOT a SaleClientDecision (a matter requiring client/authority instruction), NOT a SaleNote (narrative team memory), and NOT a research flag (merchandise needing another look). It is the ONE new Chapter 13 operational entity: the home for unresolved questions that may block work ('Who is removing the piano?', 'Will the HOA permit Saturday?'). Resolution records REFERENCES to canonical destinations \u2014 answer only, a SaleClientDecision, a SaleTask, or both \u2014 final truth is never duplicated inside the issue. PENDING (unresolved) issues surface as operational warnings; an issue NEVER certifies, authorizes, or decides anything by itself. Chapter 17 P1 extends the category vocabulary with sale-floor categories (safety, customer_flow, signage, display, pricing, checkout, lighting) \u2014 reuse of the SAME entity; there is NO StagingIssue. Chapter 19 P1 reuses this same entity as the ONE employee HELP/ESCALATION path ('Ask for Help'): a team member who hits the edge of their authority creates an issue (optionally URGENT, optionally with a private photo), and can see whether it was resolved and the answer. There is no second escalation entity.",
   "properties": {
     "sale_id": {
       "type": "string",
@@ -45,16 +45,36 @@
         "disposition",
         "financial_settlement",
         "safety",
+        "security",
         "customer_flow",
         "signage",
         "display",
         "pricing",
         "checkout",
+        "payment",
         "lighting",
         "other"
       ],
       "default": "other",
-      "description": "Small practical vocabulary \u2014 which part of the project this question touches. Chapter 17 P1-5 adds the sale-floor categories (safety, customer_flow, signage, display, pricing, checkout, lighting) so staging/floor problems reuse this ONE issue architecture instead of a StagingIssue entity. A safety issue is an OPERATIONAL flag only \u2014 never a certification that anything is or is not safe."
+      "description": "Small practical vocabulary \u2014 which part of the project this question touches. Chapter 17 P1-5 adds the sale-floor categories (safety, customer_flow, signage, display, pricing, checkout, lighting) so staging/floor problems reuse this ONE issue architecture instead of a StagingIssue entity. A safety issue is an OPERATIONAL flag only \u2014 never a certification that anything is or is not safe. Chapter 19 P1 adds 'payment' (a payment that failed or cannot be confirmed \u2014 the employee must NOT release merchandise on it) and 'security' (theft/concern/report \u2014 operational reporting, never a legal conclusion)."
+    },
+    "urgency": {
+      "type": "string",
+      "enum": [
+        "ROUTINE",
+        "IMPORTANT",
+        "URGENT"
+      ],
+      "default": "ROUTINE",
+      "description": "Chapter 19 P1-30 \u2014 HONEST OPERATIONAL URGENCY set by whoever raised the issue: how soon the team needs to look at it, relative to other open issues. URGENT means 'drop what you are doing and find the operator/manager' \u2014 it surfaces immediately and in My Sale Day. It is deliberately NOT a safety or compliance certification. Absent = ROUTINE."
+    },
+    "requested_by_name": {
+      "type": "string",
+      "description": "Chapter 19 P1-28 \u2014 display name of the person who raised the issue (employee asking for help, or the operator)."
+    },
+    "photo_uri": {
+      "type": "string",
+      "description": "Chapter 19 P1-31 \u2014 optional PRIVATE photo supporting the issue (private-storage file_uri; viewed only through a short-lived signed URL). Never public media."
     },
     "status": {
       "type": "string",

@@ -19,6 +19,8 @@ import SocialAdsHub from './pages/SocialAdsHub';
 import AdminAICredits from './pages/AdminAICredits';
 import MarketplaceItemDetail from './pages/MarketplaceItemDetail';
 import ScanAndCart from './pages/ScanAndCart';
+import MySaleDay from './pages/MySaleDay';
+import PosPractice from './pages/PosPractice';
 import CheckoutStation from './pages/CheckoutStation';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import GuideAIBotGlobal from '@/components/guide/GuideAIBotGlobal';
@@ -294,6 +296,8 @@ const AuthenticatedApp = () => {
       <Route path="/AdminAICredits" element={<LayoutWrapper currentPageName="AdminAICredits"><AdminAICredits /></LayoutWrapper>} />
       <Route path="/MarketplaceItemDetail" element={<LayoutWrapper currentPageName="MarketplaceItemDetail"><MarketplaceItemDetail /></LayoutWrapper>} />
       <Route path="/ScanAndCart" element={<LayoutWrapper currentPageName="ScanAndCart"><ScanAndCart /></LayoutWrapper>} />
+      <Route path="/MySaleDay" element={<LayoutWrapper currentPageName="MySaleDay"><MySaleDay /></LayoutWrapper>} />
+      <Route path="/PosPractice" element={<LayoutWrapper currentPageName="PosPractice"><PosPractice /></LayoutWrapper>} />
       <Route path="/SaleGuide" element={<LayoutWrapper currentPageName="SaleGuide"><SaleGuide /></LayoutWrapper>} />
       <Route path="/CheckoutStation" element={<LayoutWrapper currentPageName="CheckoutStation"><CheckoutStation /></LayoutWrapper>} />
       <Route path="/SalePipeline" element={<LayoutWrapper currentPageName="SalePipeline"><SalePipeline /></LayoutWrapper>} />

@@ -1,7 +1,7 @@
 {
   "name": "SaleClientDecision",
   "type": "object",
-  "description": "Chapter 1 P1 \u2014 canonical sale-scoped client decision record with change history. Answers WHO authorized it, WHEN, WHAT they instructed, HOW it was received, and WHETHER it later changed. KEEP/SELL/REVIEW merchandise decisions are decision_type 'merchandise' on this same architecture \u2014 there is no second merchandise-decision system. Item.status (selling/transaction state) remains fully independent of these records. Chapter 4 P1: decision_type 'financial' with current_decision 'authorized' and charge_amount > 0 records a client-AUTHORIZED ADDITIONAL SERVICE CHARGE that flows to the settlement statement \u2014 there is no separate charge-approval entity. Chapter 6 P2: decision_type 'financial' with related_expense_id set authorizes CLIENT REIMBURSEMENT of a canonical Expense \u2014 it is deliberately EXCLUDED from service-charge revenue and instead flows to settlement as an authorized reimbursable expense line. A company expense never reduces client proceeds without a decision like this. Chapter 13 P1 adds the REQUEST STATE (a client request is NOT an approved change): while request_status is REQUESTED/UNDER_REVIEW the requested instruction NEVER changes current_decision or project truth \u2014 only explicit operator approval appends the controlling history entry. Chapter 13 P1 adds image_index for image-level merchandise decisions: a KEEP decision on a property photo marks it retained-private (excluded_from_public) so it never enters the public gallery or marketing.",
+  "description": "Chapter 1 P1 \u2014 canonical sale-scoped client decision record with change history. Answers WHO authorized it, WHEN, WHAT they instructed, HOW it was received, and WHETHER it later changed. KEEP/SELL/REVIEW merchandise decisions are decision_type 'merchandise' on this same architecture \u2014 there is no second merchandise-decision system. Item.status (selling/transaction state) remains fully independent of these records. Chapter 4 P1: decision_type 'financial' with current_decision 'authorized' and charge_amount > 0 records a client-AUTHORIZED ADDITIONAL SERVICE CHARGE that flows to the settlement statement \u2014 there is no separate charge-approval entity. Chapter 6 P2: decision_type 'financial' with related_expense_id set authorizes CLIENT REIMBURSEMENT of a canonical Expense \u2014 it is deliberately EXCLUDED from service-charge revenue and instead flows to settlement as an authorized reimbursable expense line. A company expense never reduces client proceeds without a decision like this. Chapter 13 P1 adds the REQUEST STATE (a client request is NOT an approved change): while request_status is REQUESTED/UNDER_REVIEW the requested instruction NEVER changes current_decision or project truth \u2014 only explicit operator approval appends the controlling history entry. Chapter 13 P1 adds image_index for image-level merchandise decisions: a KEEP decision on a property photo marks it retained-private (excluded_from_public) so it never enters the public gallery or marketing. Chapter 19 P0-2: creating or changing an authoritative client decision is an OPERATOR/MANAGER act enforced at the data layer \u2014 sale-team members and record creators can no longer create or modify decisions; they raise client matters through SaleIssue (help/escalation), which the operator resolves into a decision. This boundary is doctrine, not just UI.",
   "properties": {
     "sale_id": {
       "type": "string",
@@ -209,13 +209,6 @@
           "data.operator_id": "{{user.id}}"
         },
         {
-          "data.sale_team_ids": {
-            "$in": [
-              "{{user.id}}"
-            ]
-          }
-        },
-        {
           "user_condition": {
             "role": "admin"
           }
@@ -225,17 +218,7 @@
     "update": {
       "$or": [
         {
-          "created_by_id": "{{user.id}}"
-        },
-        {
           "data.operator_id": "{{user.id}}"
-        },
-        {
-          "data.sale_team_ids": {
-            "$in": [
-              "{{user.id}}"
-            ]
-          }
         },
         {
           "user_condition": {

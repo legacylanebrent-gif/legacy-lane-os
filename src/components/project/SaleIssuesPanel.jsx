@@ -34,7 +34,7 @@ export default function SaleIssuesPanel({ sale, issues, onChanged }) {
   const [resolveTarget, setResolveTarget] = useState(null);
   const [taskFrom, setTaskFrom] = useState(null);
   const [saving, setSaving] = useState(false);
-  const [form, setForm] = useState({ title: '', description: '', category: 'other', answer_by: '', owner: 'me', waiting_on: '' });
+  const [form, setForm] = useState({ title: '', description: '', category: 'other', urgency: 'ROUTINE', answer_by: '', owner: 'me', waiting_on: '' });
   const [resolve, setResolve] = useState({ resolution: '', resolution_source: 'answer_only' });
 
   const open = issues.filter((i) => i.status === 'OPEN' || i.status === 'WAITING');
@@ -60,11 +60,13 @@ export default function SaleIssuesPanel({ sale, issues, onChanged }) {
           ? `Waiting on ${form.waiting_on ? form.waiting_on.replace(/_/g, ' ') : 'external party'}`
           : (form.owner === 'me' ? (me?.full_name || 'Operator') : 'Team member'),
         answer_by: form.answer_by || '',
+        urgency: form.urgency || 'ROUTINE',
+        requested_by_name: me?.full_name || 'Operator',
         source_type: 'MANUAL',
       });
       toast.success('Issue recorded');
       setShowNew(false);
-      setForm({ title: '', description: '', category: 'other', answer_by: '', owner: 'me', waiting_on: '' });
+      setForm({ title: '', description: '', category: 'other', urgency: 'ROUTINE', answer_by: '', owner: 'me', waiting_on: '' });
       onChanged();
     } catch (e) {
       console.error(e);
@@ -149,12 +151,16 @@ export default function SaleIssuesPanel({ sale, issues, onChanged }) {
             {i.description && <p className="text-xs text-slate-500 mt-0.5">{i.description}</p>}
           </div>
           <div className="flex items-center gap-1.5 flex-shrink-0">
+            {i.urgency === 'URGENT' && <Badge className="bg-red-100 text-red-700 border border-red-300">URGENT</Badge>}
+            {i.urgency === 'IMPORTANT' && <Badge className="bg-amber-100 text-amber-800 border border-amber-300">IMPORTANT</Badge>}
             <Badge className={STATUS_BADGE[i.status]}>{i.status}</Badge>
             {overdue && <Badge className="bg-red-100 text-red-700 border border-red-300">OVERDUE</Badge>}
           </div>
         </div>
         <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-500">
           <span>Owner: <span className="font-medium text-slate-700">{i.owner_name || 'Unassigned'}</span></span>
+          {i.requested_by_name && <span>Raised by: <span className="font-medium text-slate-700">{i.requested_by_name}</span></span>}
+          {i.photo_uri && <span className="text-cyan-600">photo attached</span>}
           {i.answer_by && <span>Answer by: <span className={`font-medium ${overdue ? 'text-red-600' : 'text-slate-700'}`}>{i.answer_by}</span></span>}
           <span className="capitalize">{(i.category || 'other').replace(/_/g, ' ')}</span>
         </div>
@@ -230,6 +236,15 @@ export default function SaleIssuesPanel({ sale, issues, onChanged }) {
                 <div><Label>Answer needed by</Label>
                   <Input type="date" value={form.answer_by} onChange={(e) => setForm((f) => ({ ...f, answer_by: e.target.value }))} /></div>
               </div>
+              <div><Label>Urgency</Label>
+                <Select value={form.urgency} onValueChange={(v) => setForm((f) => ({ ...f, urgency: v }))}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="ROUTINE">Routine</SelectItem>
+                    <SelectItem value="IMPORTANT">Important</SelectItem>
+                    <SelectItem value="URGENT">Urgent — needs the operator now</SelectItem>
+                  </SelectContent>
+                </Select></div>
               <div className="grid grid-cols-2 gap-3">
                 <div><Label>Owner</Label>
                   <Select value={form.owner} onValueChange={(v) => setForm((f) => ({ ...f, owner: v }))}>
