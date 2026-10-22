@@ -1,0 +1,43 @@
+{
+  "name": "Ch19RlsProbe",
+  "type": "object",
+  "description": "TEMPORARY Chapter 19 P0 capability probe \u2014 tests whether field-level update RLS is enforced. Delete after the probe run.",
+  "properties": {
+    "label": {
+      "type": "string"
+    },
+    "guard": {
+      "type": "number",
+      "default": 0,
+      "description": "Probe field with a field-level update rule (admin only).",
+      "rls": {
+        "update": {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      }
+    }
+  },
+  "required": [
+    "label"
+  ],
+  "rls": {
+    "read": {},
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "user"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}
