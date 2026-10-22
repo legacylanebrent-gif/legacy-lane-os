@@ -6,6 +6,10 @@
       "type": "string",
       "description": "Reference to Cleanout entity"
     },
+    "operator_id": {
+      "type": "string",
+      "description": "Chapter 22 P0-1 \u2014 Cleanout.operator_id projection (RLS anchor), derived from the parent cleanout at creation. The owning operator can read, award, and manage every bid on their cleanout."
+    },
     "vendor_id": {
       "type": "string",
       "description": "User ID of the cleanout vendor"
@@ -32,6 +36,11 @@
       "type": "string",
       "description": "Vendor message to the operator"
     },
+    "quote_valid_until": {
+      "type": "string",
+      "format": "date",
+      "description": "Chapter 22 P1 \u2014 quote expiration IF KNOWN (vendor-stated). Absent = no expiration stated \u2014 unknown stays unknown."
+    },
     "status": {
       "type": "string",
       "enum": [
@@ -47,5 +56,63 @@
     "cleanout_id",
     "vendor_id",
     "bid_amount"
-  ]
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.operator_id": "{{user.id}}"
+        },
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "user"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.operator_id": "{{user.id}}"
+        },
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.operator_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
 }

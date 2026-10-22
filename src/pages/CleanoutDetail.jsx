@@ -116,6 +116,7 @@ export default function CleanoutDetail() {
       } else {
         await base44.entities.CleanoutBid.create({
           cleanout_id: cleanoutId,
+          operator_id: cleanout?.operator_id || null,
           vendor_id: user.id,
           vendor_name: vendorProfile.business_name,
           vendor_email: vendorProfile.email,

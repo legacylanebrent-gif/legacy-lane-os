@@ -8,9 +8,13 @@
     "description": {
       "type": "string"
     },
+    "sale_id": {
+      "type": "string",
+      "description": "Chapter 22 P0-2 \u2014 CANONICAL EstateSale link (the relational identity for this cleanout). property_address is descriptive only and is NEVER used to match a sale. Legacy records without this link are UNRESOLVED until a deterministic backfill links them; unknown stays unknown."
+    },
     "operator_id": {
       "type": "string",
-      "description": "Estate Sale Company Owner user ID"
+      "description": "Estate Sale Company Owner user ID (RLS anchor)"
     },
     "operator_name": {
       "type": "string"
@@ -56,15 +60,15 @@
         "cancelled"
       ],
       "default": "draft",
-      "description": "Current status of the cleanout"
+      "description": "Current status of the cleanout. Chapter 22: 'completed' is written only through the sanctioned completeTransitionEvent path, which requires OPERATOR VERIFICATION \u2014 a provider saying done is never completion."
     },
     "scope_description": {
       "type": "string",
-      "description": "What needs to be cleaned out"
+      "description": "What needs to be cleaned out. Chapter 22: free text may EXPLAIN the scope but must not be the only protection \u2014 structural scope lives in included_item_ids / included_zone_ids / excluded_item_ids (guarded by setTransitionEventScope)."
     },
     "access_notes": {
       "type": "string",
-      "description": "How to access the property"
+      "description": "How to access the property \u2014 the LEAST-PRIVILEGE information the provider needs to perform the assignment; never alarm codes, gate codes, or key locations (those live in the operator-only sale access plan)."
     },
     "awarded_vendor_id": {
       "type": "string",
@@ -81,11 +85,188 @@
       "type": "string",
       "format": "date-time",
       "description": "When the cleanout was published to vendors"
+    },
+    "authorization_decision_id": {
+      "type": "string",
+      "description": "Chapter 22 P0-5/P0-7 \u2014 the canonical client-authorized SaleClientDecision evidencing client authority for this cleanout. A pending client request is never authorization. Set through the sanctioned setTransitionEventScope path."
+    },
+    "included_item_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Chapter 22 P0-7 \u2014 the EXACT canonical Items included in the cleanout scope (protected merchandise is structurally rejected from this list)."
+    },
+    "excluded_item_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Chapter 22 P0-6 \u2014 Items explicitly EXCLUDED / PROTECTED from the cleanout (sold, retained, donation, specialist, sensitive, restricted merchandise). Structural \u2014 free text may supplement but never replace."
+    },
+    "included_zone_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Chapter 22 P1 \u2014 included rooms/areas by canonical EstateSale.prep_zones zone_id."
+    },
+    "stairs_note": {
+      "type": "string",
+      "description": "Chapter 22 P1 \u2014 stairs/access constraints the provider needs to know."
+    },
+    "heavy_items_note": {
+      "type": "string",
+      "description": "Chapter 22 P1 \u2014 heavy/large items requiring special handling within the scope."
+    },
+    "completion_standard_note": {
+      "type": "string",
+      "description": "Chapter 22 P1 \u2014 the agreed condition that counts as complete for this cleanout (e.g. 'house and garage empty, no debris')."
+    },
+    "provider_relationship": {
+      "type": "string",
+      "enum": [
+        "CLIENT_HIRED",
+        "COMPANY_HIRED",
+        "REFERRAL_INTRODUCTION"
+      ],
+      "description": "Chapter 22 P1 \u2014 WHO hired this provider. A referral/introduction is NOT a company-hired provider and implies no supervision or endorsement. Never inferred \u2014 operator-recorded."
+    },
+    "payment_responsibility": {
+      "type": "string",
+      "description": "Chapter 22 P1 \u2014 who is responsible for paying the provider (honest free text: 'Client pays vendor directly', 'Company pays, client reimburses per authorized decision'). Never inferred from the relationship."
+    },
+    "invoice_to": {
+      "type": "string",
+      "description": "Chapter 22 P1 \u2014 who receives the provider's invoice."
+    },
+    "scheduled_for": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Chapter 22 P1 \u2014 when the work is scheduled."
+    },
+    "confirmation_status": {
+      "type": "string",
+      "enum": [
+        "TENTATIVE",
+        "SCHEDULED",
+        "CONFIRMED",
+        "COMPLETED",
+        "CANCELLED"
+      ],
+      "default": "TENTATIVE",
+      "description": "Chapter 22 P1 \u2014 provider assignment confirmation state. TENTATIVE is an honest hold, never a confirmed assignment."
+    },
+    "completion": {
+      "type": "object",
+      "default": {},
+      "description": "Chapter 22 P1 \u2014 cleanout completion truth. PROVIDER COMPLETION STATEMENT \u2260 OPERATOR VERIFICATION: completion is recorded only when the operator verifies the agreed scope was actually completed.",
+      "properties": {
+        "provider_completed_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "When the provider reported the work complete (their statement, not verification)."
+        },
+        "provider_reported_note": {
+          "type": "string"
+        },
+        "operator_verified": {
+          "type": "boolean",
+          "default": false,
+          "description": "The operator's HUMAN verification that the agreed scope was actually completed."
+        },
+        "operator_verified_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "operator_verified_by_name": {
+          "type": "string"
+        },
+        "exceptions_note": {
+          "type": "string",
+          "description": "Exceptions/issues observed at completion (factual)."
+        },
+        "performance_note": {
+          "type": "string",
+          "description": "PRIVATE operator operational note on how this provider performed (timeliness, property care, scope adherence...). Internal only \u2014 never a public review."
+        }
+      }
     }
   },
   "required": [
     "title",
     "operator_id",
     "cleanout_deadline"
-  ]
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.operator_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "$and": [
+            {
+              "user_condition": {
+                "role": "user"
+              }
+            },
+            {
+              "data.status": {
+                "$in": [
+                  "published",
+                  "bidding_closed",
+                  "awarded"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "create": {
+      "$or": [
+        {
+          "data.operator_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.operator_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.operator_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
 }

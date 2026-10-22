@@ -31,8 +31,13 @@ Deno.serve(async (req) => {
 
     // P0-8 — only SOLD merchandise can be released. An item whose payment is
     // UNKNOWN/PROCESSING is not sold; a hold is not a sale; available is not paid.
-    if (item.status !== 'sold') {
-      return Response.json({ error: `Only SOLD merchandise can be released. This item is ${item.status} — payment must be confirmed before release.` }, { status: 409 });
+    // Chapter 22: client-retained merchandise awaiting FAMILY pickup reuses
+    // this same release path (released_to = the named family collector, who
+    // gains NO broader client authority).
+    const disposition = item.post_sale_disposition || {};
+    const retainedRelease = disposition.outcome === 'CLIENT_RETAINS' && !disposition.resolved_at;
+    if (item.status !== 'sold' && !retainedRelease) {
+      return Response.json({ error: `Only SOLD merchandise (or client-retained merchandise awaiting family pickup) can be released. This item is ${item.status} — payment must be confirmed before release.` }, { status: 409 });
     }
 
     // HIGH_VALUE custody: operator/seller/admin only.
@@ -68,6 +73,9 @@ Deno.serve(async (req) => {
     };
     if (newRemaining === 0) {
       updateData.pickup_completed_at = now;
+    }
+    if (newRemaining === 0 && retainedRelease) {
+      updateData.post_sale_disposition = { ...disposition, resolved_at: now, resolution_note: `Released to ${released_to || disposition.collector_name || 'the family collector'}.` };
     }
     if (item.inventory_level === 'HIGH_VALUE') {
       updateData.custody_events = [...(item.custody_events || []), {

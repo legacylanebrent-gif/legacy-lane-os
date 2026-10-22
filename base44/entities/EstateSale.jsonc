@@ -877,18 +877,6 @@
                   }
                 },
                 {
-                  "created_by_id": "{{user.id}}"
-                }
-              ]
-            },
-            {
-              "$and": [
-                {
-                  "user_condition": {
-                    "role": "user"
-                  }
-                },
-                {
                   "data.operator_id": "{{user.id}}"
                 }
               ]
@@ -907,18 +895,6 @@
       "rls": {
         "read": {
           "$or": [
-            {
-              "$and": [
-                {
-                  "user_condition": {
-                    "role": "user"
-                  }
-                },
-                {
-                  "created_by_id": "{{user.id}}"
-                }
-              ]
-            },
             {
               "$and": [
                 {
@@ -958,18 +934,6 @@
                   }
                 },
                 {
-                  "created_by_id": "{{user.id}}"
-                }
-              ]
-            },
-            {
-              "$and": [
-                {
-                  "user_condition": {
-                    "role": "user"
-                  }
-                },
-                {
                   "data.operator_id": "{{user.id}}"
                 }
               ]
@@ -989,30 +953,6 @@
       "rls": {
         "read": {
           "$or": [
-            {
-              "$and": [
-                {
-                  "user_condition": {
-                    "role": "user"
-                  }
-                },
-                {
-                  "created_by_id": "{{user.id}}"
-                }
-              ]
-            },
-            {
-              "$and": [
-                {
-                  "user_condition": {
-                    "role": "user"
-                  }
-                },
-                {
-                  "data.operator_id": "{{user.id}}"
-                }
-              ]
-            },
             {
               "$and": [
                 {
@@ -1342,13 +1282,13 @@
     "prep_zones": {
       "type": "array",
       "default": [],
-      "description": "Chapter 14 P1 \u2014 TEAM-READABLE PREP ZONES (rooms / work areas) for preparation. Same projection pattern as excluded_areas: deliberately ON THE SALE (team-readable), NOT on the operator-private Chapter 12 consultation deal. source_type/source_id preserves provenance back to the consultation room a zone originated from WITHOUT exposing private consultation content \u2014 only the room NAME is projected, so the two never drift independently. Zone notes are TEAM-SAFE (no codes/credentials). Prep status is honest human-set state \u2014 no percentage progress anywhere. Discovery counts are DERIVED at read time from SaleDiscovery records, never stored here. Chapter 17 P1 extends the SAME zone with the smallest staging layer (purpose, category plan, signage/equipment needs, lighting/flow concerns, staging notes, and a sale-day status that NEVER overwrites Chapter 14 preparation truth) \u2014 there is NO second room/staging system.",
+      "description": "Chapter 14 P1 \u2014 TEAM-READABLE PREP ZONES (rooms / work areas) for preparation. Same projection pattern as excluded_areas: deliberately ON THE SALE (team-readable), NOT on the operator-private Chapter 12 consultation deal. source_type/source_id preserves provenance back to the consultation room a zone originated from WITHOUT exposing private consultation content \u2014 only the room NAME is projected, so the two never drift independently. Zone notes are TEAM-SAFE (no codes/credentials). Prep status is honest human-set state \u2014 no percentage progress anywhere. Discovery counts are DERIVED at read time from SaleDiscovery records, never stored here. Chapter 17 P1 extends the SAME zone with the smallest staging layer (purpose, category plan, signage/equipment needs, lighting/flow concerns, staging notes, and a sale-day status that NEVER overwrites Chapter 14 preparation truth) \u2014 there is NO second room/staging system. Chapter 22 P1: prep zones are also the suggested room list for the FINAL WALKTHROUGH (human confirmations recorded in transition.walkthrough).",
       "items": {
         "type": "object",
         "properties": {
           "zone_id": {
             "type": "string",
-            "description": "Stable zone identifier (referenced by SaleDiscovery.zone_id and work-zone QR signs)."
+            "description": "Stable zone identifier (referenced by SaleDiscovery.zone_id, Item.zone_id, and work-zone QR signs)."
           },
           "name": {
             "type": "string",
@@ -1620,6 +1560,209 @@
         "instructions": {
           "type": "string",
           "description": "Other team-safe sale-day instructions tied to the client visit (e.g. 'let the operator know when they arrive')."
+        }
+      }
+    },
+    "transition": {
+      "type": "object",
+      "default": {},
+      "description": "Chapter 22 P1 \u2014 the sale's TRANSITION COMPLETION block: the client's objective, the property deadline that drives the project, what FINISHED means for this engagement, the final human-verified walkthrough, the buyout award, and the human completion approval. SALE COMPLETE \u2260 TRANSITION COMPLETE: the sale event ends (status) and financial settlement finalizes independently; this block records when the PROPERTY TRANSITION itself concluded \u2014 a conclusion the system supports only after required obligations have endings (approveTransitionCompletion gate). Completion is DERIVED from canonical records plus human approval \u2014 this block stores the human-approved conclusion and planning inputs, never a parallel truth store.",
+      "properties": {
+        "objective": {
+          "type": "object",
+          "description": "The client's actual transition objective \u2014 THE CLIENT'S OBJECTIVE DEFINES SUCCESS. 'Everything gone' is not a scope.",
+          "properties": {
+            "key": {
+              "type": "string",
+              "enum": [
+                "MAXIMIZE_PROCEEDS",
+                "MEET_PROPERTY_DEADLINE",
+                "CLEAR_PROPERTY",
+                "MINIMIZE_ADDITIONAL_WORK",
+                "PRESERVE_SPECIFIC_PROPERTY",
+                "BALANCED_CUSTOM"
+              ]
+            },
+            "notes": {
+              "type": "string",
+              "description": "The objective in the client's/operator's own words \u2014 nuance is never reduced to the enum."
+            },
+            "achieved": {
+              "type": "string",
+              "enum": [
+                "YES",
+                "PARTIAL",
+                "NO"
+              ],
+              "description": "Operator-recorded honest judgment on whether the objective was achieved (recorded at/after completion)."
+            },
+            "achieved_note": {
+              "type": "string"
+            }
+          }
+        },
+        "property_deadline": {
+          "type": "object",
+          "description": "The real project-driving property deadline (closing, walkthrough, move, cleaning, possession, turnover). Absent date = NO DEADLINE RECORDED \u2014 unknown stays unknown, never silently 'no deadline needed'.",
+          "properties": {
+            "date": {
+              "type": "string",
+              "format": "date"
+            },
+            "deadline_type": {
+              "type": "string",
+              "enum": [
+                "REAL_ESTATE_CLOSING",
+                "WALKTHROUGH",
+                "MOVE",
+                "CLEANING",
+                "POSSESSION",
+                "TURNOVER",
+                "OTHER"
+              ]
+            },
+            "note": {
+              "type": "string",
+              "description": "Source/context of the deadline."
+            }
+          }
+        },
+        "completion_standard": {
+          "type": "object",
+          "description": "What FINISHED means for THIS project \u2014 tied back to the accepted SaleScope, never an assumed 'empty house'.",
+          "properties": {
+            "standard": {
+              "type": "string",
+              "enum": [
+                "SALE_SERVICES_ONLY",
+                "POST_SALE_SERVICES",
+                "ROOMS_CLEARED",
+                "DONATION_COORDINATED",
+                "CLEANOUT_COORDINATED",
+                "CLEANOUT_COMPLETED",
+                "PROPERTY_CLEARED",
+                "CUSTOM_AGREED"
+              ]
+            },
+            "requires_item_disposition": {
+              "type": "boolean",
+              "default": true,
+              "description": "Whether every remaining tracked item must have a recorded disposition/reason before completion (NOTHING IS LEFTOVER \u2014 everything has a next status)."
+            },
+            "note": {
+              "type": "string"
+            }
+          }
+        },
+        "buyout_award": {
+          "type": "object",
+          "description": "Chapter 22 P0-9 \u2014 the accepted BUYOUT on this sale's remaining merchandise, written ONLY through the sanctioned setTransitionEventScope path (client-authorized decision required; protected merchandise is structurally rejected from the included list).",
+          "properties": {
+            "buyer_name": {
+              "type": "string"
+            },
+            "offer_amount": {
+              "type": "number"
+            },
+            "conditions_note": {
+              "type": "string"
+            },
+            "decision_id": {
+              "type": "string",
+              "description": "Canonical SaleClientDecision evidencing client approval of this buyout."
+            },
+            "authorized_by_name": {
+              "type": "string"
+            },
+            "authorized_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "included_item_ids": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "default": []
+            },
+            "excluded_item_ids": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "default": []
+            },
+            "transferred_at": {
+              "type": "string",
+              "format": "date-time",
+              "description": "When the bulk transfer physically completed (absent = not transferred)."
+            }
+          }
+        },
+        "walkthrough": {
+          "type": "object",
+          "description": "Chapter 22 P1 \u2014 the FINAL WALKTHROUGH: area-by-area HUMAN confirmations (software records the operator's confirmation; software does NOT claim it physically inspected anything). Anything intentionally remaining carries a reason.",
+          "properties": {
+            "areas": {
+              "type": "array",
+              "default": [],
+              "items": {
+                "type": "object",
+                "properties": {
+                  "area_id": {
+                    "type": "string"
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "source": {
+                    "type": "string",
+                    "enum": [
+                      "PREP_ZONE",
+                      "CUSTOM"
+                    ]
+                  },
+                  "confirmed_at": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "confirmed_by_name": {
+                    "type": "string"
+                  },
+                  "exception_note": {
+                    "type": "string",
+                    "description": "Why something intentionally remains here (BUYER PICKUP / CLIENT RETAINED / DONATION PENDING / PROVIDER PENDING / SPECIALIST / OUTSIDE SCOPE / OTHER EXPLAINED)."
+                  }
+                }
+              }
+            },
+            "condition_note": {
+              "type": "string",
+              "description": "Factual final property-condition observations (walls, floors, stairs, doors...). Never an inspection claim."
+            },
+            "condition_photo_uri": {
+              "type": "string",
+              "description": "PRIVATE completion photo (private storage file_uri; viewed via short-lived signed URL)."
+            },
+            "completed_at": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        },
+        "transition_completed_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Human-approved TRANSITION COMPLETE conclusion (written by approveTransitionCompletion after all required obligations have endings). Absent = TRANSITION OPEN."
+        },
+        "completed_by": {
+          "type": "string"
+        },
+        "completed_by_name": {
+          "type": "string"
+        },
+        "approval_note": {
+          "type": "string"
         }
       }
     },

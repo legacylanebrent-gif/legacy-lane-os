@@ -8,9 +8,13 @@
     "description": {
       "type": "string"
     },
+    "sale_id": {
+      "type": "string",
+      "description": "Chapter 22 P0-2 \u2014 CANONICAL EstateSale link (the relational identity for this donation). property_address is descriptive only and is NEVER used to match a sale. Legacy records without this link are UNRESOLVED until a deterministic backfill links them; unknown stays unknown."
+    },
     "operator_id": {
       "type": "string",
-      "description": "Estate Sale Company Owner user ID"
+      "description": "Estate Sale Company Owner user ID (RLS anchor)"
     },
     "operator_name": {
       "type": "string"
@@ -72,7 +76,7 @@
     },
     "scope_description": {
       "type": "string",
-      "description": "What items are available for donation"
+      "description": "What items are available for donation. Chapter 22: free text may EXPLAIN the load but must not be the only protection \u2014 the structural item load lives in included_item_ids (guarded by setTransitionEventScope)."
     },
     "access_notes": {
       "type": "string",
@@ -85,15 +89,108 @@
     },
     "seller_name": {
       "type": "string",
-      "description": "Home seller's name \u2014 shared with donation companies unless operator is handling"
+      "description": "Home seller's name \u2014 PRIVATE operator-held PII. Deliberately shared with donation companies only during the published/awarded provider window when operator_handling_donations is false (field-level RLS).",
+      "rls": {
+        "read": {
+          "$or": [
+            {
+              "data.operator_id": "{{user.id}}"
+            },
+            {
+              "user_condition": {
+                "role": "admin"
+              }
+            },
+            {
+              "$and": [
+                {
+                  "data.status": {
+                    "$in": [
+                      "published",
+                      "awarded"
+                    ]
+                  }
+                },
+                {
+                  "data.operator_handling_donations": {
+                    "$ne": true
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      }
     },
     "seller_phone": {
       "type": "string",
-      "description": "Home seller's phone \u2014 shared with donation companies unless operator is handling"
+      "description": "Home seller's phone \u2014 PRIVATE operator-held PII; same deliberate narrow provider-share rule as seller_name.",
+      "rls": {
+        "read": {
+          "$or": [
+            {
+              "data.operator_id": "{{user.id}}"
+            },
+            {
+              "user_condition": {
+                "role": "admin"
+              }
+            },
+            {
+              "$and": [
+                {
+                  "data.status": {
+                    "$in": [
+                      "published",
+                      "awarded"
+                    ]
+                  }
+                },
+                {
+                  "data.operator_handling_donations": {
+                    "$ne": true
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      }
     },
     "seller_email": {
       "type": "string",
-      "description": "Home seller's email \u2014 shared with donation companies unless operator is handling"
+      "description": "Home seller's email \u2014 PRIVATE operator-held PII; same deliberate narrow provider-share rule as seller_name.",
+      "rls": {
+        "read": {
+          "$or": [
+            {
+              "data.operator_id": "{{user.id}}"
+            },
+            {
+              "user_condition": {
+                "role": "admin"
+              }
+            },
+            {
+              "$and": [
+                {
+                  "data.status": {
+                    "$in": [
+                      "published",
+                      "awarded"
+                    ]
+                  }
+                },
+                {
+                  "data.operator_handling_donations": {
+                    "$ne": true
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      }
     },
     "awarded_vendor_id": {
       "type": "string",
@@ -106,11 +203,132 @@
       "type": "string",
       "format": "date-time",
       "description": "When the donation event was published to donation companies"
+    },
+    "authorization_decision_id": {
+      "type": "string",
+      "description": "Chapter 22 P0-5/P0-8 \u2014 the canonical client-authorized SaleClientDecision evidencing client authority for this donation. A pending client request is never authorization. Set through the sanctioned setTransitionEventScope path."
+    },
+    "included_item_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Chapter 22 P0-8 \u2014 the EXACT canonical Items approved for this donation load (each carries its own DONATE disposition with client authority). An organization or employee cannot convert an item into donated merely because it was physically picked up."
+    },
+    "excluded_item_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Chapter 22 P0-6 \u2014 Items explicitly EXCLUDED / PROTECTED from this donation load (structural; free text may supplement but never replace)."
+    },
+    "acceptance_status": {
+      "type": "string",
+      "enum": [
+        "NOT_CHECKED",
+        "PENDING",
+        "ACCEPTED",
+        "PARTIAL",
+        "DECLINED"
+      ],
+      "default": "NOT_CHECKED",
+      "description": "Chapter 22 P1 \u2014 the organization's acceptance of this SPECIFIC load. Directory interest or an old profile note is NEVER acceptance."
+    },
+    "pickup_scheduled_for": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Chapter 22 P1 \u2014 when the donation pickup is actually scheduled (distinct from the deadline)."
+    },
+    "pickup_completed_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Chapter 22 P1 \u2014 when the approved load was physically picked up."
+    },
+    "receipt_uri": {
+      "type": "string",
+      "description": "Chapter 22 P1 \u2014 PRIVATE storage URI of the donation receipt/acknowledgment document (viewed via short-lived signed URL). Record preservation only \u2014 NEVER tax valuation or tax advice."
+    },
+    "receipt_note": {
+      "type": "string",
+      "description": "Chapter 22 P1 \u2014 note about the receipt/acknowledgment (what it is, who issued it)."
+    },
+    "performance_note": {
+      "type": "string",
+      "description": "Chapter 22 P1 \u2014 PRIVATE operator operational note on how this provider assignment went (timeliness, property care...). Internal only \u2014 never a public review."
     }
   },
   "required": [
     "title",
     "operator_id",
     "pickup_deadline"
-  ]
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.operator_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "$and": [
+            {
+              "user_condition": {
+                "role": "user"
+              }
+            },
+            {
+              "data.status": {
+                "$in": [
+                  "published",
+                  "awarded"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "create": {
+      "$or": [
+        {
+          "data.operator_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.operator_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.operator_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
 }

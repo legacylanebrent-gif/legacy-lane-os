@@ -1,6 +1,7 @@
 {
   "name": "CleanoutLead",
   "type": "object",
+  "description": "Chapter 22 P0-1 \u2014 PLATFORM-ADMIN operational lead record (agent-submitted cleanout opportunities with agent contact information and permission_to_share flags). Admin-only access at the data layer: operators, vendors, and ordinary app users cannot read, create, update, or delete these records. Platform functions operating as service role (lead matching, vendor notification) are unaffected.",
   "properties": {
     "lead_source": {
       "type": "string",
@@ -93,5 +94,27 @@
   "required": [
     "property_address",
     "state"
-  ]
+  ],
+  "rls": {
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
 }

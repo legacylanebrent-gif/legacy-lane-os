@@ -1,9 +1,11 @@
 {
   "name": "Vendor",
   "type": "object",
+  "description": "Chapter 22 P0-1 \u2014 the PUBLIC provider/vendor DIRECTORY record (directory-safe by design: company name, category, services, service areas, public business contact, directory rating). Deliberately readable as a public provider directory. Writes are restricted: a vendor may create/update only their own record (user_id anchor), platform admins manage all. PRIVATE company operational information (assignments, quotes, seller identity, project property addresses, access notes, performance notes) never lives on this record.",
   "properties": {
     "user_id": {
-      "type": "string"
+      "type": "string",
+      "description": "Platform user ID of the vendor who owns this directory record (write anchor)."
     },
     "company_name": {
       "type": "string"
@@ -179,5 +181,56 @@
   "required": [
     "company_name",
     "vendor_type"
-  ]
+  ],
+  "rls": {
+    "read": {},
+    "create": {
+      "$or": [
+        {
+          "$and": [
+            {
+              "user_condition": {
+                "role": "user"
+              }
+            },
+            {
+              "data.user_id": "{{user.id}}"
+            }
+          ]
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.user_id": "{{user.id}}"
+        },
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
 }

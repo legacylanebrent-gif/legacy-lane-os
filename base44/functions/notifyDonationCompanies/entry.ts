@@ -58,6 +58,7 @@ Deno.serve(async (req) => {
         // for each matched vendor so they can respond via the platform.
         await base44.asServiceRole.entities.DonationResponse.create({
           donation_id,
+          operator_id: donation.operator_id || null,
           vendor_id: vendor.id,
           vendor_name: vendor.company_name,
           status: 'pending'

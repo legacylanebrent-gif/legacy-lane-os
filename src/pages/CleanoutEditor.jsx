@@ -139,7 +139,7 @@ export default function CleanoutEditor() {
       if (currentCleanoutId) {
         await base44.entities.Cleanout.update(currentCleanoutId, buildPayload());
       } else {
-        const created = await base44.entities.Cleanout.create({ ...buildPayload(), status: 'draft' });
+        const created = await base44.entities.Cleanout.create({ ...buildPayload(), sale_id: new URLSearchParams(window.location.search).get('saleId') || null, status: 'draft' });
         setCurrentCleanoutId(created.id);
         navigate(`/CleanoutEditor?id=${created.id}`, { replace: true });
       }
@@ -166,7 +166,7 @@ export default function CleanoutEditor() {
       if (cleanoutId) {
         await base44.entities.Cleanout.update(cleanoutId, buildPayload());
       } else {
-        const created = await base44.entities.Cleanout.create({ ...buildPayload(), status: 'draft' });
+        const created = await base44.entities.Cleanout.create({ ...buildPayload(), sale_id: new URLSearchParams(window.location.search).get('saleId') || null, status: 'draft' });
         cleanoutId = created.id;
       }
 

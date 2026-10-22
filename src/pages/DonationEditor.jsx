@@ -148,7 +148,7 @@ export default function DonationEditor() {
       if (currentDonationId) {
         await base44.entities.Donation.update(currentDonationId, buildPayload());
       } else {
-        const created = await base44.entities.Donation.create({ ...buildPayload(), status: 'draft' });
+        const created = await base44.entities.Donation.create({ ...buildPayload(), sale_id: new URLSearchParams(window.location.search).get('saleId') || null, status: 'draft' });
         setCurrentDonationId(created.id);
         navigate(`/DonationEditor?id=${created.id}`, { replace: true });
       }
@@ -179,7 +179,7 @@ export default function DonationEditor() {
       if (donationId) {
         await base44.entities.Donation.update(donationId, buildPayload());
       } else {
-        const created = await base44.entities.Donation.create({ ...buildPayload(), status: 'draft' });
+        const created = await base44.entities.Donation.create({ ...buildPayload(), sale_id: new URLSearchParams(window.location.search).get('saleId') || null, status: 'draft' });
         donationId = created.id;
       }
 

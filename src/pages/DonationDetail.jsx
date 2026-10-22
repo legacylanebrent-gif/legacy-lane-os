@@ -125,6 +125,7 @@ export default function DonationDetail() {
       } else {
         await base44.entities.DonationResponse.create({
           donation_id: donationId,
+          operator_id: donation.operator_id || null,
           vendor_id: user.id,
           vendor_name: vendorProfile.company_name || vendorProfile.business_name || '',
           vendor_email: vendorProfile.email || user.email,

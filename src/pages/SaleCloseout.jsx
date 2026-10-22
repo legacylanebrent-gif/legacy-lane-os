@@ -78,17 +78,14 @@ export default function SaleCloseout() {
       const laborEntries = asArray(laborRes);
       const equipmentAssignments = asArray(equipRes);
 
-      // Match donation/cleanout records to this sale by property address (city or zip).
-      const addr = sale.property_address || {};
-      const addressMatch = (rec) => {
-        const ra = rec.property_address || {};
-        return (addr.city && ra.city === addr.city) || (addr.zip && ra.zip === addr.zip);
-      };
-      const saleDonations = donations.filter(addressMatch);
-      const saleCleanouts = cleanouts.filter(addressMatch);
+      // Chapter 22 P0-2 — match donation/cleanout records by the CANONICAL sale link.
+      // Address is descriptive only; legacy unlinked records surface for review.
+      const saleDonations = donations.filter((d) => d.sale_id === sale.id);
+      const saleCleanouts = cleanouts.filter((c) => c.sale_id === sale.id);
+      const legacyUnlinked = donations.filter((d) => !d.sale_id).length + cleanouts.filter((c) => !c.sale_id).length;
       const scope = asArray(scopeRes)[0] || null;
 
-      setData({ items, decisions, tasks, expenses, deals, saleDonations, saleCleanouts, laborEntries, equipmentAssignments, sale, scope });
+      setData({ items, decisions, tasks, expenses, deals, saleDonations, saleCleanouts, legacyUnlinked, laborEntries, equipmentAssignments, sale, scope });
     } catch (e) {
       console.error('Error loading closeout data:', e);
     } finally {
@@ -108,7 +105,7 @@ export default function SaleCloseout() {
   }
   if (!sale || !data) return <div className="p-8 text-slate-500">Could not load closeout data.</div>;
 
-  const { items, decisions, tasks, expenses, deals, saleDonations, saleCleanouts, laborEntries, equipmentAssignments, scope } = data;
+  const { items, decisions, tasks, expenses, deals, saleDonations, saleCleanouts, legacyUnlinked, laborEntries, equipmentAssignments, scope } = data;
   const isPickedUp = (i) => !!i.pickup_completed_at || pickedUpIds.includes(i.id);
 
   // 1 — Sold merchandise
@@ -214,6 +211,7 @@ export default function SaleCloseout() {
       n: 2, title: 'Resolve Unsold Merchandise', icon: PackageCheck, state: step2,
       lines: [
         `Unsold items: ${unsoldItems.length}`,
+        ...(legacyUnlinked > 0 ? [`${legacyUnlinked} legacy donation/cleanout record(s) not linked to a sale — review and link`] : []),
         `Donation: ${saleDonations.length ? saleDonations.map(d => d.status || 'Scheduled').join(', ') : 'Not scheduled'}`,
         `Cleanout: ${saleCleanouts.length ? saleCleanouts.map(c => c.status || 'Scheduled').join(', ') : (buyout ? 'Not required' : 'Not scheduled')}`,
         `Buyout: ${buyout ? 'Configured for this sale' : 'Not applicable'}`,
@@ -412,13 +410,18 @@ export default function SaleCloseout() {
                 : 'This project is ready to close.'}
             </p>
           </div>
-          <Button
-            disabled={blockers.length > 0 || sale.status === 'completed'}
-            onClick={() => setShowCloseConfirm(true)}
-            className="bg-green-600 hover:bg-green-700"
-          >
-            <ListChecks className="w-4 h-4 mr-2" />Mark Project Complete
-          </Button>
+          <div className="flex flex-col sm:flex-row gap-2">
+            <Link to={'/TransitionCompletion?saleId=' + sale.id}>
+              <Button variant="outline"><ListChecks className="w-4 h-4 mr-2" />Transition Completion</Button>
+            </Link>
+            <Button
+              disabled={blockers.length > 0 || sale.status === 'completed'}
+              onClick={() => setShowCloseConfirm(true)}
+              className="bg-green-600 hover:bg-green-700"
+            >
+              <ListChecks className="w-4 h-4 mr-2" />Mark Project Complete
+            </Button>
+          </div>
         </CardContent>
       </Card>
 

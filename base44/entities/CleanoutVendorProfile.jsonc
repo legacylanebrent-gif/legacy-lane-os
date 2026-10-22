@@ -1,6 +1,7 @@
 {
   "name": "CleanoutVendorProfile",
   "type": "object",
+  "description": "Chapter 22 P0-1 \u2014 DIRECTORY-SAFE public provider profile for the cleanout network (business name, contact, services, territory): deliberately readable as a public provider directory. PRIVATE company operational information (assignments, quotes, seller identity, property addresses of active projects, access notes, performance notes) lives on operator-anchored records and is never exposed here. Writes are restricted to the profile's own vendor user and platform admins.",
   "properties": {
     "business_name": {
       "type": "string"
@@ -88,7 +89,8 @@
       "default": "none"
     },
     "user_id": {
-      "type": "string"
+      "type": "string",
+      "description": "Platform user ID of the vendor who owns this profile (write anchor)."
     },
     "is_active": {
       "type": "boolean",
@@ -102,5 +104,53 @@
     "business_name",
     "contact_name",
     "email"
-  ]
+  ],
+  "rls": {
+    "read": {},
+    "create": {
+      "$or": [
+        {
+          "$and": [
+            {
+              "user_condition": {
+                "role": "user"
+              }
+            },
+            {
+              "data.user_id": "{{user.id}}"
+            }
+          ]
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
 }

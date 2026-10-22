@@ -188,6 +188,7 @@ import PunchList from './pages/PunchList';
 import SalePublication from './pages/SalePublication';
 import SaleClientDecisions from './pages/SaleClientDecisions';
 import SaleCloseout from './pages/SaleCloseout';
+import TransitionCompletion from './pages/TransitionCompletion';
 import WebsiteRuntimeProbe from './pages/WebsiteRuntimeProbe';
 import OperatorSitePage from './pages/OperatorSitePage';
 import AdminBusinessBuilder from './pages/AdminBusinessBuilder';
@@ -384,6 +385,7 @@ const AuthenticatedApp = () => {
       <Route path="/SalePublication" element={<LayoutWrapper currentPageName="SalePublication"><SalePublication /></LayoutWrapper>} />
       <Route path="/SaleClientDecisions" element={<LayoutWrapper currentPageName="SaleClientDecisions"><SaleClientDecisions /></LayoutWrapper>} />
       <Route path="/SaleCloseout" element={<LayoutWrapper currentPageName="SaleCloseout"><SaleCloseout /></LayoutWrapper>} />
+      <Route path="/TransitionCompletion" element={<LayoutWrapper currentPageName="TransitionCompletion"><TransitionCompletion /></LayoutWrapper>} />
       <Route path="/website-runtime" element={<WebsiteRuntimeProbe />} />
       <Route path="/AdminBusinessBuilder" element={<LayoutWrapper currentPageName="AdminBusinessBuilder"><AdminBusinessBuilder /></LayoutWrapper>} />
       <Route path="/WebsiteManager" element={<LayoutWrapper currentPageName="WebsiteManager"><WebsiteManager /></LayoutWrapper>} />

@@ -2430,7 +2430,7 @@
     "releases": {
       "type": "array",
       "default": [],
-      "description": "Chapter 21 P1 \u2014 APPEND-ONLY RELEASE / PICKUP truth: each entry records what physically left the property, when, who released it, and to whom (the buyer or the NAMED authorized collector \u2014 a name only; the system never collects ID documents). The Item remains the single custody truth \u2014 there is NO second pickup entity. Remaining merchandise = quantity minus the sum of released quantities; the purchase is RELEASED (pickup_completed_at set) only when the remaining count reaches zero \u2014 a PARTIAL release never closes custody. Earlier release entries are never rewritten.",
+      "description": "Chapter 21 P1 \u2014 APPEND-ONLY RELEASE / PICKUP truth: each entry records what physically left the property, when, who released it, and to whom (the buyer or the NAMED authorized collector \u2014 a name only; the system never collects ID documents). The Item remains the single custody truth \u2014 there is NO second pickup entity. Remaining merchandise = quantity minus the sum of released quantities; the purchase is RELEASED (pickup_completed_at set) only when the remaining count reaches zero \u2014 a PARTIAL release never closes custody. Earlier release entries are never rewritten. Chapter 22: FAMILY/CLIENT-RETAINED pickups reuse this same architecture (released_to = the named family collector, who gains NO broader client authority).",
       "items": {
         "type": "object",
         "properties": {
@@ -2452,7 +2452,7 @@
           },
           "released_to": {
             "type": "string",
-            "description": "Who collected it \u2014 the buyer or the named authorized collector."
+            "description": "Who collected it \u2014 the buyer or the named authorized/family collector."
           },
           "quantity": {
             "type": "integer",
@@ -2552,6 +2552,79 @@
     "removal_note": {
       "type": "string",
       "description": "Chapter 17 P1-13 \u2014 INTERNAL operational removal path for large merchandise (exit used, stairs, doorways, tight turns, floor protection, obstacles). Private/internal by default \u2014 never projected to buyer surfaces unless deliberately summarized into safe pickup instructions."
+    },
+    "post_sale_disposition": {
+      "type": "object",
+      "default": {},
+      "description": "Chapter 22 P0-3/P0-5 \u2014 the ITEM-LEVEL POST-SALE DISPOSITION truth: what is supposed to happen to this merchandise now that the sale has ended, who/what is responsible, and whether the outcome is resolved. The Item remains the single merchandise record \u2014 there is NO second disposition entity. Consequential outcomes (DONATE, DISPOSE, BUYOUT, CLEANOUT, CLIENT_RETAINS, SPECIALIST) are written ONLY through the sanctioned setItemDisposition backend path, which requires a canonical client-authorized SaleClientDecision (an unapproved request is never authorization). PROTECTED MERCHANDISE (sold/paid/awaiting pickup, specialist custody, controlled/sensitive, client-retained) is structurally guarded from removal-scope inclusion \u2014 free-text scope notes may supplement but never replace this truth. resolved_at records the ENDING; absence = still pending. The physical release for BUYER or FAMILY pickup reuses the canonical Item.releases architecture \u2014 there is no second pickup truth.",
+      "properties": {
+        "outcome": {
+          "type": "string",
+          "enum": [
+            "RESELL",
+            "SPECIALIST",
+            "BUYOUT",
+            "DONATE",
+            "CLEANOUT",
+            "CLIENT_RETAINS",
+            "DISPOSE",
+            "DECISION_REQUIRED"
+          ],
+          "description": "The routed next status for this merchandise. Absent = NOT YET ROUTED (an honest unknown surfaced as needing disposition or a recorded reason)."
+        },
+        "decision_id": {
+          "type": "string",
+          "description": "Canonical SaleClientDecision evidencing client authority for this outcome (required for consequential outcomes)."
+        },
+        "authorized_by_name": {
+          "type": "string",
+          "description": "Display-name snapshot of the authorizing decision-maker."
+        },
+        "authorized_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "responsible_note": {
+          "type": "string",
+          "description": "Who/what is responsible for the next action (donation organization, provider, family member...)."
+        },
+        "collector_name": {
+          "type": "string",
+          "description": "FAMILY/CLIENT-RETAINED pickup: the intended recipient/collector \u2014 a NAME only. The collector gains NO broader client authority; picking something up is not authorization to change the plan."
+        },
+        "pickup_deadline": {
+          "type": "string",
+          "format": "date",
+          "description": "Deadline for the family/collector pickup when applicable."
+        },
+        "next_action_note": {
+          "type": "string",
+          "description": "The next concrete action."
+        },
+        "donation_id": {
+          "type": "string",
+          "description": "Donation event link when outcome is DONATE."
+        },
+        "cleanout_id": {
+          "type": "string",
+          "description": "Cleanout event link when outcome is CLEANOUT."
+        },
+        "resolved_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "When this disposition RESOLVED (physically left the property / completion recorded). Absent = pending."
+        },
+        "resolution_note": {
+          "type": "string"
+        },
+        "set_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "set_by_name": {
+          "type": "string"
+        }
+      }
     },
     "display_attention": {
       "type": "string",
