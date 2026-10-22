@@ -18,7 +18,7 @@ export default function ClosingFileCard({ sale, deal, econ, readiness, accessClo
     { label: 'Transition completion', href: `/TransitionCompletion?saleId=${sale.id}`, ready: !!sale?.transition?.transition_completed_at, note: sale?.transition?.transition_completed_at ? 'transition complete' : 'transition open' },
     { label: 'Disposition / walkthrough records', href: `/TransitionCompletion?saleId=${sale.id}`, ready: !!sale?.transition?.walkthrough?.completed_at, note: sale?.transition?.walkthrough?.completed_at ? 'final walkthrough recorded' : 'walkthrough open' },
     { label: 'Post-sale review & lessons', href: `/SaleCloseout?saleId=${sale.id}`, ready: null, note: 'owner reflection on the closeout page' },
-    { label: 'Access closeout (keys / devices)', ready: accessCloseout ? accessCloseout.status !== 'UNRESOLVED' : false, note: accessCloseout ? `${accessCloseout.status.toLowerCase().replace('_', ' ')}${accessCloseout.note ? ` — ${accessCloseout.note}` : ''}` : 'not yet confirmed' },
+    { label: 'Access closeout (keys / devices)', ready: !!accessCloseout?.status && accessCloseout.status !== 'UNRESOLVED', note: accessCloseout?.status ? `${accessCloseout.status.toLowerCase().replace('_', ' ')}${accessCloseout.note ? ` — ${accessCloseout.note}` : ''}` : 'not yet confirmed' },
   ];
 
   return (
