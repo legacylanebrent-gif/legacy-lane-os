@@ -86,7 +86,7 @@ function buildDefaults(campaign) {
   // Build sale public URL
   const saleId = campaign.sale_id || '';
   const saleUrl = saleId
-    ? `${window.location.origin}/SaleLanding?id=${saleId}`
+    ? `${window.location.origin}/SaleLanding?saleId=${saleId}`
     : '';
 
   // City from sale_title or notes — best effort
