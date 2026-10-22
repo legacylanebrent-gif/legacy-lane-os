@@ -281,8 +281,8 @@ export default function EstateSaleCompanyDirectory() {
                   <div className="rounded-2xl overflow-hidden shadow-xl border border-slate-200">
                     <MapContainer center={stateCenter} zoom={mapZoom} style={{ height: '380px', width: '100%' }} className="z-0">
                       <TileLayer
-                        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-                        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                        attribution='Tiles &copy; Esri &mdash; Source: Esri, HERE, Garmin, FAO, NOAA, USGS'
+                        url="https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}"
                       />
                       {mapMarkers.map(op => (
                         <Marker key={op.id} position={[op.lat, op.lng]}>

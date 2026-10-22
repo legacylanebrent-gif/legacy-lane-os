@@ -125,8 +125,8 @@ export default function TerritoryHeatmap() {
                 style={{ height: '100%', width: '100%' }}
               >
                 <TileLayer
-                  attribution='&copy; OpenStreetMap'
-                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                  attribution='Tiles &copy; Esri &mdash; Source: Esri, HERE, Garmin, FAO, NOAA, USGS'
+                  url="https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}"
                 />
                 {allPoints.map((point, idx) => (
                   <CircleMarker
