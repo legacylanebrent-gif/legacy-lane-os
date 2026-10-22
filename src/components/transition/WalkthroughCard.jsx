@@ -2,7 +2,7 @@
 // over the existing prep-zone architecture. Software records the operator's
 // confirmation; software does NOT claim it physically inspected anything.
 // Anything intentionally remaining carries a reason.
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -20,6 +20,19 @@ export default function WalkthroughCard({ sale, user, onChanged }) {
   const [busy, setBusy] = useState('');
   const [note, setNote] = useState(wt.condition_note || '');
   const [photoBusy, setPhotoBusy] = useState(false);
+  // Controlled exception notes keyed by area_id — typing and confirming both
+  // read THIS, so a reason typed right before Confirm is never dropped by a
+  // stale render closure.
+  const [exc, setExc] = useState({});
+  useEffect(() => {
+    const map = {};
+    for (const a of (sale.transition?.walkthrough?.areas || [])) map[a.area_id] = a.exception_note || '';
+    setExc((prev) => {
+      const next = { ...map };
+      for (const k of Object.keys(prev)) if (prev[k] && !next[k]) next[k] = prev[k];
+      return next;
+    });
+  }, [sale.id, sale.transition]);
 
   const zoneAreas = (sale.prep_zones || []).map((z) => ({ area_id: z.zone_id, name: z.name, source: 'PREP_ZONE' }));
   const customAreas = (wt.areas || []).filter((a) => a.source === 'CUSTOM').map((a) => ({ ...a }));
@@ -34,20 +47,22 @@ export default function WalkthroughCard({ sale, user, onChanged }) {
     onChanged && onChanged();
   };
 
-  const confirmArea = async (area) => {
+  const persistArea = async (area, confirmed) => {
     setBusy(area.area_id);
     try {
       const existing = (wt.areas || []).filter((a) => !(a.area_id === area.area_id && a.source === area.source));
-      const entry = { area_id: area.area_id, name: area.name, source: area.source, confirmed_at: new Date().toISOString(), confirmed_by_name: user?.full_name || '', exception_note: area.exception_note || null };
+      const entry = {
+        area_id: area.area_id,
+        name: area.name,
+        source: area.source,
+        confirmed_at: confirmed ? new Date().toISOString() : area.confirmed_at || null,
+        confirmed_by_name: confirmed ? user?.full_name || '' : area.confirmed_by_name || '',
+        exception_note: (exc[area.area_id] || '').trim() || null,
+      };
       await saveWalkthrough({ ...wt, areas: [...existing, entry] });
-      toast.success(`${area.name} confirmed`);
+      if (confirmed) toast.success(`${area.name} confirmed`);
     } catch (e) { toast.error(e?.message || 'Could not save'); }
     finally { setBusy(''); }
-  };
-
-  const setException = async (area, value) => {
-    const existing = (wt.areas || []).filter((a) => !(a.area_id === area.area_id && a.source === area.source));
-    await saveWalkthrough({ ...wt, areas: [...existing, { area_id: area.area_id, name: area.name, source: area.source, confirmed_at: area.confirmed_at || null, confirmed_by_name: area.confirmed_by_name || '', exception_note: value || null }] });
   };
 
   const addCustom = async () => {
@@ -91,10 +106,11 @@ export default function WalkthroughCard({ sale, user, onChanged }) {
                   : <Badge variant="outline">not confirmed</Badge>}
               </div>
               <div className="flex items-center gap-2">
-                <Input className="h-8 w-full md:w-56" defaultValue={a.exception_note || ''} placeholder="Reason anything remains (optional)"
-                  onBlur={(e) => setException(a, e.target.value)} />
+                <Input className="h-8 w-full md:w-56" value={exc[a.area_id] || ''} placeholder="Reason anything remains (optional)"
+                  onChange={(e) => setExc((s) => ({ ...s, [a.area_id]: e.target.value }))}
+                  onBlur={() => persistArea(a, false)} />
                 {!a.confirmed_at && (
-                  <Button size="sm" variant="outline" disabled={busy === a.area_id} onClick={() => confirmArea(a)}>
+                  <Button size="sm" variant="outline" disabled={busy === a.area_id} onClick={() => persistArea(a, true)}>
                     {busy === a.area_id && <Loader2 className="w-3 h-3 mr-1 animate-spin" />}Confirm
                   </Button>
                 )}
