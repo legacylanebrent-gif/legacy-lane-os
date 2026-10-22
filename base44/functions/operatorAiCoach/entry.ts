@@ -100,10 +100,11 @@ async function recordUsage(base44, operatorId, account, { aiMode, modelUsed, inp
 // done; human/system records stay authoritative.
 async function buildOperationsContext(base44, sale) {
   const [
-    scopeRes, tasksRes, researchRes, attentionRes, assignRes, kitRes, mkRes, decisionsRes, laborRes, expRes,
+    scopeRes, tasksRes, researchRes, attentionRes, assignRes, kitRes, mkRes, decisionsRes, laborRes, expRes, soldRes,
   ] = await Promise.all([
     base44.asServiceRole.entities.SaleScope.filter({ sale_id: sale.id, status: 'ACTIVE' }),
     base44.asServiceRole.entities.SaleTask.filter({ sale_id: sale.id }),
+    base44.asServiceRole.entities.Item.filter({ estate_sale_id: sale.id, status: 'sold' }),
     base44.asServiceRole.entities.Item.filter({ estate_sale_id: sale.id, research_status: { $ne: 'CLEAR' } }),
     base44.asServiceRole.entities.Item.filter({ estate_sale_id: sale.id, display_attention: { $ne: 'NONE' } }),
     base44.asServiceRole.entities.SaleEquipmentAssignment.filter({ sale_id: sale.id }),
@@ -117,6 +118,16 @@ async function buildOperationsContext(base44, sale) {
   const tasks = list(tasksRes);
   const assignments = list(assignRes);
   const lines = [];
+  // Chapter 26 P1 — REVENUE TRUTH: an unfinalized sale's actual_revenue field is
+  // 0 BY DEFAULT, not a $0-revenue fact. Derived sold-item revenue from records
+  // is the honest pre-finalization figure; the coach may never claim "$0 revenue".
+  const soldItems = list(soldRes);
+  const derivedGross = soldItems.reduce((s, i) => s + (Number(i.sold_price ?? i.price) || 0), 0);
+  const finalizedRevenue = Number(sale.actual_revenue) || null;
+  lines.push(`Sold merchandise (derived from records): ${soldItems.length} item(s) sold, derived gross $${derivedGross.toFixed(2)}.`);
+  lines.push(finalizedRevenue != null
+    ? `Settlement-finalized actual revenue: $${finalizedRevenue.toFixed(2)} (canonical once settlement is finalized).`
+    : `Settlement-finalized actual revenue: NOT YET FINALIZED — the honest revenue picture is the derived gross above; NEVER claim $0 revenue or "no profit" from the unfinalized field.`);
   lines.push(`Agreed scope: ${list(scopeRes)[0] ? 'ACTIVE scope record on file' : 'NO scope record — UNKNOWN, do not assume'}.`);
   lines.push(`Open client decisions: ${list(decisionsRes).map(d => `"${d.subject}"`).join('; ') || 'none from records'}.`);
   lines.push(`Research-flagged items: ${list(researchRes).map(i => `"${i.title}" (${i.research_status})`).join('; ') || 'none from records'}.`);
@@ -172,8 +183,8 @@ function buildSystemPrompt({ user, operator, activeSale, aiMemory, screenContext
 Sale: ${activeSale.title || 'Untitled'}
 Status: ${activeSale.status || 'unknown'}
 Location: ${[activeSale.property_address?.city, activeSale.property_address?.state].filter(Boolean).join(', ') || 'Not set'}
-Estimated Value: $${(activeSale.estimated_value || 0).toLocaleString()}
-Actual Revenue: $${(activeSale.actual_revenue || 0).toLocaleString()}
+Estimated Value: ${activeSale.estimated_value != null ? '$' + activeSale.estimated_value.toLocaleString() : 'Not recorded'}
+Actual Revenue: ${activeSale.actual_revenue ? '$' + activeSale.actual_revenue.toLocaleString() : 'Not finalized in records (field is 0 by default until settlement is finalized — see derived sold-item revenue in operations context; never report $0 revenue)'}
 Total Items: ${activeSale.total_items || 0}
 Categories: ${(activeSale.categories || []).join(', ') || 'Not specified'}
 Commission Rate: ${activeSale.commission_rate || 'Not set'}%
