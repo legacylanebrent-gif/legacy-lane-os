@@ -3,7 +3,7 @@ import {
   Trash2, Heart, UserPlus, Warehouse, ShoppingBag, HandCoins,
   Megaphone, Zap, BarChart3, TrendingUp, FileText, FileCheck2, UserCog,
   Sparkles, GraduationCap, Network, MapPin, ShieldQuestion,
-  Globe, Camera, ClipboardList, Wrench
+  Globe, Camera, ClipboardList, Wrench, Rocket
 } from 'lucide-react';
 
 // Single source of truth for every operator page link, organized by section.
@@ -21,6 +21,12 @@ export const OPERATOR_LINK_SECTIONS = [
       { page: 'CRM', label: 'CRM', icon: User },
       { page: 'Leads', label: 'Lead Center', icon: Users },
       { page: 'OperatorMarketingHub', label: 'Marketing Hub', icon: Megaphone },
+    ],
+  },
+  {
+    title: '🚀 90-Day Launch Mode',
+    links: [
+      { page: 'OperatorLaunchMode', label: '90-Day Launch Mode', icon: Rocket },
     ],
   },
   {

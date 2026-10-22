@@ -75,6 +75,7 @@ import CustomerIODashboard from './pages/CustomerIODashboard';
 import OperatorMarketingDashboard from './pages/OperatorMarketingDashboard';
 import OperatorMarketingHub from './pages/OperatorMarketingHub';
 import OperatorLinks from './pages/OperatorLinks';
+import OperatorLaunchMode from './pages/OperatorLaunchMode';
 import MyLinks from './pages/MyLinks';
 import CustomerIOReportingCenter from './pages/CustomerIOReportingCenter';
 import CustomerIOEmailTest from './pages/CustomerIOEmailTest';
@@ -325,6 +326,7 @@ const AuthenticatedApp = () => {
       <Route path="/ReferralBatchInvite" element={<LayoutWrapper currentPageName="ReferralBatchInvite"><ReferralBatchInvite /></LayoutWrapper>} />
       <Route path="/OperatorProfile" element={<LayoutWrapper currentPageName="OperatorProfile"><OperatorProfile /></LayoutWrapper>} />
       <Route path="/OperatorDashboard" element={<LayoutWrapper currentPageName="OperatorDashboard"><OperatorDashboard /></LayoutWrapper>} />
+      <Route path="/OperatorLaunchMode" element={<LayoutWrapper currentPageName="OperatorLaunchMode"><OperatorLaunchMode /></LayoutWrapper>} />
       <Route path="/SoldInventory" element={<LayoutWrapper currentPageName="SoldInventory"><SoldInventory /></LayoutWrapper>} />
       <Route path="/StorageManagement" element={<LayoutWrapper currentPageName="StorageManagement"><StorageManagement /></LayoutWrapper>} />
       <Route path="/ViewStorageContents" element={<LayoutWrapper currentPageName="ViewStorageContents"><ViewStorageContents /></LayoutWrapper>} />

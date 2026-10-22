@@ -95,8 +95,8 @@ export default function BizInABox() {
   const features = [
     {
       icon: Briefcase,
-      title: 'Complete Business Formation',
-      description: 'LLC filing, EIN registration, business bank account setup',
+      title: 'Business Formation Guidance',
+      description: 'Guidance and checklists for business formation questions (LLC/EIN considerations) and business banking — you complete any government or legal filings yourself with your qualified professionals',
       color: 'text-orange-600'
     },
     {

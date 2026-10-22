@@ -143,6 +143,324 @@
         }
       }
     },
+    "launch_mode": {
+      "type": "object",
+      "default": {},
+      "description": "Chapter 27 P1 \u2014 OPERATOR 90-DAY LAUNCH MODE state. NAMESPACE NOTE: this is the ONLY operator-launch concept in the product and is deliberately distinct from the admin app-quality LaunchReadinessScore/LaunchCommandCenter, the LLBB pilot LaunchWizard, and marketing 'launch' pages. ORCHESTRATION LAYER ONLY, never a second operating system: milestones (first consultation, first activated project, first completed project, post-sale review) are DERIVED from canonical records and are NEVER duplicated here. This block stores only what cannot be safely derived: launch start, Day 1 baseline (historical truth, append-only history), critical-item acknowledgments, the completed Day 90 review snapshot, the Quarter Two plan, and graduation. No numeric launch score exists anywhere \u2014 readiness is a deterministic explainable status.",
+      "properties": {
+        "mode": {
+          "type": "string",
+          "enum": [
+            "ACTIVE",
+            "GRADUATED"
+          ],
+          "description": "ACTIVE = operator is in 90-Day Launch Mode. GRADUATED = operator completed launch mode; history below is preserved forever."
+        },
+        "started_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "When the operator started Launch Mode (launch Day 1)."
+        },
+        "started_by": {
+          "type": "string",
+          "description": "User ID who started Launch Mode."
+        },
+        "started_by_name": {
+          "type": "string"
+        },
+        "baseline": {
+          "type": "object",
+          "description": "Chapter 27 P1 \u2014 DAY 1 BASELINE: the operator's initial assumptions, recorded BEFORE operating history changes them. Day 1 runs on assumptions; Day 90 runs on evidence. HISTORICAL TRUTH: a baseline is never silently rewritten \u2014 an amendment moves the prior version into baseline_history (append-only) and increments version. Unknown stays unknown: values may honestly be 'UNKNOWN', 'NOT YET ESTIMATED' or 'NOT APPLICABLE'; the system never invents precision.",
+          "properties": {
+            "recorded_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "recorded_by": {
+              "type": "string"
+            },
+            "recorded_by_name": {
+              "type": "string"
+            },
+            "version": {
+              "type": "integer",
+              "default": 1,
+              "description": "Baseline version \u2014 incremented on explicit amendment; prior versions preserved in baseline_history."
+            },
+            "assumptions": {
+              "type": "object",
+              "description": "Free-text assumptions (numbers as text \u2014 fake precision is never required).",
+              "properties": {
+                "expected_project_volume": {
+                  "type": "string",
+                  "description": "How many projects per quarter the operator assumes (e.g. '2', 'UNKNOWN')."
+                },
+                "expected_prep_hours": {
+                  "type": "string",
+                  "description": "Assumed preparation labor per project (e.g. '40 hours')."
+                },
+                "expected_owner_hours": {
+                  "type": "string",
+                  "description": "Assumed owner hours per week (e.g. '25 hours/week')."
+                },
+                "expected_company_revenue": {
+                  "type": "string",
+                  "description": "Assumed company revenue per project or per quarter."
+                },
+                "expected_lead_source": {
+                  "type": "string",
+                  "description": "Assumed primary lead source (e.g. 'social media')."
+                },
+                "expected_marketing_channels": {
+                  "type": "string",
+                  "description": "Assumed marketing channels that will work."
+                },
+                "expected_strong_categories": {
+                  "type": "string",
+                  "description": "Assumed strong merchandise categories (e.g. 'furniture')."
+                },
+                "expected_service_model": {
+                  "type": "string",
+                  "description": "Assumed service model (what the company sells and how)."
+                },
+                "expected_team": {
+                  "type": "string",
+                  "description": "Assumed team/staffing."
+                },
+                "expected_capacity": {
+                  "type": "string",
+                  "description": "Assumed owner/company capacity."
+                },
+                "key_assumptions_note": {
+                  "type": "string",
+                  "description": "Other key business assumptions in the operator's own words."
+                }
+              },
+              "default": {}
+            }
+          }
+        },
+        "baseline_history": {
+          "type": "array",
+          "default": [],
+          "description": "Prior baseline versions \u2014 append-only Day-1 historical truth. Never deleted or rewritten.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "recorded_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "superseded_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "superseded_by_name": {
+                "type": "string"
+              },
+              "version": {
+                "type": "integer"
+              },
+              "assumptions": {
+                "type": "object"
+              },
+              "amendment_reason": {
+                "type": "string",
+                "description": "Why the baseline was amended (never silent)."
+              }
+            }
+          }
+        },
+        "criticals_acknowledged": {
+          "type": "array",
+          "default": [],
+          "description": "Chapter 27 P1 \u2014 LAUNCH GATE acknowledgments: the operator explicitly acknowledged unresolved launch-CRITICAL items before progressing toward the first project. This is a WARNING/ACKNOWLEDGMENT record, NEVER a readiness certification and NEVER a legal/compliance conclusion. Existing operational/security/authority hard blockers elsewhere in EstateSalen are unaffected.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "by": {
+                "type": "string"
+              },
+              "by_name": {
+                "type": "string"
+              },
+              "unresolved": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "Labels of the critical items that were unresolved at acknowledgment time."
+              },
+              "note": {
+                "type": "string",
+                "description": "The operator's own reason for proceeding."
+              }
+            }
+          }
+        },
+        "day90_review": {
+          "type": "object",
+          "description": "Chapter 27 P1 \u2014 the completed DAY 90 / LAUNCH REVIEW snapshot: what we expected (baseline), what actually happened (derived from canonical records at review time), what we learned, what still needs work. The comparison VALUES are a snapshot for history; live truth stays in canonical records. Absent = review not completed (which blocks graduation).",
+          "properties": {
+            "completed_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "completed_by": {
+              "type": "string"
+            },
+            "completed_by_name": {
+              "type": "string"
+            },
+            "comparisons": {
+              "type": "array",
+              "default": [],
+              "description": "Snapshot of baseline-vs-actual comparisons at review time. Classifications are honest: CLOSE TO EXPECTATION / HIGHER THAN EXPECTED / LOWER THAN EXPECTED / CHANGED / INSUFFICIENT EVIDENCE / NOT YET TESTED. Never a causal or statistical claim.",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "key": {
+                    "type": "string"
+                  },
+                  "label": {
+                    "type": "string"
+                  },
+                  "expected": {
+                    "type": "string"
+                  },
+                  "actual": {
+                    "type": "string"
+                  },
+                  "classification": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "learned_note": {
+              "type": "string",
+              "description": "What we learned \u2014 the operator's own words."
+            },
+            "needs_work_note": {
+              "type": "string",
+              "description": "What still needs work \u2014 feeds Quarter Two priorities."
+            }
+          }
+        },
+        "quarter_two": {
+          "type": "object",
+          "description": "Chapter 27 P1 \u2014 the NEXT 90 DAYS plan created at the end of launch mode: selected priorities, goals and a review point. Priorities are operator-selected from architecture-supported areas; this is a structured plan, not automated goal analytics.",
+          "properties": {
+            "created_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "created_by": {
+              "type": "string"
+            },
+            "created_by_name": {
+              "type": "string"
+            },
+            "priorities": {
+              "type": "array",
+              "default": [],
+              "description": "Selected priority areas (fixed architecture-supported vocabulary).",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "MORE_CONSULTATIONS",
+                  "BETTER_PROJECT_SELECTION",
+                  "PROFITABILITY",
+                  "LABOR_EFFICIENCY",
+                  "PRICING",
+                  "STAFFING",
+                  "TRAINING",
+                  "REFERRALS",
+                  "BUYER_AUDIENCE",
+                  "MARKETING",
+                  "SYSTEMS_SOPS",
+                  "OWNER_CAPACITY",
+                  "OTHER"
+                ]
+              }
+            },
+            "goals": {
+              "type": "array",
+              "default": [],
+              "description": "Per-priority goals: outcome, owner and optional target date. A PLAN for humans \u2014 never an automated commitment engine.",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "priority": {
+                    "type": "string"
+                  },
+                  "goal": {
+                    "type": "string"
+                  },
+                  "owner": {
+                    "type": "string"
+                  },
+                  "target_date": {
+                    "type": "string",
+                    "format": "date"
+                  },
+                  "note": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "review_point": {
+              "type": "string",
+              "format": "date",
+              "description": "When this plan will be reviewed."
+            },
+            "note": {
+              "type": "string"
+            }
+          }
+        },
+        "first_project_not_applicable": {
+          "type": "object",
+          "description": "Chapter 27 P1 \u2014 HUMAN JUDGMENT record: the operator (or an admin) explicitly recorded that a complete first-project cycle is not applicable to their circumstances (e.g. service model without sale projects). A recorded human judgment \u2014 never automatic, never granted merely because time passed.",
+          "properties": {
+            "at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "by": {
+              "type": "string"
+            },
+            "by_name": {
+              "type": "string"
+            },
+            "note": {
+              "type": "string",
+              "description": "The business reason."
+            }
+          }
+        },
+        "graduated_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "When the operator graduated from Launch Mode to the normal EstateSalen operating system. Never granted by calendar time alone \u2014 evidence-based, human-confirmed."
+        },
+        "graduated_by": {
+          "type": "string"
+        },
+        "graduated_by_name": {
+          "type": "string"
+        },
+        "graduation_note": {
+          "type": "string",
+          "description": "The operator's own words at graduation. Launch history (baseline, review, plan) is preserved below as company history."
+        }
+      }
+    },
     "notes": {
       "type": "string"
     }
