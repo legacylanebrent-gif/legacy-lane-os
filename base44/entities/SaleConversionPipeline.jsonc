@@ -1,7 +1,7 @@
 {
   "name": "SaleConversionPipeline",
   "type": "object",
-  "description": "Canonical PRE-SALE opportunity record and, once linked, the settlement/commission agreement record. Chapter 4 P1 adds the pre-sale economics block: contractual minimum fee, expected additional service revenue, category-level estimated labor, estimated direct costs, and the operator's internal minimum-revenue/minimum-contribution thresholds. Projected figures are estimates for evaluation only \u2014 authoritative actuals derive from settlement/closeout. Chapter 5 P1 adds the operational distance snapshot (distance_miles, projected from the linked EstateSale when the sale already carries one) and the structured client-fit assessment that feeds the Sale Acceptance Scorecard as advisory, explainable input. Chapter 9 P1 adds the client-facing estimated sale RANGE (low/high \u2014 never auto-invented from a single estimate), the owner-time flag on projected labor rows, and ACCEPTED COMMERCIAL TERMS metadata: the deal remains the ONE settlement-facing source of commercial truth, and commercial_terms_accepted_at records when the client accepted it \u2014 the accepted_terms_snapshot preserves exactly what was accepted so later deal edits never rewrite accepted history. Chapter 10 P1 adds CRM DISCIPLINE to this same record (no second CRM): a canonical NEXT ACTION (what happens next, when \u2014 deterministic seed from an inquiry, operator-owned thereafter), distinct OUTCOME stages (CONTACTED progression; NURTURE = not ready but not lost; REFERRED = directed elsewhere with destination/provenance; LOST with a structured reason), INQUIRY PROVENANCE (source system, source record, inquiry timestamp, first meaningful HUMAN response timestamp), and an optional client Contact link for exact-identity continuity. Inquiry capture NEVER grants marketing consent; consent lives only where it was explicitly captured. Chapter 12 P1 adds the CONSULTATION WORKING BLOCK (no second consultation entity): the Chapter 12 audit found these small truths missing, so they live here on the canonical deal \u2014 pre-consultation answers, CLIENT GOALS (what the client wants \u2014 distinct from the operator recommendation), EXTERNAL DEADLINES, room-by-room observations, condition/safety OBSERVATIONS (never diagnoses), preparation-work evidence, CLIENT EXPECTATIONS (what the client said \u2014 never verified truth), the OPERATOR'S structured HUMAN recommendation (the deterministic Sale Acceptance Review is advisory evidence only), explicit ACCEPTANCE CONDITIONS, and PRIVATE consultation photos. Consultation Mode ORCHESTRATES canonical systems; this block never becomes a second source of economics, authority, fit, research, labor or scope truth.",
+  "description": "Canonical PRE-SALE opportunity record and, once linked, the settlement/commission agreement record. Chapter 4 P1 adds the pre-sale economics block: contractual minimum fee, expected additional service revenue, category-level estimated labor, estimated direct costs, and the operator's internal minimum-revenue/minimum-contribution thresholds. Projected figures are estimates for evaluation only \u2014 authoritative actuals derive from settlement/closeout. Chapter 5 P1 adds the operational distance snapshot (distance_miles, projected from the linked EstateSale when the sale already carries one) and the structured client-fit assessment that feeds the Sale Acceptance Scorecard as advisory, explainable input. Chapter 9 P1 adds the client-facing estimated sale RANGE (low/high \u2014 never auto-invented from a single estimate), the owner-time flag on projected labor rows, and ACCEPTED COMMERCIAL TERMS metadata: the deal remains the ONE settlement-facing source of commercial truth, and commercial_terms_accepted_at records when the client accepted it \u2014 the accepted_terms_snapshot preserves exactly what was accepted so later deal edits never rewrite accepted history. Chapter 10 P1 adds CRM DISCIPLINE to this same record (no second CRM): a canonical NEXT ACTION (what happens next, when \u2014 deterministic seed from an inquiry, operator-owned thereafter), distinct OUTCOME stages (CONTACTED progression; NURTURE = not ready but not lost; REFERRED = directed elsewhere with destination/provenance; LOST with a structured reason), INQUIRY PROVENANCE (source system, source record, inquiry timestamp, first meaningful HUMAN response timestamp), and an optional client Contact link for exact-identity continuity. Inquiry capture NEVER grants marketing consent; consent lives only where it was explicitly captured. Chapter 12 P1 adds the CONSULTATION WORKING BLOCK (no second consultation entity): the Chapter 12 audit found these small truths missing, so they live here on the canonical deal \u2014 pre-consultation answers, CLIENT GOALS (what the client wants \u2014 distinct from the operator recommendation), EXTERNAL DEADLINES, room-by-room observations, condition/safety OBSERVATIONS (never diagnoses), preparation-work evidence, CLIENT EXPECTATIONS (what the client said \u2014 never verified truth), the OPERATOR'S structured HUMAN recommendation (the deterministic Sale Acceptance Review is advisory evidence only), explicit ACCEPTANCE CONDITIONS, and PRIVATE consultation photos. Consultation Mode ORCHESTRATES canonical systems; this block never becomes a second source of economics, authority, fit, research, labor or scope truth. Chapter 23 P1 adds the statement DELIVERY state (GENERATED/DELIVERED \u2014 human-confirmed delivery, never an automatic sent claim) and the contractual CLIENT PAYMENT DUE DATE with source provenance; payment truth itself lives on payout_records and canonical payment records.",
   "properties": {
     "operator_id": {
       "type": "string",
@@ -877,7 +877,7 @@
     },
     "actual_revenue": {
       "type": "number",
-      "description": "Deal-level actual revenue snapshot written by the settlement/closeout writer (mirrors EstateSale fields; EstateSale remains the canonical sale record). Chapter 10 source-to-revenue reporting reads this canonical figure."
+      "description": "Deal-level actual revenue snapshot written by the settlement/closeout writer (mirrors EstateSale fields; EstateSale remains the canonical sale record). Chapter 23: this stores GROSS MERCHANDISE SALES, never company revenue \u2014 company revenue is commission_earned on the sale / companyRevenue in the economics model."
     },
     "total_paid_to_client": {
       "type": "number",
@@ -905,7 +905,12 @@
             "type": "string"
           },
           "notes": {
-            "type": "string"
+            "type": "string",
+            "description": "Reference/confirmation (check number, transfer ref) where appropriate."
+          },
+          "recorded_by_name": {
+            "type": "string",
+            "description": "Chapter 23 P1 \u2014 display-name snapshot of the operator who recorded the payment."
           },
           "statement_generated": {
             "type": "boolean",
@@ -921,6 +926,33 @@
     "settlement_finalized_date": {
       "type": "string",
       "format": "date"
+    },
+    "client_payment_due_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Chapter 23 P1 \u2014 the CONTRACTUAL settlement payment due date, recorded only where the accepted terms/agreement actually state one. Null = none recorded \u2014 the system never invents a deadline."
+    },
+    "client_payment_due_source": {
+      "type": "string",
+      "description": "Chapter 23 P1 \u2014 provenance of the due date (accepted agreement section, authorized change, other). Operator-recorded."
+    },
+    "statement_delivery": {
+      "type": "string",
+      "enum": [
+        "GENERATED",
+        "DELIVERED"
+      ],
+      "default": "GENERATED",
+      "description": "Chapter 23 P1 \u2014 the statement DELIVERY state, deliberately distinct from payment: GENERATED = built but not confirmed delivered; DELIVERED = the operator's human confirmation the client received it. The system never claims email/SMS delivery automatically."
+    },
+    "statement_delivered_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Chapter 23 P1 \u2014 when the operator confirmed delivery."
+    },
+    "statement_delivered_by_name": {
+      "type": "string",
+      "description": "Chapter 23 P1 \u2014 display-name snapshot of the operator who confirmed delivery."
     }
   },
   "required": [

@@ -1766,6 +1766,35 @@
         }
       }
     },
+    "access_closeout": {
+      "type": "object",
+      "default": {},
+      "description": "Chapter 23 P1 \u2014 the smallest truthful ACCESS CLOSEOUT record for the project: the operator's human confirmation of what happened to keys, lockbox, and access devices at the end of the engagement. Human confirmation only \u2014 the software never claims a device was physically returned. Codes/credentials are NEVER stored here (they stay in the operator-only access plan). Absent = NOT YET CONFIRMED, which blocks project close until the operator records a status.",
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": [
+            "NOT_APPLICABLE",
+            "UNRESOLVED",
+            "RETURNED",
+            "TRANSFERRED",
+            "DISABLED"
+          ],
+          "description": "NOT_APPLICABLE = no company-held access devices for this project. UNRESOLVED = a device is still outstanding. RETURNED / TRANSFERRED / DISABLED = the operator's human confirmation of the ending. Never automatic."
+        },
+        "note": {
+          "type": "string",
+          "description": "What was returned/transferred, to whom \u2014 team-safe, never codes."
+        },
+        "closed_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "closed_by_name": {
+          "type": "string"
+        }
+      }
+    },
     "discount_schedule": {
       "type": "array",
       "default": [],

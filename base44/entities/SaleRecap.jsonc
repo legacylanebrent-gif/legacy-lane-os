@@ -143,6 +143,35 @@
       "type": "string",
       "format": "date-time",
       "description": "When the reflection was last saved."
+    },
+    "post_sale_review": {
+      "type": "object",
+      "default": {},
+      "description": "Chapter 23 P1 \u2014 the operator's structured FIVE-MINUTE POST-SALE REVIEW on the canonical recap record (no new entity): what worked, what didn't, what surprised, what to change next time, optional team input. Plain operator-owned reflection \u2014 never AI-written, never client-facing.",
+      "properties": {
+        "what_worked": {
+          "type": "string"
+        },
+        "what_didnt": {
+          "type": "string"
+        },
+        "surprised_us": {
+          "type": "string"
+        },
+        "change_next_time": {
+          "type": "string"
+        },
+        "team_input": {
+          "type": "string"
+        },
+        "recorded_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "recorded_by_name": {
+          "type": "string"
+        }
+      }
     }
   },
   "required": [
