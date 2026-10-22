@@ -158,8 +158,8 @@ export default function BrowseOperators() {
           <div className="rounded-2xl overflow-hidden shadow-xl border border-slate-200">
             <MapContainer center={[39.8, -98.6]} zoom={4} style={{ height: '420px', width: '100%' }} className="z-0">
               <TileLayer
-                attribution='Tiles &copy; Esri &mdash; Source: Esri, HERE, Garmin, FAO, NOAA, USGS'
-                url="https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}"
+                attribution='Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
+                url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
               />
               {stateMarkers.map(({ code, center, count }) => (
                 <Marker key={code} position={center}>

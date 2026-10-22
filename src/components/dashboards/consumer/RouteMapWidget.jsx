@@ -124,8 +124,8 @@ export default function RouteMapWidget() {
       <div className="rounded-xl overflow-hidden border border-slate-200">
         <MapContainer center={mapCenter} zoom={11} style={{ height: '240px', width: '100%' }} scrollWheelZoom={false}>
           <TileLayer
-            attribution='Tiles &copy; Esri &mdash; Source: Esri, HERE, Garmin, FAO, NOAA, USGS'
-            url="https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}"
+            attribution='Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
+            url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
           />
           {routePoints.length >= 2 && (
             <Polyline positions={routePoints} color="#0891b2" weight={3} opacity={0.7} dashArray="6 4" />

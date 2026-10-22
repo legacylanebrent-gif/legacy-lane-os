@@ -383,8 +383,8 @@ export default function StateOperators() {
                 <div className="rounded-2xl overflow-hidden shadow-xl border border-slate-200">
                   <MapContainer center={stateCenter} zoom={mapZoom} style={{ height: '380px', width: '100%' }} className="z-0">
                     <TileLayer
-                      attribution='Tiles &copy; Esri &mdash; Source: Esri, HERE, Garmin, FAO, NOAA, USGS'
-                      url="https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}"
+                      attribution='Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
+                      url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
                     />
                     {mapMarkers.map(op => (
                       <Marker key={op.id} position={[op.lat, op.lng]}>
