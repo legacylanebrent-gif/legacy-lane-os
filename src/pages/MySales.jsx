@@ -27,6 +27,15 @@ import { format } from 'date-fns';
 import { getSaleDisplayStatus } from '@/components/estate/getSaleDisplayStatus';
 import ProfileCompletionGate, { isProfileComplete } from '@/components/profile/ProfileCompletionGate';
 
+function StageSection({ label, children }) {
+  return (
+    <div>
+      <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-1">{label}</div>
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-1.5">{children}</div>
+    </div>
+  );
+}
+
 const formatTo12Hour = (time) => {
   if (!time) return '';
   // If already has AM/PM, return cleaned up version
@@ -688,41 +697,57 @@ export default function MySales() {
                        const isCompleted = getSaleDisplayStatus(sale) === 'completed';
                        const btnClass = "h-7 text-[11px] px-2 py-0 w-full justify-start";
                        return (
-                         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-1.5 mt-2">
-                           {!isCompleted && (<Button variant="outline" size="sm" asChild className={`${btnClass} border-orange-600 bg-orange-600 text-white hover:bg-orange-700 font-semibold`}><Link to={'/PrepareSale?saleId=' + sale.id}><ClipboardList className="w-3 h-3 mr-1 flex-shrink-0" />Prepare This Sale</Link></Button>)}
-                           {!isCompleted && (<Button variant="outline" size="sm" onClick={() => handleEdit(sale)} className={`${btnClass} border-blue-500 text-black hover:bg-blue-50`}><Edit className="w-3 h-3 mr-1 flex-shrink-0" />Edit Sale</Button>)}
-{!isCompleted && (<Button variant="outline" size="sm" asChild className={`${btnClass} border-teal-500 hover:bg-teal-50`}><Link to={createPageUrl('Worksheet') + '?saleId=' + sale.id}><DollarSign className="w-3 h-3 mr-1 flex-shrink-0" />Transactions</Link></Button>)}
-                           {!isCompleted && (<Button variant="outline" size="sm" onClick={() => handleLiquidationStart(sale)} className={`${btnClass} border-orange-600 text-orange-700 hover:bg-orange-50`}><Rocket className="w-3 h-3 mr-1 flex-shrink-0" />Create Buyout</Button>)}
-{!isCompleted && isProOrElite && (<Button variant="outline" size="sm" onClick={() => handleCreateCleanout(sale)} className={`${btnClass} border-cyan-600 text-cyan-700 hover:bg-cyan-50`}><Building2 className="w-3 h-3 mr-1 flex-shrink-0" />Create Cleanout</Button>)}
-{!isCompleted && isProOrElite && (<Button variant="outline" size="sm" onClick={() => handleCreateDonation(sale)} className={`${btnClass} border-pink-600 text-pink-700 hover:bg-pink-50`}><Heart className="w-3 h-3 mr-1 flex-shrink-0" />Create Donation</Button>)}
-{!isCompleted && (<Button variant="outline" size="sm" onClick={() => handleFiveAndUnderStart(sale)} className={`${btnClass} border-green-600 text-green-700 hover:bg-green-50`}><DollarSign className="w-3 h-3 mr-1 flex-shrink-0" />Create $5 Under</Button>)}
-                           {!isCompleted && isElite && (
-                             <Button variant="outline" size="sm" onClick={() => handleToggleLocalFeatured(sale)} disabled={featuringId === sale.id}
-                               className={`${btnClass} ${sale.local_featured ? 'border-amber-500 bg-amber-50' : 'border-amber-400 hover:bg-amber-50'}`}
-                             ><Pin className="w-3 h-3 mr-1 flex-shrink-0" />{featuringId === sale.id ? '...' : sale.local_featured ? 'Local Featured ★' : 'Feature Locally'}</Button>
-                           )}
-                           {!isCompleted && isElite && (
-                             <Button variant="outline" size="sm" onClick={() => handleBuyerMatch(sale.id)} disabled={matchingSaleId === sale.id}
-                               className={`${btnClass} border-emerald-500 hover:bg-emerald-50`}
-                             ><UserCheck className="w-3 h-3 mr-1 flex-shrink-0" />{matchingSaleId === sale.id ? '...' : 'Buyer Match'}</Button>
-                           )}
-                           
-                           <Button variant="outline" size="sm" asChild className={`${btnClass} border-purple-500 hover:bg-purple-50`}><Link to={createPageUrl('SaleInventory') + '?saleId=' + sale.id}><Package className="w-3 h-3 mr-1 flex-shrink-0" />Inventory</Link></Button>
-                           <Button variant="outline" size="sm" asChild className={`${btnClass} border-cyan-500 hover:bg-cyan-50`}><Link to={createPageUrl('Attendance') + '?saleId=' + sale.id}><TrendingUp className="w-3 h-3 mr-1 flex-shrink-0" />Attendance</Link></Button>
-                           {!isCompleted && (<Button variant="outline" size="sm" asChild className={`${btnClass} border-amber-500 hover:bg-amber-50`}><Link to={createPageUrl('SaleTasks') + '?saleId=' + sale.id}><FileText className="w-3 h-3 mr-1 flex-shrink-0" />Tasks</Link></Button>)}
-                           <Button variant="outline" size="sm" asChild className={`${btnClass} border-teal-500 hover:bg-teal-50`}><Link to={'/SaleEquipment?saleId=' + sale.id}><Wrench className="w-3 h-3 mr-1 flex-shrink-0" />Equipment</Link></Button>
-                           <Button variant="outline" size="sm" asChild className={`${btnClass} border-indigo-500 hover:bg-indigo-50`}><Link to={createPageUrl('SaleStatistics') + '?saleId=' + sale.id}><BarChart3 className="w-3 h-3 mr-1 flex-shrink-0" />Statistics</Link></Button>
-                           {!isCompleted && (<Button variant="outline" size="sm" asChild className={`${btnClass} border-red-500 hover:bg-red-50`}><Link to={createPageUrl('PrintSigns') + '?saleId=' + sale.id}><Megaphone className="w-3 h-3 mr-1 flex-shrink-0" />Signs</Link></Button>)}
-                           <Button variant="outline" size="sm" asChild className={`${btnClass} border-slate-500 hover:bg-slate-50`}><Link to={createPageUrl('SaleExport') + '?saleId=' + sale.id}><Download className="w-3 h-3 mr-1 flex-shrink-0" />Export</Link></Button>
-                           {!isCompleted && (<Button variant="outline" size="sm" onClick={async () => { const events = await base44.entities.VIPEvent.filter({ sale_id: sale.id }); if (events.length > 0) { window.location.href = createPageUrl('VIPEvent') + '?eventId=' + events[0].id; } else { setSelectedSale(sale); setShowVIPModal(true); }}} className={`${btnClass} border-yellow-500 hover:bg-yellow-50`}><Star className="w-3 h-3 mr-1 flex-shrink-0" />VIP Event</Button>)}
-                           {!isCompleted && (<Button variant="outline" size="sm" onClick={() => { setBuyoutSale(sale); setShowBuyoutModal(true); }} className={`${btnClass} border-orange-600 hover:bg-orange-50`}><Briefcase className="w-3 h-3 mr-1 flex-shrink-0" />Buyout</Button>)}
-                           <Button variant="outline" size="sm" onClick={() => { setExpensesSale(sale); setShowExpensesModal(true); }} className={`${btnClass} border-emerald-600 hover:bg-emerald-50`}><Receipt className="w-3 h-3 mr-1 flex-shrink-0" />Expenses</Button>
-                           {!isCompleted && (<Button variant="outline" size="sm" asChild className={`${btnClass} border-pink-500 hover:bg-pink-50`}><Link to={createPageUrl('SaleMarketingCampaigns') + '?saleId=' + sale.id}><Megaphone className="w-3 h-3 mr-1 flex-shrink-0" />Marketing</Link></Button>)}
-                           <Button variant="outline" size="sm" asChild className={`${btnClass} border-blue-600 hover:bg-blue-50`}><Link to={createPageUrl('SaleContracts') + '?saleId=' + sale.id}><FileText className="w-3 h-3 mr-1 flex-shrink-0" />Contracts</Link></Button>
-                           <Button variant="outline" size="sm" asChild className={`${btnClass} border-violet-600 hover:bg-violet-50`}><Link to={'/SaleClientDecisions?saleId=' + sale.id}><ClipboardCheck className="w-3 h-3 mr-1 flex-shrink-0" />Decisions</Link></Button>
-                           <Button variant="outline" size="sm" asChild className={`${btnClass} border-emerald-700 hover:bg-emerald-50`}><Link to={'/SaleCloseout?saleId=' + sale.id}><ListChecks className="w-3 h-3 mr-1 flex-shrink-0" />Closeout</Link></Button>
-                           {!isCompleted && (<Button variant="outline" size="sm" asChild className={`${btnClass} border-indigo-500 hover:bg-indigo-50`}><Link to={createPageUrl('EarlySignIn') + '?saleId=' + sale.id}><Users className="w-3 h-3 mr-1 flex-shrink-0" />Early Sign In</Link></Button>)}
-                           {!isCompleted && (<Button variant="outline" size="sm" onClick={() => { setSocialSale(sale); setShowSocialModal(true); }} className={`${btnClass} border-purple-500 hover:bg-purple-50`}><Sparkles className="w-3 h-3 mr-1 flex-shrink-0" />Social Posts</Button>)}
+                         <div className="mt-2 space-y-3">
+                           <StageSection label="1. Setup &amp; Planning">
+                             {!isCompleted && (<Button variant="outline" size="sm" asChild className={`${btnClass} border-orange-600 bg-orange-600 text-white hover:bg-orange-700 font-semibold`}><Link to={'/PrepareSale?saleId=' + sale.id}><ClipboardList className="w-3 h-3 mr-1 flex-shrink-0" />Prepare This Sale</Link></Button>)}
+                             {!isCompleted && (<Button variant="outline" size="sm" onClick={() => handleEdit(sale)} className={`${btnClass} border-blue-500 text-black hover:bg-blue-50`}><Edit className="w-3 h-3 mr-1 flex-shrink-0" />Edit Sale</Button>)}
+                             <Button variant="outline" size="sm" asChild className={`${btnClass} border-blue-600 hover:bg-blue-50`}><Link to={createPageUrl('SaleContracts') + '?saleId=' + sale.id}><FileText className="w-3 h-3 mr-1 flex-shrink-0" />Contracts</Link></Button>
+                             <Button variant="outline" size="sm" onClick={() => { setExpensesSale(sale); setShowExpensesModal(true); }} className={`${btnClass} border-emerald-600 hover:bg-emerald-50`}><Receipt className="w-3 h-3 mr-1 flex-shrink-0" />Expenses</Button>
+                             {!isCompleted && (<Button variant="outline" size="sm" asChild className={`${btnClass} border-amber-500 hover:bg-amber-50`}><Link to={createPageUrl('SaleTasks') + '?saleId=' + sale.id}><FileText className="w-3 h-3 mr-1 flex-shrink-0" />Tasks</Link></Button>)}
+                             <Button variant="outline" size="sm" asChild className={`${btnClass} border-violet-600 hover:bg-violet-50`}><Link to={'/SaleClientDecisions?saleId=' + sale.id}><ClipboardCheck className="w-3 h-3 mr-1 flex-shrink-0" />Decisions</Link></Button>
+                             <Button variant="outline" size="sm" asChild className={`${btnClass} border-teal-500 hover:bg-teal-50`}><Link to={'/SaleEquipment?saleId=' + sale.id}><Wrench className="w-3 h-3 mr-1 flex-shrink-0" />Equipment</Link></Button>
+                           </StageSection>
+
+                           <StageSection label="2. Inventory &amp; Preparation">
+                             <Button variant="outline" size="sm" asChild className={`${btnClass} border-purple-500 hover:bg-purple-50`}><Link to={createPageUrl('SaleInventory') + '?saleId=' + sale.id}><Package className="w-3 h-3 mr-1 flex-shrink-0" />Inventory</Link></Button>
+                             {!isCompleted && isElite && (
+                               <Button variant="outline" size="sm" onClick={() => handleBuyerMatch(sale.id)} disabled={matchingSaleId === sale.id}
+                                 className={`${btnClass} border-emerald-500 hover:bg-emerald-50`}
+                               ><UserCheck className="w-3 h-3 mr-1 flex-shrink-0" />{matchingSaleId === sale.id ? '...' : 'Buyer Match'}</Button>
+                             )}
+                             {!isCompleted && (<Button variant="outline" size="sm" asChild className={`${btnClass} border-red-500 hover:bg-red-50`}><Link to={createPageUrl('PrintSigns') + '?saleId=' + sale.id}><Megaphone className="w-3 h-3 mr-1 flex-shrink-0" />Signs</Link></Button>)}
+                           </StageSection>
+
+                           <StageSection label="3. Promote &amp; Presale">
+                             {!isCompleted && (<Button variant="outline" size="sm" asChild className={`${btnClass} border-pink-500 hover:bg-pink-50`}><Link to={createPageUrl('SaleMarketingCampaigns') + '?saleId=' + sale.id}><Megaphone className="w-3 h-3 mr-1 flex-shrink-0" />Marketing</Link></Button>)}
+                             {!isCompleted && (<Button variant="outline" size="sm" onClick={() => { setSocialSale(sale); setShowSocialModal(true); }} className={`${btnClass} border-purple-500 hover:bg-purple-50`}><Sparkles className="w-3 h-3 mr-1 flex-shrink-0" />Social Posts</Button>)}
+                             {!isCompleted && isElite && (
+                               <Button variant="outline" size="sm" onClick={() => handleToggleLocalFeatured(sale)} disabled={featuringId === sale.id}
+                                 className={`${btnClass} ${sale.local_featured ? 'border-amber-500 bg-amber-50' : 'border-amber-400 hover:bg-amber-50'}`}
+                               ><Pin className="w-3 h-3 mr-1 flex-shrink-0" />{featuringId === sale.id ? '...' : sale.local_featured ? 'Local Featured ★' : 'Feature Locally'}</Button>
+                             )}
+                             {!isCompleted && (<Button variant="outline" size="sm" onClick={async () => { const events = await base44.entities.VIPEvent.filter({ sale_id: sale.id }); if (events.length > 0) { window.location.href = createPageUrl('VIPEvent') + '?eventId=' + events[0].id; } else { setSelectedSale(sale); setShowVIPModal(true); }}} className={`${btnClass} border-yellow-500 hover:bg-yellow-50`}><Star className="w-3 h-3 mr-1 flex-shrink-0" />VIP Event</Button>)}
+                           </StageSection>
+
+                           <StageSection label="4. Sale &amp; Money">
+                             {!isCompleted && (<Button variant="outline" size="sm" asChild className={`${btnClass} border-indigo-500 hover:bg-indigo-50`}><Link to={createPageUrl('EarlySignIn') + '?saleId=' + sale.id}><Users className="w-3 h-3 mr-1 flex-shrink-0" />Early Sign In</Link></Button>)}
+                             <Button variant="outline" size="sm" asChild className={`${btnClass} border-cyan-500 hover:bg-cyan-50`}><Link to={createPageUrl('Attendance') + '?saleId=' + sale.id}><TrendingUp className="w-3 h-3 mr-1 flex-shrink-0" />Attendance</Link></Button>
+                             {!isCompleted && (<Button variant="outline" size="sm" asChild className={`${btnClass} border-teal-500 hover:bg-teal-50`}><Link to={createPageUrl('Worksheet') + '?saleId=' + sale.id}><DollarSign className="w-3 h-3 mr-1 flex-shrink-0" />Transactions</Link></Button>)}
+                             {!isCompleted && (<Button variant="outline" size="sm" onClick={() => handleFiveAndUnderStart(sale)} className={`${btnClass} border-green-600 text-green-700 hover:bg-green-50`}><DollarSign className="w-3 h-3 mr-1 flex-shrink-0" />Create $5 Under</Button>)}
+                             <Button variant="outline" size="sm" asChild className={`${btnClass} border-indigo-500 hover:bg-indigo-50`}><Link to={createPageUrl('SaleStatistics') + '?saleId=' + sale.id}><BarChart3 className="w-3 h-3 mr-1 flex-shrink-0" />Statistics</Link></Button>
+                           </StageSection>
+
+                           <StageSection label="5. Post-Sale / Disposition">
+                             {!isCompleted && (<Button variant="outline" size="sm" onClick={() => handleLiquidationStart(sale)} className={`${btnClass} border-orange-600 text-orange-700 hover:bg-orange-50`}><Rocket className="w-3 h-3 mr-1 flex-shrink-0" />Create Buyout</Button>)}
+                             {!isCompleted && (<Button variant="outline" size="sm" onClick={() => { setBuyoutSale(sale); setShowBuyoutModal(true); }} className={`${btnClass} border-orange-600 hover:bg-orange-50`}><Briefcase className="w-3 h-3 mr-1 flex-shrink-0" />Buyout</Button>)}
+                             {!isCompleted && isProOrElite && (<Button variant="outline" size="sm" onClick={() => handleCreateDonation(sale)} className={`${btnClass} border-pink-600 text-pink-700 hover:bg-pink-50`}><Heart className="w-3 h-3 mr-1 flex-shrink-0" />Create Donation</Button>)}
+                             {!isCompleted && isProOrElite && (<Button variant="outline" size="sm" onClick={() => handleCreateCleanout(sale)} className={`${btnClass} border-cyan-600 text-cyan-700 hover:bg-cyan-50`}><Building2 className="w-3 h-3 mr-1 flex-shrink-0" />Create Cleanout</Button>)}
+                           </StageSection>
+
+                           <StageSection label="6. Closeout">
+                             <Button variant="outline" size="sm" asChild className={`${btnClass} border-emerald-700 hover:bg-emerald-50`}><Link to={'/SaleCloseout?saleId=' + sale.id}><ListChecks className="w-3 h-3 mr-1 flex-shrink-0" />Closeout</Link></Button>
+                             <Button variant="outline" size="sm" asChild className={`${btnClass} border-slate-500 hover:bg-slate-50`}><Link to={createPageUrl('SaleExport') + '?saleId=' + sale.id}><Download className="w-3 h-3 mr-1 flex-shrink-0" />Export</Link></Button>
+                           </StageSection>
                          </div>
                        );
                      })()}
