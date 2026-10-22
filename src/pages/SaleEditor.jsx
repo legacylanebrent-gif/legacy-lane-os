@@ -36,6 +36,8 @@ import ImageImportModal from '@/components/estate/ImageImportModal';
 import DeepSearchProgressModal from '@/components/estate/DeepSearchProgressModal';
 import SaleTeamSection from '@/components/estate/SaleTeamSection';
 import SiteAssessmentSection from '@/components/saleops/SiteAssessmentSection';
+import AccessPlanSection from '@/components/saleops/AccessPlanSection';
+import PostSaleActionsCard from '@/components/estate/PostSaleActionsCard';
 import SaleEditorFooter from '@/components/estate/SaleEditorFooter';
 import { applyDistanceSnapshot } from '@/components/saleops/distanceSnapshot';
 
@@ -1455,11 +1457,14 @@ Be practical and realistic for an estate sale context.`,
 
       <div className="max-w-5xl mx-auto px-4 lg:px-6 py-8 space-y-6 w-full overflow-x-hidden">
         <Tabs defaultValue="info" className="space-y-6">
-          <TabsList className="w-full max-w-xl mx-auto">
-            <TabsTrigger value="info" className="flex-1 text-base font-semibold">Sale Info</TabsTrigger>
-            <TabsTrigger value="images" className="flex-1 text-base font-semibold">Images</TabsTrigger>
-            <TabsTrigger value="communications" className="flex-1 text-base font-semibold">Communications</TabsTrigger>
-            <TabsTrigger value="labor" className="flex-1 text-base font-semibold">Labor</TabsTrigger>
+          <TabsList className="w-full max-w-6xl mx-auto flex-wrap h-auto gap-1">
+            <TabsTrigger value="info" className="flex-1 min-w-[80px] text-xs sm:text-sm font-semibold px-2 py-2 whitespace-normal">Sale Info</TabsTrigger>
+            <TabsTrigger value="images" className="flex-1 min-w-[70px] text-xs sm:text-sm font-semibold px-2 py-2 whitespace-normal">Images</TabsTrigger>
+            <TabsTrigger value="communications" className="flex-1 min-w-[100px] text-xs sm:text-sm font-semibold px-2 py-2 whitespace-normal">Communications</TabsTrigger>
+            <TabsTrigger value="labor" className="flex-1 min-w-[55px] text-xs sm:text-sm font-semibold px-2 py-2 whitespace-normal">Labor</TabsTrigger>
+            <TabsTrigger value="assessment" className="flex-1 min-w-[115px] text-xs sm:text-sm font-semibold px-2 py-2 whitespace-normal">Operational Site Assessment</TabsTrigger>
+            <TabsTrigger value="access" className="flex-1 min-w-[100px] text-xs sm:text-sm font-semibold px-2 py-2 whitespace-normal">Property Access Plan</TabsTrigger>
+            <TabsTrigger value="postsale" className="flex-1 min-w-[70px] text-xs sm:text-sm font-semibold px-2 py-2 whitespace-normal">Post Sale</TabsTrigger>
           </TabsList>
 
           <TabsContent value="info" className="space-y-6 mt-0">
@@ -1776,37 +1781,9 @@ Return ONLY the description text, no extra commentary.`
           </CardContent>
         </Card>
 
-        {/* Post-Sale Actions */}
-        {saleId && (
-          <Card className="border-purple-200 bg-purple-50/40">
-            <CardContent className="pt-6 space-y-3">
-              <div className="flex items-center gap-2 mb-1">
-                <div className="w-2 h-2 rounded-full bg-purple-600" />
-                <h2 className="text-base font-semibold text-slate-900">Post-Sale Actions</h2>
-              </div>
-              <p className="text-xs text-slate-500">After your sale completes, offer remaining inventory to registered resellers privately.</p>
-              <Button
-                variant="outline"
-                className="border-purple-400 text-purple-700 hover:bg-purple-100 w-full sm:w-auto"
-                onClick={() => navigate(`/ResellerPackupEventEditor?saleId=${saleId}`)}
-              >
-                <span className="mr-2">📦</span>
-                Create Reseller Pack-Up Event
-              </Button>
-              <p className="text-xs text-slate-400">This creates a private, invite-only event for resellers only. Not visible to the public.</p>
-            </CardContent>
-          </Card>
-        )}
-
         {/* Chapter 2 P1 — referral source projection + operational notes */}
         <ReferralSourceCard saleId={saleId} />
         <SaleNotesPanel saleId={saleId} />
-
-        {/* Chapter 5 P1 — canonical operational site assessment */}
-        <SiteAssessmentSection
-          value={formData.site_assessment}
-          onChange={(v) => setFormData(p => ({ ...p, site_assessment: v }))}
-        />
 
         {/* Footer */}
         <SaleEditorFooter saving={saving} onHandleSave={handleSave} onPublish={handlePublish} />
@@ -2491,6 +2468,29 @@ Return ONLY the description text, no extra commentary.`
         {saleId ? <LaborEntriesPanel saleId={saleId} /> : (
           <p className="text-sm text-slate-500 text-center py-8">Save the sale first to track labor hours.</p>
         )}
+          </TabsContent>
+
+          {/* Chapter 5 P1 — canonical operational site assessment */}
+          <TabsContent value="assessment" className="space-y-6 mt-0">
+            <SiteAssessmentSection
+              value={formData.site_assessment}
+              onChange={(v) => setFormData(p => ({ ...p, site_assessment: v }))}
+            />
+            <SaleEditorFooter saving={saving} onHandleSave={handleSave} onPublish={handlePublish} />
+          </TabsContent>
+
+          {/* Chapter 9 P1 — private property access plan (operator-only) */}
+          <TabsContent value="access" className="space-y-6 mt-0">
+            <AccessPlanSection
+              value={formData.site_assessment?.access_details || {}}
+              onChange={(v) => setFormData(p => ({ ...p, site_assessment: { ...(p.site_assessment || {}), access_details: v } }))}
+            />
+            <SaleEditorFooter saving={saving} onHandleSave={handleSave} onPublish={handlePublish} />
+          </TabsContent>
+
+          {/* Post-Sale */}
+          <TabsContent value="postsale" className="space-y-6 mt-0">
+            <PostSaleActionsCard saleId={saleId} onPackUp={() => navigate(`/ResellerPackupEventEditor?saleId=${saleId}`)} />
           </TabsContent>
         </Tabs>
       </div>

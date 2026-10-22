@@ -2,7 +2,6 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Home, Info } from 'lucide-react';
-import AccessPlanSection from '@/components/saleops/AccessPlanSection';
 
 // Chapter 5 P1 — canonical operational site assessment (lives on EstateSale —
 // the single editable copy; no second property entity, no deal-side duplicate).
@@ -130,7 +129,6 @@ export default function SiteAssessmentSection({ value, onChange }) {
         </div>
       </CardContent>
     </Card>
-    <AccessPlanSection value={site.access_details || {}} onChange={v => set('access_details', v)} />
     </div>
   );
 }
