@@ -8,8 +8,13 @@
 //   - referral_source_contact_id: the referring Contact (exact identity)
 //   - deterministic seeded next action (4-hour speed-to-lead grace, unchanged)
 // Marketing consent is NEVER granted by inquiry capture (bridge doctrine).
+// Phase 2A: a VERSIONED introduction-consent record is written through the
+// shared sellerConsentControl recorder — currently BEHIND A DISABLED rollout
+// control (final consent wording is an unresolved broker/legal decision), so
+// this seam behaves exactly as before and writes no consent record.
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.54';
 import { bridgeSellerInquiry } from '../../shared/sellerInquiryBridge.ts';
+import { recordSellerConsent } from '../../shared/sellerConsentControl.ts';
 
 export default async function(req: Request): Promise<Response> {
   try {
@@ -115,7 +120,32 @@ export default async function(req: Request): Promise<Response> {
       return Response.json({ ok: false, error: result.error || 'bridge_failed' }, { status: 500 });
     }
 
-    return Response.json({ ok: true, created: result.created, replayed: result.replayed });
+    // Phase 2A — record the seller's versioned introduction consent for THIS
+    // submission. The recorder is rollout-gated: disabled today (no record,
+    // flow unchanged); when enabled with approved wording it pins the text
+    // version, snapshots the exact displayed text, and server-stamps the
+    // time. It NEVER grants marketing consent and NEVER creates any
+    // compensation entitlement.
+    let consent: any = { recorded: false, reason: 'consent_rollout_disabled' };
+    try {
+      consent = await recordSellerConsent(service, {
+        source_type: 'partner_referred_inquiry',
+        source_id: lead.id,
+        operator_id: operatorId,
+        intended_recipient_ids: [operatorId],
+        attribution_source: 'partner_referral_link',
+      });
+    } catch (e) {
+      console.error('recordSellerConsent error:', (e as Error).message);
+      consent = { recorded: false, reason: 'consent_recording_failed' };
+    }
+
+    return Response.json({
+      ok: true,
+      created: result.created,
+      replayed: result.replayed,
+      consent_recorded: !!consent.recorded,
+    });
   } catch (error) {
     console.error('submitPartnerReferredInquiry error:', (error as Error).message);
     return Response.json({ ok: false, error: (error as Error).message }, { status: 500 });

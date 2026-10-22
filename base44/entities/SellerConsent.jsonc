@@ -1,0 +1,174 @@
+{
+  "name": "SellerConsent",
+  "type": "object",
+  "description": "Referral Rebuild Phase 2A \u2014 VERSIONED record of a seller's permission to be contacted for an introduction (Referral Phase 2 design Part 2A). Records are created ONLY by sanctioned server functions at inquiry submission time: the SERVER generates the timestamp and pins the consent text version, storing the EXACT displayed text snapshot. A seller (usually no platform account) never writes this record directly. OPTIONAL marketing consent is a SEPARATE block \u2014 withdrawing either never affects the other, and inquiry capture alone NEVER grants marketing consent. ABSENCE OF A RECORD = NOT RECORDED (historical submissions are never backfilled to affirmative or to withdrawn; unknown stays unknown). This is a consent record, NOT verified licensing, NOT broker approval, and NOT an executed brokerage referral agreement. It creates NO compensation entitlement of any kind.",
+  "properties": {
+    "consent_id": {
+      "type": "string",
+      "description": "Server-generated unique consent identifier (SC-<epoch>-<suffix>)."
+    },
+    "source_type": {
+      "type": "string",
+      "enum": [
+        "estate_transition_lead",
+        "partner_referred_inquiry",
+        "website_lead",
+        "manual"
+      ],
+      "description": "Which canonical inquiry source record this consent was captured on."
+    },
+    "source_id": {
+      "type": "string",
+      "description": "ID of the source inquiry record (e.g. EstateTransitionLead id)."
+    },
+    "operator_id": {
+      "type": "string",
+      "description": "Derived OPERATOR recipient of the consent (resolved server-side from the inquiry context, never client-supplied)."
+    },
+    "intended_recipient_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "ALL user IDs of intended recipients of the seller's contact information. Brokerage recipients are ADDED ONLY after broker/legal confirmation of identities (Phase 2 step 4) \u2014 never invented placeholders here."
+    },
+    "contact_purpose": {
+      "type": "string",
+      "enum": [
+        "introduction_only",
+        "other"
+      ],
+      "default": "introduction_only",
+      "description": "The purpose the seller consented to: an INTRODUCTION ONLY. Never broadens silently."
+    },
+    "consent_text_version": {
+      "type": "string",
+      "description": "The EXACT consent text version the seller acknowledged, pinned SERVER-SIDE at submission time (shared sellerConsentControl constant). Changing the displayed text requires bumping this version \u2014 a stored consent never silently covers different wording."
+    },
+    "consent_text_snapshot": {
+      "type": "string",
+      "description": "The EXACT text displayed to the seller at submission, stored verbatim as historical truth."
+    },
+    "submitted_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "SERVER-GENERATED timestamp when consent was captured. Never client-supplied."
+    },
+    "attribution_source": {
+      "type": "string",
+      "description": "How the seller reached the operator (source page/link as known at submission)."
+    },
+    "marketing_consent": {
+      "type": "object",
+      "default": {},
+      "description": "SEPARATE, OPTIONAL marketing consent block. Defaults to ABSENT \u2014 inquiry capture never grants it, and withdrawing it (or the introduction consent) never affects the other block.",
+      "properties": {
+        "granted": {
+          "type": "boolean",
+          "description": "Whether the seller separately granted marketing consent. Absent/false = not granted."
+        },
+        "scope_note": {
+          "type": "string",
+          "description": "What the seller agreed to receive, in the seller's own displayed terms."
+        },
+        "captured_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "SERVER timestamp when the separate marketing consent was captured."
+        }
+      }
+    },
+    "withdrawn_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "SERVER timestamp when the seller withdrew consent (recorded by an authorized recipient relaying the seller's request). Absent = active."
+    },
+    "withdrawal_reason": {
+      "type": "string",
+      "description": "Factual reason for the withdrawal as relayed."
+    },
+    "withdrawn_by": {
+      "type": "string",
+      "description": "User ID of the authorized person who recorded the withdrawal (server-derived from the authenticated session)."
+    },
+    "withdrawn_by_name": {
+      "type": "string",
+      "description": "Display-name snapshot of the withdrawing recorder."
+    },
+    "downstream_notifications": {
+      "type": "array",
+      "default": [],
+      "description": "APPEND-ONLY log of which recipients were notified of this withdrawal (who, when, notification id). Earlier entries are never rewritten or removed.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "recipient_user_id": {
+            "type": "string"
+          },
+          "notification_id": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "granted",
+        "withdrawn"
+      ],
+      "default": "granted",
+      "description": "Current consent status. Withdrawal is recorded by the sanctioned withdrawSellerConsent function only."
+    }
+  },
+  "required": [
+    "consent_id",
+    "source_type",
+    "source_id",
+    "operator_id",
+    "consent_text_version",
+    "consent_text_snapshot",
+    "submitted_at",
+    "status"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.operator_id": "{{user.id}}"
+        },
+        {
+          "data.intended_recipient_ids": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}
