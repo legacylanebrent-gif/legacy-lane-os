@@ -114,7 +114,11 @@
     },
     "partner_submission_id": {
       "type": "string",
-      "description": "Referral Rebuild Phase 2B \u2014 STABLE submission identifier (client-generated uuid, reused across retries of the same submission). The idempotency anchor for partner-referred intake: a retried submission reuses the SAME inquiry record (and the same consent) instead of duplicating. Absent on historical records."
+      "description": "Stable partner inquiry retry key; historical absence is not backfilled."
+    },
+    "partner_submission_identity": {
+      "type": "string",
+      "description": "Server-derived private SHA-256 of normalized seller information and resolved operator/referrer scope; conflict detection only, not a unique constraint."
     },
     "lead_score": {
       "type": "integer",
@@ -148,7 +152,7 @@
         "type": "object"
       },
       "default": [],
-      "description": "Routing assignments \u2014 rule-based providers and/or directory county matches"
+      "description": "Routing assignments, rule-based providers and/or directory county matches"
     },
     "routed_at": {
       "type": "string",
@@ -186,7 +190,7 @@
         }
       },
       "default": [],
-      "description": "Top MasterOperatorDirectory companies matched to this lead's county, ranked paid-first then featured (no PII)"
+      "description": "Top directory county matches ranked paid-first then featured; no PII."
     },
     "crm_status": {
       "type": "string",

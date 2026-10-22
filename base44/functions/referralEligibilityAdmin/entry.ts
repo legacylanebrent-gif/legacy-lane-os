@@ -17,6 +17,7 @@
 //   - a verified profile NEVER activates compensation: the global
 //     LEGACY_REFERRAL_COMPENSATION_ENABLED control stays disabled separately.
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.54';
+import { eligibilityReply } from '../../shared/eligibilityContract.ts';
 import { LEGACY_REFERRAL_COMPENSATION_ENABLED } from '../../shared/referralCompensationControl.ts';
 import {
   ELIGIBILITY_STATUS,
@@ -26,20 +27,23 @@ import {
   appendHistoryEntry,
 } from '../../shared/referralEligibilityControl.ts';
 
-export default async function(req: Request): Promise<Response> {
+export default async function(req) {
+  let operation = 'list';
+  const reply = (data, init) => eligibilityReply(operation, data, init);
   try {
     const base44 = createClientFromRequest(req);
     const user = await base44.auth.me();
     if (!user) {
-      return Response.json({ ok: false, error: 'unauthorized' }, { status: 401 });
+      return reply({ ok: false, error: 'unauthorized' }, { status: 401 });
     }
     if (user.role !== 'admin') {
-      return Response.json({ ok: false, error: 'admin_required' }, { status: 403 });
+      return reply({ ok: false, error: 'admin_required' }, { status: 403 });
     }
 
     let body: any = {};
     try { body = await req.json(); } catch { body = {}; }
     const action = String(body.action || 'list');
+    operation = action === 'review' ? `review.${String(body.review_action || '')}` : action;
     const service = base44.asServiceRole;
     const now = new Date().toISOString();
     const byName = user.full_name || user.email || 'Administrator';
@@ -47,7 +51,7 @@ export default async function(req: Request): Promise<Response> {
     if (action === 'list') {
       const page = await service.entities.ReferralEligibilityProfile.filter({});
       const profiles = page.items || page || [];
-      return Response.json({
+      return reply({
         ok: true,
         profiles: profiles.map((p) => ({
           ...p,
@@ -60,15 +64,15 @@ export default async function(req: Request): Promise<Response> {
     if (action === 'get') {
       const userId = String(body.user_id || '').trim();
       if (!userId) {
-        return Response.json({ ok: false, error: 'user_id_required' }, { status: 400 });
+        return reply({ ok: false, error: 'user_id_required' }, { status: 400 });
       }
       const page = await service.entities.ReferralEligibilityProfile.filter(
         { user_id: userId });
       const profile = (page.items || page || [])[0];
       if (!profile) {
-        return Response.json({ ok: false, error: 'profile_not_found' }, { status: 404 });
+        return reply({ ok: false, error: 'profile_not_found' }, { status: 404 });
       }
-      return Response.json({
+      return reply({
         ok: true,
         profile: { ...profile, effective: computeEffectiveEligibility(profile, null, now) },
         compensation_enabled: LEGACY_REFERRAL_COMPENSATION_ENABLED,
@@ -80,7 +84,7 @@ export default async function(req: Request): Promise<Response> {
       const reviewAction = String(body.review_action || '').trim();
       const reason = String(body.reason || '').trim();
       if (!userId || !reviewAction) {
-        return Response.json(
+        return reply(
           { ok: false, error: 'user_id_and_review_action_required' }, { status: 400 });
       }
 
@@ -88,7 +92,7 @@ export default async function(req: Request): Promise<Response> {
         { user_id: userId });
       const profile = (page.items || page || [])[0];
       if (!profile) {
-        return Response.json({ ok: false, error: 'profile_not_found' }, { status: 404 });
+        return reply({ ok: false, error: 'profile_not_found' }, { status: 404 });
       }
 
       const fromStatus = profile.status;
@@ -110,12 +114,12 @@ export default async function(req: Request): Promise<Response> {
         // Evidence + required fields BEFORE verification — fail closed.
         const check = validateSubmission(profile.self_submitted || {});
         if (!check.ok) {
-          return Response.json(
+          return reply(
             { ok: false, error: 'application_incomplete', missing: check.missing },
             { status: 400 });
         }
         if (((profile.self_submitted || {}).evidence_file_uris || []).length === 0) {
-          return Response.json({ ok: false, error: 'evidence_required' }, { status: 400 });
+          return reply({ ok: false, error: 'evidence_required' }, { status: 400 });
         }
         const ver = body.verification || {};
         const source = String(ver.verification_source || '').trim();
@@ -125,16 +129,16 @@ export default async function(req: Request): Promise<Response> {
           .map((j) => String(j || '').trim().toUpperCase()).filter(Boolean);
         const licenseStatus = String(ver.license_status || '').trim();
         if (!source || !reference) {
-          return Response.json(
+          return reply(
             { ok: false, error: 'verification_source_and_reference_required' },
             { status: 400 });
         }
         if (!jurisdictions.length) {
-          return Response.json(
+          return reply(
             { ok: false, error: 'approved_jurisdiction_required' }, { status: 400 });
         }
         if (!['active', 'inactive', 'unknown'].includes(licenseStatus)) {
-          return Response.json(
+          return reply(
             { ok: false, error: 'license_status_required' }, { status: 400 });
         }
 
@@ -142,7 +146,7 @@ export default async function(req: Request): Promise<Response> {
         // profile is a no-op (no history duplicate).
         if (fromStatus === ELIGIBILITY_STATUS.VERIFIED &&
             matchesVerifiedSnapshot(profile)) {
-          return Response.json({
+          return reply({
             ok: true, already_verified: true, profile,
             compensation_enabled: LEGACY_REFERRAL_COMPENSATION_ENABLED,
           });
@@ -175,7 +179,7 @@ export default async function(req: Request): Promise<Response> {
             String(ver.note || '').trim() || null,
             { verified: verifiedBlock, status_reason: null }));
 
-        return Response.json({
+        return reply({
           ok: true,
           profile: {
             ...updated,
@@ -188,7 +192,7 @@ export default async function(req: Request): Promise<Response> {
       if (reviewAction === 'reject' || reviewAction === 'suspend' ||
           reviewAction === 'request_corrections') {
         if (!reason) {
-          return Response.json(
+          return reply(
             { ok: false, error: 'reason_required' }, { status: 400 });
         }
         const toStatus = reviewAction === 'reject'
@@ -200,7 +204,7 @@ export default async function(req: Request): Promise<Response> {
           : reviewAction === 'suspend' ? 'suspended' : 'corrections_requested';
         const updated = await service.entities.ReferralEligibilityProfile.update(
           profile.id, transition(toStatus, historyAction, reason));
-        return Response.json({
+        return reply({
           ok: true,
           profile: {
             ...updated,
@@ -214,17 +218,17 @@ export default async function(req: Request): Promise<Response> {
         // Only a PRIOR server-written verification can be reinstated —
         // never an applicant claim.
         if (fromStatus !== ELIGIBILITY_STATUS.SUSPENDED) {
-          return Response.json(
+          return reply(
             { ok: false, error: 'profile_not_suspended' }, { status: 400 });
         }
         if (!profile.verified || !profile.verified.verified_at) {
-          return Response.json(
+          return reply(
             { ok: false, error: 'no_prior_verification_to_reinstate' }, { status: 400 });
         }
         const updated = await service.entities.ReferralEligibilityProfile.update(
           profile.id, transition(
             ELIGIBILITY_STATUS.VERIFIED, 'reinstated', reason || null));
-        return Response.json({
+        return reply({
           ok: true,
           profile: {
             ...updated,
@@ -234,13 +238,13 @@ export default async function(req: Request): Promise<Response> {
         });
       }
 
-      return Response.json(
+      return reply(
         { ok: false, error: 'unknown_review_action' }, { status: 400 });
     }
 
-    return Response.json({ ok: false, error: 'unknown_action' }, { status: 400 });
+    return reply({ ok: false, error: 'unknown_action' }, { status: 400 });
   } catch (error) {
     console.error('referralEligibilityAdmin error:', (error as Error).message);
-    return Response.json({ ok: false, error: (error as Error).message }, { status: 500 });
+    return reply({ ok: false, error: (error as Error).message }, { status: 500 });
   }
 }

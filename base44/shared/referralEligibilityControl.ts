@@ -125,6 +125,16 @@ export function computeEffectiveEligibility(profile, jurisdiction, nowIso) {
   }
   const v = profile.verified;
   const nowMs = Date.parse(nowIso || new Date().toISOString());
+  const verifiedMs = Date.parse(v.verified_at);
+  const startMs = Date.parse(v.eligibility_effective_start);
+  const endMs = v.eligibility_effective_end ? Date.parse(v.eligibility_effective_end) : null;
+  if (!Number.isFinite(verifiedMs) || !Number.isFinite(startMs) || startMs < verifiedMs ||
+      nowMs < startMs || nowMs < verifiedMs) {
+    reasons.push({ code: 'eligibility_not_effective', detail: 'verification/start window invalid or not yet effective' });
+  }
+  if (endMs !== null && (!Number.isFinite(endMs) || nowMs >= endMs)) {
+    reasons.push({ code: 'eligibility_ended', detail: 'eligibility window ended or invalid' });
+  }
 
   // TRUST ONLY SERVER-CONTROLLED DATA: expiration is read from the
   // SERVER-PINNED verified snapshot (written by the admin review seam),
@@ -139,7 +149,10 @@ export function computeEffectiveEligibility(profile, jurisdiction, nowIso) {
       detail: 'self-submitted information no longer matches the verified snapshot',
     });
   }
-  const licExp = snap.license_expiration || (profile.self_submitted || {}).license_expiration;
+  const licExp = snap.license_expiration;
+  if (!Object.keys(snap).length || !licExp || !Number.isFinite(Date.parse(`${licExp}T23:59:59Z`))) {
+    reasons.push({ code: 'verified_expiration_unknown', detail: 'no valid expiration in the server-pinned snapshot' });
+  }
   if (licExp && nowMs > Date.parse(`${licExp}T23:59:59Z`)) {
     reasons.push({ code: 'license_expired', detail: licExp });
   }

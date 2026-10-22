@@ -15,6 +15,7 @@
 // A verified profile NEVER activates compensation: the global
 // LEGACY_REFERRAL_COMPENSATION_ENABLED control stays disabled independently.
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.54';
+import { eligibilityReply } from '../../shared/eligibilityContract.ts';
 import { LEGACY_REFERRAL_COMPENSATION_ENABLED } from '../../shared/referralCompensationControl.ts';
 import {
   ELIGIBILITY_STATUS,
@@ -40,11 +41,14 @@ async function resolveCompanyId(service, userId) {
   }
 }
 
-async function findOwnProfile(service, user) {
+async function findOwnProfile(service, user, create = false) {
   const page = await service.entities.ReferralEligibilityProfile.filter(
     { user_id: user.id });
   const existing = (page.items || page || [])[0];
   if (existing) return existing;
+  // Reading the page must never create a production fixture/draft.
+  if (!create) return { user_id: user.id, status: ELIGIBILITY_STATUS.DRAFT,
+    self_submitted: {}, eligibility_history: [] };
   // Draft shell — created only through this authenticated seam, anchored to
   // the session identity. Company linkage is CONTEXT ONLY (never licensure).
   const companyId = await resolveCompanyId(service, user.id);
@@ -58,24 +62,27 @@ async function findOwnProfile(service, user) {
   });
 }
 
-export default async function(req: Request): Promise<Response> {
+export default async function(req) {
+  let operation = 'get';
+  const reply = (data, init) => eligibilityReply(operation, data, init);
   try {
     const base44 = createClientFromRequest(req);
     const user = await base44.auth.me();
     if (!user) {
-      return Response.json({ ok: false, error: 'unauthorized' }, { status: 401 });
+      return reply({ ok: false, error: 'unauthorized' }, { status: 401 });
     }
 
     let body: any = {};
     try { body = await req.json(); } catch { body = {}; }
     const action = String(body.action || 'get');
+    operation = action;
     const service = base44.asServiceRole;
     const now = new Date().toISOString();
     const byName = user.full_name || user.email || 'Applicant';
 
     if (action === 'get') {
       const profile = await findOwnProfile(service, user);
-      if (!profile.company_id) {
+      if (profile.id && !profile.company_id) {
         const companyId = await resolveCompanyId(service, user.id);
         if (companyId) {
           await service.entities.ReferralEligibilityProfile.update(
@@ -83,7 +90,7 @@ export default async function(req: Request): Promise<Response> {
           profile.company_id = companyId;
         }
       }
-      return Response.json({
+      return reply({
         ok: true,
         profile,
         effective: computeEffectiveEligibility(profile, body.jurisdiction, now),
@@ -97,18 +104,18 @@ export default async function(req: Request): Promise<Response> {
       // compensation flags) is structurally ignored by sanitizeSelfSubmission.
       const self = sanitizeSelfSubmission(body.self_submitted || {});
       if (!self) {
-        return Response.json({ ok: false, error: 'nothing_to_submit' }, { status: 400 });
+        return reply({ ok: false, error: 'nothing_to_submit' }, { status: 400 });
       }
       const check = validateSubmission(self);
       if (!check.ok) {
-        return Response.json(
+        return reply(
           { ok: false, error: 'incomplete_application', missing: check.missing },
           { status: 400 });
       }
 
-      const profile = await findOwnProfile(service, user);
+      const profile = await findOwnProfile(service, user, true);
       if (profile.status === ELIGIBILITY_STATUS.SUSPENDED) {
-        return Response.json({ ok: false, error: 'profile_suspended' }, { status: 403 });
+        return reply({ ok: false, error: 'profile_suspended' }, { status: 403 });
       }
 
       const material = isMaterialChange(profile.self_submitted, self);
@@ -163,7 +170,7 @@ export default async function(req: Request): Promise<Response> {
           last_activity_at: now,
         });
 
-      return Response.json({
+      return reply({
         ok: true,
         profile: updated,
         effective: computeEffectiveEligibility(updated, body.jurisdiction, now),
@@ -172,9 +179,9 @@ export default async function(req: Request): Promise<Response> {
       });
     }
 
-    return Response.json({ ok: false, error: 'unknown_action' }, { status: 400 });
+    return reply({ ok: false, error: 'unknown_action' }, { status: 400 });
   } catch (error) {
     console.error('referralEligibility error:', (error as Error).message);
-    return Response.json({ ok: false, error: (error as Error).message }, { status: 500 });
+    return reply({ ok: false, error: (error as Error).message }, { status: 500 });
   }
 }

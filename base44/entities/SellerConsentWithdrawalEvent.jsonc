@@ -1,0 +1,93 @@
+{
+  "name": "SellerConsentWithdrawalEvent",
+  "type": "object",
+  "description": "Append-only administrative relay events. A request_received event is an unverified report, never withdrawal authority. Confirmation is atomically appended on SellerConsent.withdrawal_history; notification events here mean queued or failed, never delivered. Sanctioned server function only; app users and app admins cannot directly write/edit/delete audit events. Workspace editors remain trusted maintainers.",
+  "properties": {
+    "consent_record_id": {
+      "type": "string"
+    },
+    "consent_id": {
+      "type": "string"
+    },
+    "event_type": {
+      "type": "string",
+      "enum": [
+        "request_received",
+        "notification_queued",
+        "notification_failed"
+      ]
+    },
+    "actor_id": {
+      "type": "string"
+    },
+    "actor_name": {
+      "type": "string"
+    },
+    "at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "request_received_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "channel": {
+      "type": "string",
+      "maxLength": 80
+    },
+    "requester_identity": {
+      "type": "string",
+      "maxLength": 120
+    },
+    "claimed_capacity": {
+      "type": "string",
+      "maxLength": 120
+    },
+    "reference_note": {
+      "type": "string",
+      "maxLength": 300
+    },
+    "recipient_user_id": {
+      "type": "string"
+    },
+    "notification_id": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "consent_record_id",
+    "consent_id",
+    "event_type",
+    "actor_id",
+    "at"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.actor_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "user_condition": {
+        "collaborator_role": "editor"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "collaborator_role": "editor"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "collaborator_role": "editor"
+      }
+    }
+  }
+}
