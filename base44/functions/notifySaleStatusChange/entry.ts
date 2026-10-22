@@ -41,11 +41,11 @@ Deno.serve(async (req) => {
     if (newStatus === 'upcoming' && oldStatus === 'draft') {
       title = '📅 Sale Published';
       message = `Your sale "${sale.title}" is now live and visible to the public.`;
-      link = `/SaleEditor?id=${sale.id}`;
+      link = `/EstateSaleDetail?id=${sale.id}`;
     } else if (newStatus === 'active') {
       title = '🎉 Sale Started';
       message = `Your sale "${sale.title}" has started! Good luck!`;
-      link = `/MySales`;
+      link = `/EstateSaleDetail?id=${sale.id}`;
     } else if (newStatus === 'completed') {
       title = '✅ Sale Completed';
       message = `Your sale "${sale.title}" has been marked as completed. Time to recap!`;
