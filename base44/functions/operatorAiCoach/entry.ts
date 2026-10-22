@@ -145,7 +145,7 @@ function buildSystemPrompt({ user, operator, activeSale, aiMemory, screenContext
     ? `== ACTIVE SALE CONTEXT ==
 Sale: ${activeSale.title || 'Untitled'}
 Status: ${activeSale.status || 'unknown'}
-Address: ${activeSale.property_address?.formatted_address || activeSale.property_address?.city + ', ' + activeSale.property_address?.state || 'Not set'}
+Location: ${[activeSale.property_address?.city, activeSale.property_address?.state].filter(Boolean).join(', ') || 'Not set'}
 Estimated Value: $${(activeSale.estimated_value || 0).toLocaleString()}
 Actual Revenue: $${(activeSale.actual_revenue || 0).toLocaleString()}
 Total Items: ${activeSale.total_items || 0}
@@ -292,10 +292,29 @@ Deno.serve(async (req) => {
   const aiMemory = operatorUser.ai_coach_memory || '';
 
   // 7. Load active sale data if provided
+  // Chapter 24 P0-1 — AUTHORIZE BEFORE FETCH/CONTEXT. The sale id arrives from
+  // the client and is never trusted: the caller must be the sale's operator, a
+  // member of its sale team, or an admin BEFORE any sale data reaches AI context.
+  // Deny-before-fetch — an unauthorized sale id never reaches the model.
   let activeSale = null;
   if (active_sale_id) {
-    const sales = await base44.asServiceRole.entities.EstateSale.filter({ id: active_sale_id });
-    activeSale = sales[0] || null;
+    let sales = [];
+    try {
+      sales = await base44.asServiceRole.entities.EstateSale.filter({ id: active_sale_id });
+    } catch (e) {
+      // Invalid/malformed id — fail closed; no data is loaded or disclosed.
+      return Response.json({ error: 'Sale not found.' }, { status: 404 });
+    }
+    const candidate = sales[0] || null;
+    if (!candidate) {
+      return Response.json({ error: 'Sale not found.' }, { status: 404 });
+    }
+    const isSaleOperator = candidate.operator_id === effectiveOperatorId;
+    const isSaleTeam = (candidate.sale_team || []).includes(user.id);
+    if (!isSaleOperator && !isSaleTeam && !isAdmin) {
+      return Response.json({ error: 'Not authorized for this sale.' }, { status: 403 });
+    }
+    activeSale = candidate;
   }
 
   // 8. Check credit account

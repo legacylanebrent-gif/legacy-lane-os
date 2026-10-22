@@ -26,7 +26,7 @@ function toSlug(str) {
     .replace(/^-+|-+$/g, '');
 }
 
-async function generateAISummary(base44, sale, topItems, categoryBreakdown, totalRevenue) {
+async function generateAISummary(base44, sale, topItems, categoryBreakdown) {
   const topCategories = Object.entries(categoryBreakdown)
     .sort(([, a], [, b]) => b - a)
     .slice(0, 5)
@@ -43,8 +43,9 @@ Sale Title: ${sale.title}
 Location: ${location || 'Unknown'}
 Top Categories: ${topCategories.join(', ')}
 Notable Items: ${topItemNames || 'Various antiques and collectibles'}
-Total Revenue: ${totalRevenue ? '$' + totalRevenue.toLocaleString() : 'Not disclosed'}
 Estate Sale Company Owner: ${sale.operator_name || 'Unknown'}
+
+Never state revenue, proceeds, fees, commissions, or any other financial figures — the public recap must not disclose private financial information.
 
 Write in a factual, archival tone. Mention the location, types of items, and any notable pieces. 
 This will be indexed by search engines as a historical record.`;
@@ -128,7 +129,22 @@ Deno.serve(async (req) => {
     }
 
     if (!sale) {
-      return Response.json({ error: 'No sale data provided' }, { status: 400 });
+      // Chapter 24 P0-2D — no silent fallback to an arbitrary/default sale.
+      return Response.json({ error: 'sale_id (or the automation sale record) is required — no default sale' }, { status: 400 });
+    }
+
+    // Chapter 24 P0-2 — direct (non-automation) callers must be authorized for
+    // the sale before a recap is generated. The automation invocation runs as
+    // the workflow creator; on that path the trigger payload itself named the
+    // completed sale (provenance), so only user-context calls are gated here.
+    try {
+      const user = await base44.auth.me();
+      if (user && sale.operator_id !== user.id && user.role !== 'admin') {
+        return Response.json({ error: 'Only the sale operator (or an admin) may generate a recap for this sale.' }, { status: 403 });
+      }
+    } catch (e) {
+      // No authenticated user context (automation path) — the trigger payload
+      // already restricted this run to the completed sale it named.
     }
 
     // Only process completed sales
@@ -184,7 +200,7 @@ Deno.serve(async (req) => {
       .map(([cat]) => cat);
 
     // Generate AI summary
-    const aiSummary = await generateAISummary(base44, sale, topItems, categoryBreakdown, sale.actual_revenue);
+    const aiSummary = await generateAISummary(base44, sale, topItems, categoryBreakdown);
 
     // Build slug for this recap
     const city = sale.property_address?.city || '';
@@ -210,8 +226,10 @@ Deno.serve(async (req) => {
       total_items: images.length || sale.total_items || 0,
       total_sold: pricings.filter(p => p.user_price).length,
       total_views: sale.views || 0,
-      estimated_sale_value: sale.estimated_value || null,
-      actual_revenue: sale.actual_revenue || null,
+      // Chapter 24 P0-2B — private financial figures are NEVER written to the
+      // public-facing recap record (draft or published).
+      estimated_sale_value: null,
+      actual_revenue: null,
       top_categories: topCategories,
       notable_brands: [...brandSet].slice(0, 10),
       most_valuable_items: topItems.slice(0, 6),
@@ -220,32 +238,59 @@ Deno.serve(async (req) => {
       primary_image_url: sale.images?.[0]?.url || '',
       seo_title: seoTitle,
       meta_description: metaDesc,
-      status: 'published',
+      // Chapter 24 P0-2 — completion may create a PRIVATE DRAFT only;
+      // publication is a separate human act (publishSaleRecap).
+      status: 'draft',
       indexed_status: 'not_submitted',
     };
 
-    // Upsert recap
+    // Upsert recap — Chapter 24 P0-2D IDEMPOTENCY: replaying the completion
+    // trigger never creates a duplicate record, never un-publishes a published
+    // recap, and never re-runs the knowledge-graph side effects.
     const existing = await base44.asServiceRole.entities.SaleRecap.filter({ sale_id: sale.id });
     let recapId;
+    let isNewRecap = false;
     if (existing.length > 0) {
+      if (existing[0].status === 'published') {
+        return Response.json({ success: true, skipped: 'already_published', recap_id: existing[0].id });
+      }
       await base44.asServiceRole.entities.SaleRecap.update(existing[0].id, recapData);
       recapId = existing[0].id;
     } else {
       const created = await base44.asServiceRole.entities.SaleRecap.create(recapData);
       recapId = created.id;
+      isNewRecap = true;
     }
 
-    // Stage 10: Mark items as sold in knowledge graph
-    if (pricings.length > 0) {
+    // Stage 10: Mark items as sold in knowledge graph (FIRST GENERATION ONLY —
+    // replays must not double-count sold items).
+    if (isNewRecap && pricings.length > 0) {
       await markSoldOnKnowledge(base44, pricings).catch(err => {
         console.error('markSoldOnKnowledge error:', err.message);
       });
+    }
+
+    // Chapter 24 P1 — AUTOMATION EXPLAINABILITY: the operator can answer
+    // WHY DID THIS HAPPEN? from the sale's own activity log.
+    try {
+      await base44.asServiceRole.entities.Activity.create({
+        sale_id: sale.id,
+        operator_id: sale.operator_id || '',
+        user_id: sale.operator_id || '',
+        activity_type: 'note',
+        subject: 'Sale recap draft generated',
+        description: `AUTOMATED (trigger: EstateSale status completed for "${sale.title}"). A private DRAFT SaleRecap was generated with an AI summary from canonical sale records (categories, items, dates — no financial figures). Publication requires explicit operator approval.`,
+        status: 'completed',
+      });
+    } catch (e) {
+      console.warn('recap activity log failed:', e && e.message);
     }
 
     return Response.json({
       success: true,
       recap_id: recapId,
       slug,
+      status: 'draft',
       items_processed: topItems.length,
       categories: topCategories,
     });

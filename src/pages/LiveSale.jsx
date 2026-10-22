@@ -8,7 +8,7 @@ import { base44 } from '@/api/base44Client';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Loader2, RadioTower, RefreshCw, Users } from 'lucide-react';
+import { Loader2, LifeBuoy, RadioTower, RefreshCw, Users } from 'lucide-react';
 import OpenReadinessCard from '@/components/livesale/OpenReadinessCard';
 import ChangesCard from '@/components/livesale/ChangesCard';
 import AttentionQueueCard from '@/components/livesale/AttentionQueueCard';
@@ -160,9 +160,14 @@ export default function LiveSale() {
             {' · '}Assembled from current records — this view owns nothing.
           </p>
         </div>
-        <Button size="sm" variant="outline" onClick={() => load(sale.id)}>
-          <RefreshCw className="w-3.5 h-3.5 mr-1" />Refresh
-        </Button>
+        <div className="flex items-center gap-2">
+          <Link to={`/ManualFallbackKit?saleId=${sale.id}`}>
+            <Button size="sm" variant="outline"><LifeBuoy className="w-3.5 h-3.5 mr-1" />Continuity kit</Button>
+          </Link>
+          <Button size="sm" variant="outline" onClick={() => load(sale.id)}>
+            <RefreshCw className="w-3.5 h-3.5 mr-1" />Refresh
+          </Button>
+        </div>
       </div>
 
       <Section title="Opening">

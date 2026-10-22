@@ -19,6 +19,7 @@ import SaleEconomicsPanel from '@/components/saleops/SaleEconomicsPanel';
 import TenMoreReflection from '@/components/saleops/TenMoreReflection';
 import ReconciliationPanel from '@/components/saleops/ReconciliationPanel';
 import PostSaleReviewCard from '@/components/saleops/PostSaleReviewCard';
+import RecapPublishCard from '@/components/saleops/RecapPublishCard';
 import ClosingFileCard from '@/components/saleops/ClosingFileCard';
 import ReleasePickupDialog from '@/components/pickup/ReleasePickupDialog';
 
@@ -243,7 +244,7 @@ export default function SaleCloseout() {
     try {
       await base44.entities.EstateSale.update(sale.id, { status: 'completed' });
       setShowCloseConfirm(false);
-      alert('Project marked complete. The existing SaleRecap workflow will generate the public recap.');
+      alert('Project marked complete. A private recap draft is generated for your review on the closeout page — nothing is published until you approve it.');
       navigate(createPageUrl('MySales'));
     } catch (e) {
       console.error(e);
@@ -515,6 +516,9 @@ export default function SaleCloseout() {
       {/* Chapter 23 P1 — five-minute review + near miss (canonical home: SaleRecap / SaleIssue) */}
       <PostSaleReviewCard sale={sale} />
 
+      {/* Chapter 24 P0-2A — recap review & publication gate (draft → human approval → public) */}
+      <RecapPublishCard sale={sale} />
+
       {/* Project close */}
       <Card className={blockers.length ? 'border-red-300' : 'border-green-300'}>
         <CardContent className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -545,7 +549,7 @@ export default function SaleCloseout() {
         <DialogContent className="max-w-md">
           <DialogHeader><DialogTitle>Mark this project complete?</DialogTitle></DialogHeader>
           <p className="text-sm text-slate-600">
-            This sets the existing EstateSale status to <strong>completed</strong> (the same lifecycle state used by the platform's auto-completion). The SaleRecap workflow generates the public recap.
+            This sets the existing EstateSale status to <strong>completed</strong> (the same lifecycle state used by the platform's auto-completion). A private recap <strong>draft</strong> is generated for your review — publishing it is your explicit approval, and private financial figures are never published.
           </p>
           {warnings.length > 0 && (
             <div className="text-sm text-amber-700 bg-amber-50 border border-amber-200 rounded-md p-2.5 mt-2">

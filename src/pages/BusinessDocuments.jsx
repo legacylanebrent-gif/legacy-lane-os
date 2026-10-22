@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Loader2, Plus, Search, FileCheck2, AlertTriangle } from 'lucide-react';
 import DocumentCard from '@/components/businessdocs/DocumentCard';
 import DocumentChecklist from '@/components/businessdocs/DocumentChecklist';
+import AiUsePolicyCard from '@/components/businessdocs/AiUsePolicyCard';
 import DocumentUploadModal from '@/components/businessdocs/DocumentUploadModal';
 import PolicyAssignmentDialog from '@/components/businessdocs/PolicyAssignmentDialog';
 import { DOC_CATEGORIES, expiringState } from '@/components/businessdocs/documentModel';
@@ -129,6 +130,7 @@ export default function BusinessDocuments() {
       </div>
 
       <DocumentChecklist categoryCounts={counts.byCategory} />
+      <AiUsePolicyCard />
 
       {/* Filters — vertical-first on small screens */}
       <div className="flex flex-col sm:flex-row gap-2">

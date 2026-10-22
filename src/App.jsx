@@ -123,6 +123,7 @@ import AdminBlogSelector from './pages/AdminBlogSelector';
 import BlogIndex from './pages/BlogIndex';
 import CompanyProfilePage from './pages/CompanyProfilePage';
 import SaleRecapPage from './pages/SaleRecapPage';
+import ManualFallbackKit from './pages/ManualFallbackKit';
 import PriceGuidePage from './pages/PriceGuidePage';
 import WantedItemsPage from './pages/WantedItemsPage';
 import WeeklyVideoIntelligence from './pages/WeeklyVideoIntelligence';
@@ -450,6 +451,7 @@ const AuthenticatedApp = () => {
       <Route path="/blog" element={<BlogIndex />} />
       <Route path="/blog-post" element={<BlogPost />} />
       <Route path="/companies" element={<CompanyProfilePage />} />
+      <Route path="/ManualFallbackKit" element={<LayoutWrapper currentPageName="ManualFallbackKit"><ManualFallbackKit /></LayoutWrapper>} />
       <Route path="/sale-recap" element={<SaleRecapPage />} />
       <Route path="/SaleRecap" element={<SaleRecapPage />} />
       <Route path="/price-guide" element={<PriceGuidePage />} />

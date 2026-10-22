@@ -92,13 +92,6 @@ export default function SaleRecapPage() {
           </div>
         </div>
 
-        {recap.actual_revenue > 0 && (
-          <div className="bg-green-50 border border-green-200 rounded-xl p-4 mb-8 text-center">
-            <div className="text-3xl font-bold text-green-700">${recap.actual_revenue?.toLocaleString()}</div>
-            <div className="text-sm text-green-600">Total Sale Revenue</div>
-          </div>
-        )}
-
         {recap.ai_summary && (
           <div className="bg-white border rounded-2xl p-6 mb-8">
             <h2 className="font-bold text-slate-900 mb-2">Sale Summary</h2>

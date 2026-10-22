@@ -109,8 +109,19 @@ Deno.serve(async (req) => {
     const priceAvg = pricesRaw.length > 0 ? Math.round(pricesRaw.reduce((a, b) => a + b, 0) / pricesRaw.length) : null;
 
     // Save to SaleItemPricing entity if sale_id provided
+    // Chapter 24 near-P0 — OWNERSHIP BEFORE WRITE: the caller must be
+    // authorized for the parent sale before comparable/pricing evidence is
+    // written against it. No cross-company evidence injection.
     if (sale_id && results.length > 0) {
       const saleRows = await base44.asServiceRole.entities.EstateSale.filter({ id: sale_id });
+      const sale = saleRows[0] || null;
+      if (!sale) return Response.json({ error: 'Sale not found' }, { status: 404 });
+      const isOperator = sale.operator_id === user.id;
+      const isSaleTeam = (sale.sale_team || []).includes(user.id);
+      const isAdmin = user.role === 'admin';
+      if (!isOperator && !isSaleTeam && !isAdmin) {
+        return Response.json({ error: 'Only the sale operator (or an admin) may save pricing evidence for this sale.' }, { status: 403 });
+      }
       await base44.asServiceRole.entities.SaleItemPricing.create({
         sale_id,
         operator_id: saleRows[0]?.operator_id,

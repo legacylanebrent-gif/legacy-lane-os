@@ -1,6 +1,7 @@
 {
   "name": "SaleRecap",
   "type": "object",
+  "description": "Chapter 24 P0-2 \u2014 a recap is generated as a PRIVATE DRAFT (status 'draft') with an AI summary from canonical sale records. The AI summary remains an AI-GENERATED DRAFT until a human approves it: only the sale operator (or an admin) may publish (publishSaleRecap), and publication strips private financial figures. actual_revenue/estimated_sale_value are deliberately written as null \u2014 a PUBLIC RECAP MUST NOT EXPOSE PRIVATE FINANCIAL DATA.",
   "properties": {
     "sale_id": {
       "type": "string"
@@ -13,7 +14,8 @@
       "type": "string"
     },
     "operator_id": {
-      "type": "string"
+      "type": "string",
+      "description": "Estate Sale Company Owner user ID (RLS anchor)."
     },
     "operator_name": {
       "type": "string"
@@ -44,10 +46,12 @@
       "default": 0
     },
     "estimated_sale_value": {
-      "type": "number"
+      "type": "number",
+      "description": "Chapter 24 P0-2B \u2014 deliberately null: private financial figures are never stored on the public-facing recap record."
     },
     "actual_revenue": {
-      "type": "number"
+      "type": "number",
+      "description": "Chapter 24 P0-2B \u2014 deliberately null: private financial figures are never stored on the public-facing recap record."
     },
     "top_categories": {
       "type": "array",
@@ -89,7 +93,8 @@
       "description": "{ category: count }"
     },
     "ai_summary": {
-      "type": "string"
+      "type": "string",
+      "description": "Chapter 24 \u2014 AI-GENERATED DRAFT text. It is written by the automation, never publishes on its own, and never becomes evidence merely because it was generated from records."
     },
     "historical_notes": {
       "type": "string"
@@ -113,7 +118,17 @@
         "published",
         "archived"
       ],
-      "default": "draft"
+      "default": "draft",
+      "description": "Chapter 24 P0-2 \u2014 'draft' is the automation's only output; 'published' is written exclusively by the human approval path (publishSaleRecap)."
+    },
+    "published_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Chapter 24 P0-2A \u2014 when the operator approved publication."
+    },
+    "published_by_name": {
+      "type": "string",
+      "description": "Chapter 24 P0-2A \u2014 display-name snapshot of the approving operator."
     },
     "indexed_status": {
       "type": "string",
@@ -176,5 +191,58 @@
   },
   "required": [
     "sale_id"
-  ]
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.status": "published"
+        },
+        {
+          "data.operator_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "$or": [
+        {
+          "data.operator_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.operator_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.operator_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
 }
