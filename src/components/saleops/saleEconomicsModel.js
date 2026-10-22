@@ -9,6 +9,11 @@
 //   computed on NET merchandise proceeds when refunds exist.
 //   CLIENT PROCEEDS = net merchandise proceeds − company revenue − authorized reimbursable expenses.
 //   DIRECT COSTS = sale-scoped Expense + LaborEntry-derived cash labor (hours × rate, non-owner).
+//     Chapter 26 P1: labor hours WITHOUT a recorded rate have UNKNOWN cost (never $0 —
+//     unknown-rate hours surface as incomplete, and contribution is PARTIAL while any
+//     exist). WAGE-ONE dedupe: Expense 'labor_wages' enters direct costs only when
+//     LaborEntry carries no known wage cost for the sale — the same wage may never
+//     enter economics twice (excluded wage expenses stay disclosed, never deleted).
 //   OWNER TIME = hours only, never cash cost.
 //   CONTRIBUTION = company revenue − direct costs. NOT net profit (overhead and owner time excluded).
 //   THE AGREEMENT CONTROLS THE MATH: settlement uses the ACCEPTED commercial terms snapshot
@@ -146,9 +151,30 @@ export function authorizedReimbursables(expenses, decisions) {
 // ── LABOR (hours in, cash cost out — never the reverse) ──────────────────────
 export const totalLaborHours = (entries) => asArray(entries).reduce((s, e) => s + (Number(e.hours) || 0), 0);
 export const ownerHours = (entries) => asArray(entries).filter(e => e.is_owner_time).reduce((s, e) => s + (Number(e.hours) || 0), 0);
-export const cashLaborFromHours = (entries) => asArray(entries)
-  .filter(e => !e.is_owner_time)
-  .reduce((s, e) => s + (Number(e.hours) || 0) * (Number(e.hourly_rate) || 0), 0);
+
+// Chapter 26 Phase 1 (P0-1) — UNKNOWN RATE ≠ ZERO RATE.
+// A missing/null rate means the COST BASIS IS UNKNOWN: those hours can never
+// contribute $0 of "known" labor cost. An EXPLICIT rate of 0 is a known numeric
+// value (legitimate unpaid/help labor) and counts as KNOWN — distinct from unknown.
+// Owner time is never cash cost regardless (Chapter 23 doctrine unchanged).
+export function laborCostFromEntries(entries) {
+  const nonOwner = asArray(entries).filter(e => !e.is_owner_time);
+  let knownCost = 0, knownHours = 0, unknownHours = 0, unknownEntries = 0;
+  nonOwner.forEach(e => {
+    const h = Number(e.hours) || 0;
+    const r = e.hourly_rate;
+    if (r === null || r === undefined || r === '') { unknownHours += h; unknownEntries += 1; return; }
+    knownHours += h;
+    knownCost += h * (Number(r) || 0); // explicit 0 stays a KNOWN $0 — never "unknown"
+  });
+  return {
+    knownCost, knownHours, unknownHours, unknownEntries,
+    complete: unknownEntries === 0,
+  };
+}
+// Known cash labor cost only (unknown-rate hours contribute NOTHING here — they
+// are surfaced separately as unknown, never as $0).
+export const cashLaborFromHours = (entries) => laborCostFromEntries(entries).knownCost;
 
 // ── SALE-SCOPED EXPENSE GROUPING ─────────────────────────────────────────────
 export const EXPENSE_GROUPS = {
@@ -195,10 +221,27 @@ export function actualSaleEconomics({ items, deal, financialDecisions, expenses,
   const reimbTotal = reimbursableTotal != null ? reimbursableTotal : authorizedReimbursables(expenses, financialDecisions).total;
   const netDueToClient = netMerchandiseProceeds - companyRevenue - reimbTotal;
   const exp = expenseByGroup(expenses);
-  const cashHoursLabor = cashLaborFromHours(laborEntries);
-  const cashLaborTotal = cashHoursLabor + exp.laborWages;
-  const directCosts = exp.total + cashHoursLabor;
+  const labor = laborCostFromEntries(laborEntries);
+  const cashHoursLabor = labor.knownCost;
+  // Chapter 26 Phase 1 (P0-2) — ONE COST, ONE EFFECT (wage dedupe).
+  // Expense category 'labor_wages' is the wage representation for labor NOT tracked
+  // in LaborEntry (documented on the Expense category). When LaborEntry already
+  // carries KNOWN wage cost for this sale, wage-category Expense lines are EXCLUDED
+  // from direct costs and DISCLOSED — the same wage cost must never enter project
+  // economics twice. The Expense records are PRESERVED (operational truth);
+  // only their economic effect is deduplicated. Distinct labor costs recorded in
+  // other categories (contract labor, professional services, reimbursements) are
+  // NEVER deduplicated — only the labor_wages category participates in this rule.
+  const wageExpenseTotal = exp.laborWages;
+  const excludedWageExpenses = (labor.knownCost > 0 && wageExpenseTotal > 0) ? wageExpenseTotal : 0;
+  const includedWageExpenses = wageExpenseTotal - excludedWageExpenses;
+  const cashLaborTotal = cashHoursLabor + includedWageExpenses;
+  const directCosts = exp.total - excludedWageExpenses + cashHoursLabor;
   const contribution = companyRevenue - directCosts;
+  // UNKNOWN IS DATA: unknown-rate hours make labor cost INCOMPLETE — the figure
+  // below is built from KNOWN components and must always be presented as PARTIAL
+  // wherever labor cost is incomplete. Never as fully-known profitability.
+  const laborIncomplete = !labor.complete;
   const totalHours = totalLaborHours(laborEntries);
   const ownerHrs = ownerHours(laborEntries);
   return {
@@ -209,6 +252,15 @@ export function actualSaleEconomics({ items, deal, financialDecisions, expenses,
     expenses: exp,
     cashHoursLabor, laborWages: exp.laborWages, cashLaborTotal, directCosts,
     contribution,
+    // Chapter 26 Phase 1 — truthful labor-cost state
+    labor,
+    laborCostKnown: cashHoursLabor,
+    laborUnknownHours: labor.unknownHours,
+    laborIncomplete,
+    wageExpenseExcluded: excludedWageExpenses,
+    wageDedupeApplied: excludedWageExpenses > 0,
+    contributionIncomplete: laborIncomplete,
+    contributionState: laborIncomplete ? 'INCOMPLETE_LABOR_COST' : 'COMPLETE',
     margin: companyRevenue > 0 ? contribution / companyRevenue : null,
     ownerHours: ownerHrs,
     employeeHours: Math.max(0, totalHours - ownerHrs),
@@ -305,14 +357,22 @@ export function projectedDealEconomics(deal, o = {}) {
   const serviceRevenue = num(o.serviceRevenue ?? deal?.expected_service_revenue) || 0;
   const fee = companyFee({ gross: estGross, commissionRate: rate, minimumFee });
   const companyRevenue = fee.applied + serviceRevenue;
-  const labor = asArray(o.laborEstimates ?? deal?.labor_estimates)
-    .map(l => ({ hours: Number(l.hours) || 0, rate: Number(l.rate) || 0, isOwner: !!l.is_owner_time }));
+  const laborRows = asArray(o.laborEstimates ?? deal?.labor_estimates);
   // Projected OWNER hours are reported separately and never counted as projected
   // CASH labor cost (matching the LaborEntry owner-time doctrine).
-  const cashLabor = labor.filter(l => !l.isOwner);
-  const estOwnerHours = labor.filter(l => l.isOwner).reduce((s, l) => s + l.hours, 0);
-  const estHours = cashLabor.reduce((s, l) => s + l.hours, 0);
-  const estLaborCost = cashLabor.reduce((s, l) => s + l.hours * l.rate, 0);
+  const cashLaborRows = laborRows.filter(l => !l.is_owner_time);
+  const estOwnerHours = laborRows.filter(l => !!l.is_owner_time).reduce((s, l) => s + (Number(l.hours) || 0), 0);
+  const estHours = cashLaborRows.reduce((s, l) => s + (Number(l.hours) || 0), 0);
+  // Chapter 26 Phase 1 (P0-1) — an estimated row with hours but NO rate has an
+  // UNKNOWN projected cost: never $0. Known components only; unknown hours flagged.
+  let estLaborCost = 0, estLaborUnknownHours = 0;
+  cashLaborRows.forEach(l => {
+    const h = Number(l.hours) || 0;
+    const r = l.rate;
+    if (r === null || r === undefined || r === '') { estLaborUnknownHours += h; return; }
+    estLaborCost += h * (Number(r) || 0);
+  });
+  const estLaborCostIncomplete = estLaborUnknownHours > 0;
   const advertising = num(o.advertising ?? deal?.estimated_advertising) || 0;
   const supplies = num(o.supplies ?? deal?.estimated_supplies) || 0;
   const transportation = num(o.transportation ?? deal?.estimated_transportation) || 0;
@@ -326,6 +386,9 @@ export function projectedDealEconomics(deal, o = {}) {
     estGross, rate, minimumFee, serviceRevenue, fee, companyRevenue,
     estHours, estLaborCost, estOwnerHours, advertising, supplies, transportation, processing, other,
     directCosts, contribution,
+    estLaborUnknownHours, estLaborCostIncomplete,
+    contributionIncomplete: estLaborCostIncomplete,
+    contributionState: estLaborCostIncomplete ? 'INCOMPLETE_LABOR_COST' : 'COMPLETE',
     minRevenueThreshold, minContributionThreshold,
     minRevenueTest: minRevenueThreshold != null ? companyRevenue >= minRevenueThreshold : null,
     minContributionTest: minContributionThreshold != null ? contribution >= minContributionThreshold : null,

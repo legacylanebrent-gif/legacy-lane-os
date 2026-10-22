@@ -287,8 +287,8 @@ export default function SaleCloseout() {
         `Company fee applied: ${money(econ.fee.applied)}${econ.fee.minimumApplied ? ' (contract minimum)' : ` (${econ.terms.commissionRate}%)`}`,
         `Authorized service charges: ${econ.charges.length} (${money(econ.serviceRevenue)})`,
         `Direct expenses recorded: ${expenses.length} (${money(econ.expenses.total)})`,
-        `Cash labor cost: ${money(econ.cashLaborTotal)} · Owner time: ${econ.ownerHours.toFixed(1)} hrs (not cash)`,
-        `Sale contribution: ${money(econ.contribution)} (not net profit)`,
+        `Cash labor cost: ${money(econ.cashLaborTotal)}${econ.laborIncomplete ? ` (INCOMPLETE — ${econ.laborUnknownHours.toFixed(1)} hrs without a recorded rate; their cost is UNKNOWN, not $0)` : ''}${econ.wageDedupeApplied ? ` (${money(econ.wageExpenseExcluded)} wage expense excluded — already carried by recorded labor hours)` : ''} · Owner time: ${econ.ownerHours.toFixed(1)} hrs (not cash)`,
+        `Sale contribution: ${money(econ.contribution)} (not net profit${econ.contributionIncomplete ? `; INCOMPLETE — PARTIAL, labor cost unknown for ${econ.laborUnknownHours.toFixed(1)} hrs` : ''})`,
       ],
     },
     {

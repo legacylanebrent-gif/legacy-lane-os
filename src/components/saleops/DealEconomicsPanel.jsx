@@ -227,11 +227,11 @@ export default function DealEconomicsPanel({ deal, onPersist, allDeals, linkedSa
             </div>
           )}
           <ResultRow label="Projected company revenue" value={money(base.companyRevenue)} strong hint="Fee applied + expected authorized services" />
-          <ResultRow label="Projected cash labor cost" value={money(base.estLaborCost)} />
+          <ResultRow label={`Projected cash labor cost${base.estLaborCostIncomplete ? ' — known only' : ''}`} value={money(base.estLaborCost)} hint={base.estLaborCostIncomplete ? `INCOMPLETE — ${base.estLaborUnknownHours.toFixed(1)} estimated hour(s) have no rate; their cost is UNKNOWN, not $0` : undefined} />
           {base.estOwnerHours > 0 && <ResultRow label="Projected owner time" value={`${base.estOwnerHours.toFixed(1)} hrs (not cash)`} />}
           <ResultRow label="Projected direct cost" value={money(base.directCosts)} />
           <div className="border-t border-cyan-200 pt-1.5">
-            <ResultRow label="Projected sale contribution" value={money(base.contribution)} strong tone={base.contribution >= 0 ? 'text-green-700' : 'text-red-600'} hint="Company revenue − direct costs. Not accounting net profit (no overhead, no owner time)." />
+            <ResultRow label={`Projected sale contribution${base.contributionIncomplete ? ' — PARTIAL (incomplete labor cost)' : ''}`} value={money(base.contribution)} strong tone={base.contribution >= 0 ? 'text-green-700' : 'text-red-600'} hint="Company revenue − direct costs. Not accounting net profit (no overhead, no owner time)." />
           </div>
         </CardContent>
       </Card>

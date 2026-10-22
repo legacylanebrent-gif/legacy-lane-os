@@ -101,8 +101,27 @@ export default function SaleEconomicsPanel({ sale, items, expenses, deal, laborE
         <Card>
           <CardHeader className="pb-2"><CardTitle className="text-base">Direct Sale Costs</CardTitle></CardHeader>
           <CardContent className="space-y-2 text-sm">
-            <Line label="Cash labor (hours × rate)" value={money(econ.cashHoursLabor)} hint={econ.totalHours > 0 ? `${econ.totalHours.toFixed(1)} hours recorded` : 'no labor hours recorded'} muted />
-            {econ.laborWages > 0 && <Line label="Wage expense lines (no hours tracked)" value={money(econ.laborWages)} muted />}
+            <Line label="Cash labor — known cost (hours × rate)" value={money(econ.cashHoursLabor)} hint={econ.totalHours > 0 ? `${econ.totalHours.toFixed(1)} hours recorded` : 'no labor hours recorded'} muted />
+            {econ.laborIncomplete && (
+              <div className="flex items-start gap-2 text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-md p-2">
+                <AlertTriangle className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" />
+                <span>
+                  <strong>INCOMPLETE LABOR COST</strong> — {econ.laborUnknownHours.toFixed(1)} hour(s) have no recorded rate.
+                  Their labor cost is <strong>UNKNOWN, not $0</strong>. Labor totals and contribution below are built from KNOWN
+                  components only and are <strong>PARTIAL</strong>. Record the missing rate(s) to complete project economics.
+                </span>
+              </div>
+            )}
+            {econ.wageDedupeApplied ? (
+              <div className="flex items-start gap-2 text-xs text-slate-600 bg-slate-50 border border-slate-200 rounded-md p-2">
+                <Info className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" />
+                <span>
+                  Wage expense lines of {money(econ.wageExpenseExcluded)} are <strong>EXCLUDED from direct costs</strong> — recorded
+                  labor hours already carry {money(econ.laborCostKnown)} of known wage cost, and the same wage cost may not enter
+                  economics twice. The expense records are preserved; only their economic effect is deduplicated.
+                </span>
+              </div>
+            ) : (econ.laborWages > 0 && <Line label="Wage expense lines (no hours tracked)" value={money(econ.laborWages)} muted />)}
             <Line label="Advertising" value={money(econ.expenses.advertising)} muted />
             <Line label="Supplies / materials" value={money(econ.expenses.supplies)} muted />
             <Line label="Travel / transportation" value={money(econ.expenses.transportation)} muted />
@@ -125,10 +144,15 @@ export default function SaleEconomicsPanel({ sale, items, expenses, deal, laborE
         <CardContent className="p-4">
           <div className="flex items-center justify-between flex-wrap gap-3">
             <div>
-              <p className="text-xs uppercase tracking-wide text-slate-400">Actual sale contribution</p>
-              <p className={`text-3xl font-bold ${econ.contribution >= 0 ? 'text-green-700' : 'text-red-600'}`}>{money(econ.contribution)}</p>
+              <p className="text-xs uppercase tracking-wide text-slate-400">
+                Actual sale contribution{econ.contributionIncomplete ? ' — INCOMPLETE (partial, from known components)' : ''}
+              </p>
+              <p className={`text-3xl font-bold ${econ.contribution >= 0 ? 'text-green-700' : 'text-red-600'} ${econ.contributionIncomplete ? 'opacity-70' : ''}`}>
+                {money(econ.contribution)}{econ.contributionIncomplete ? ' +' : ''}
+              </p>
               <p className="text-xs text-slate-500 mt-1">
                 Company revenue − direct costs. This is <strong>not</strong> net company profit: overhead and owner time are deliberately excluded.
+                {econ.contributionIncomplete && <> Labor cost for <strong>{econ.laborUnknownHours.toFixed(1)} hour(s)</strong> is <strong>UNKNOWN</strong> — this figure is <strong>PARTIAL</strong> and complete contribution cannot be determined until the missing rate(s) are recorded.</>}
               </p>
             </div>
             <div className="flex items-center gap-2 text-xs text-slate-500 bg-slate-50 border border-slate-200 rounded-md p-2 max-w-xs">
@@ -142,9 +166,9 @@ export default function SaleEconomicsPanel({ sale, items, expenses, deal, laborE
       {/* Chapter 23 P1 — project economics metrics (unknown stays unknown, never 0-as-fact) */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         {[
-          ['Margin (contribution / company revenue)', econ.margin != null ? `${(econ.margin * 100).toFixed(1)}%` : '—'],
+          ['Margin (contribution / company revenue)', econ.margin != null ? `${(econ.margin * 100).toFixed(1)}%${econ.contributionIncomplete ? ' · partial' : ''}` : '—'],
           ['Revenue / labor hour', econ.revenuePerLaborHour != null ? money(econ.revenuePerLaborHour) : '— (no hours recorded)'],
-          ['Contribution / labor hour', econ.contributionPerLaborHour != null ? money(econ.contributionPerLaborHour) : '— (no hours recorded)'],
+          ['Contribution / labor hour', econ.contributionPerLaborHour != null ? `${money(econ.contributionPerLaborHour)}${econ.contributionIncomplete ? ' · partial' : ''}` : '— (no hours recorded)'],
           ['Owner share of labor', econ.ownerSharePct != null ? `${Math.round(econ.ownerSharePct * 100)}%` : '—'],
         ].map(([label, value]) => (
           <Card key={label}>
@@ -201,6 +225,14 @@ export default function SaleEconomicsPanel({ sale, items, expenses, deal, laborE
               <p className="text-xs text-slate-400 mt-2">
                 Estimates are pre-sale projections from the opportunity record; actuals come from sold inventory, labor entries and sale-scoped expenses.
               </p>
+              {(econ.laborIncomplete || (projected && projected.estLaborCostIncomplete)) && (
+                <p className="text-xs text-amber-700 mt-1">
+                  Labor cost is INCOMPLETE — {[
+                    projected && projected.estLaborCostIncomplete ? `${projected.estLaborUnknownHours.toFixed(1)} projected hour(s) without a rate` : null,
+                    econ.laborIncomplete ? `${econ.laborUnknownHours.toFixed(1)} actual hour(s) without a rate` : null,
+                  ].filter(Boolean).join(', ')}. Hours without a rate have UNKNOWN cost (never $0); labor and contribution figures above are PARTIAL.
+                </p>
+              )}
               {econ.charges.length > 0 && (
                 <p className="text-xs text-slate-500 mt-1">
                   Scope-change context: {econ.charges.length} client-authorized additional service decision(s) totaling {money(econ.serviceRevenue)} were recorded on this project — variance may reflect authorized added scope, not an estimating miss.

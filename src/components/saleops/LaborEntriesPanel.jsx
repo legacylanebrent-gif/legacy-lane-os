@@ -36,6 +36,9 @@ function LaborSummary({ entries }) {
   });
   const cash = cashLaborFromHours(entries);
   const owner = ownerHours(entries);
+  const unknownRateHours = entries
+    .filter(e => !e.is_owner_time && (e.hourly_rate === null || e.hourly_rate === undefined || e.hourly_rate === ''))
+    .reduce((s, e) => s + (Number(e.hours) || 0), 0);
   return (
     <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
       <Card><CardContent className="p-3">
@@ -43,9 +46,14 @@ function LaborSummary({ entries }) {
         <div className="text-lg font-bold text-slate-900">{totalLaborHours(entries).toFixed(1)}</div>
       </CardContent></Card>
       <Card><CardContent className="p-3">
-        <div className="text-xs text-slate-500 flex items-center gap-1"><DollarSign className="w-3 h-3" />Cash labor cost</div>
+        <div className="text-xs text-slate-500 flex items-center gap-1"><DollarSign className="w-3 h-3" />Cash labor cost{unknownRateHours > 0 ? ' — known only' : ''}</div>
         <div className="text-lg font-bold text-green-700">{money(cash)}</div>
         <div className="text-[10px] text-slate-400">paid hours × rate</div>
+        {unknownRateHours > 0 && (
+          <div className="text-[10px] text-amber-700 font-medium mt-1">
+            INCOMPLETE — {unknownRateHours.toFixed(1)} hr(s) have no rate; their cost is UNKNOWN, not $0
+          </div>
+        )}
       </CardContent></Card>
       <Card><CardContent className="p-3">
         <div className="text-xs text-slate-500 flex items-center gap-1"><User className="w-3 h-3" />Owner time</div>

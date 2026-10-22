@@ -100,7 +100,7 @@ async function recordUsage(base44, operatorId, account, { aiMode, modelUsed, inp
 // done; human/system records stay authoritative.
 async function buildOperationsContext(base44, sale) {
   const [
-    scopeRes, tasksRes, researchRes, attentionRes, assignRes, kitRes, mkRes, decisionsRes,
+    scopeRes, tasksRes, researchRes, attentionRes, assignRes, kitRes, mkRes, decisionsRes, laborRes, expRes,
   ] = await Promise.all([
     base44.asServiceRole.entities.SaleScope.filter({ sale_id: sale.id, status: 'ACTIVE' }),
     base44.asServiceRole.entities.SaleTask.filter({ sale_id: sale.id }),
@@ -110,6 +110,8 @@ async function buildOperationsContext(base44, sale) {
     base44.asServiceRole.entities.SaleKitTemplate.filter({ operator_id: sale.operator_id, enabled: true }),
     base44.asServiceRole.entities.MarketingKit.filter({ sale_id: sale.id }),
     base44.asServiceRole.entities.SaleClientDecision.filter({ sale_id: sale.id, status: 'open' }),
+    base44.asServiceRole.entities.LaborEntry.filter({ sale_id: sale.id }),
+    base44.asServiceRole.entities.Expense.filter({ sale_id: sale.id }),
   ]);
   const list = (r) => (Array.isArray(r) ? r : (r?.items || []));
   const tasks = list(tasksRes);
@@ -128,6 +130,30 @@ async function buildOperationsContext(base44, sale) {
   lines.push(`Marketing kit: ${mk ? `components ${JSON.stringify(mk.component_status || {})}` : 'NO marketing kit record — UNKNOWN'}.`);
   const openTasks = tasks.filter(t => t.status !== 'completed');
   lines.push(`Tasks: ${tasks.length} total, ${openTasks.length} open${openTasks.length ? ` (${openTasks.slice(0, 12).map(t => `"${t.name}"`).join('; ')})` : ''}.`);
+  // Chapter 26 P1 (financial truth in AI context) — UNKNOWN LABOR COST IS NEVER $0.
+  // Labor hours without a recorded rate have UNKNOWN cost; while any exist, the
+  // sale's complete project economics CANNOT be determined.
+  const laborEntries = list(laborRes);
+  const expenseList = list(expRes);
+  const nonOwner = laborEntries.filter(e => !e.is_owner_time);
+  const rateUnknown = (e) => e.hourly_rate === null || e.hourly_rate === undefined || e.hourly_rate === '';
+  const knownLaborCost = nonOwner
+    .filter(e => !rateUnknown(e))
+    .reduce((s, e) => s + (Number(e.hours) || 0) * (Number(e.hourly_rate) || 0), 0);
+  const unknownLaborHours = nonOwner.filter(rateUnknown).reduce((s, e) => s + (Number(e.hours) || 0), 0);
+  const ownerTime = laborEntries.filter(e => !!e.is_owner_time).reduce((s, e) => s + (Number(e.hours) || 0), 0);
+  const wageExpenses = expenseList.filter(e => e.category === 'labor_wages').reduce((s, e) => s + (Number(e.amount) || 0), 0);
+  const otherExpenses = expenseList.filter(e => e.category !== 'labor_wages').reduce((s, e) => s + (Number(e.amount) || 0), 0);
+  lines.push(`Labor: ${nonOwner.length} employee entries, known cost $${knownLaborCost.toFixed(2)} (rated hours only); ${unknownLaborHours} hour(s) have NO recorded rate — their cost is UNKNOWN, never $0. Owner time: ${ownerTime} hrs (never cash cost).`);
+  if (knownLaborCost > 0 && wageExpenses > 0) {
+    lines.push(`Wage expenses $${wageExpenses.toFixed(2)} recorded alongside rated labor hours — economically deduplicated (one cost, one effect); both records preserved.`);
+  } else if (wageExpenses > 0) {
+    lines.push(`Wage expenses $${wageExpenses.toFixed(2)} recorded (no rated labor hours).`);
+  }
+  lines.push(`Other recorded direct expenses: $${otherExpenses.toFixed(2)}.`);
+  if (unknownLaborHours > 0) {
+    lines.push(`PROJECT ECONOMICS ARE INCOMPLETE: labor cost for ${unknownLaborHours} hour(s) is UNKNOWN. Complete contribution and profitability CANNOT be determined from these records.`);
+  }
   lines.push('Anything not listed is UNKNOWN from records — never invent it.');
   return lines.join('\n');
 }
@@ -205,6 +231,7 @@ ${operationsContext || 'No operations context loaded — rely only on what the o
 - Never claim anything is done or certified: do not mark equipment packed, complete security/checkout checklists, approve client decisions, change scope, mark research verified, mark a sale ready, complete tasks, or process transactions. Those are human/system actions.
 - Never certify safety, security, ADA, fire-code, occupancy, or electrical adequacy. Security completion means CHECKLIST REVIEWED only.
 - Never invent issues, items, or facts absent from the records. Say UNKNOWN where the records are silent.
+- Never treat UNKNOWN labor cost as zero: labor hours without a recorded rate are NOT free labor. If asked whether a sale was profitable and any labor cost is incomplete, state that the available records are insufficient to determine the complete project economics — do not compute or imply a contribution figure from the missing cost.
 
 == OUTPUT FORMAT ==
 ${outputInstruction}

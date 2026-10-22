@@ -107,6 +107,7 @@ export function acceptanceReview({ base, scenarioResult, overlap, advisory }) {
     reasons.push('The projection holds, but the conservative scenario erodes a meaningful share of it.');
   }
   if (overlap.count == null) reasons.push('Set the estimated sale dates on the Dates tab to include calendar overlap in this assessment.');
+  if (base.estLaborCostIncomplete) reasons.push(`Projected labor cost is INCOMPLETE — ${base.estLaborUnknownHours.toFixed(1)} estimated hour(s) have no rate. Those hours are not $0; the projected contribution is PARTIAL until the rate(s) are recorded.`);
   if (advisory.flagged.length) {
     reasons.push(`Advisory — client fit ${advisory.cfWorst}: ${advisory.flagged.map(f => `${f.label}${f.level === 'concern' ? ' (concern)' : ''}`).join(', ')}.`);
   }
