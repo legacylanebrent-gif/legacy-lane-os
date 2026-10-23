@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ChevronLeft, ChevronRight, CalendarDays, Columns3 } from 'lucide-react';
-import { startOfMonth, endOfMonth, startOfWeek, endOfWeek, addMonths, addWeeks, eachDayOfInterval, format, isSameMonth, isToday } from 'date-fns';
+import { startOfMonth, endOfMonth, startOfWeek, endOfWeek, addMonths, addWeeks, eachDayOfInterval, format, isSameMonth, isToday, isSameDay } from 'date-fns';
 
 // Chapter 3 P1 — operator sale calendar. A VIEW over existing EstateSale.sale_dates;
 // no scheduling records are created or duplicated here. Consumer MyCalendar is untouched.
@@ -26,6 +26,7 @@ export default function OperatorCalendar() {
   const [loading, setLoading] = useState(true);
   const [view, setView] = useState('month');
   const [cursor, setCursor] = useState(new Date());
+  const [selectedDay, setSelectedDay] = useState(null);
 
   useEffect(() => { load(); }, []);
 
@@ -157,7 +158,12 @@ export default function OperatorCalendar() {
                   return (
                     <div
                       key={day.toISOString()}
-                      className={`border rounded-md p-1.5 min-h-[92px] ${isToday(day) ? 'border-orange-400 bg-orange-50' : 'border-slate-200'} ${!inMonth ? 'opacity-40' : ''}`}
+                      role="button"
+                      tabIndex={0}
+                      aria-pressed={!!selectedDay && isSameDay(selectedDay, day)}
+                      onClick={() => setSelectedDay(day)}
+                      onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSelectedDay(day); } }}
+                      className={`border rounded-md p-1.5 min-h-[92px] text-left cursor-pointer ${isToday(day) ? 'border-orange-400 bg-orange-50' : 'border-slate-200'} ${!inMonth ? 'opacity-40' : ''} ${!!selectedDay && isSameDay(selectedDay, day) ? 'ring-2 ring-orange-400' : ''}`}
                     >
                       <div className="flex items-center justify-between">
                         <span className={`text-xs font-semibold ${isToday(day) ? 'text-orange-700' : 'text-slate-600'}`}>
@@ -172,6 +178,29 @@ export default function OperatorCalendar() {
                   );
                 })}
               </div>
+              {selectedDay && (
+                <div className="mt-4 border-t border-slate-100 pt-3">
+                  <div className="flex items-center justify-between gap-2">
+                    <h3 className="text-sm font-semibold text-slate-800">{format(selectedDay, 'EEEE, MMMM d, yyyy')}</h3>
+                    <button className="text-xs text-slate-500 hover:text-slate-800" onClick={() => setSelectedDay(null)}>Close</button>
+                  </div>
+                  {eventsFor(selectedDay).length === 0 ? (
+                    <p className="text-sm text-slate-500 py-2">No sales scheduled for this day.</p>
+                  ) : (
+                    <div className="space-y-2 mt-2">
+                      {eventsFor(selectedDay).map(s => (
+                        <button
+                          key={s.id}
+                          onClick={() => navigate(`/SaleEditor?saleId=${s.id}`)}
+                          className={`w-full text-left px-3 py-2.5 rounded-md border text-sm font-medium ${STATUS_STYLES[s.status] || STATUS_STYLES.draft}`}
+                        >
+                          {s.title || 'Untitled sale'} · <span className="capitalize">{s.status}</span>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
               {sales.length === 0 && (
                 <p className="text-center text-sm text-slate-500 py-6">
                   No sales yet — scheduled sale dates will appear here automatically.
@@ -183,7 +212,7 @@ export default function OperatorCalendar() {
       </Card>
 
       <p className="text-xs text-slate-400">
-        This calendar reads your sale dates — it never creates or duplicates scheduling records. Click any sale to open it.
+        This calendar reads your sale dates — it never creates or duplicates scheduling records. Tap a day to see its sales; tap a sale to open it.
       </p>
     </div>
   );
