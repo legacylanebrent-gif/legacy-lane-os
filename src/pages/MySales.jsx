@@ -449,14 +449,6 @@ export default function MySales() {
           </Button>
           <Button
             variant="outline"
-            onClick={() => navigate('/OperatorSkills')}
-            className="border-slate-300 text-slate-700 hover:bg-slate-50"
-          >
-            <Star className="w-4 h-4 mr-2" />
-            Skills Assessment
-          </Button>
-          <Button
-            variant="outline"
             onClick={() => navigate(createPageUrl('MySalesGuide'))}
             className="border-slate-300 text-slate-700 hover:bg-slate-50"
           >
