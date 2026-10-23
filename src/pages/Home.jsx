@@ -115,6 +115,9 @@ export default function Home() {
 
   useEffect(() => {
     checkAuthAndRedirect();
+    // Ask for location immediately on arrival — do not wait for data loading,
+    // which can take many seconds on mobile and suppress the permission prompt.
+    getUserLocation();
   }, []);
 
   const checkAuthAndRedirect = async () => {
@@ -147,7 +150,6 @@ export default function Home() {
         console.error('Error loading data:', error);
         setLoading(false);
       }
-      getUserLocation();
       loadRoute();
     }
   };
@@ -251,6 +253,12 @@ export default function Home() {
             }
             if (storedZip) {
               setUserZipCode(storedZip);
+            }
+            // No location at all — tell the visitor why nothing was asked,
+            // instead of failing silently (blocked prompt, prior denial).
+            if (!storedLocation) {
+              setDebugMessage('📍 Location unavailable — allow access in your browser settings, or search by ZIP below');
+              setTimeout(() => setDebugMessage(''), 6000);
             }
           }
         }
