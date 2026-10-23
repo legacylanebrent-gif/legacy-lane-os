@@ -412,8 +412,9 @@ Return as a JSON array.`,
             <CardContent className="space-y-3">
               {tasks.filter(t => t.category === category).map(task => (
                 <div key={task.id} className="p-4 border rounded-lg space-y-3">
-                  <div className="flex items-start gap-4">
-                    <div className="pt-1">{getStatusIcon(task)}</div>
+                  <div className="flex flex-col sm:flex-row sm:items-start gap-3 sm:gap-4">
+                    <div className="flex items-start gap-3 flex-1 min-w-0">
+                    <div className="pt-0.5 flex-shrink-0">{getStatusIcon(task)}</div>
                     <div className="flex-1 min-w-0">
                       <div className="flex flex-wrap items-center gap-2">
                         <h4 className={`font-semibold ${task.status === 'completed' ? 'text-slate-400 line-through' : 'text-slate-900'}`}>{task.name}</h4>
@@ -436,14 +437,15 @@ Return as a JSON array.`,
                         <p className="text-xs text-slate-500 mt-1">Completed {new Date(task.completed_at).toLocaleString()}{task.completed_by_name ? ` by ${task.completed_by_name}` : ''}</p>
                       )}
                     </div>
-                    <div className="flex gap-2">
+                    </div>
+                    <div className="grid grid-cols-3 gap-2 sm:flex sm:gap-2">
                       <Button variant="outline" size="sm" onClick={() => setStatus(task, 'not_started')} className={task.status === 'not_started' ? 'border-slate-400' : ''}>Not Started</Button>
                       <Button variant="outline" size="sm" onClick={() => setStatus(task, 'in_progress')} className={task.status === 'in_progress' ? 'border-orange-400 bg-orange-50' : ''}>In Progress</Button>
                       <Button variant="outline" size="sm" onClick={() => setStatus(task, 'completed')} className={task.status === 'completed' ? 'border-green-400 bg-green-50' : ''}>Completed</Button>
                     </div>
                   </div>
                   {/* Accountability row */}
-                  <div className="flex flex-col lg:flex-row lg:items-center gap-2 pl-9 border-t border-slate-100 pt-3">
+                  <div className="flex flex-col gap-2 sm:pl-9 lg:flex-row lg:items-center border-t border-slate-100 pt-3">
                     <div className="flex items-center gap-2 min-w-0 flex-1">
                       <span className="text-xs text-slate-500 flex-shrink-0">Owner</span>
                       <Select value={task.assignee_user_id || 'unassigned'} onValueChange={v => assignTask(task, v)}>
@@ -453,6 +455,7 @@ Return as a JSON array.`,
                         </SelectContent>
                       </Select>
                     </div>
+                    <div className="flex flex-wrap items-center gap-2 sm:gap-3">
                     <div className="flex items-center gap-2">
                       <span className="text-xs text-slate-500 flex-shrink-0">Due</span>
                       <Input type="date" value={task.due_date || ''} onChange={e => patchTask(task.id, { due_date: e.target.value })}
@@ -479,6 +482,7 @@ Return as a JSON array.`,
                       <Button variant="outline" size="sm" className={`h-8 text-xs ${task.attention ? 'border-purple-400 bg-purple-50 text-purple-700' : ''}`} onClick={() => toggleAttention(task)}>
                         <Flag className="w-3 h-3 mr-1" />{task.attention ? 'Unflag' : 'Flag'}
                       </Button>
+                    </div>
                     </div>
                   </div>
                 </div>
