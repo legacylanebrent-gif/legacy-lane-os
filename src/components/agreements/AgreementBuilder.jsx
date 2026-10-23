@@ -58,7 +58,7 @@ export default function AgreementBuilder({ sale, deal, scope, acceptedProposal, 
   return (
     <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
       <DialogHeader>
-        <DialogTitle>Build Agreement — version {nextVersion}</DialogTitle>
+        <DialogTitle>Build Estate Sale Contract — version {nextVersion}</DialogTitle>
         <p className="text-xs text-slate-500">Populates your own approved template with structured project facts. EstateSalen does not author or alter legal language — the surrounding terms are yours (have your attorney review them). No e-signature: print/download, sign externally, upload the signed copy, then mark executed.</p>
       </DialogHeader>
 

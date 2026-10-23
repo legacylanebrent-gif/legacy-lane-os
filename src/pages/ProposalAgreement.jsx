@@ -4,7 +4,7 @@ import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Dialog } from '@/components/ui/dialog';
-import { Plus, ArrowLeft, Loader2, RefreshCw, ShieldAlert, FileText, History, Info } from 'lucide-react';
+import { Plus, ArrowLeft, Loader2, RefreshCw, ShieldAlert, FileText, FileSignature, Info } from 'lucide-react';
 import { asArray } from '@/components/saleops/saleDecisionModel';
 import { analyzeAgreementReadiness } from '@/components/agreements/agreementModel';
 import { nextProposalVersion } from '@/components/agreements/proposalModel';
@@ -95,7 +95,7 @@ export default function ProposalAgreement() {
             <ArrowLeft className="w-4 h-4 mr-2" />Back to Sales
           </Button>
           <h1 className="text-xl sm:text-2xl font-bold text-slate-900 truncate">{sale.title}</h1>
-          <p className="text-xs text-slate-500">Proposal & Agreement — proposed ≠ accepted ≠ current. A signed agreement is a historical snapshot.</p>
+          <p className="text-xs text-slate-500">Contracts — proposals & the estate sale agreement. Proposed ≠ accepted ≠ current; a signed contract is a historical snapshot.</p>
         </div>
         <Button variant="outline" size="sm" onClick={() => { setLoading(true); load(); }}><RefreshCw className="w-3.5 h-3.5 mr-1" />Refresh</Button>
       </div>
@@ -134,14 +134,21 @@ export default function ProposalAgreement() {
       {/* ── AGREEMENT ── */}
       <section className="space-y-3">
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <h2 className="text-sm font-semibold text-slate-800 flex items-center gap-2"><History className="w-4 h-4 text-orange-500" />Agreements (versioned snapshots)</h2>
+          <h2 className="text-sm font-semibold text-slate-800 flex items-center gap-2"><FileSignature className="w-4 h-4 text-orange-500" />Estate Sale Contract <span className="text-xs font-normal text-slate-400">versioned agreement snapshots</span></h2>
           <div className="flex items-center gap-2">
             {!acceptedProposal && <Badge variant="outline" className="text-xs">Requires an accepted proposal</Badge>}
             <Button size="sm" disabled={!acceptedProposal || !templates.length} onClick={() => setShowAgreementBuilder(true)} title={!acceptedProposal ? 'Record proposal acceptance first' : (!templates.length ? 'Store an AGREEMENT template in Business Documents first' : '')}>
-              <Plus className="w-3.5 h-3.5 mr-1" />Build Agreement
+              <Plus className="w-3.5 h-3.5 mr-1" />Build Contract
             </Button>
           </div>
         </div>
+        {templates.length > 0 && (
+          <div className="text-xs bg-slate-50 border border-slate-200 rounded-md p-2 flex flex-wrap items-center gap-1.5">
+            <span className="text-slate-500 font-medium flex-shrink-0">Contract templates:</span>
+            {templates.map(t => <Badge key={t.id} variant="outline" className="text-[11px] font-normal">{t.title} · v{t.version || 1}</Badge>)}
+            <span className="text-slate-400">Sample wording is a starting point — have your attorney review before use.</span>
+          </div>
+        )}
         {readiness.counts.review > 0 && acceptedProposal && (
           <p className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-md p-2">
             {readiness.counts.review} readiness item(s) still need review — you can still build, but resolve these before presenting the agreement.
@@ -149,7 +156,7 @@ export default function ProposalAgreement() {
         )}
         {agreements.length === 0 && (
           <p className="text-sm text-slate-500 bg-slate-50 border border-slate-200 rounded-md p-3">
-            No agreements yet. Once a proposal is accepted, build the agreement from your own approved template — the surrounding legal text is yours; EstateSalen populates the facts.
+            No contract on file yet. Once a proposal is accepted, build the estate sale contract from an approved template — the surrounding legal text is yours; EstateSalen populates the facts.
           </p>
         )}
         {agreements.map(a => (
