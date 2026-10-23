@@ -304,8 +304,15 @@ function MileageView({ sale, user, onSaved, onBack }) {
   const [addressType, setAddressType] = useState(null); // null | 'home' | 'business'
   const timerRef = useRef(null);
 
-  const homeAddress = user?.home_address || user?.address || '';
-  const businessAddress = user?.business_address || '';
+  // A user address may be a plain string OR a structured {street, city, state, zip} object — normalize to text.
+  const asAddressText = (a) => {
+    if (!a) return '';
+    if (typeof a === 'string') return a;
+    return [a.street, a.city, a.state, a.zip].filter(Boolean).join(', ');
+  };
+
+  const homeAddress = asAddressText(user?.home_address || user?.address);
+  const businessAddress = asAddressText(user?.business_address);
 
   const saleAddress = sale?.property_address
     ? `${sale.property_address.street || ''}, ${sale.property_address.city || ''}, ${sale.property_address.state || ''} ${sale.property_address.zip || ''}`.trim().replace(/^,\s*/, '')
