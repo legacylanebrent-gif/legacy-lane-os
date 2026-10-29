@@ -1,7 +1,7 @@
 {
   "name": "AgentListingConfig",
   "type": "object",
-  "description": "Admin-controlled matching policy and permitted enrichment fields for the Agent Pending Listings workflow. Single active record (key = 'default'). Admin-only read and write.",
+  "description": "Admin-controlled matching policy, permitted enrichment fields and source-use policy for the Agent Pending Listings workflow. Single active record (key = 'default'). Admin-only read and write. Owner contact visibility is scoped to the importing agent's own verified/confirmed records and is not switched off here; what IS configured here is which source fields may be copied, and whether the source's use terms permit customer-list advertising exports.",
   "properties": {
     "key": {
       "type": "string",
@@ -41,7 +41,71 @@
         "parcel_id",
         "characteristics"
       ],
-      "description": "Reference ownership fields agents may see. Owner phone numbers and personal emails are never in this list."
+      "description": "Ownership evidence fields shown to agents alongside their own records."
+    },
+    "contact_source_fields": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [
+        "phone_1",
+        "phone_2",
+        "phone_3",
+        "phone_4",
+        "phone_5",
+        "email_1",
+        "email_2",
+        "email_3",
+        "email_4"
+      ],
+      "description": "Reference contact columns an agent may receive for their OWN verified/confirmed record. Only these columns exist in the reference schema, so this list is an allowlist, not a broad grant."
+    },
+    "property_fact_fields": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [
+        "county",
+        "parcel_id",
+        "property_type",
+        "beds",
+        "baths",
+        "building_sqft",
+        "lot_size",
+        "year_built",
+        "listing_status",
+        "list_date",
+        "days_on_market",
+        "last_sale_date"
+      ],
+      "description": "Subject-property fact allowlist. Demographic, health and financial reference columns are never included."
+    },
+    "source_use_policy": {
+      "type": "object",
+      "default": {},
+      "description": "Admin-attested source-use policy for advertising exports. Until an administrator confirms the source terms permit customer-list advertising, every export evaluates as 'Source use restricted'. This attestation is a gate, not permission from the individual person.",
+      "properties": {
+        "customer_list_export_enabled": {
+          "type": "boolean",
+          "default": false
+        },
+        "allowed_use_note": {
+          "type": "string"
+        },
+        "policy_version": {
+          "type": "string",
+          "default": "v1"
+        },
+        "updated_by_name": {
+          "type": "string"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
     },
     "max_rows_per_import": {
       "type": "integer",

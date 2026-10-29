@@ -5,6 +5,7 @@ import {
   canAccessAgentRecord,
   loadConfig,
   ownershipForAgent,
+  contactsForAgent,
   audit,
   json,
 } from '../../shared/listingAccess.ts';
@@ -43,7 +44,19 @@ function openTasks(opp) {
 function cardView(opp) {
   const ownership = opp.ownership || {};
   const tasks = openTasks(opp);
+  const contactView = contactsForAgent(opp);
+  const usableContacts = contactView.contacts.filter((c) => c.usable);
+  const permission = opp.advertising_permission || {};
   return {
+    enrichment_status: opp.enrichment?.status || 'never',
+    last_enriched_at: opp.enrichment?.last_enriched_at || '',
+    enrichment_source_date: opp.enrichment?.source_date || '',
+    enrichment_message: opp.enrichment?.message || '',
+    contact_count: usableContacts.length,
+    email_count: usableContacts.filter((c) => c.kind === 'email').length,
+    phone_count: usableContacts.filter((c) => c.kind === 'phone').length,
+    contacts_withheld: contactView.withheld || '',
+    advertising_permission_granted: permission.granted === true && !permission.revoked_at,
     id: opp.id,
     address: opp.address || {},
     formatted_address: opp.address?.formatted_address || formatAddress(opp.address || {}),
@@ -179,8 +192,17 @@ export default async function (req) {
       const importRec = opp.last_import_id
         ? (await base44.asServiceRole.entities.AgentListingImport.filter({ id: opp.last_import_id }))[0]
         : null;
+      const contactView = contactsForAgent(opp);
       return json({
-        opportunity: { ...opp, ownership: ownershipForAgent(opp, config) },
+        opportunity: {
+          ...opp,
+          ownership: ownershipForAgent(opp, config),
+          contacts: contactView.contacts,
+          contacts_withheld: contactView.withheld,
+          enrichment: opp.enrichment || {},
+          property_facts: opp.property_facts || {},
+          advertising_permission: opp.advertising_permission || {},
+        },
         card: cardView(opp),
         events: (events || []).filter((e) => e.agent_user_id === user.id || isAdmin(user)),
         import: importRec

@@ -1,0 +1,108 @@
+{
+  "name": "AgentListingExport",
+  "type": "object",
+  "description": "Record of one Facebook customer-list CSV download for ONE agent. Stores the evaluation counts, the eligibility-policy version and the file expiration \u2014 NEVER the exported phone numbers, emails or names. The file itself is generated in the authenticated request response; nothing is written to public storage. Written only by the sanctioned agentListingExport server function. Agents read only their own exports; admins read all.",
+  "properties": {
+    "agent_user_id": {
+      "type": "string",
+      "description": "Server-derived agent (access anchor)."
+    },
+    "agent_name": {
+      "type": "string"
+    },
+    "scope": {
+      "type": "string",
+      "enum": [
+        "selected",
+        "filtered"
+      ],
+      "default": "selected"
+    },
+    "filter": {
+      "type": "string"
+    },
+    "search_query": {
+      "type": "string"
+    },
+    "opportunity_count": {
+      "type": "integer",
+      "default": 0
+    },
+    "people_evaluated": {
+      "type": "integer",
+      "default": 0
+    },
+    "eligible_count": {
+      "type": "integer",
+      "default": 0
+    },
+    "excluded_counts": {
+      "type": "object",
+      "default": {},
+      "description": "Excluded people grouped by eligibility status. Counts only."
+    },
+    "export_fields": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    },
+    "format": {
+      "type": "string",
+      "default": "meta_customer_list_csv"
+    },
+    "policy_version": {
+      "type": "string"
+    },
+    "row_count": {
+      "type": "integer",
+      "default": 0
+    },
+    "file_name": {
+      "type": "string"
+    },
+    "file_expires_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "The download link/response is short-lived; treat any saved copy as an expiring snapshot."
+    },
+    "requested_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "agent_user_id",
+    "requested_at"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.agent_user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

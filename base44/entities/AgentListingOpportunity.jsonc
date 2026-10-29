@@ -159,6 +159,10 @@
         "owner_of_record": {
           "type": "string"
         },
+        "co_owner_of_record": {
+          "type": "string",
+          "description": "Additional owner of record on the matched reference record, when supplied. Kept separate from the primary owner; never merged into one name."
+        },
         "ownership_type": {
           "type": "string",
           "enum": [
@@ -169,6 +173,15 @@
           ]
         },
         "owner_mailing_address": {
+          "type": "string"
+        },
+        "owner_mailing_city": {
+          "type": "string"
+        },
+        "owner_mailing_state": {
+          "type": "string"
+        },
+        "owner_mailing_zip": {
           "type": "string"
         },
         "parcel_id": {
@@ -235,6 +248,229 @@
           "type": "string"
         },
         "resolved_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "contacts": {
+      "type": "array",
+      "default": [],
+      "description": "Owner contact values attached ONLY from the matched reference record for a verified or admin-confirmed ownership association. One entry per distinct phone/email value. Nothing is invented, borrowed from another household member, or attached from an ambiguous match. Each value keeps its own source, source date, verification and restrictions, plus the agent's own mark; marks survive every refresh and a rejected value is never restored as usable. Provider contact details stay UNVERIFIED: a verified property match never verifies a phone number or email.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "contact_id": {
+            "type": "string"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "email",
+              "phone"
+            ]
+          },
+          "value": {
+            "type": "string",
+            "description": "Normalized value used for dedupe and export (lowercase email, digits with country code for phone)."
+          },
+          "value_display": {
+            "type": "string",
+            "description": "Value as shown to the agent."
+          },
+          "owner_name": {
+            "type": "string",
+            "description": "Owner or co-owner of record this value is associated with."
+          },
+          "phone_type": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          },
+          "source_record_id": {
+            "type": "string"
+          },
+          "source_date": {
+            "type": "string"
+          },
+          "verification": {
+            "type": "string",
+            "enum": [
+              "unverified",
+              "provider_reported"
+            ],
+            "default": "unverified"
+          },
+          "restrictions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "default": [],
+            "description": "Known source-use restrictions (dnc_listed, do_not_mail, ...)."
+          },
+          "agent_status": {
+            "type": "string",
+            "enum": [
+              "none",
+              "confirmed",
+              "incorrect",
+              "disconnected",
+              "not_owner"
+            ],
+            "default": "none",
+            "description": "The importing agent's own mark. Identity evidence only \u2014 never advertising permission."
+          },
+          "agent_status_by_name": {
+            "type": "string"
+          },
+          "agent_status_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "first_seen_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "last_seen_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      }
+    },
+    "property_facts": {
+      "type": "object",
+      "default": {},
+      "description": "Explicit allowlist of facts about the SUBJECT property from the matched reference record. Never the owner's mailing address, never demographics, health or financial fields.",
+      "properties": {
+        "county": {
+          "type": "string"
+        },
+        "parcel_id": {
+          "type": "string"
+        },
+        "property_type": {
+          "type": "string"
+        },
+        "beds": {
+          "type": "number"
+        },
+        "baths": {
+          "type": "number"
+        },
+        "building_sqft": {
+          "type": "number"
+        },
+        "lot_size": {
+          "type": "string"
+        },
+        "year_built": {
+          "type": "number"
+        },
+        "listing_status": {
+          "type": "string"
+        },
+        "list_date": {
+          "type": "string"
+        },
+        "days_on_market": {
+          "type": "number"
+        },
+        "last_sale_date": {
+          "type": "string"
+        }
+      }
+    },
+    "enrichment": {
+      "type": "object",
+      "default": {},
+      "description": "Owner/property enrichment status. Written only by the sanctioned enrichment function. Enrichment never rewrites ownership evidence or an admin confirmation \u2014 a disagreement is surfaced as a review flag instead.",
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": [
+            "never",
+            "enriched",
+            "current",
+            "partial",
+            "review_required",
+            "no_reference",
+            "failed"
+          ],
+          "default": "never"
+        },
+        "last_enriched_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "source": {
+          "type": "string"
+        },
+        "source_date": {
+          "type": "string"
+        },
+        "reference_record_id": {
+          "type": "string"
+        },
+        "added_count": {
+          "type": "integer",
+          "default": 0
+        },
+        "unchanged_count": {
+          "type": "integer",
+          "default": 0
+        },
+        "unavailable_count": {
+          "type": "integer",
+          "default": 0
+        },
+        "message": {
+          "type": "string"
+        },
+        "conflict_note": {
+          "type": "string",
+          "description": "Set when the reference record now disagrees with stored/confirmed ownership evidence. Review flag only \u2014 never replaces confirmed data."
+        },
+        "job_id": {
+          "type": "string"
+        }
+      }
+    },
+    "advertising_permission": {
+      "type": "object",
+      "default": {},
+      "description": "Documented permission evidence for customer-list advertising about this owner. Contact visibility, ownership matching, pending status and CRM presence never imply it. Requires a stated basis and a reference to the evidence \u2014 a bare checkbox is not evidence.",
+      "properties": {
+        "granted": {
+          "type": "boolean",
+          "default": false
+        },
+        "basis": {
+          "type": "string",
+          "enum": [
+            "owner_written_permission",
+            "signed_agreement_advertising_clause",
+            "platform_opt_in",
+            "other_documented"
+          ]
+        },
+        "reference": {
+          "type": "string",
+          "description": "Where the evidence lives (agreement section, dated email, recorded call note)."
+        },
+        "scope_note": {
+          "type": "string"
+        },
+        "captured_by_name": {
+          "type": "string"
+        },
+        "captured_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "revoked_at": {
           "type": "string",
           "format": "date-time"
         }

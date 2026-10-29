@@ -10,6 +10,18 @@ export const DEFAULT_ALLOWED_ENRICHMENT = [
   'characteristics',
 ];
 
+// The reference schema's ONLY contact columns. An allowlist, not a broad grant:
+// nothing outside these columns can ever be copied onto an agent's record.
+export const DEFAULT_CONTACT_SOURCE_FIELDS = [
+  'phone_1', 'phone_2', 'phone_3', 'phone_4', 'phone_5',
+  'email_1', 'email_2', 'email_3', 'email_4',
+];
+
+export const DEFAULT_PROPERTY_FACT_FIELDS = [
+  'county', 'parcel_id', 'property_type', 'beds', 'baths', 'building_sqft',
+  'lot_size', 'year_built', 'listing_status', 'list_date', 'days_on_market', 'last_sale_date',
+];
+
 export const FALLBACK_CONFIG = {
   key: 'default',
   matching_version: 'v1',
@@ -18,6 +30,9 @@ export const FALLBACK_CONFIG = {
   ambiguity_gap: 8,
   max_candidates: 5,
   allowed_enrichment_fields: DEFAULT_ALLOWED_ENRICHMENT,
+  contact_source_fields: DEFAULT_CONTACT_SOURCE_FIELDS,
+  property_fact_fields: DEFAULT_PROPERTY_FACT_FIELDS,
+  source_use_policy: { customer_list_export_enabled: false, allowed_use_note: '', policy_version: 'v1' },
   max_rows_per_import: 500,
   max_ai_calls_per_import: 25,
   ai_assist_enabled: true,
@@ -52,9 +67,57 @@ export function allowedFields(config) {
   const list = Array.isArray(config?.allowed_enrichment_fields) && config.allowed_enrichment_fields.length
     ? config.allowed_enrichment_fields
     : DEFAULT_ALLOWED_ENRICHMENT;
-  // Hard floor: owner contact details are never permitted enrichment, whatever policy says.
-  const forbidden = ['phone', 'email', 'phone_1', 'email_1', 'owner_phone', 'owner_email'];
-  return list.filter((f) => !forbidden.includes(f));
+  return list;
+}
+
+export function contactSourceFields(config) {
+  const list = Array.isArray(config?.contact_source_fields) && config.contact_source_fields.length
+    ? config.contact_source_fields
+    : DEFAULT_CONTACT_SOURCE_FIELDS;
+  return list.filter((f) => DEFAULT_CONTACT_SOURCE_FIELDS.includes(f));
+}
+
+export function propertyFactFields(config) {
+  const list = Array.isArray(config?.property_fact_fields) && config.property_fact_fields.length
+    ? config.property_fact_fields
+    : DEFAULT_PROPERTY_FACT_FIELDS;
+  return list.filter((f) => DEFAULT_PROPERTY_FACT_FIELDS.includes(f));
+}
+
+// Contact details belong to ONE owner association. They are attached only when that
+// association is verified by the deterministic match or confirmed by an admin — never
+// from an ambiguous, unit-conflicting or merely candidate-level result.
+export function contactAssociationQualifies(opportunity) {
+  const ownership = opportunity?.ownership || {};
+  return ownership.match_status === 'verified' || ownership.review_status === 'confirmed';
+}
+
+// Contact values an agent may see on their OWN record. Values the agent has marked
+// incorrect / disconnected / not_owner stay visible (so the mark can be reviewed) but
+// are flagged as unusable for outreach and export.
+export function contactsForAgent(opportunity) {
+  if (!contactAssociationQualifies(opportunity)) {
+    return { contacts: [], withheld: 'Owner contacts appear only after the ownership association is verified or admin-confirmed.' };
+  }
+  const contacts = Array.isArray(opportunity?.contacts) ? opportunity.contacts : [];
+  return {
+    contacts: contacts.map((c) => ({
+      contact_id: c.contact_id,
+      kind: c.kind,
+      value_display: c.value_display || c.value || '',
+      owner_name: c.owner_name || '',
+      phone_type: c.phone_type || '',
+      source: c.source || '',
+      source_date: c.source_date || '',
+      verification: c.verification || 'unverified',
+      restrictions: Array.isArray(c.restrictions) ? c.restrictions : [],
+      agent_status: c.agent_status || 'none',
+      agent_status_by_name: c.agent_status_by_name || '',
+      agent_status_at: c.agent_status_at || '',
+      usable: !['incorrect', 'disconnected', 'not_owner'].includes(c.agent_status || 'none'),
+    })),
+    withheld: '',
+  };
 }
 
 // Ownership evidence as an agent may see it. Owner mailing address stays separate
@@ -81,9 +144,17 @@ export function ownershipForAgent(opportunity, config) {
     ai_hint: opportunity?.ai_match_hint?.summary || '',
     permitted_fields: fields,
   };
-  if (fields.includes('owner_of_record')) out.owner_of_record = ownership.owner_of_record || '';
+  if (fields.includes('owner_of_record')) {
+    out.owner_of_record = ownership.owner_of_record || '';
+    out.co_owner_of_record = ownership.co_owner_of_record || '';
+  }
   if (fields.includes('ownership_type')) out.ownership_type = ownership.ownership_type || '';
-  if (fields.includes('owner_mailing_address')) out.owner_mailing_address = ownership.owner_mailing_address || '';
+  if (fields.includes('owner_mailing_address')) {
+    out.owner_mailing_address = ownership.owner_mailing_address || '';
+    out.owner_mailing_city = ownership.owner_mailing_city || '';
+    out.owner_mailing_state = ownership.owner_mailing_state || '';
+    out.owner_mailing_zip = ownership.owner_mailing_zip || '';
+  }
   if (fields.includes('parcel_id')) out.parcel_id = ownership.parcel_id || '';
   if (fields.includes('characteristics')) out.characteristics = ownership.characteristics || {};
   return out;
@@ -99,6 +170,8 @@ export async function audit(base44, event) {
     import_id: event.import_id || '',
     opportunity_id: event.opportunity_id || '',
     property_id: event.property_id || '',
+    enrich_job_id: event.enrich_job_id || '',
+    export_id: event.export_id || '',
     details: event.details || {},
     at: new Date().toISOString(),
   };

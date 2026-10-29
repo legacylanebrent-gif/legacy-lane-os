@@ -31,6 +31,75 @@ export const matching = {
   aiExplain: (opportunityId) => callFn('agentListingMatch', { action: 'ai_explain', opportunity_id: opportunityId }),
 };
 
+export const enrichment = {
+  start: (payload) => callFn('agentListingEnrich', { action: 'start', ...payload }),
+  process: (jobId, batchSize = 15) => callFn('agentListingEnrich', { action: 'process', job_id: jobId, batch_size: batchSize }),
+  status: (jobId) => callFn('agentListingEnrich', { action: 'status', job_id: jobId }),
+  retry: (jobId) => callFn('agentListingEnrich', { action: 'retry', job_id: jobId }),
+  markContact: (opportunityId, contactId, status, kind) => callFn('agentListingEnrich', {
+    action: 'mark_contact',
+    opportunity_id: opportunityId,
+    contact_id: contactId,
+    status,
+    kind: kind || '',
+  }),
+  setPermission: (opportunityId, payload) => callFn('agentListingEnrich', {
+    action: 'set_permission',
+    opportunity_id: opportunityId,
+    ...payload,
+  }),
+};
+
+export const facebookExport = {
+  preview: (payload) => callFn('agentListingExport', { action: 'preview', ...payload }),
+  generate: (payload) => callFn('agentListingExport', { action: 'generate', ...payload }),
+  history: () => callFn('agentListingExport', { action: 'history' }),
+};
+
+export const ENRICHMENT_LABELS = {
+  never: 'Not enriched yet',
+  enriched: 'Enriched',
+  current: 'Already current',
+  partial: 'Partially enriched',
+  review_required: 'Review required',
+  no_reference: 'No reference record',
+  failed: 'Enrichment failed',
+};
+
+export const ENRICHMENT_STYLES = {
+  never: 'bg-slate-100 text-slate-600 border-slate-200',
+  enriched: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+  current: 'bg-cyan-50 text-cyan-800 border-cyan-200',
+  partial: 'bg-amber-50 text-amber-800 border-amber-200',
+  review_required: 'bg-amber-50 text-amber-800 border-amber-200',
+  no_reference: 'bg-slate-100 text-slate-600 border-slate-200',
+  failed: 'bg-rose-50 text-rose-700 border-rose-200',
+};
+
+export const CONTACT_MARKS = [
+  { value: 'confirmed', label: 'Confirmed' },
+  { value: 'incorrect', label: 'Incorrect' },
+  { value: 'disconnected', label: 'Disconnected' },
+  { value: 'not_owner', label: 'Someone else' },
+];
+
+export const CONTACT_MARK_LABELS = {
+  none: 'Not marked',
+  confirmed: 'You confirmed this',
+  incorrect: 'Marked incorrect',
+  disconnected: 'Marked disconnected',
+  not_owner: 'Belongs to someone else',
+};
+
+export const ELIGIBILITY_LABELS = {
+  eligible: 'Eligible',
+  permission_missing: 'Permission evidence missing',
+  source_restricted: 'Source use restricted',
+  suppressed: 'Suppressed',
+  identity_review: 'Identity review required',
+  insufficient_identifiers: 'Insufficient supported identifiers',
+};
+
 export const adminApi = {
   overview: (filters = {}) => callFn('agentListingAdmin', { action: 'overview', filters }),
   importDetail: (importId) => callFn('agentListingAdmin', { action: 'import_detail', import_id: importId }),
@@ -49,6 +118,7 @@ export const adminApi = {
     to_agent_email: email,
   }),
   configGet: () => callFn('agentListingAdmin', { action: 'config_get' }),
+  enrichmentOverview: () => callFn('agentListingAdmin', { action: 'enrichment_overview' }),
   configSet: (config) => callFn('agentListingAdmin', { action: 'config_set', config }),
   trends: () => callFn('agentListingAdmin', { action: 'trends' }),
 };

@@ -1,5 +1,14 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
-import { currentUser, isAdmin, loadConfig, audit, json, DEFAULT_ALLOWED_ENRICHMENT } from '../../shared/listingAccess.ts';
+import {
+  currentUser,
+  isAdmin,
+  loadConfig,
+  audit,
+  json,
+  DEFAULT_ALLOWED_ENRICHMENT,
+  DEFAULT_CONTACT_SOURCE_FIELDS,
+  DEFAULT_PROPERTY_FACT_FIELDS,
+} from '../../shared/listingAccess.ts';
 import { applyMatch } from '../../shared/listingMatch.ts';
 import { processImport } from '../../shared/listingImportEngine.ts';
 
@@ -239,7 +248,69 @@ export default async function (req) {
     }
 
     if (action === 'config_get') {
-      return json({ config, default_fields: DEFAULT_ALLOWED_ENRICHMENT });
+      return json({
+        config,
+        default_fields: DEFAULT_ALLOWED_ENRICHMENT,
+        default_contact_fields: DEFAULT_CONTACT_SOURCE_FIELDS,
+        default_fact_fields: DEFAULT_PROPERTY_FACT_FIELDS,
+      });
+    }
+
+    // Enrichment job and export-activity monitoring. Admin oversight only: counts,
+    // scope and outcomes — never the exported contact values themselves.
+    if (action === 'enrichment_overview') {
+      const jobs = await base44.asServiceRole.entities.AgentListingEnrichJob.filter({}, '-created_date', 40, 0);
+      const exports = await base44.asServiceRole.entities.AgentListingExport.filter({}, '-requested_at', 40, 0);
+      const opps = await base44.asServiceRole.entities.AgentListingOpportunity.filter({}, '-created_date', 400, 0);
+      const withContacts = (opps || []).filter((o) => (o.contacts || []).length > 0);
+      const needsReview = (opps || []).filter((o) => o.enrichment?.status === 'review_required');
+      const failed = (opps || []).filter((o) => o.enrichment?.status === 'failed');
+
+      return json({
+        jobs: (jobs || []).map((j) => ({
+          id: j.id,
+          agent_name: j.agent_name,
+          agent_user_id: j.agent_user_id,
+          scope: j.scope,
+          status: j.status,
+          total_targets: j.total_targets || 0,
+          processed_count: j.processed_count || 0,
+          enriched_count: j.enriched_count || 0,
+          current_count: j.current_count || 0,
+          partial_count: j.partial_count || 0,
+          review_required_count: j.review_required_count || 0,
+          no_reference_count: j.no_reference_count || 0,
+          failed_count: j.failed_count || 0,
+          retry_count: j.retry_count || 0,
+          last_error: j.last_error || '',
+          started_at: j.started_at || '',
+          completed_at: j.completed_at || '',
+        })),
+        exports: (exports || []).map((e) => ({
+          id: e.id,
+          agent_name: e.agent_name,
+          requested_at: e.requested_at,
+          scope: e.scope,
+          opportunity_count: e.opportunity_count,
+          people_evaluated: e.people_evaluated,
+          eligible_count: e.eligible_count,
+          excluded_counts: e.excluded_counts || {},
+          policy_version: e.policy_version,
+          row_count: e.row_count,
+          file_expires_at: e.file_expires_at,
+        })),
+        summary: {
+          jobs_total: (jobs || []).length,
+          jobs_running: (jobs || []).filter((j) => j.status === 'processing' || j.status === 'queued').length,
+          jobs_failed: (jobs || []).filter((j) => j.status === 'failed' || j.status === 'partial').length,
+          records_with_contacts: withContacts.length,
+          records_needing_review: needsReview.length,
+          records_failed: failed.length,
+          exports_total: (exports || []).length,
+          people_exported: (exports || []).reduce((sum, e) => sum + (e.eligible_count || 0), 0),
+        },
+        source_use_policy: config.source_use_policy || {},
+      });
     }
 
     if (action === 'config_set') {
@@ -263,6 +334,25 @@ export default async function (req) {
         max_ai_calls_per_import: numeric(incoming.max_ai_calls_per_import, config.max_ai_calls_per_import, 0, 200),
         ai_assist_enabled: incoming.ai_assist_enabled !== undefined ? !!incoming.ai_assist_enabled : config.ai_assist_enabled,
         allowed_enrichment_fields: allowed.length ? allowed : DEFAULT_ALLOWED_ENRICHMENT,
+        contact_source_fields: Array.isArray(incoming.contact_source_fields)
+          ? (incoming.contact_source_fields.filter((f) => DEFAULT_CONTACT_SOURCE_FIELDS.includes(f)).length
+            ? incoming.contact_source_fields.filter((f) => DEFAULT_CONTACT_SOURCE_FIELDS.includes(f))
+            : config.contact_source_fields)
+          : config.contact_source_fields,
+        property_fact_fields: Array.isArray(incoming.property_fact_fields)
+          ? (incoming.property_fact_fields.filter((f) => DEFAULT_PROPERTY_FACT_FIELDS.includes(f)).length
+            ? incoming.property_fact_fields.filter((f) => DEFAULT_PROPERTY_FACT_FIELDS.includes(f))
+            : config.property_fact_fields)
+          : config.property_fact_fields,
+        source_use_policy: incoming.source_use_policy
+          ? {
+            customer_list_export_enabled: incoming.source_use_policy.customer_list_export_enabled === true,
+            allowed_use_note: String(incoming.source_use_policy.allowed_use_note || '').slice(0, 500),
+            policy_version: String(incoming.source_use_policy.policy_version || config.source_use_policy?.policy_version || 'v1').slice(0, 20),
+            updated_by_name: user.full_name || user.email || '',
+            updated_at: new Date().toISOString(),
+          }
+          : config.source_use_policy,
         updated_by_name: user.full_name || user.email || '',
         updated_at: new Date().toISOString(),
       };

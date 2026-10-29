@@ -1,7 +1,7 @@
 {
   "name": "AgentListingAuditEvent",
   "type": "object",
-  "description": "Append-only audit trail for the Agent Pending Listings workflow: imports, row failures, matches, address corrections, admin confirmations/rejections/reassignments, retries, outreach drafts and service requests. Written only by sanctioned server functions. Agents read events about their own records; admins read all.",
+  "description": "Append-only audit trail for the Agent Pending Listings workflow: imports, row failures, matches, address corrections, admin confirmations/rejections/reassignments, retries, enrichment jobs, contact marks, advertising-permission evidence, outreach drafts, service requests and CSV downloads. Written only by sanctioned server functions. Raw phone numbers and emails are never copied into these events \u2014 only counts, categories and policy versions. Agents read events about their own records; admins read all.",
   "properties": {
     "agent_user_id": {
       "type": "string",
@@ -46,7 +46,17 @@
         "service_need_recorded",
         "ai_generated",
         "config_updated",
-        "reference_recheck"
+        "reference_recheck",
+        "enrichment_started",
+        "enrichment_batch",
+        "enrichment_completed",
+        "enrichment_retried",
+        "enrichment_row_failed",
+        "contact_marked",
+        "advertising_permission_recorded",
+        "advertising_permission_revoked",
+        "export_previewed",
+        "export_downloaded"
       ]
     },
     "import_id": {
@@ -58,10 +68,16 @@
     "property_id": {
       "type": "string"
     },
+    "enrich_job_id": {
+      "type": "string"
+    },
+    "export_id": {
+      "type": "string"
+    },
     "details": {
       "type": "object",
       "default": {},
-      "description": "Structured evidence: rule used, candidate ids, before/after values, counts."
+      "description": "Structured evidence: rule used, candidate ids, before/after values, counts, policy version. Never raw contact values."
     },
     "at": {
       "type": "string",

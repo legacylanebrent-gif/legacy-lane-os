@@ -1,0 +1,137 @@
+{
+  "name": "AgentListingEnrichJob",
+  "type": "object",
+  "description": "A persistent owner/property enrichment job for ONE agent's own records. Created, advanced and completed only by the sanctioned agentListingEnrich server function, which derives the agent from the session and authorizes every target record. Records the chosen scope, per-category outcome counts and a resume cursor so a partially completed job never loses successful rows and can be retried safely. Agents read only their own jobs; admins read all.",
+  "properties": {
+    "agent_user_id": {
+      "type": "string",
+      "description": "Server-derived agent (access anchor)."
+    },
+    "agent_name": {
+      "type": "string"
+    },
+    "scope": {
+      "type": "string",
+      "enum": [
+        "selected",
+        "filtered"
+      ],
+      "default": "selected"
+    },
+    "filter": {
+      "type": "string",
+      "description": "Workspace filter the scope was resolved from (when scope is filtered)."
+    },
+    "search_query": {
+      "type": "string"
+    },
+    "target_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Authorized opportunity ids captured at creation, in processing order."
+    },
+    "total_targets": {
+      "type": "integer",
+      "default": 0
+    },
+    "cursor_index": {
+      "type": "integer",
+      "default": 0,
+      "description": "Resume cursor: index of the next target to process."
+    },
+    "processed_count": {
+      "type": "integer",
+      "default": 0
+    },
+    "enriched_count": {
+      "type": "integer",
+      "default": 0
+    },
+    "current_count": {
+      "type": "integer",
+      "default": 0
+    },
+    "partial_count": {
+      "type": "integer",
+      "default": 0
+    },
+    "review_required_count": {
+      "type": "integer",
+      "default": 0
+    },
+    "no_reference_count": {
+      "type": "integer",
+      "default": 0
+    },
+    "failed_count": {
+      "type": "integer",
+      "default": 0
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "queued",
+        "processing",
+        "completed",
+        "partial",
+        "failed"
+      ],
+      "default": "queued"
+    },
+    "last_error": {
+      "type": "string"
+    },
+    "retry_count": {
+      "type": "integer",
+      "default": 0
+    },
+    "started_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "last_batch_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "completed_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "agent_user_id",
+    "status"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.agent_user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}
