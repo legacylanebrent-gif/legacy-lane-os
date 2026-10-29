@@ -334,26 +334,35 @@ export async function applyMatch(base44, opportunity, config, options = {}) {
   if (agentConfirmed || agentVerifiedOwner) {
     const conflicting = (agentVerifiedOwner && ownership.owner_of_record && agentVerifiedOwner !== ownership.owner_of_record)
       || (existing.source_record_id && ownership.source_record_id && existing.source_record_id !== ownership.source_record_id);
+    // A confirmed match is settled evidence: a later automatic re-match must never
+    // blank out what was confirmed. Fresh evidence can only add a conflict note.
+    const confirmedEvidence = agentConfirmed
+      ? {
+          match_status: 'verified',
+          owner_of_record: existing.owner_of_record || ownership.owner_of_record || '',
+          ownership_type: existing.ownership_type || ownership.ownership_type || 'unknown',
+          owner_mailing_address: existing.owner_mailing_address || ownership.owner_mailing_address || '',
+          parcel_id: existing.parcel_id || ownership.parcel_id || '',
+          characteristics: existing.characteristics || ownership.characteristics || {},
+          source: existing.source || ownership.source || '',
+          source_record_id: existing.source_record_id || ownership.source_record_id || '',
+          source_date: existing.source_date || ownership.source_date || '',
+          rule_used: existing.rule_used || ownership.rule_used,
+          confidence_basis: existing.confidence_basis || ownership.confidence_basis,
+        }
+      : {};
+    patch.ownership = {
+      ...ownership,
+      ...confirmedEvidence,
+      review_status: agentConfirmed ? 'confirmed' : existing.review_status || 'none',
+      agent_verified_owner: agentVerifiedOwner || '',
+      agent_verified_at: agentVerifiedAt || '',
+      resolved_by_name: existing.resolved_by_name || '',
+      resolved_at: existing.resolved_at || '',
+    };
     if (conflicting) {
-      patch.ownership = {
-        ...ownership,
-        review_status: agentConfirmed ? 'confirmed' : existing.review_status || 'none',
-        agent_verified_owner: agentVerifiedOwner || '',
-        agent_verified_at: agentVerifiedAt || '',
-        owner_of_record: agentVerifiedOwner || existing.owner_of_record || ownership.owner_of_record,
-        conflict_note: `Newer reference evidence (${ownership.source_date || 'date unknown'}) differs from the agent-verified ownership recorded earlier. Review before relying on either.`,
-        resolved_by_name: existing.resolved_by_name || '',
-        resolved_at: existing.resolved_at || '',
-      };
-    } else {
-      patch.ownership = {
-        ...ownership,
-        review_status: agentConfirmed ? 'confirmed' : existing.review_status || 'none',
-        agent_verified_owner: agentVerifiedOwner || '',
-        agent_verified_at: agentVerifiedAt || '',
-        resolved_by_name: existing.resolved_by_name || '',
-        resolved_at: existing.resolved_at || '',
-      };
+      patch.ownership.owner_of_record = agentVerifiedOwner || existing.owner_of_record || ownership.owner_of_record || '';
+      patch.ownership.conflict_note = `Newer reference evidence (${ownership.source_date || 'date unknown'}) differs from the agent-verified ownership recorded earlier. Review before relying on either.`;
     }
   }
 
