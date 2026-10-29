@@ -85,11 +85,13 @@ async function collectPool(base44, addr, parcel) {
   return [...pool.values()];
 }
 
+// Returns 0 when the stored reference database has no records at all for a state.
 async function referenceCountForState(base44, state) {
   try {
-    return await base44.asServiceRole.entities.PropstreamREListing.count({ state });
+    const rows = await base44.asServiceRole.entities.PropstreamREListing.filter({ state }, '-created_date', 1, 0);
+    return (rows || []).length;
   } catch (error) {
-    console.error('[listingMatch] reference count failed:', error?.message);
+    console.error('[listingMatch] reference probe failed:', error?.message);
     return -1;
   }
 }

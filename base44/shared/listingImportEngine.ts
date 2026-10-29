@@ -326,15 +326,19 @@ async function processRow(base44, importRec, row, config, agent) {
   return { status: rowStatus, match_status: matchStatus, opportunity_id: opportunity.id, property_created: propertyCreated };
 }
 
+// Reconciliation counts derived from the persisted row statuses (one bounded read).
 async function recount(base44, importId) {
-  const [imported, updated, failed, skipped, pending] = await Promise.all([
-    base44.asServiceRole.entities.AgentListingImportRow.count({ import_id: importId, status: 'imported' }),
-    base44.asServiceRole.entities.AgentListingImportRow.count({ import_id: importId, status: 'updated' }),
-    base44.asServiceRole.entities.AgentListingImportRow.count({ import_id: importId, status: 'failed' }),
-    base44.asServiceRole.entities.AgentListingImportRow.count({ import_id: importId, status: 'skipped' }),
-    base44.asServiceRole.entities.AgentListingImportRow.count({ import_id: importId, status: 'pending' }),
-  ]);
-  return { imported, updated, failed, skipped, pending };
+  const rows = await base44.asServiceRole.entities.AgentListingImportRow.filter(
+    { import_id: importId },
+    'row_index',
+    1000,
+    0,
+  );
+  const counts = { imported: 0, updated: 0, failed: 0, skipped: 0, pending: 0 };
+  for (const row of rows || []) {
+    if (counts[row.status] !== undefined) counts[row.status] += 1;
+  }
+  return counts;
 }
 
 async function matchCounts(base44, importId) {

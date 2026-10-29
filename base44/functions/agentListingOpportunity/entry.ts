@@ -7,7 +7,7 @@ import {
   audit,
   json,
 } from '../../shared/listingAccess.ts';
-import { formatAddress } from '../../shared/listingAddress.ts';
+import { formatAddress, normalizeAddress } from '../../shared/listingAddress.ts';
 import { applyMatch } from '../../shared/listingMatch.ts';
 
 // The agent's daily workspace: opportunity list, detail, and every agent-side action.
@@ -286,7 +286,6 @@ export default async function (req) {
       };
       if (!next.street || !next.city || !next.state) return json({ error: 'Street, city and state are required' }, 400);
       next.formatted_address = formatAddress(next);
-      const { normalizeAddress } = await import('../../shared/listingAddress.ts');
       const normalized = normalizeAddress(next);
 
       await touch(base44, opp, {
@@ -477,7 +476,6 @@ HARD RULES:
       const address = opp.address || {};
       let operatorIds = [];
       try {
-        const directoryQuery = address.county_ignored ? {} : { state: address.state };
         if (address.state) {
           const candidates = await base44.asServiceRole.entities.MasterOperatorDirectory.filter(
             { state: address.state },
@@ -486,15 +484,18 @@ HARD RULES:
             0,
           );
           const county = String(opp.listing?.county || '').toLowerCase().trim();
+          const city = String(address.city || '').toLowerCase().trim();
           const matched = (candidates || []).filter((op) => {
-            if (!op.claimed_by_user_id && !op.company_id) return false;
-            if (county && String(op.county || op.geocoded_county || '').toLowerCase().includes(county)) return true;
+            if (!op.claimed_by_user_id) return false;
+            const opCounty = String(op.county || op.geocoded_county || '').toLowerCase();
+            if (county && opCounty.includes(county)) return true;
             const cities = String(op.service_area_cities || '').toLowerCase();
-            return cities.includes(String(address.city || '').toLowerCase());
+            const opCity = String(op.city || op.geocoded_city || '').toLowerCase();
+            return (city && opCity === city) || (city && cities.includes(city));
           });
           operatorIds = [...new Set(matched.map((op) => op.claimed_by_user_id).filter(Boolean))].slice(0, 5);
         }
-        if (!operatorIds.length && address.county_ignored === undefined) {
+        if (!operatorIds.length) {
           console.log('[agentListingOpportunity] no directory operator matched; request recorded without operator ids');
         }
       } catch (error) {
