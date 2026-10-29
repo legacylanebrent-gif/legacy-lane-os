@@ -11,7 +11,7 @@ import {
   normText,
 } from './listingAddress.ts';
 import { loadConfig, audit } from './listingAccess.ts';
-import { runMatch, mapListingStatus } from './listingMatch.ts';
+import { applyMatch, mapListingStatus } from './listingMatch.ts';
 
 export const FIELD_LABELS = {
   street: 'Street address',
@@ -294,15 +294,19 @@ async function processRow(base44, importRec, row, config, agent) {
     }
   }
 
-  // 3. Ownership match against the stored reference database.
+  // 3. Ownership match against the stored reference database. applyMatch preserves
+  // agent/admin-confirmed ownership and flags newer conflicting evidence instead of
+  // silently replacing it when the same listing is imported again.
   let matchStatus = null;
   try {
-    const { ownership } = await runMatch(base44, opportunity, config);
-    matchStatus = ownership.match_status;
-    await base44.asServiceRole.entities.AgentListingOpportunity.update(opportunity.id, {
-      ownership,
-      last_activity_at: new Date().toISOString(),
+    const ownership = await applyMatch(base44, opportunity, config, {
+      actor: {
+        actor_user_id: importRec.agent_user_id,
+        actor_name: importRec.agent_name,
+        actor_role: 'system',
+      },
     });
+    matchStatus = ownership.match_status;
   } catch (error) {
     console.error('[listingImport] match failed for row', row.row_index, error?.message);
     matchStatus = 'failed';

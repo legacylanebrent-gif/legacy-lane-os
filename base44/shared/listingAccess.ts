@@ -27,6 +27,13 @@ export function isAdmin(user) {
   return !!user && user.role === 'admin';
 }
 
+// The ONE authorization decision for an agent-owned record: its owner, or a platform
+// admin acting in oversight. Every sanctioned function that loads a record by id uses it.
+export function canAccessAgentRecord(record, user) {
+  if (!record || !user) return false;
+  return record.agent_user_id === user.id || isAdmin(user);
+}
+
 export async function currentUser(base44) {
   return await base44.auth.me().catch((e) => (e.status === 401 ? null : Promise.reject(e)));
 }
