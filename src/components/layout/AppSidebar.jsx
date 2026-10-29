@@ -51,13 +51,20 @@ export const ALL_NAV_ITEMS = [
   // ══════════════════════════════════════════════════════════════════════
   { page: 'OperatorLinks',          label: 'Operator Links',         icon: LayoutGrid,      group: 'More' },
 
+  // ── AGENT ───────────────────────────────────────────────────────────────────
+  { page: 'AgentPendingListings',   label: 'Pending Listings',       icon: Building2,       group: 'More' },
+
   // ══════════════════════════════════════════════════════════════════════
   // ADMIN — single hub page (all admin links consolidated on /AdminLinks)
   // ══════════════════════════════════════════════════════════════════════
 
   // Admin — single hub page (all admin links consolidated on /AdminLinks)
   { page: 'AdminLinks',             label: 'Admin Links',            icon: Shield,          group: 'Admin' },
+  { page: 'AdminAgentListingImports', label: 'Agent Listing Imports', icon: Shield,         group: 'Admin' },
 ];
+
+// Agent-facing tools that every signed-in user may reach without a page grant
+const ALWAYS_VISIBLE_PAGES = new Set(['AgentPendingListings']);
 
 // Subgroup ordering within Admin
 const ADMIN_SUBGROUP_ORDER = [
@@ -154,6 +161,7 @@ export default function AppSidebar({ user, currentPageName, allowedPages }) {
   const handleLogout = () => base44.auth.logout(createPageUrl('Home'));
 
   const visibleItems = ALL_NAV_ITEMS.filter(item => {
+    if (ALWAYS_VISIBLE_PAGES.has(item.page)) return !!user;
     if (!allowedPages.includes(item.page)) return false;
     // Gate Elite-only marketing pages for Professional tier
     if (ELITE_ONLY_MARKETING_PAGES.has(item.page)) {
