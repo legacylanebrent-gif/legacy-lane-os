@@ -14,6 +14,10 @@
       "type": "string",
       "description": "Canonical Property id."
     },
+    "match_key": {
+      "type": "string",
+      "description": "Top-level normalized address key (street|unit~city~state~zip). Lets a second agent reuse the SAME canonical Property without ever reading the other agent's records."
+    },
     "crm_opportunity_id": {
       "type": "string",
       "description": "The agent's existing generic CRM Opportunity record for this property."
@@ -45,9 +49,6 @@
           "type": "string"
         },
         "formatted_address": {
-          "type": "string"
-        },
-        "match_key": {
           "type": "string"
         }
       }
