@@ -1,0 +1,62 @@
+{
+  "name": "AgentListingMapping",
+  "type": "object",
+  "description": "An agent's saved CSV column mapping, recalled by header fingerprint so the same export source maps automatically next time. Agents read only their own mappings; writes go through the sanctioned import function.",
+  "properties": {
+    "agent_user_id": {
+      "type": "string",
+      "description": "Access anchor (server-derived)."
+    },
+    "name": {
+      "type": "string"
+    },
+    "header_signature": {
+      "type": "string"
+    },
+    "mapping": {
+      "type": "object",
+      "default": {}
+    },
+    "use_count": {
+      "type": "integer",
+      "default": 0
+    },
+    "last_used_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "agent_user_id",
+    "header_signature"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.agent_user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

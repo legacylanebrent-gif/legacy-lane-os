@@ -1,0 +1,105 @@
+{
+  "name": "AgentListingAuditEvent",
+  "type": "object",
+  "description": "Append-only audit trail for the Agent Pending Listings workflow: imports, row failures, matches, address corrections, admin confirmations/rejections/reassignments, retries, outreach drafts and service requests. Written only by sanctioned server functions. Agents read events about their own records; admins read all.",
+  "properties": {
+    "agent_user_id": {
+      "type": "string",
+      "description": "Agent the event concerns (access anchor)."
+    },
+    "actor_user_id": {
+      "type": "string",
+      "description": "Server-derived actor."
+    },
+    "actor_name": {
+      "type": "string"
+    },
+    "actor_role": {
+      "type": "string",
+      "enum": [
+        "agent",
+        "admin",
+        "system"
+      ]
+    },
+    "event_type": {
+      "type": "string",
+      "enum": [
+        "import_started",
+        "import_completed",
+        "import_failed",
+        "import_retried",
+        "row_failed",
+        "match_verified",
+        "match_possible",
+        "match_unmatched",
+        "match_reference_unavailable",
+        "address_corrected",
+        "match_confirmed",
+        "match_rejected",
+        "opportunity_reassigned",
+        "outreach_drafted",
+        "outreach_approved",
+        "service_requested",
+        "opportunity_dismissed",
+        "opportunity_handled",
+        "service_need_recorded",
+        "ai_generated",
+        "config_updated",
+        "reference_recheck"
+      ]
+    },
+    "import_id": {
+      "type": "string"
+    },
+    "opportunity_id": {
+      "type": "string"
+    },
+    "property_id": {
+      "type": "string"
+    },
+    "details": {
+      "type": "object",
+      "default": {},
+      "description": "Structured evidence: rule used, candidate ids, before/after values, counts."
+    },
+    "at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "agent_user_id",
+    "event_type",
+    "at"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.agent_user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

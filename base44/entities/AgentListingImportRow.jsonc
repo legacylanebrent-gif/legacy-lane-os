@@ -1,0 +1,89 @@
+{
+  "name": "AgentListingImportRow",
+  "type": "object",
+  "description": "Per-row processing record for an agent listing import. Persists raw AND normalized values, row-level status and plain-language failure reason so a partially completed import never loses successful rows and can resume safely. Agents read only rows belonging to their own imports.",
+  "properties": {
+    "import_id": {
+      "type": "string"
+    },
+    "agent_user_id": {
+      "type": "string",
+      "description": "Access anchor (server-derived)."
+    },
+    "row_index": {
+      "type": "integer"
+    },
+    "raw": {
+      "type": "object",
+      "default": {},
+      "description": "The untouched CSV row values as supplied by the source export."
+    },
+    "normalized": {
+      "type": "object",
+      "default": {},
+      "description": "Normalized street/unit/city/state/zip plus the address match key."
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "imported",
+        "updated",
+        "failed",
+        "skipped"
+      ],
+      "default": "pending"
+    },
+    "error_code": {
+      "type": "string"
+    },
+    "error_message": {
+      "type": "string",
+      "description": "Plain-language explanation shown to the agent."
+    },
+    "property_id": {
+      "type": "string"
+    },
+    "opportunity_id": {
+      "type": "string"
+    },
+    "processed_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "import_id",
+    "agent_user_id",
+    "row_index"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.agent_user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

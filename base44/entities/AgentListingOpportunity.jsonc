@@ -1,0 +1,456 @@
+{
+  "name": "AgentListingOpportunity",
+  "type": "object",
+  "description": "An importing agent's PRIVATE CRM relationship to one canonical Property, plus its property-service opportunity and the traceable PropStream ownership evidence. One record per (agent_user_id, property_id). This is a relationship record, NOT a competing property database: the canonical property stays in Property, the CRM pipeline record stays in Opportunity, referrals stay in AgentListingPoolSubmission. A pending listing is NEVER evidence that the seller needs a service. Reference ownership is 'owner of record' as of the source date and is never proof of who the seller, occupant, executor or authorized decision-maker is. Agents read only their own records; every write happens through sanctioned server functions (admin-only record writes).",
+  "properties": {
+    "agent_user_id": {
+      "type": "string",
+      "description": "Authenticated importing agent (server-derived). Access anchor."
+    },
+    "agent_name": {
+      "type": "string"
+    },
+    "property_id": {
+      "type": "string",
+      "description": "Canonical Property id."
+    },
+    "crm_opportunity_id": {
+      "type": "string",
+      "description": "The agent's existing generic CRM Opportunity record for this property."
+    },
+    "import_id": {
+      "type": "string",
+      "description": "Import that first created this opportunity."
+    },
+    "last_import_id": {
+      "type": "string"
+    },
+    "address": {
+      "type": "object",
+      "default": {},
+      "properties": {
+        "street": {
+          "type": "string"
+        },
+        "unit": {
+          "type": "string"
+        },
+        "city": {
+          "type": "string"
+        },
+        "state": {
+          "type": "string"
+        },
+        "zip": {
+          "type": "string"
+        },
+        "formatted_address": {
+          "type": "string"
+        },
+        "match_key": {
+          "type": "string"
+        }
+      }
+    },
+    "listing": {
+      "type": "object",
+      "default": {},
+      "description": "Listing snapshot from the source export (latest known values).",
+      "properties": {
+        "listing_id": {
+          "type": "string"
+        },
+        "listing_source": {
+          "type": "string"
+        },
+        "listing_status_raw": {
+          "type": "string"
+        },
+        "listing_status_mapped": {
+          "type": "string",
+          "enum": [
+            "pending",
+            "under_contract",
+            "active",
+            "sold",
+            "withdrawn",
+            "unknown"
+          ]
+        },
+        "status_review_required": {
+          "type": "boolean",
+          "default": false,
+          "description": "True when the source status was not confidently mapped; never silently treated as pending."
+        },
+        "pending_date": {
+          "type": "string",
+          "format": "date"
+        },
+        "expected_closing_date": {
+          "type": "string",
+          "format": "date"
+        },
+        "county": {
+          "type": "string"
+        },
+        "parcel_id": {
+          "type": "string"
+        },
+        "listing_agent_name": {
+          "type": "string"
+        },
+        "listing_agent_email": {
+          "type": "string"
+        },
+        "listing_agent_phone": {
+          "type": "string"
+        },
+        "brokerage": {
+          "type": "string"
+        },
+        "seller_name_provided": {
+          "type": "string",
+          "description": "Seller information supplied by the importing agent (not verified)."
+        },
+        "seller_contact_provided": {
+          "type": "string"
+        },
+        "list_price": {
+          "type": "number"
+        },
+        "source_date": {
+          "type": "string",
+          "format": "date"
+        },
+        "imported_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "ownership": {
+      "type": "object",
+      "default": {},
+      "description": "Traceable ownership evidence from the stored PropStream reference database. Only fields the admin permits are returned to agents. Owner mailing address is kept separate from the property address.",
+      "properties": {
+        "match_status": {
+          "type": "string",
+          "enum": [
+            "unmatched",
+            "verified",
+            "possible",
+            "no_match",
+            "reference_unavailable",
+            "failed"
+          ],
+          "default": "unmatched"
+        },
+        "review_status": {
+          "type": "string",
+          "enum": [
+            "none",
+            "pending",
+            "confirmed",
+            "rejected"
+          ],
+          "default": "none"
+        },
+        "owner_of_record": {
+          "type": "string"
+        },
+        "ownership_type": {
+          "type": "string",
+          "enum": [
+            "individual",
+            "trust",
+            "company",
+            "unknown"
+          ]
+        },
+        "owner_mailing_address": {
+          "type": "string"
+        },
+        "parcel_id": {
+          "type": "string"
+        },
+        "characteristics": {
+          "type": "object",
+          "default": {}
+        },
+        "source": {
+          "type": "string"
+        },
+        "source_record_id": {
+          "type": "string"
+        },
+        "source_date": {
+          "type": "string",
+          "format": "date"
+        },
+        "matched_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "matching_version": {
+          "type": "string"
+        },
+        "rule_used": {
+          "type": "string"
+        },
+        "confidence_basis": {
+          "type": "string"
+        },
+        "explanation": {
+          "type": "string"
+        },
+        "candidate_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": []
+        },
+        "candidates": {
+          "type": "array",
+          "default": [],
+          "description": "Redacted candidate evidence for 'possible match - review required'.",
+          "items": {
+            "type": "object"
+          }
+        },
+        "conflict_note": {
+          "type": "string",
+          "description": "Set when newer reference evidence conflicts with an agent-confirmed match; surfaced for review, never silently overwritten."
+        },
+        "agent_verified_owner": {
+          "type": "string",
+          "description": "Owner information the agent confirmed independently. Never overwritten by reference data."
+        },
+        "agent_verified_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "resolved_by_name": {
+          "type": "string"
+        },
+        "resolved_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "ai_match_hint": {
+      "type": "object",
+      "default": {},
+      "description": "AI interpretation of SUPPLIED candidates only. Never invents an owner, contact, parcel or result; never on its own approves ownership.",
+      "properties": {
+        "summary": {
+          "type": "string"
+        },
+        "recommended_candidate_id": {
+          "type": "string"
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "service_need": {
+      "type": "string",
+      "enum": [
+        "unknown",
+        "full_estate_sale",
+        "furniture_sale",
+        "buyout",
+        "donation",
+        "cleanout",
+        "unsure",
+        "none"
+      ],
+      "default": "unknown",
+      "description": "Agent-recorded service need. Unknown until the agent (or the seller/representative) confirms it."
+    },
+    "service_need_note": {
+      "type": "string"
+    },
+    "service_need_confirmed_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "deadline": {
+      "type": "string",
+      "format": "date",
+      "description": "Confirmed service deadline (move-out/closing) driving the next action."
+    },
+    "next_action": {
+      "type": "string"
+    },
+    "next_action_due": {
+      "type": "string",
+      "format": "date"
+    },
+    "tasks": {
+      "type": "array",
+      "default": [],
+      "description": "Follow-up tasks inside this opportunity record (no competing task system).",
+      "items": {
+        "type": "object",
+        "properties": {
+          "task_id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "due_date": {
+            "type": "string",
+            "format": "date"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "open",
+              "done"
+            ],
+            "default": "open"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "created_by_name": {
+            "type": "string"
+          },
+          "completed_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      }
+    },
+    "ai_next_step": {
+      "type": "object",
+      "default": {},
+      "properties": {
+        "summary": {
+          "type": "string"
+        },
+        "missing_info": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": []
+        },
+        "recommended_action": {
+          "type": "string"
+        },
+        "generated_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "outreach_draft": {
+      "type": "object",
+      "default": {},
+      "description": "Draft only. Sending stays in the existing authorized, consent-checked sending workflow.",
+      "properties": {
+        "subject": {
+          "type": "string"
+        },
+        "body": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "draft",
+            "approved"
+          ],
+          "default": "draft"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "approved_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "service_request_id": {
+      "type": "string",
+      "description": "AgentListingPoolSubmission created when the seller/representative authorized sharing."
+    },
+    "service_request_status": {
+      "type": "string"
+    },
+    "dismissed": {
+      "type": "boolean",
+      "default": false
+    },
+    "dismissed_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "handled": {
+      "type": "boolean",
+      "default": false
+    },
+    "handled_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "handled_note": {
+      "type": "string"
+    },
+    "correction_count": {
+      "type": "integer",
+      "default": 0
+    },
+    "last_corrected_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "last_activity_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "agent_user_id",
+    "property_id"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.agent_user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

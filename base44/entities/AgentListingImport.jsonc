@@ -1,0 +1,152 @@
+{
+  "name": "AgentListingImport",
+  "type": "object",
+  "description": "One uploaded pending-listing CSV for ONE agent. A point-in-time source export, never a live feed. Rows are persisted separately (AgentListingImportRow) so processing is bounded, resumable and idempotent. Agents read only their own imports; every write happens through the sanctioned agentListingImport server function (admin-only record writes).",
+  "properties": {
+    "agent_user_id": {
+      "type": "string",
+      "description": "Authenticated importing agent (server-derived, never client supplied). Access anchor."
+    },
+    "agent_name": {
+      "type": "string"
+    },
+    "agent_email": {
+      "type": "string"
+    },
+    "file_name": {
+      "type": "string"
+    },
+    "source_label": {
+      "type": "string",
+      "description": "Where the export came from (MLS export, brokerage export, PropStream listing export...)."
+    },
+    "source_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Date of the source export when known. Displayed next to the import date."
+    },
+    "imported_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "column_mapping": {
+      "type": "object",
+      "default": {},
+      "description": "Field -> CSV column mapping used for this import."
+    },
+    "header_signature": {
+      "type": "string",
+      "description": "Sorted header fingerprint used to recall the agent's saved mapping."
+    },
+    "raw_headers": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    },
+    "total_rows": {
+      "type": "integer",
+      "default": 0
+    },
+    "processed_count": {
+      "type": "integer",
+      "default": 0
+    },
+    "imported_count": {
+      "type": "integer",
+      "default": 0
+    },
+    "updated_count": {
+      "type": "integer",
+      "default": 0
+    },
+    "failed_count": {
+      "type": "integer",
+      "default": 0
+    },
+    "skipped_count": {
+      "type": "integer",
+      "default": 0
+    },
+    "matched_verified_count": {
+      "type": "integer",
+      "default": 0
+    },
+    "matched_possible_count": {
+      "type": "integer",
+      "default": 0
+    },
+    "unmatched_count": {
+      "type": "integer",
+      "default": 0
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "queued",
+        "processing",
+        "completed",
+        "partial",
+        "failed"
+      ],
+      "default": "queued"
+    },
+    "current_row_index": {
+      "type": "integer",
+      "default": 0,
+      "description": "Resume cursor for bounded background processing."
+    },
+    "error_summary": {
+      "type": "string"
+    },
+    "last_error": {
+      "type": "string"
+    },
+    "started_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "completed_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "reprocess_count": {
+      "type": "integer",
+      "default": 0
+    }
+  },
+  "required": [
+    "agent_user_id",
+    "file_name"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.agent_user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

@@ -1,0 +1,91 @@
+{
+  "name": "AgentListingConfig",
+  "type": "object",
+  "description": "Admin-controlled matching policy and permitted enrichment fields for the Agent Pending Listings workflow. Single active record (key = 'default'). Admin-only read and write.",
+  "properties": {
+    "key": {
+      "type": "string",
+      "default": "default"
+    },
+    "matching_version": {
+      "type": "string",
+      "default": "v1"
+    },
+    "auto_verify_min_score": {
+      "type": "number",
+      "default": 92,
+      "description": "Similarity floor for a single unambiguous candidate to auto-verify."
+    },
+    "possible_min_score": {
+      "type": "number",
+      "default": 70
+    },
+    "ambiguity_gap": {
+      "type": "number",
+      "default": 8,
+      "description": "If the top two candidates are closer than this, the result is 'possible match - review required', never auto-verified."
+    },
+    "max_candidates": {
+      "type": "integer",
+      "default": 5
+    },
+    "allowed_enrichment_fields": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [
+        "owner_of_record",
+        "ownership_type",
+        "owner_mailing_address",
+        "parcel_id",
+        "characteristics"
+      ],
+      "description": "Reference ownership fields agents may see. Owner phone numbers and personal emails are never in this list."
+    },
+    "max_rows_per_import": {
+      "type": "integer",
+      "default": 500
+    },
+    "max_ai_calls_per_import": {
+      "type": "integer",
+      "default": 25
+    },
+    "ai_assist_enabled": {
+      "type": "boolean",
+      "default": true
+    },
+    "updated_by_name": {
+      "type": "string"
+    },
+    "updated_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "key"
+  ],
+  "rls": {
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}
