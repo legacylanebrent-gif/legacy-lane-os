@@ -73,6 +73,9 @@ export default async function (req) {
         },
         review_queue: reviewQueue,
         config,
+        default_fields: DEFAULT_ALLOWED_ENRICHMENT,
+        default_contact_fields: DEFAULT_CONTACT_SOURCE_FIELDS,
+        default_fact_fields: DEFAULT_PROPERTY_FACT_FIELDS,
       });
     }
 

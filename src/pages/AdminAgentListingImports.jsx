@@ -7,6 +7,7 @@ import AdminReviewQueue from '@/components/agentlisting/AdminReviewQueue';
 import AdminImportsTable from '@/components/agentlisting/AdminImportsTable';
 import AdminConfigPanel from '@/components/agentlisting/AdminConfigPanel';
 import AdminTrendsCard from '@/components/agentlisting/AdminTrendsCard';
+import AdminEnrichmentActivity from '@/components/agentlisting/AdminEnrichmentActivity';
 
 const SUMMARY = [
   ['total_imports', 'Imports'],
@@ -116,8 +117,15 @@ export default function AdminAgentListingImports() {
         <>
           <AdminReviewQueue queue={data.review_queue || []} onResolved={load} />
           <AdminImportsTable imports={data.imports || []} onChanged={load} />
+          <AdminEnrichmentActivity />
           <div className="grid gap-4 lg:grid-cols-2">
-            <AdminConfigPanel config={data.config || {}} defaultFields={data.config?.allowed_enrichment_fields || []} onSaved={load} />
+            <AdminConfigPanel
+              config={data.config || {}}
+              defaultFields={data.default_fields || []}
+              defaultContactFields={data.default_contact_fields || []}
+              defaultFactFields={data.default_fact_fields || []}
+              onSaved={load}
+            />
             <AdminTrendsCard />
           </div>
         </>

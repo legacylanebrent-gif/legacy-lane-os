@@ -1,12 +1,15 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Loader2, Search } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Download, Loader2, Search } from 'lucide-react';
 import { opportunities } from '@/components/agentlisting/listingApi';
 import OpportunityCard from '@/components/agentlisting/OpportunityCard';
 import OpportunityDetailDialog from '@/components/agentlisting/OpportunityDetailDialog';
 import ImportPanel from '@/components/agentlisting/ImportPanel';
 import ImportHistory from '@/components/agentlisting/ImportHistory';
+import EnrichToolbar from '@/components/agentlisting/EnrichToolbar';
+import FacebookExportDialog from '@/components/agentlisting/FacebookExportDialog';
 
 const FILTERS = [
   { id: 'work_today', label: 'Work today' },
@@ -35,6 +38,16 @@ export default function AgentPendingListings() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [refreshKey, setRefreshKey] = useState(0);
+  const [selectedIds, setSelectedIds] = useState(() => new Set());
+  const [exportOpen, setExportOpen] = useState(false);
+
+  const toggleSelect = (id) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  };
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -52,6 +65,10 @@ export default function AgentPendingListings() {
     const timer = setTimeout(load, q ? 350 : 0);
     return () => clearTimeout(timer);
   }, [load, q, refreshKey]);
+
+  useEffect(() => {
+    setSelectedIds(new Set());
+  }, [filter, q]);
 
   const counts = data?.counts || {};
 
@@ -110,6 +127,19 @@ export default function AgentPendingListings() {
             </div>
           </div>
 
+          <div className="flex flex-col gap-2 rounded-xl border border-slate-200 bg-white p-3 sm:flex-row sm:items-center sm:justify-between">
+            <EnrichToolbar
+              filter={filter}
+              q={q}
+              selectedIds={selectedIds}
+              matchingCount={data?.total_matching || 0}
+              onFinished={() => setRefreshKey((k) => k + 1)}
+            />
+            <Button size="sm" variant="outline" onClick={() => setExportOpen(true)} className="gap-1.5">
+              <Download className="h-3.5 w-3.5" /> Export for Facebook
+            </Button>
+          </div>
+
           {error && <p className="text-sm text-rose-600">{error}</p>}
           {loading && !data && (
             <div className="flex items-center gap-2 py-10 text-sm text-slate-500">
@@ -126,7 +156,13 @@ export default function AgentPendingListings() {
           )}
           <div className="grid gap-3 lg:grid-cols-2">
             {(data?.opportunities || []).map((card) => (
-              <OpportunityCard key={card.id} card={card} onOpen={setSelectedId} />
+              <OpportunityCard
+                key={card.id}
+                card={card}
+                onOpen={setSelectedId}
+                selected={selectedIds.has(card.id)}
+                onToggleSelect={toggleSelect}
+              />
             ))}
           </div>
         </TabsContent>
@@ -141,6 +177,15 @@ export default function AgentPendingListings() {
         opportunityId={selectedId}
         onClose={() => setSelectedId(null)}
         onChanged={() => setRefreshKey((k) => k + 1)}
+      />
+
+      <FacebookExportDialog
+        open={exportOpen}
+        onClose={() => setExportOpen(false)}
+        filter={filter}
+        q={q}
+        selectedIds={selectedIds}
+        matchingCount={data?.total_matching || 0}
       />
     </div>
   );

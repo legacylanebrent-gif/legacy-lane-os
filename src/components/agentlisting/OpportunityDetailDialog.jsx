@@ -2,13 +2,17 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Loader2, XCircle, CheckCircle2 } from 'lucide-react';
-import { opportunities, LISTING_STATUS_LABELS } from './listingApi';
+import { opportunities, LISTING_STATUS_LABELS, ENRICHMENT_LABELS, ENRICHMENT_STYLES } from './listingApi';
 import OwnershipBadge from './OwnershipBadge';
 import OwnershipEvidence from './OwnershipEvidence';
 import ServiceNeedPanel from './ServiceNeedPanel';
 import OpportunityTasks from './OpportunityTasks';
 import OutreachPanel from './OutreachPanel';
 import AddressCorrection from './AddressCorrection';
+import OwnerContacts from './OwnerContacts';
+import PropertyFacts from './PropertyFacts';
+import AdvertisingPermission from './AdvertisingPermission';
+import EnrichButton from './EnrichButton';
 
 export default function OpportunityDetailDialog({ opportunityId, onClose, onChanged }) {
   const [data, setData] = useState(null);
@@ -86,18 +90,36 @@ export default function OpportunityDetailDialog({ opportunityId, onClose, onChan
 
             <div className="grid gap-3 md:grid-cols-2">
               <OwnershipEvidence opportunity={opp} onUpdated={refresh} />
+              <OwnerContacts opportunity={opp} onChanged={refresh} />
+              <AdvertisingPermission opportunity={opp} onChanged={refresh} />
               <ServiceNeedPanel opportunity={opp} onUpdated={refresh} />
               <OpportunityTasks opportunity={opp} onUpdated={refresh} />
               <OutreachPanel opportunity={opp} onUpdated={refresh} />
             </div>
+
+            <PropertyFacts facts={opp.property_facts} />
 
             <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-slate-200 bg-white p-3">
               <div className="text-xs text-slate-500">
                 Imported {String(card.imported_at || '').slice(0, 10) || 'unknown date'}
                 {data.import?.source_label ? ` · ${data.import.source_label}` : ''}
                 {data.import?.source_date ? ` · as of ${data.import.source_date}` : ''}
+                <span
+                  className={`ml-2 inline-block rounded-full border px-2 py-0.5 text-[11px] font-medium ${
+                    ENRICHMENT_STYLES[card.enrichment_status] || ENRICHMENT_STYLES.never
+                  }`}
+                >
+                  {ENRICHMENT_LABELS[card.enrichment_status] || 'Not enriched yet'}
+                </span>
               </div>
-              <AddressCorrection opportunity={opp} onUpdated={refresh} />
+              <div className="flex flex-wrap items-center gap-2">
+                <EnrichButton
+                  opportunityId={opp.id}
+                  status={card.enrichment_status}
+                  onDone={refresh}
+                />
+                <AddressCorrection opportunity={opp} onUpdated={refresh} />
+              </div>
             </div>
 
             <div className="flex flex-wrap gap-2">
