@@ -220,6 +220,21 @@ export function addressSimilarity(subject, candidate) {
     return { score: 0, reasons: ['Different unit'], blocked: 'different_unit' };
   }
 
+  // Street NAME must genuinely agree. Sharing only a generic suffix (Way, Drive)
+  // is a different property, never a review candidate.
+  const nameOnly = (value) => value
+    .split(' ')
+    .filter((t) => t && !/^\d/.test(t) && t !== SUFFIXES[t])
+    .join(' ');
+  const subjName = nameOnly(subjBase);
+  const candName = nameOnly(candBase);
+  if (subjName && candName) {
+    const nameScore = dice(subjName, candName);
+    if (nameScore < 0.7) {
+      return { score: 0, reasons: ['Street name differs'], blocked: 'street_name_mismatch' };
+    }
+  }
+
   const streetScore = dice(subjBase, candBase);
   score += streetScore * 70;
   if (subjNum && candNum && subjNum === candNum) {
