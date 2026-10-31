@@ -21,7 +21,7 @@ function getCustomerIoConfig() {
 }
 
 // Send a transactional email via CustomerIO App API
-async function sendCustomerIoEmail({ to, subject, body, fromName, userId }, config) {
+async function sendCustomerIoEmail({ to, subject, body, fromName, replyTo, userId }, config) {
   const region = Deno.env.get('CUSTOMERIO_REGION') || 'us';
   const endpoint = region === 'eu' ? 'https://api-eu.customer.io' : 'https://api.customer.io';
   const res = await fetch(`${endpoint}/v1/send/email`, {
@@ -34,6 +34,8 @@ async function sendCustomerIoEmail({ to, subject, body, fromName, userId }, conf
       to,
       from: config.fromEmail,
       from_name: fromName || config.fromName,
+      // Replies go to the operator, never the platform's default inbox.
+      ...(replyTo ? { reply_to: replyTo } : {}),
       subject,
       body,
       identifiers: userId ? { id: userId } : undefined,
@@ -148,14 +150,20 @@ Deno.serve(async (req) => {
       // Chapter 7 P1 — canonical business identity: Company first, documented
       // legacy User fields only as fallback when canonical data is absent.
       let canonicalCompanyName = '';
+      let canonicalCompanyEmail = '';
       if (user.company_id) {
         try {
           const comps = await base44.asServiceRole.entities.Company.filter({ id: user.company_id });
-          if (comps.length) canonicalCompanyName = comps[0].display_name || comps[0].legal_name || '';
+          if (comps.length) {
+            canonicalCompanyName = comps[0].display_name || comps[0].legal_name || '';
+            canonicalCompanyEmail = comps[0].email || '';
+          }
         } catch (e) { /* fall back to legacy user fields below */ }
       }
       const senderName = campaign.sender_name || canonicalCompanyName || user.company_name || user.full_name || 'EstateSalen';
-      const replyTo = campaign.reply_to_email || '';
+      // Reply-to belongs to the operator: campaign value, else their company email, else their account email.
+      const replyToCandidate = (campaign.reply_to_email || canonicalCompanyEmail || user.email || '').trim();
+      const replyTo = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(replyToCandidate) ? replyToCandidate : '';
 
       // Send emails in concurrent batches via CustomerIO transactional email
       const cioConfig = getCustomerIoConfig();
@@ -171,6 +179,7 @@ Deno.serve(async (req) => {
                 subject: campaign.email_subject,
                 body: campaign.email_body,
                 fromName: senderName,
+                replyTo,
                 userId: recipient.user_id,
               }, cioConfig);
             }
@@ -201,6 +210,8 @@ Deno.serve(async (req) => {
         sent_at: new Date().toISOString(),
         recipient_count: sentCount,
         sender_name: senderName,
+        // Record where replies will actually land.
+        ...(replyTo ? { reply_to_email: replyTo } : {}),
         metrics: {
           ...(campaign.metrics || {}),
           sent: newSent,
