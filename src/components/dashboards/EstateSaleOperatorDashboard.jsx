@@ -6,18 +6,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import CreateEstateSaleModal from '@/components/estate/CreateEstateSaleModal';
 import OperatorSalesTable from '@/components/operator/OperatorSalesTable';
 import OperatorMessagesWidget from '@/components/operator/OperatorMessagesWidget';
-import {
-  Home,
-  DollarSign,
-  TrendingUp,
-  Calendar,
-  Eye,
-  Heart,
-  MessageSquare,
-  Plus,
-  RefreshCw,
-  Settings,
-} from 'lucide-react';
+import OperatorHero from '@/components/operator/dashboard/OperatorHero';
+import SaleSpotlight from '@/components/operator/dashboard/SaleSpotlight';
+import { Home, Eye, Heart, MessageSquare, Plus } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import ProfileCompletionGate, { isProfileComplete } from '@/components/profile/ProfileCompletionGate';
@@ -124,157 +115,91 @@ export default function EstateSaleOperatorDashboard({ user }) {
     );
   }
 
+  const nextSale = (() => {
+    const live = sales.find((s) => s.status === 'active');
+    if (live) return live;
+    const upcoming = sales
+      .filter((s) => s.status === 'upcoming')
+      .sort((a, b) => (a.sale_dates?.[0]?.date || '').localeCompare(b.sale_dates?.[0]?.date || ''));
+    return upcoming[0] || sales.find((s) => s.status === 'draft') || sales[0] || null;
+  })();
+
+  const openCreateModal = () => {
+    if (!isProfileComplete(user)) {
+      alert('Please complete your profile first. Set your company name and location in My Profile.');
+      navigate(createPageUrl('MyProfile'));
+      return;
+    }
+    setCreateModalOpen(true);
+  };
+
   return (
     <div className="p-4 sm:p-8 space-y-6">
-      {/* Header */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-slate-900">Estate Sale Dashboard</h1>
-          <p className="text-slate-600 mt-1 text-sm sm:text-base">
-            Manage your estate sales and track performance
-          </p>
-        </div>
-        <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
-          <Button
-            variant="outline"
-            onClick={() => setRefreshKey((k) => k + 1)}
-            disabled={loading}
-            className="w-full sm:w-auto"
-          >
-            <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
-            Refresh
-          </Button>
-          <Button
-            onClick={() => navigate(createPageUrl('MySales'))}
-            variant="outline"
-            className="w-full sm:w-auto"
-          >
-            <Settings className="w-4 h-4 mr-2" />
-            My Sales Manager
-          </Button>
-          <Button
-            onClick={() => {
-              if (!isProfileComplete(user)) {
-                alert('Please complete your profile first. Set your company name and location in My Profile.');
-                navigate(createPageUrl('MyProfile'));
-                return;
-              }
-              setCreateModalOpen(true);
-            }}
-            className="bg-orange-600 hover:bg-orange-700 w-full sm:w-auto"
-          >
-            <Plus className="w-4 h-4 mr-2" />
-            Create Estate Sale
-          </Button>
-        </div>
-      </div>
+      <OperatorHero
+        user={user}
+        stats={stats}
+        loading={loading}
+        onRefresh={() => setRefreshKey((k) => k + 1)}
+        onCreateSale={openCreateModal}
+        onOpenSales={() => navigate(createPageUrl('MySales'))}
+      />
+
+      <SaleSpotlight sale={nextSale} onCreateSale={openCreateModal} onEditSale={handleEditSale} />
 
       {/* Profile completion gate */}
       {user && !isProfileComplete(user) && (
         <ProfileCompletionGate user={user} actionLabel="create a sale" />
       )}
 
-      {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card className="cursor-pointer hover:shadow-md hover:border-orange-300 transition-all" onClick={() => navigate('/MySales')}>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-slate-600 mb-1">Total Sales</p>
-                <p className="text-3xl font-bold text-slate-900">{stats.totalSales}</p>
-                <p className="text-xs text-orange-500 mt-1">View all →</p>
-              </div>
-              <div className="h-12 w-12 bg-orange-100 rounded-lg flex items-center justify-center">
-                <Home className="w-6 h-6 text-orange-600" />
-              </div>
+      {/* Compact activity strip */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        <Card className="cursor-pointer transition-all hover:-translate-y-0.5 hover:shadow-md" onClick={() => navigate('/MySales')}>
+          <CardContent className="p-4 flex items-center gap-3">
+            <div className="h-10 w-10 bg-orange-100 rounded-lg flex items-center justify-center flex-shrink-0">
+              <Home className="w-5 h-5 text-orange-600" />
             </div>
-          </CardContent>
-        </Card>
-
-        <Card className="cursor-pointer hover:shadow-md hover:border-green-300 transition-all" onClick={() => navigate('/MySales?status=active')}>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-slate-600 mb-1">Active Sales</p>
-                <p className="text-3xl font-bold text-green-600">{stats.activeSales}</p>
-                <p className="text-xs text-green-500 mt-1">View active →</p>
-              </div>
-              <div className="h-12 w-12 bg-green-100 rounded-lg flex items-center justify-center">
-                <TrendingUp className="w-6 h-6 text-green-600" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="cursor-pointer hover:shadow-md hover:border-blue-300 transition-all" onClick={() => navigate('/MySales?status=upcoming')}>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-slate-600 mb-1">Upcoming Sales</p>
-                <p className="text-3xl font-bold text-blue-600">{stats.upcomingSales}</p>
-                <p className="text-xs text-blue-500 mt-1">View upcoming →</p>
-              </div>
-              <div className="h-12 w-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                <Calendar className="w-6 h-6 text-blue-600" />
-              </div>
+            <div className="min-w-0">
+              <p className="text-2xl font-bold text-slate-900 leading-none">{stats.totalSales}</p>
+              <p className="text-xs text-slate-600 mt-1">Total sales</p>
             </div>
           </CardContent>
         </Card>
 
         <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-slate-600 mb-1">Total Revenue</p>
-                <p className="text-3xl font-bold text-green-600">
-                  ${stats.totalRevenue.toLocaleString()}
-                </p>
-              </div>
-              <div className="h-12 w-12 bg-green-100 rounded-lg flex items-center justify-center">
-                <DollarSign className="w-6 h-6 text-green-600" />
-              </div>
+          <CardContent className="p-4 flex items-center gap-3">
+            <div className="h-10 w-10 bg-cyan-100 rounded-lg flex items-center justify-center flex-shrink-0">
+              <Eye className="w-5 h-5 text-cyan-600" />
+            </div>
+            <div className="min-w-0">
+              <p className="text-2xl font-bold text-slate-900 leading-none">{stats.totalViews.toLocaleString()}</p>
+              <p className="text-xs text-slate-600 mt-1">Public views</p>
             </div>
           </CardContent>
         </Card>
 
         <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-slate-600 mb-1">Total Views</p>
-                <p className="text-3xl font-bold text-cyan-600">{stats.totalViews}</p>
-              </div>
-              <div className="h-12 w-12 bg-cyan-100 rounded-lg flex items-center justify-center">
-                <Eye className="w-6 h-6 text-cyan-600" />
-              </div>
+          <CardContent className="p-4 flex items-center gap-3">
+            <div className="h-10 w-10 bg-rose-100 rounded-lg flex items-center justify-center flex-shrink-0">
+              <Heart className="w-5 h-5 text-rose-600" />
+            </div>
+            <div className="min-w-0">
+              <p className="text-2xl font-bold text-slate-900 leading-none">{stats.totalSaves.toLocaleString()}</p>
+              <p className="text-xs text-slate-600 mt-1">Saves</p>
             </div>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-slate-600 mb-1">Total Saves</p>
-                <p className="text-3xl font-bold text-red-600">{stats.totalSaves}</p>
-              </div>
-              <div className="h-12 w-12 bg-red-100 rounded-lg flex items-center justify-center">
-                <Heart className="w-6 h-6 text-red-600" />
-              </div>
+        <Card
+          className="cursor-pointer transition-all hover:-translate-y-0.5 hover:shadow-md"
+          onClick={() => navigate(createPageUrl('Messages'))}
+        >
+          <CardContent className="p-4 flex items-center gap-3">
+            <div className="h-10 w-10 bg-violet-100 rounded-lg flex items-center justify-center flex-shrink-0">
+              <MessageSquare className="w-5 h-5 text-violet-600" />
             </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-slate-600 mb-1">Unread Messages</p>
-                <p className="text-3xl font-bold text-orange-600">{stats.unreadMessages}</p>
-              </div>
-              <div className="h-12 w-12 bg-orange-100 rounded-lg flex items-center justify-center">
-                <MessageSquare className="w-6 h-6 text-orange-600" />
-              </div>
+            <div className="min-w-0">
+              <p className="text-2xl font-bold text-slate-900 leading-none">{stats.unreadMessages}</p>
+              <p className="text-xs text-slate-600 mt-1">Unread messages</p>
             </div>
           </CardContent>
         </Card>
