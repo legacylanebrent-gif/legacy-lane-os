@@ -5,6 +5,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Loader2, ClipboardList, AlertTriangle, CalendarClock, Ban, UserX, FlaskConical } from 'lucide-react';
 import { format, addDays } from 'date-fns';
+import BackToMySales from '@/components/layout/BackToMySales';
 
 // Chapter 3 P1 — cross-sale workload / weekly planner. ONE view over existing
 // EstateSale, SaleTask and Item research flags. No Workload records are created,
@@ -124,6 +125,7 @@ export default function OperatorWorkload() {
 
   return (
     <div className="p-6 lg:p-8 space-y-6">
+      <BackToMySales />
       <div>
         <h1 className="text-3xl font-serif font-bold text-slate-900">Workload & Weekly Planner</h1>
         <p className="text-sm md:text-base text-slate-600">

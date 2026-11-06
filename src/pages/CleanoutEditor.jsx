@@ -12,6 +12,7 @@ import {
   MapPin, Calendar, Image as ImageIcon, Loader2, Send
 } from 'lucide-react';
 import { format } from 'date-fns';
+import BackToMySales from '@/components/layout/BackToMySales';
 
 const STATUS_CONFIG = {
   draft: { label: 'Draft', color: 'bg-slate-100 text-slate-700' },
@@ -279,7 +280,8 @@ export default function CleanoutEditor() {
   // ── EDITOR MODE (new or existing) ──
   return (
     <div className="p-6 lg:p-8 space-y-6 mt-4">
-      <div className="flex flex-wrap items-center gap-3 mt-4">
+      <BackToMySales className="mt-4" />
+      <div className="flex flex-wrap items-center gap-3">
         <Button variant="outline" size="sm" onClick={() => navigate('/CleanoutEditor')}>
           <ArrowLeft className="w-4 h-4 mr-1" /> Back to List
         </Button>

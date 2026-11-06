@@ -6,6 +6,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ChevronLeft, ChevronRight, CalendarDays, Columns3 } from 'lucide-react';
 import { startOfMonth, endOfMonth, startOfWeek, endOfWeek, addMonths, addWeeks, eachDayOfInterval, format, isSameMonth, isToday, isSameDay } from 'date-fns';
+import BackToMySales from '@/components/layout/BackToMySales';
 
 // Chapter 3 P1 — operator sale calendar. A VIEW over existing EstateSale.sale_dates;
 // no scheduling records are created or duplicated here. Consumer MyCalendar is untouched.
@@ -93,6 +94,7 @@ export default function OperatorCalendar() {
 
   return (
     <div className="p-6 lg:p-8 space-y-6">
+      <BackToMySales />
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
         <div>
           <h1 className="text-3xl font-serif font-bold text-slate-900">Sale Calendar</h1>
