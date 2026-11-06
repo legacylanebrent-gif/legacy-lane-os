@@ -8,6 +8,14 @@ import OperatorSalesTable from '@/components/operator/OperatorSalesTable';
 import OperatorMessagesWidget from '@/components/operator/OperatorMessagesWidget';
 import OperatorHero from '@/components/operator/dashboard/OperatorHero';
 import SaleSpotlight from '@/components/operator/dashboard/SaleSpotlight';
+import TodayStrip from '@/components/operator/dashboard/TodayStrip';
+import NeedsYouPanel from '@/components/operator/dashboard/NeedsYouPanel';
+import MoneyPanel from '@/components/operator/dashboard/MoneyPanel';
+import GoalRing from '@/components/operator/dashboard/GoalRing';
+import SaleGallery from '@/components/operator/dashboard/SaleGallery';
+import RecentActivity from '@/components/operator/dashboard/RecentActivity';
+import CoolFindsCard from '@/components/operator/dashboard/CoolFindsCard';
+import { loadOperatorMoney } from '@/components/operator/dashboard/saleDayMetrics';
 import { Home, Eye, Heart, MessageSquare, Plus } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
@@ -29,10 +37,18 @@ export default function EstateSaleOperatorDashboard({ user }) {
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [editingSale, setEditingSale] = useState(null);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [money, setMoney] = useState({ thisMonth: 0, lastMonth: 0, txCount: 0 });
 
   useEffect(() => {
     loadDashboardData();
   }, [refreshKey]);
+
+  useEffect(() => {
+    if (!user?.id) return;
+    loadOperatorMoney(user.id)
+      .then(setMoney)
+      .catch((e) => console.error('Operator money:', e));
+  }, [refreshKey, user?.id]);
 
   const loadDashboardData = async () => {
     setLoading(true);
@@ -115,6 +131,8 @@ export default function EstateSaleOperatorDashboard({ user }) {
     );
   }
 
+  const activeSale = sales.find((s) => s.status === 'active') || null;
+
   const nextSale = (() => {
     const live = sales.find((s) => s.status === 'active');
     if (live) return live;
@@ -145,6 +163,21 @@ export default function EstateSaleOperatorDashboard({ user }) {
       />
 
       <SaleSpotlight sale={nextSale} onCreateSale={openCreateModal} onEditSale={handleEditSale} />
+
+      <TodayStrip sale={activeSale || nextSale} />
+
+      <NeedsYouPanel user={user} sales={sales} />
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <div className="lg:col-span-2 space-y-4">
+          <MoneyPanel sales={sales} money={money} />
+          <CoolFindsCard user={user} />
+        </div>
+        <div className="space-y-4">
+          <GoalRing user={user} monthRevenue={money.thisMonth} />
+          <RecentActivity user={user} />
+        </div>
+      </div>
 
       {/* Profile completion gate */}
       {user && !isProfileComplete(user) && (
@@ -213,6 +246,8 @@ export default function EstateSaleOperatorDashboard({ user }) {
         </TabsList>
 
         <TabsContent value="sales" className="space-y-4">
+          {sales.length > 0 && <SaleGallery sales={sales} />}
+
           <Card>
             <CardHeader>
               <CardTitle>Estate Sales</CardTitle>
