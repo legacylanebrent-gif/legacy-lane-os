@@ -1,8 +1,10 @@
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { TrendingUp, Info } from 'lucide-react';
+import ReferralEstimateDisclosure from '@/components/referrals/ReferralEstimateDisclosure';
 
-// Same illustration math the referral flow uses: 2% referral fee, 15% payout.
+// Same illustration math the referral flow uses: 2% referral fee (an approximate
+// real estate agent commission), 15% payout.
 const REFERRAL_FEE_RATE = 0.02;
 const PAYOUT_SHARE_RATE = 0.15;
 const EXAMPLES = [300000, 500000, 750000];
@@ -36,7 +38,7 @@ export default function ReferralIncomePitch() {
 
         <div className="mt-3 rounded-xl border border-cyan-200 bg-white p-2.5">
           <p className="text-center text-xs font-semibold text-slate-700">
-            Home sale price × 2% referral fee × 15% payout share
+            Home sale price × approx. 2% agent commission (the referral fee) × 15% payout share
           </p>
         </div>
 
@@ -48,17 +50,18 @@ export default function ReferralIncomePitch() {
                 {money(payoutFor(value))}
               </p>
               <p className="text-[11px] text-slate-500">
-                your payout · {money(Math.round(value * REFERRAL_FEE_RATE))} fee
+                your payout · {money(Math.round(value * REFERRAL_FEE_RATE))} approx. commission
               </p>
             </div>
           ))}
         </div>
 
-        <p className="mt-3 flex items-start gap-1.5 text-[11px] leading-relaxed text-slate-500">
+        <ReferralEstimateDisclosure className="mt-3 bg-white" />
+
+        <p className="mt-2 flex items-start gap-1.5 text-[11px] leading-relaxed text-slate-500">
           <Info className="mt-0.5 h-3 w-3 flex-shrink-0" />
-          Illustration only — not a quote, guarantee, or entitlement. Payouts depend on the executed
-          referral agreement, an active license, a verified brokerage affiliation, and the sale
-          closing. Referral compensation is currently disabled platform-wide.
+          Payouts depend on the executed referral agreement, an active license, a verified brokerage
+          affiliation, and the sale closing. Referral compensation is currently disabled platform-wide.
         </p>
       </CardContent>
     </Card>

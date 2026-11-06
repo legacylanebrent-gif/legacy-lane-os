@@ -3,6 +3,9 @@
 //
 // The payout is an ILLUSTRATION, never a quote or promise:
 //   home value × 2% referral fee × 15% agent payout share.
+// The 2% is an APPROXIMATE real estate agent commission — the real commission is
+// set in the client's listing agreement. Every number here is approximate and
+// changes once the actual sale price and actual commission are known.
 // The estimate itself is a market estimate, never an appraisal.
 
 export const REFERRAL_FEE_RATE = 0.02;

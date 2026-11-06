@@ -3,6 +3,7 @@ import { base44 } from "@/api/base44Client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import ClientReferralForm from "@/components/referrals/ClientReferralForm";
 import MySubmittedReferrals from "@/components/referrals/MySubmittedReferrals";
+import ReferralEstimateDisclosure from "@/components/referrals/ReferralEstimateDisclosure";
 import { UserPlus, History } from "lucide-react";
 
 export default function SubmitClientReferral() {
@@ -27,6 +28,8 @@ export default function SubmitClientReferral() {
           </p>
         </div>
       </div>
+
+      <ReferralEstimateDisclosure className="mt-4" />
 
       <Card className="mt-6">
         <CardContent className="pt-6">

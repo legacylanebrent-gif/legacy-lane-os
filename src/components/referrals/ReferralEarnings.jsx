@@ -29,7 +29,11 @@ export default function ReferralEarnings({ lead, onEstimated }) {
           You could earn {money(payout)} from this referral
         </p>
         <p className="mt-1 text-xs text-emerald-800">
-          Based on an estimated {money(value)} home value · 2% referral fee × 15% payout
+          Based on an estimated {money(value)} home value · approx. 2% agent commission × 15% payout
+        </p>
+        <p className="mt-1 text-[11px] leading-relaxed text-emerald-800/80">
+          Approximate only. The 2% is an approximate real estate agent commission; home values and
+          earnings change once the actual sale price and actual commission are known.
         </p>
         <Link
           to="/ReferralEligibility"
