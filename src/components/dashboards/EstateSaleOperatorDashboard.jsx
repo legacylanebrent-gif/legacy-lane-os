@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import CreateEstateSaleModal from '@/components/estate/CreateEstateSaleModal';
-import OperatorSalesTable from '@/components/operator/OperatorSalesTable';
 import OperatorMessagesWidget from '@/components/operator/OperatorMessagesWidget';
 import OperatorHero from '@/components/operator/dashboard/OperatorHero';
 import SaleSpotlight from '@/components/operator/dashboard/SaleSpotlight';
@@ -97,18 +96,6 @@ export default function EstateSaleOperatorDashboard({ user }) {
   const handleEditSale = (sale) => {
     setEditingSale(sale);
     setCreateModalOpen(true);
-  };
-
-  const handleDeleteSale = async (sale) => {
-    if (!confirm(`Are you sure you want to delete "${sale.title}"?`)) return;
-
-    try {
-      await base44.entities.EstateSale.delete(sale.id);
-      setRefreshKey((k) => k + 1);
-    } catch (error) {
-      console.error('Error deleting sale:', error);
-      alert('Failed to delete sale');
-    }
   };
 
   const handleModalClose = () => {
@@ -248,34 +235,23 @@ export default function EstateSaleOperatorDashboard({ user }) {
         </TabsList>
 
         <TabsContent value="sales" className="space-y-4">
-          {sales.length > 0 && <SaleGallery sales={sales} />}
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Estate Sales</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {sales.length === 0 ? (
-                <div className="text-center py-12">
-                  <Home className="w-16 h-16 mx-auto mb-4 text-slate-300" />
-                  <p className="text-slate-600 mb-4">No estate sales yet</p>
-                  <Button
-                    onClick={() => setCreateModalOpen(true)}
-                    className="bg-orange-600 hover:bg-orange-700"
-                  >
-                    <Plus className="w-4 h-4 mr-2" />
-                    Create Your First Sale
-                  </Button>
-                </div>
-              ) : (
-                <OperatorSalesTable
-                  sales={sales}
-                  onEdit={handleEditSale}
-                  onDelete={handleDeleteSale}
-                />
-              )}
-            </CardContent>
-          </Card>
+          {sales.length > 0 ? (
+            <SaleGallery sales={sales} limit={sales.length} />
+          ) : (
+            <Card>
+              <CardContent className="text-center py-12">
+                <Home className="w-16 h-16 mx-auto mb-4 text-slate-300" />
+                <p className="text-slate-600 mb-4">No estate sales yet</p>
+                <Button
+                  onClick={() => setCreateModalOpen(true)}
+                  className="bg-orange-600 hover:bg-orange-700"
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  Create Your First Sale
+                </Button>
+              </CardContent>
+            </Card>
+          )}
         </TabsContent>
 
         <TabsContent value="messages">
