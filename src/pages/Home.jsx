@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
+import { resolveCurrentLocation } from '@/lib/browserLocation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
@@ -100,6 +101,7 @@ export default function Home() {
   const [showLocationChangeDialog, setShowLocationChangeDialog] = useState(false);
   const [newLocation, setNewLocation] = useState(null);
   const [userZipCode, setUserZipCode] = useState('');
+  const [locating, setLocating] = useState(false);
   const [searchRadius, setSearchRadius] = useState(() => {
     return parseInt(localStorage.getItem('searchRadius') || '25');
   });
@@ -453,59 +455,63 @@ export default function Home() {
     }
   };
 
-  const handleUseMyLocation = () => {
+  const handleUseMyLocation = async () => {
     if (userLocation) {
       // Already have location, re-organize
       organizeSales();
       calculateMinZoom(userLocation);
-    } else {
-      // Get location
-      if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(
-          async (position) => {
-            const userLoc = {
-              lat: position.coords.latitude,
-              lng: position.coords.longitude
-            };
-            setUserLocation(userLoc);
-            calculateMinZoom(userLoc);
-            
-            // Save to localStorage and profile
-            localStorage.setItem('userLocation', JSON.stringify(userLoc));
-            if (currentUser && isAuthenticated) {
-              try {
-                await base44.auth.updateMe({ location: userLoc });
-              } catch (error) {
-                console.log('Could not save location to profile');
-              }
-            }
-            
-            // Try to get zip code from location and save it
-            try {
-              const response = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?latlng=${userLoc.lat},${userLoc.lng}&key=${await getGoogleMapsKey()}`);
-              const data = await response.json();
-              if (data.results && data.results[0]) {
-                const addressComponents = data.results[0].address_components;
-                const zipComponent = addressComponents.find(c => c.types.includes('postal_code'));
-                if (zipComponent) {
-                  const zip = zipComponent.long_name.match(/^\d{5}/);
-                  if (zip) {
-                    const zipCodeValue = zip[0];
-                    setUserZipCode(zipCodeValue);
-                    localStorage.setItem('userZipCode', zipCodeValue);
-                  }
-                }
-              }
-            } catch (error) {
-              console.log('Could not get zip code from location');
-            }
-          },
-          (error) => {
-            console.log('Geolocation error:', error);
-            alert('Unable to get your location. Please try entering a ZIP code.');
-          }
-        );
+      return;
+    }
+    if (locating) return;
+    setLocating(true);
+    try {
+      const resolved = await resolveCurrentLocation();
+      if (!resolved) {
+        alert('Unable to get your location. Please try entering a ZIP code.');
+        return;
       }
+
+      const userLoc = { lat: resolved.lat, lng: resolved.lng };
+      setUserLocation(userLoc);
+      calculateMinZoom(userLoc);
+
+      // Save to localStorage and profile
+      localStorage.setItem('userLocation', JSON.stringify(userLoc));
+      if (currentUser && isAuthenticated) {
+        try {
+          await base44.auth.updateMe({ location: userLoc });
+        } catch (error) {
+          console.log('Could not save location to profile');
+        }
+      }
+
+      // Use the ZIP that came with the fix, otherwise look it up from the coordinates
+      if (resolved.zip) {
+        setUserZipCode(resolved.zip);
+        localStorage.setItem('userZipCode', resolved.zip);
+        return;
+      }
+
+      try {
+        const response = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?latlng=${userLoc.lat},${userLoc.lng}&key=${await getGoogleMapsKey()}`);
+        const data = await response.json();
+        if (data.results && data.results[0]) {
+          const addressComponents = data.results[0].address_components;
+          const zipComponent = addressComponents.find(c => c.types.includes('postal_code'));
+          if (zipComponent) {
+            const zip = zipComponent.long_name.match(/^\d{5}/);
+            if (zip) {
+              const zipCodeValue = zip[0];
+              setUserZipCode(zipCodeValue);
+              localStorage.setItem('userZipCode', zipCodeValue);
+            }
+          }
+        }
+      } catch (error) {
+        console.log('Could not get zip code from location');
+      }
+    } finally {
+      setLocating(false);
     }
   };
 
@@ -900,9 +906,10 @@ export default function Home() {
             </div>
             <Button 
               onClick={handleUseMyLocation}
+              disabled={locating}
               className="bg-white hover:bg-slate-50 text-slate-900 h-11 w-full font-semibold shadow-xl border-2 border-slate-200"
             >
-              📍 Use My Location
+              {locating ? '📍 Locating…' : '📍 Use My Location'}
             </Button>
 
             {userLocation && (
