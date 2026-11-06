@@ -36,6 +36,7 @@ export const ALL_NAV_ITEMS = [
   // ── CRM & LEADS (operator core) ─────────────────────────────────────────────
   { page: 'CRM',                    label: 'CRM',                    icon: Users,           group: 'CRM & Leads' },
   { page: 'Leads',                  label: 'Lead Center',            icon: Award,           group: 'CRM & Leads' },
+  { page: 'SubmitClientReferral',    label: 'Submit Client Referral', icon: UserPlus,        group: 'CRM & Leads' },
 
   // ── MARKETING (operator core) ───────────────────────────────────────────────
   { page: 'OperatorMarketingHub',   label: 'Marketing Hub',          icon: Lightbulb,       group: 'Marketing' },
@@ -64,7 +65,7 @@ export const ALL_NAV_ITEMS = [
 ];
 
 // Agent-facing tools that every signed-in user may reach without a page grant
-const ALWAYS_VISIBLE_PAGES = new Set(['AgentPendingListings']);
+const ALWAYS_VISIBLE_PAGES = new Set(['AgentPendingListings', 'SubmitClientReferral']);
 
 // Subgroup ordering within Admin
 const ADMIN_SUBGROUP_ORDER = [

@@ -1,7 +1,7 @@
 {
   "name": "ReferralLead",
   "type": "object",
-  "description": "Legacy real-estate referral exchange lead (Houszu / Legacy Lane). Holds client PII. Referral Rebuild Phase 1: reads are limited to the lead's source, assigned agent, assigned operator, and admins \u2014 unassigned leads are no longer visible to ordinary exchange participants while compensated acceptance is paused; all writes are admin-only (server functions operate as service role).",
+  "description": "Legacy real-estate referral exchange lead (Houszu / Legacy Lane). Holds client PII. Referral Rebuild Phase 1: reads are limited to the lead's source, assigned agent, assigned operator, and admins \u2014 unassigned leads are no longer visible to ordinary exchange participants while compensated acceptance is paused; all writes are admin-only (server functions operate as service role). A client referral submitted by an Estate Sale Company Owner through the operator referral form is written only by the sanctioned submitClientReferral function, is flagged agent_lead, and notifies the real estate agents serving the property's city.",
   "properties": {
     "lead_id": {
       "type": "string",
@@ -11,9 +11,31 @@
       "type": "string",
       "description": "Full property address"
     },
+    "property_city": {
+      "type": "string",
+      "description": "Property city. Drives which agents are notified for an agent_lead referral."
+    },
+    "property_state": {
+      "type": "string",
+      "description": "Two-letter property state."
+    },
+    "property_zip": {
+      "type": "string"
+    },
+    "county": {
+      "type": "string"
+    },
     "client_name": {
       "type": "string",
       "description": "Name of the client/property owner"
+    },
+    "client_email": {
+      "type": "string",
+      "description": "Client email supplied by the referring Estate Sale Company Owner (not verified)."
+    },
+    "client_phone": {
+      "type": "string",
+      "description": "Client phone supplied by the referring Estate Sale Company Owner (not verified)."
     },
     "source_user_id": {
       "type": "string",
@@ -26,6 +48,40 @@
         "Estate Sale Company Owner"
       ],
       "description": "Whether the lead was sourced by an agent or Estate Sale Company Owner"
+    },
+    "source_channel": {
+      "type": "string",
+      "enum": [
+        "operator_form",
+        "partner_link",
+        "legacy"
+      ],
+      "default": "legacy",
+      "description": "How the lead entered the system. operator_form = an Estate Sale Company Owner submitted it from the operator referral form."
+    },
+    "submitted_by_name": {
+      "type": "string",
+      "description": "Display-name snapshot of the submitting Estate Sale Company Owner."
+    },
+    "agent_lead": {
+      "type": "boolean",
+      "default": false,
+      "description": "Flagged as a lead for real estate agents. Only these leads trigger the agent notification to agents serving the property city."
+    },
+    "timeline": {
+      "type": "string",
+      "enum": [
+        "within_30_days",
+        "one_to_three_months",
+        "three_to_six_months",
+        "six_plus_months",
+        "unknown"
+      ],
+      "description": "Client's stated timeline as reported by the Estate Sale Company Owner."
+    },
+    "need_notes": {
+      "type": "string",
+      "description": "What the client needs, in the referring operator's words."
     },
     "assigned_agent_id": {
       "type": "string",
@@ -45,6 +101,32 @@
       ],
       "default": "new",
       "description": "Current status of the referral lead"
+    },
+    "agent_notified_count": {
+      "type": "integer",
+      "default": 0,
+      "description": "Number of agents the referral email was delivered to."
+    },
+    "agent_notified_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the agent notification ran."
+    },
+    "agent_notify_status": {
+      "type": "string",
+      "enum": [
+        "not_sent",
+        "sent",
+        "partial",
+        "no_agents",
+        "failed"
+      ],
+      "default": "not_sent",
+      "description": "Outcome of the agent notification. no_agents = nobody is listed for this city; failed = the send failed."
+    },
+    "agent_notify_note": {
+      "type": "string",
+      "description": "Plain-language explanation of the notification outcome."
     }
   },
   "required": [
