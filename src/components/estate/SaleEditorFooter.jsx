@@ -16,7 +16,7 @@ export default function SaleEditorFooter({ saving, onHandleSave, onPublish }) {
         <Rocket className="w-4 h-4 mr-2" />
         {saving ? 'Publishing...' : 'Publish Sale'}
       </Button>
-      <Button variant="outline" onClick={() => onHandleSave(false)} disabled={saving} className="w-full sm:w-auto order-3">
+      <Button onClick={() => onHandleSave(false)} disabled={saving} className="w-full sm:w-auto order-3 bg-orange-100 hover:bg-orange-200 text-orange-900 border border-orange-300">
         {saving ? 'Saving...' : 'Save'}
       </Button>
       <Button variant="outline" onClick={() => navigate(createPageUrl('MySales'))} className="w-full sm:w-auto order-4">Cancel</Button>
