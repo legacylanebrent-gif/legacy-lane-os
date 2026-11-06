@@ -1,5 +1,6 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.54';
 import { buildAgentReferralEmail } from '../../shared/agentReferralEmail.ts';
+import { estimatePropertyValue } from '../../shared/referralValueEstimate.ts';
 
 const MAX_AGENTS = 20;
 const SEND_BATCH = 5;
@@ -287,6 +288,15 @@ export default async function(req: Request): Promise<Response> {
       agent_notified_count: 0,
     });
 
+    // The AI market value estimate runs alongside the notifications so it does not
+    // add its full runtime to the save.
+    const valuationPromise = estimatePropertyValue(base44, {
+      address: propertyAddress,
+      city: propertyCity,
+      state: propertyState,
+      zip: propertyZip,
+    });
+
     const adminAlert = await notifyAdminsOfReferral(base44, lead, operatorName, user.email);
 
     let notified = 0;
@@ -334,7 +344,10 @@ export default async function(req: Request): Promise<Response> {
       console.error('submitClientReferral: notification error:', notifyError?.message);
     }
 
+    const valuation = await valuationPromise;
+
     await base44.asServiceRole.entities.ReferralLead.update(lead.id, {
+      ...valuation,
       agent_notified_count: notified,
       agent_notified_at: now,
       agent_notify_status: notifyStatus,
@@ -349,6 +362,7 @@ export default async function(req: Request): Promise<Response> {
       notify_status: notifyStatus,
       admins_notified: adminAlert.notified,
       admins_emailed: adminAlert.emailed,
+      home_value_status: valuation.home_value_status,
       note,
     });
   } catch (error) {

@@ -1,7 +1,7 @@
 {
   "name": "ReferralLead",
   "type": "object",
-  "description": "Legacy real-estate referral exchange lead (Houszu / Legacy Lane). Holds client PII. Referral Rebuild Phase 1: reads are limited to the lead's source, assigned agent, assigned operator, and admins \u2014 unassigned leads are no longer visible to ordinary exchange participants while compensated acceptance is paused; all writes are admin-only (server functions operate as service role). A client referral submitted by an Estate Sale Company Owner through the operator referral form is written only by the sanctioned submitClientReferral function, is flagged agent_lead, and notifies the real estate agents serving the property's city. Agents report their contact attempts through the sanctioned referralContactReport function, which appends to contact_attempts with a server-derived agent identity and timestamp so the referring company can see what was actually done for their client.",
+  "description": "Legacy real-estate referral exchange lead (Houszu / Legacy Lane). Holds client PII. Referral Rebuild Phase 1: reads are limited to the lead's source, assigned agent, assigned operator, and admins \u2014 unassigned leads are no longer visible to ordinary exchange participants while compensated acceptance is paused; all writes are admin-only (server functions operate as service role). A client referral submitted by an Estate Sale Company Owner through the operator referral form is written only by the sanctioned submitClientReferral function, is flagged agent_lead, and notifies the real estate agents serving the property's city. Agents report their contact attempts through the sanctioned referralContactReport function, which appends to contact_attempts with a server-derived agent identity and timestamp so the referring company can see what was actually done for their client. Each referral also carries an AI market value estimate for the property (home_value_*) and the resulting referral-fee illustration (referral_fee_estimate), written only by server functions: the estimate is a market estimate for illustration, NOT an appraisal, and the payout figure is an illustration of the 2% referral fee \u00d7 15% payout share, never a quote, guarantee, or entitlement.",
   "properties": {
     "lead_id": {
       "type": "string",
@@ -226,6 +226,58 @@
       ],
       "default": "not_contacted",
       "description": "Plain-language engagement summary derived from the reported attempts: no report yet, attempts made without reaching the client, client reached, or client declined. Reported by agents \u2014 never inferred from the email delivery."
+    },
+    "home_value_status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "estimated",
+        "unavailable"
+      ],
+      "default": "pending",
+      "description": "Whether the property has an AI market value estimate. pending = requested and not yet returned; estimated = a value was recorded; unavailable = the estimate could not be produced (address unusable or the estimate failed)."
+    },
+    "estimated_home_value": {
+      "type": "number",
+      "description": "AI MARKET ESTIMATE of what the property would sell for, in whole US dollars, based on public market data for the address. This is an illustration for the referral fee, NOT an appraisal, market analysis, or price opinion, and is never a promise of sale price."
+    },
+    "home_value_low": {
+      "type": "number",
+      "description": "Low end of the estimate range, in whole US dollars."
+    },
+    "home_value_high": {
+      "type": "number",
+      "description": "High end of the estimate range, in whole US dollars."
+    },
+    "home_value_confidence": {
+      "type": "string",
+      "enum": [
+        "high",
+        "medium",
+        "low"
+      ],
+      "description": "How well the address could be matched to public market data, as reported by the estimate."
+    },
+    "home_value_basis": {
+      "type": "string",
+      "description": "Short plain-language explanation of how the value was estimated (comparable sales, public estimates, property characteristics)."
+    },
+    "home_value_source": {
+      "type": "string",
+      "description": "Where the estimate came from (e.g. AI market estimate using public web sources)."
+    },
+    "home_value_estimated_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Server timestamp of the valuation attempt. An old timestamp means the estimate is stale."
+    },
+    "referral_commission_estimate": {
+      "type": "number",
+      "description": "Illustration: estimated_home_value \u00d7 2% referral fee, in whole US dollars. Illustration only \u2014 the actual fee is set by the executed referral agreement."
+    },
+    "referral_fee_estimate": {
+      "type": "number",
+      "description": "Illustration: the referral commission \u00d7 15% agent payout share that a participating agent could earn on this referral. Illustration only \u2014 it is NOT a quote, guarantee, or entitlement, and earning it requires the agent to complete eligibility and the referral to close."
     }
   },
   "required": [

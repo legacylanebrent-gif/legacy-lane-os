@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { Badge } from "@/components/ui/badge";
 import { MapPin, ChevronDown, ChevronUp, Phone, MessageSquareText } from "lucide-react";
+import ReferralEarnings from "@/components/referrals/ReferralEarnings";
 
 const NOTIFY_LABELS = {
   sent: { label: "Agents notified", cls: "bg-emerald-100 text-emerald-700" },
@@ -42,6 +43,7 @@ export default function MySubmittedReferrals({ userId, refreshKey }) {
   const [leads, setLeads] = useState([]);
   const [loading, setLoading] = useState(true);
   const [openId, setOpenId] = useState(null);
+  const [tick, setTick] = useState(0);
 
   useEffect(() => {
     let active = true;
@@ -62,7 +64,7 @@ export default function MySubmittedReferrals({ userId, refreshKey }) {
       }
     })();
     return () => { active = false; };
-  }, [userId, refreshKey]);
+  }, [userId, refreshKey, tick]);
 
   if (loading) return <p className="text-sm text-slate-500">Loading your referrals…</p>;
   if (leads.length === 0) return <p className="text-sm text-slate-500">You haven't submitted any client referrals yet.</p>;
@@ -98,6 +100,7 @@ export default function MySubmittedReferrals({ userId, refreshKey }) {
               <MapPin className="h-3.5 w-3.5" />
               {[lead.property_address, lead.property_city, lead.property_state].filter(Boolean).join(", ")}
             </p>
+            <ReferralEarnings lead={lead} onEstimated={() => setTick((n) => n + 1)} />
             {lead.agent_notify_note && <p className="mt-1 text-xs text-slate-500">{lead.agent_notify_note}</p>}
 
             {open && attempts.length > 0 && (
