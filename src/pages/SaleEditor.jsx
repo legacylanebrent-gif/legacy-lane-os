@@ -39,6 +39,8 @@ import SiteAssessmentSection from '@/components/saleops/SiteAssessmentSection';
 import AccessPlanSection from '@/components/saleops/AccessPlanSection';
 import PostSaleActionsCard from '@/components/estate/PostSaleActionsCard';
 import SaleEditorFooter from '@/components/estate/SaleEditorFooter';
+import SaleEditorTabs, { SALE_EDITOR_TABS } from '@/components/estate/SaleEditorTabs';
+import SaleEditorWalkthrough from '@/components/estate/SaleEditorWalkthrough';
 import { applyDistanceSnapshot } from '@/components/saleops/distanceSnapshot';
 
 import { SALE_STATUSES } from '@/components/estate/saleEditorShared';
@@ -47,6 +49,9 @@ import SaleDatesCard from '@/components/estate/SaleDatesCard';
 export default function SaleEditor() {
   const navigate = useNavigate();
   const [saleId, setSaleId] = useState(null);
+  const [activeTab, setActiveTab] = useState('info');
+  const [tourOpen, setTourOpen] = useState(false);
+  const [tourStep, setTourStep] = useState(0);
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -166,6 +171,32 @@ export default function SaleEditor() {
     document.addEventListener('visibilitychange', handleVisibility);
     return () => document.removeEventListener('visibilitychange', handleVisibility);
   }, []);
+
+  // First-visit walkthrough — shows on the user's first and second visit only,
+  // and stops for good the moment they exit it.
+  useEffect(() => {
+    if (!user?.id) return;
+    const doneKey = `saleEditorTourDone_${user.id}`;
+    const visitsKey = `saleEditorVisits_${user.id}`;
+    const visits = (parseInt(localStorage.getItem(visitsKey) || '0', 10) || 0) + 1;
+    localStorage.setItem(visitsKey, String(visits));
+    if (visits > 2 || localStorage.getItem(doneKey)) return;
+    setTourStep(0);
+    setActiveTab(SALE_EDITOR_TABS[0].value);
+    const timer = setTimeout(() => setTourOpen(true), 800);
+    return () => clearTimeout(timer);
+  }, [user?.id]);
+
+  const closeTour = () => {
+    setTourOpen(false);
+    if (user?.id) localStorage.setItem(`saleEditorTourDone_${user.id}`, '1');
+  };
+
+  const goToTourStep = (next) => {
+    const clamped = Math.max(0, Math.min(SALE_EDITOR_TABS.length - 1, next));
+    setTourStep(clamped);
+    setActiveTab(SALE_EDITOR_TABS[clamped].value);
+  };
 
   // Auto-save: debounce 3s after any formData change (skip initial load)
   // NOTE: images are intentionally excluded — they are saved directly on each mutation
@@ -1453,16 +1484,13 @@ Be practical and realistic for an estate sale context.`,
         </>
 
       <div className="max-w-5xl mx-auto px-4 lg:px-6 py-8 space-y-6 w-full overflow-x-hidden">
-        <Tabs defaultValue="info" className="space-y-6">
-          <TabsList className="w-full max-w-6xl mx-auto flex-wrap h-auto gap-1">
-            <TabsTrigger value="info" className="flex-1 min-w-[80px] text-xs sm:text-sm font-semibold px-2 py-2 whitespace-normal">Sale Info</TabsTrigger>
-            <TabsTrigger value="images" className="flex-1 min-w-[70px] text-xs sm:text-sm font-semibold px-2 py-2 whitespace-normal">Images</TabsTrigger>
-            <TabsTrigger value="communications" className="flex-1 min-w-[100px] text-xs sm:text-sm font-semibold px-2 py-2 whitespace-normal">Communications</TabsTrigger>
-            <TabsTrigger value="labor" className="flex-1 min-w-[55px] text-xs sm:text-sm font-semibold px-2 py-2 whitespace-normal">Labor</TabsTrigger>
-            <TabsTrigger value="assessment" className="flex-1 min-w-[115px] text-xs sm:text-sm font-semibold px-2 py-2 whitespace-normal">Operational Site Assessment</TabsTrigger>
-            <TabsTrigger value="access" className="flex-1 min-w-[100px] text-xs sm:text-sm font-semibold px-2 py-2 whitespace-normal">Property Access Plan</TabsTrigger>
-            <TabsTrigger value="postsale" className="flex-1 min-w-[70px] text-xs sm:text-sm font-semibold px-2 py-2 whitespace-normal">Post Sale</TabsTrigger>
-          </TabsList>
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+          <SaleEditorTabs
+            value={activeTab}
+            onValueChange={setActiveTab}
+            highlightValue={tourOpen ? SALE_EDITOR_TABS[tourStep]?.value : null}
+            raised={tourOpen}
+          />
 
           <TabsContent value="info" className="space-y-6 mt-0">
         {/* Basic Information */}
@@ -2451,6 +2479,14 @@ Return ONLY the description text, no extra commentary.`
           </TabsContent>
         </Tabs>
       </div>
+
+      <SaleEditorWalkthrough
+        open={tourOpen}
+        step={tourStep}
+        onNext={() => goToTourStep(tourStep + 1)}
+        onPrev={() => goToTourStep(tourStep - 1)}
+        onExit={closeTour}
+      />
     </div>
   );
 }
