@@ -15,6 +15,8 @@ import SaleGallery from '@/components/operator/dashboard/SaleGallery';
 import RecentActivity from '@/components/operator/dashboard/RecentActivity';
 import CoolFindsCard from '@/components/operator/dashboard/CoolFindsCard';
 import LocalIsoCard from '@/components/operator/dashboard/LocalIsoCard';
+import MlsListingsCard from '@/components/operator/dashboard/MlsListingsCard';
+import ReferralTrackerCard from '@/components/operator/dashboard/ReferralTrackerCard';
 import { loadOperatorMoney } from '@/components/operator/dashboard/saleDayMetrics';
 import { Home, Eye, Heart, MessageSquare, Plus } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -258,6 +260,12 @@ export default function EstateSaleOperatorDashboard({ user }) {
           <OperatorMessagesWidget user={user} />
         </TabsContent>
       </Tabs>
+
+      {/* Bottom panels */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <MlsListingsCard />
+        <ReferralTrackerCard userId={user?.id} refreshKey={refreshKey} />
+      </div>
 
       {/* Create/Edit Modal */}
       <CreateEstateSaleModal
