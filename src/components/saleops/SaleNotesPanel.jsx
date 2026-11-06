@@ -92,7 +92,10 @@ export default function SaleNotesPanel({ saleId }) {
           <StickyNote className="w-5 h-5 text-orange-600" /> Operational Notes
         </CardTitle>
         <p className="text-xs text-slate-500">
-          Internal team memory for this sale. Consequential client decisions still belong in Client Authority &amp; Decisions.
+          Jot down what the team needs to know about this house — where the key is, who has access, when a contractor is coming, quirks like a sticky side door. Everyone working this sale sees the notes, and each one is saved with the name and time it was added.
+        </p>
+        <p className="text-xs text-slate-500">
+          These are reminders only. They don't change prices, record a client decision, or send anything to the client.
         </p>
       </CardHeader>
       <CardContent className="space-y-4">
