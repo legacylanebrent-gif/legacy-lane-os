@@ -16,9 +16,30 @@ export function computeReferralPayout(homeValue) {
   return { commission, payout };
 }
 
+// The model usually returns numbers, but a formatted string ("$8,350,000") is
+// common enough that it must not lose the whole estimate.
 function whole(value) {
-  const n = Number(value);
+  if (typeof value === 'number') return Number.isFinite(value) && value > 0 ? Math.round(value) : null;
+  const cleaned = String(value ?? '').replace(/[^0-9.]/g, '');
+  const n = Number(cleaned);
   return Number.isFinite(n) && n > 0 ? Math.round(n) : null;
+}
+
+// A model that ignores the schema answers in prose and the platform hands back
+// its raw text; that still counts as "no estimate" for us.
+function asObject(result) {
+  if (result && typeof result === 'object') return result;
+  if (typeof result === 'string') {
+    const match = result.match(/\{[\s\S]*\}/);
+    if (match) {
+      try {
+        return JSON.parse(match[0]);
+      } catch {
+        return null;
+      }
+    }
+  }
+  return null;
 }
 
 // Writes the valuation block onto a ReferralLead. Called only from server
@@ -60,20 +81,24 @@ Return the most likely sale price for this home selling within the next 6 months
       },
     });
 
-    const estimated = whole(result?.estimated_value);
-    if (!estimated) throw new Error('No usable estimate returned');
+    const payload = asObject(result);
+    const estimated = whole(payload?.estimated_value);
+    if (!estimated) {
+      console.error('referralValueEstimate: unusable result:', typeof result, String(result).slice(0, 300));
+      throw new Error('No usable estimate returned');
+    }
 
     const payout = computeReferralPayout(estimated);
-    const low = whole(result?.low_value);
-    const high = whole(result?.high_value);
+    const low = whole(payload?.low_value);
+    const high = whole(payload?.high_value);
 
     return {
       home_value_status: 'estimated',
       estimated_home_value: estimated,
       home_value_low: low || undefined,
       home_value_high: high || undefined,
-      home_value_confidence: ['high', 'medium', 'low'].includes(result?.confidence) ? result.confidence : 'low',
-      home_value_basis: String(result?.basis || '').slice(0, 600),
+      home_value_confidence: ['high', 'medium', 'low'].includes(payload?.confidence) ? payload.confidence : 'low',
+      home_value_basis: String(payload?.basis || '').slice(0, 600),
       home_value_source: 'AI market estimate using public web sources',
       home_value_estimated_at: estimatedAt,
       referral_commission_estimate: payout?.commission,
