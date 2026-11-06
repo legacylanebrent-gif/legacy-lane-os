@@ -92,6 +92,90 @@ async function collectAgentsForCity(base44, city, state) {
   return [...found.values()];
 }
 
+function esc(value) {
+  return String(value == null ? '' : value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+}
+
+// Admins get an in-app notification and an email the moment a referral is saved,
+// independent of whether any agent coverage exists for the property's city.
+async function notifyAdminsOfReferral(base44, lead, operatorName, operatorEmail) {
+  let admins = [];
+  try {
+    admins = asList(await base44.asServiceRole.entities.User.filter({ role: 'admin' }));
+  } catch (error) {
+    console.error('submitClientReferral: admin lookup failed:', error?.message);
+    return { notified: 0, emailed: 0 };
+  }
+  if (admins.length === 0) return { notified: 0, emailed: 0 };
+
+  const place = [lead.property_city, lead.property_state].filter(Boolean).join(', ');
+  const title = `New client referral in ${place || 'your area'}`;
+  const rows = [
+    ['Client', lead.client_name],
+    ['Property', [lead.property_address, place, lead.property_zip].filter(Boolean).join(', ')],
+    ['County', lead.county],
+    ['Timeline', lead.timeline],
+    ['Client email', lead.client_email],
+    ['Client phone', lead.client_phone],
+    ['Referred by', `${operatorName}${operatorEmail ? ` (${operatorEmail})` : ''}`],
+    ['Notes', lead.need_notes],
+  ].filter(([, value]) => String(value || '').trim());
+
+  const message = `${operatorName} submitted a client referral for ${lead.client_name} at ${lead.property_address}${place ? `, ${place}` : ''}.`;
+
+  try {
+    await base44.asServiceRole.entities.Notification.bulkCreate(
+      admins.map((admin) => ({
+        user_id: admin.id,
+        type: 'new_lead',
+        title,
+        message,
+        related_entity_type: 'ReferralLead',
+        related_entity_id: lead.id,
+        read: false,
+      }))
+    );
+  } catch (error) {
+    console.error('submitClientReferral: admin in-app notification failed:', error?.message);
+  }
+
+  const text = [title, '', message, '', ...rows.map(([label, value]) => `${label}: ${value}`)].join('\n');
+  const html = `<div style="font-family:Arial,Helvetica,sans-serif;font-size:15px;color:#0f172a;line-height:1.6;">
+    <h2 style="font-family:Georgia,Arial,serif;font-size:22px;margin:0 0 12px;">${esc(title)}</h2>
+    <p style="margin:0 0 16px;color:#475569;">${esc(message)}</p>
+    <table cellpadding="0" cellspacing="0" style="border:1px solid #e5e7eb;background:#f8fafc;">
+      ${rows
+        .map(
+          ([label, value]) =>
+            `<tr><td style="padding:8px 12px;border-bottom:1px solid #e5e7eb;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:#64748b;">${esc(label)}</td><td style="padding:8px 12px;border-bottom:1px solid #e5e7eb;">${esc(value)}</td></tr>`
+        )
+        .join('')}
+    </table>
+  </div>`;
+
+  let emailed = 0;
+  for (const admin of admins) {
+    if (!admin.email) continue;
+    try {
+      await base44.asServiceRole.integrations.Core.SendEmail({
+        to: admin.email,
+        from_name: 'EstateSalen',
+        subject: title,
+        body: html,
+        text,
+      });
+      emailed += 1;
+    } catch (error) {
+      console.error(`submitClientReferral: admin email failed for ${admin.email}:`, error?.message);
+    }
+  }
+
+  return { notified: admins.length, emailed };
+}
+
 async function getGmailSender(base44) {
   const { accessToken } = await base44.asServiceRole.connectors.getConnection('gmail');
   // gmail.send does not grant profile reads, so the mailbox address comes from
@@ -202,6 +286,8 @@ export default async function(req: Request): Promise<Response> {
       agent_notified_count: 0,
     });
 
+    const adminAlert = await notifyAdminsOfReferral(base44, lead, operatorName, user.email);
+
     let notified = 0;
     let notifyStatus = 'not_sent';
     let note = '';
@@ -256,6 +342,8 @@ export default async function(req: Request): Promise<Response> {
       lead_id: lead.lead_id,
       agents_notified: notified,
       notify_status: notifyStatus,
+      admins_notified: adminAlert.notified,
+      admins_emailed: adminAlert.emailed,
       note,
     });
   } catch (error) {
