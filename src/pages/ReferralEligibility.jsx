@@ -9,8 +9,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert } from "@/components/ui/alert";
-import { Loader2, ShieldCheck, UploadCloud, Info, AlertTriangle, CheckCircle2, Clock } from "lucide-react";
+import { Link } from "react-router-dom";
+import { Loader2, ShieldCheck, UploadCloud, Info, AlertTriangle, CheckCircle2, Clock, ArrowRight } from "lucide-react";
 import { validateEligibilityResponse } from "@/lib/eligibilityResponse";
+import MySubmittedReferrals from "@/components/referrals/MySubmittedReferrals";
+import ReferralIncomePitch from "@/components/referrals/eligibility/ReferralIncomePitch";
+import ReferralFindOutHow from "@/components/referrals/eligibility/ReferralFindOutHow";
 
 // Referral Rebuild Phase 2B — operator-facing INDIVIDUAL eligibility portal.
 // The operator submits/corrects their OWN license & brokerage application
@@ -48,6 +52,7 @@ export default function ReferralEligibility() {
   const [missing, setMissing] = useState([]);
   const [error, setError] = useState("");
   const [savedMsg, setSavedMsg] = useState("");
+  const [userId, setUserId] = useState(null);
 
   const [form, setForm] = useState({
     legal_name: "", license_number: "", license_state: "", license_type: "",
@@ -59,7 +64,11 @@ export default function ReferralEligibility() {
 
   const load = async () => {
     try {
-      const res = await base44.functions.invoke("referralEligibility", { action: "get" });
+      const [res, me] = await Promise.all([
+        base44.functions.invoke("referralEligibility", { action: "get" }),
+        base44.auth.me().catch(() => null),
+      ]);
+      setUserId(me?.id || null);
       const data = validateEligibilityResponse(res.data, "get");
       const p = data.profile;
       setProfile(p);
@@ -155,6 +164,10 @@ export default function ReferralEligibility() {
         </p>
       </div>
 
+      <ReferralIncomePitch />
+
+      <ReferralFindOutHow />
+
       <Alert className="border-amber-200 bg-amber-50">
         <Info className="w-4 h-4 text-amber-600" />
         <div className="text-sm text-amber-900">
@@ -222,8 +235,31 @@ export default function ReferralEligibility() {
         </CardContent>
       </Card>
 
-      {/* Application form (applicant-settable fields only) */}
+      {/* Referral tracker — every client this operator has submitted */}
       <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="flex flex-wrap items-center justify-between gap-2 text-base">
+            <span>Your referral tracker</span>
+            <Link
+              to="/SubmitClientReferral"
+              className="inline-flex items-center gap-1 text-xs font-semibold text-cyan-700 hover:text-cyan-800"
+            >
+              Submit a referral
+              <ArrowRight className="w-3 h-3" />
+            </Link>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="mb-2 text-xs text-slate-500">
+            Each client you've submitted, what the agents did with them, and the referral income that
+            referral illustrates.
+          </p>
+          <MySubmittedReferrals userId={userId} />
+        </CardContent>
+      </Card>
+
+      {/* Application form (applicant-settable fields only) */}
+      <Card id="eligibility-form">
         <CardHeader className="pb-2">
           <CardTitle className="text-base">Your license & brokerage information</CardTitle>
         </CardHeader>
