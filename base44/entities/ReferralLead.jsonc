@@ -1,7 +1,7 @@
 {
   "name": "ReferralLead",
   "type": "object",
-  "description": "Legacy real-estate referral exchange lead (Houszu / Legacy Lane). Holds client PII. Referral Rebuild Phase 1: reads are limited to the lead's source, assigned agent, assigned operator, and admins \u2014 unassigned leads are no longer visible to ordinary exchange participants while compensated acceptance is paused; all writes are admin-only (server functions operate as service role). A client referral submitted by an Estate Sale Company Owner through the operator referral form is written only by the sanctioned submitClientReferral function, is flagged agent_lead, and notifies the real estate agents serving the property's city.",
+  "description": "Legacy real-estate referral exchange lead (Houszu / Legacy Lane). Holds client PII. Referral Rebuild Phase 1: reads are limited to the lead's source, assigned agent, assigned operator, and admins \u2014 unassigned leads are no longer visible to ordinary exchange participants while compensated acceptance is paused; all writes are admin-only (server functions operate as service role). A client referral submitted by an Estate Sale Company Owner through the operator referral form is written only by the sanctioned submitClientReferral function, is flagged agent_lead, and notifies the real estate agents serving the property's city. Agents report their contact attempts through the sanctioned referralContactReport function, which appends to contact_attempts with a server-derived agent identity and timestamp so the referring company can see what was actually done for their client.",
   "properties": {
     "lead_id": {
       "type": "string",
@@ -127,6 +127,105 @@
     "agent_notify_note": {
       "type": "string",
       "description": "Plain-language explanation of the notification outcome."
+    },
+    "notified_agent_emails": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Lowercased emails of the agents the referral was actually delivered to. This is the authorization anchor for agent self-reporting (a signed-in user may read/report on this lead only when their account email is on this list), plus the assigned agent, the source, and admins. Empty on referrals sent before reporting existed \u2014 nobody was recorded, so no agent claim can be verified for them."
+    },
+    "contact_attempts": {
+      "type": "array",
+      "default": [],
+      "description": "Append-only log of the agents' contact attempts on this referral, written ONLY by the sanctioned referralContactReport function. Each entry carries the agent identity and email derived from the authenticated session (never supplied by the caller as authority), the contact time the agent reports, and what actually happened. The referring company reads this to see what was done for their client. Entries are never edited or removed by the reporting agents.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "attempt_id": {
+            "type": "string"
+          },
+          "at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the contact attempt happened, as reported by the agent."
+          },
+          "recorded_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Server timestamp of when the report was filed."
+          },
+          "agent_user_id": {
+            "type": "string",
+            "description": "Server-derived user ID of the reporting agent."
+          },
+          "agent_name": {
+            "type": "string",
+            "description": "Name the agent reported under (defaults to their account name)."
+          },
+          "agent_email": {
+            "type": "string",
+            "description": "Server-derived account email of the reporting agent. Identity evidence, not a claim."
+          },
+          "method": {
+            "type": "string",
+            "enum": [
+              "call",
+              "text",
+              "email",
+              "in_person",
+              "other"
+            ],
+            "description": "How the agent reached out."
+          },
+          "outcome": {
+            "type": "string",
+            "enum": [
+              "connected",
+              "left_message",
+              "no_answer",
+              "wrong_number",
+              "declined",
+              "other"
+            ],
+            "description": "What happened on this attempt."
+          },
+          "connected": {
+            "type": "boolean",
+            "default": false,
+            "description": "Whether the agent actually spoke with the client on this attempt."
+          },
+          "spoke_with": {
+            "type": "string",
+            "description": "Who the agent spoke with (client, spouse, family member, attorney...)."
+          },
+          "notes": {
+            "type": "string",
+            "description": "The agent's notes about the attempt, in their own words."
+          }
+        }
+      }
+    },
+    "last_contact_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Reported time of the most recent contact attempt (summary of contact_attempts; the log itself stays the source of truth)."
+    },
+    "last_contact_outcome": {
+      "type": "string",
+      "description": "Outcome of the most recent reported attempt."
+    },
+    "agent_engagement": {
+      "type": "string",
+      "enum": [
+        "not_contacted",
+        "attempted",
+        "connected",
+        "declined"
+      ],
+      "default": "not_contacted",
+      "description": "Plain-language engagement summary derived from the reported attempts: no report yet, attempts made without reaching the client, client reached, or client declined. Reported by agents \u2014 never inferred from the email delivery."
     }
   },
   "required": [

@@ -224,6 +224,7 @@ import ProposalAgreement from './pages/ProposalAgreement';
 import AgentPendingListings from './pages/AgentPendingListings';
 import AdminAgentListingImports from './pages/AdminAgentListingImports';
 import SubmitClientReferral from './pages/SubmitClientReferral';
+import AgentReferralResponse from './pages/AgentReferralResponse';
 
 // Life Transition SEO Engine — Phase 2
 import ProbateHubV2 from './pages/life-transition/ProbateHubV2';
@@ -426,6 +427,7 @@ const AuthenticatedApp = () => {
       <Route path="/AgentPendingListings" element={<LayoutWrapper currentPageName="AgentPendingListings"><AgentPendingListings /></LayoutWrapper>} />
       <Route path="/AdminAgentListingImports" element={<LayoutWrapper currentPageName="AdminAgentListingImports"><AdminAgentListingImports /></LayoutWrapper>} />
       <Route path="/SubmitClientReferral" element={<LayoutWrapper currentPageName="SubmitClientReferral"><SubmitClientReferral /></LayoutWrapper>} />
+      <Route path="/AgentReferralResponse" element={<AgentReferralResponse />} />
 
       {/* ── Operator Website Template #1 (Phase 3D.1) ── */}
       <Route path="/site" element={<OperatorSitePage pageType="home" />} />

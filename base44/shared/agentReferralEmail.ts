@@ -40,7 +40,11 @@ export function buildAgentReferralEmail({
   needNotes,
   operatorName,
   operatorEmail,
+  leadId,
 }) {
+  const reportUrl = leadId
+    ? `${APP_URL}/AgentReferralResponse?lead=${encodeURIComponent(leadId)}`
+    : APP_URL;
   const place = [propertyCity, propertyState].filter(Boolean).join(", ");
   const fullAddress = [propertyAddress, place, propertyZip].filter(Boolean).join(", ");
   const subject = `New client referral in ${place || "your area"}`;
@@ -94,7 +98,14 @@ export function buildAgentReferralEmail({
         </tr>
         <tr>
           <td style="padding:8px 24px 0;">
-            <a href="${APP_URL}" style="display:inline-block;background-color:#06b6d4;color:#000000;font-family:Arial,Helvetica,sans-serif;font-size:15px;font-weight:700;text-decoration:none;padding:14px 28px;">View in EstateSalen</a>
+            <a href="${reportUrl}" style="display:inline-block;background-color:#06b6d4;color:#000000;font-family:Arial,Helvetica,sans-serif;font-size:15px;font-weight:700;text-decoration:none;padding:14px 28px;">Report your contact attempt</a>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:16px 24px 0;">
+            <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:1.6;color:#0f172a;">
+              After you reach out, log what happened (when you called, whether you connected, and your notes). ${esc(operatorName || "The referring company")} sees your report, so they know their client is being looked after.
+            </p>
           </td>
         </tr>
         <tr>
@@ -122,6 +133,9 @@ export function buildAgentReferralEmail({
     `Hi ${firstNameOf(agentName)}, ${operatorName || "An estate sale company"} shared a client who may need help with a sale in your area.`,
     "",
     ...rows.map(([label, value]) => `${label}: ${value}`),
+    "",
+    `Report your contact attempt: ${reportUrl}`,
+    `After you reach out, log what happened (when you called, whether you connected, and your notes). ${operatorName || "The referring company"} sees your report, so they know their client is being looked after.`,
     "",
     `Reply to this email to reach ${operatorName || "the referring company"} directly.`,
     `You are receiving this because your business is listed as serving ${propertyCity || "this city"}.`,

@@ -190,6 +190,7 @@ async function getGmailSender(base44) {
 
 async function sendAgentEmail({ accessToken, fromEmail, agent, lead, operatorName, operatorEmail }) {
   const { subject, html, text, replyTo } = buildAgentReferralEmail({
+    leadId: lead.lead_id,
     agentName: agent.name,
     clientName: lead.client_name,
     clientEmail: lead.client_email,
@@ -289,6 +290,7 @@ export default async function(req: Request): Promise<Response> {
     const adminAlert = await notifyAdminsOfReferral(base44, lead, operatorName, user.email);
 
     let notified = 0;
+    const notifiedEmails = [];
     let notifyStatus = 'not_sent';
     let note = '';
 
@@ -306,9 +308,11 @@ export default async function(req: Request): Promise<Response> {
         for (let i = 0; i < targets.length; i += SEND_BATCH) {
           const batch = targets.slice(i, i + SEND_BATCH);
           const results = await Promise.allSettled(
-            batch.map((agent) =>
-              sendAgentEmail({ accessToken, fromEmail, agent, lead, operatorName, operatorEmail: user.email })
-            )
+            batch.map(async (agent) => {
+              const ok = await sendAgentEmail({ accessToken, fromEmail, agent, lead, operatorName, operatorEmail: user.email });
+              if (ok === true) notifiedEmails.push(String(agent.email || '').toLowerCase());
+              return ok;
+            })
           );
           notified += results.filter((result) => result.status === 'fulfilled' && result.value === true).length;
         }
@@ -335,6 +339,7 @@ export default async function(req: Request): Promise<Response> {
       agent_notified_at: now,
       agent_notify_status: notifyStatus,
       agent_notify_note: note,
+      notified_agent_emails: notifiedEmails,
     });
 
     return Response.json({
