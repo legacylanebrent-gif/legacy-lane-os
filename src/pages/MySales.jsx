@@ -423,38 +423,6 @@ export default function MySales() {
           <p className="text-sm md:text-base text-slate-600">Manage your estate sale listings and track performance</p>
         </div>
         <div className="flex gap-2 md:self-start flex-wrap">
-          <Button
-            variant="outline"
-            onClick={() => navigate('/MySaleDay')}
-            className="border-slate-300 text-slate-700 hover:bg-slate-50"
-          >
-            <UserCheck className="w-4 h-4 mr-2" />
-            My Sale Day
-          </Button>
-          <Button
-            variant="outline"
-            onClick={() => navigate('/OperatorCalendar')}
-            className="border-slate-300 text-slate-700 hover:bg-slate-50"
-          >
-            <CalendarDays className="w-4 h-4 mr-2" />
-            Calendar
-          </Button>
-          <Button
-            variant="outline"
-            onClick={() => navigate('/OperatorWorkload')}
-            className="border-slate-300 text-slate-700 hover:bg-slate-50"
-          >
-            <ClipboardList className="w-4 h-4 mr-2" />
-            Workload
-          </Button>
-          <Button
-            variant="outline"
-            onClick={() => navigate(createPageUrl('MySalesGuide'))}
-            className="border-slate-300 text-slate-700 hover:bg-slate-50"
-          >
-            <BookOpen className="w-4 h-4 mr-2" />
-            EstateSalen 411
-          </Button>
           <Button 
             onClick={() => {
               if (!isProfileComplete(user)) {
@@ -487,6 +455,38 @@ export default function MySales() {
               Create Donation
             </Button>
           )}
+          <Button
+            variant="outline"
+            onClick={() => navigate('/MySaleDay')}
+            className="border-slate-300 text-slate-700 hover:bg-slate-50"
+          >
+            <UserCheck className="w-4 h-4 mr-2" />
+            My Sale Day
+          </Button>
+          <Button
+            variant="outline"
+            onClick={() => navigate('/OperatorCalendar')}
+            className="border-slate-300 text-slate-700 hover:bg-slate-50"
+          >
+            <CalendarDays className="w-4 h-4 mr-2" />
+            Calendar
+          </Button>
+          <Button
+            variant="outline"
+            onClick={() => navigate('/OperatorWorkload')}
+            className="border-slate-300 text-slate-700 hover:bg-slate-50"
+          >
+            <ClipboardList className="w-4 h-4 mr-2" />
+            Workload
+          </Button>
+          <Button
+            variant="outline"
+            onClick={() => navigate(createPageUrl('MySalesGuide'))}
+            className="border-slate-300 text-slate-700 hover:bg-slate-50"
+          >
+            <BookOpen className="w-4 h-4 mr-2" />
+            EstateSalen 411
+          </Button>
         </div>
       </div>
 
