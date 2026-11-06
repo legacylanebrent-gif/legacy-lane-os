@@ -117,8 +117,8 @@ export default function Home() {
 
   useEffect(() => {
     checkAuthAndRedirect();
-    // Ask for location immediately on arrival — do not wait for data loading,
-    // which can take many seconds on mobile and suppress the permission prompt.
+    // Only restore a previously saved location on arrival — the browser's
+    // permission prompt is triggered by the "Use My Location" tap instead.
     getUserLocation();
   }, []);
 
@@ -167,107 +167,21 @@ export default function Home() {
     organizeSales();
   }, [searchQuery, sales, userLocation, searchRadius]);
 
+  // Restore a location the visitor already gave us. We deliberately do NOT ask
+  // the browser for its location on page load: mobile browsers suppress that
+  // prompt without a tap and can pop up a "could not detect location" error.
+  // The hero prompt asks them to tap "Use My Location" instead.
   const getUserLocation = () => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        async (position) => {
-          const userLoc = {
-            lat: position.coords.latitude,
-            lng: position.coords.longitude
-          };
-          
-          // Reverse geocode to get zip code
-          try {
-            const response = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?latlng=${userLoc.lat},${userLoc.lng}&key=${await getGoogleMapsKey()}`);
-            const data = await response.json();
-            if (data.results && data.results[0]) {
-              const addressComponents = data.results[0].address_components;
-              const zipComponent = addressComponents.find(c => c.types.includes('postal_code'));
-              if (zipComponent) {
-                const zip = zipComponent.long_name.match(/^\d{5}/);
-                if (zip) {
-                  setUserZipCode(zip[0]);
-                  localStorage.setItem('userZipCode', zip[0]);
-                }
-              }
-            }
-          } catch (error) {
-            console.log('Could not get zip code from location');
-          }
-          
-          // Check if location has changed significantly from stored location
-          const prevLoc = currentUser?.location || (localStorage.getItem('userLocation') ? JSON.parse(localStorage.getItem('userLocation')) : null);
-          
-          if (prevLoc?.lat && prevLoc?.lng) {
-            const distance = calculateDistance(prevLoc.lat, prevLoc.lng, userLoc.lat, userLoc.lng);
-            
-            // If moved more than 10 miles, ask to update
-            if (distance > 10) {
-              setNewLocation(userLoc);
-              setShowLocationChangeDialog(true);
-              // Use previous location temporarily
-              if (!userLocation) {
-                setUserLocation(prevLoc);
-                calculateMinZoom(prevLoc);
-              }
-            } else {
-              // Update silently if within 10 miles
-              if (!userLocation) {
-                setUserLocation(userLoc);
-                calculateMinZoom(userLoc);
-              }
-              // Save to localStorage and profile if authenticated
-              localStorage.setItem('userLocation', JSON.stringify(userLoc));
-              if (currentUser && isAuthenticated) {
-                try {
-                  await base44.auth.updateMe({ location: userLoc });
-                } catch (error) {
-                  console.log('Could not update user location');
-                }
-              }
-            }
-          } else {
-            // First visit, store location
-            localStorage.setItem('userLocation', JSON.stringify(userLoc));
-            if (!userLocation) {
-              setUserLocation(userLoc);
-              calculateMinZoom(userLoc);
-            }
-            // Save to profile if authenticated
-            if (currentUser && isAuthenticated) {
-              try {
-                await base44.auth.updateMe({ location: userLoc });
-              } catch (error) {
-                console.log('Could not save user location');
-              }
-            }
-          }
-        },
-        (error) => {
-          console.log('Geolocation error:', error);
-          // Try to use stored location if available
-          if (!userLocation) {
-            const storedLocation = currentUser?.location || (localStorage.getItem('userLocation') ? JSON.parse(localStorage.getItem('userLocation')) : null);
-            const storedZip = localStorage.getItem('userZipCode');
-            if (storedLocation) {
-              setUserLocation(storedLocation);
-              calculateMinZoom(storedLocation);
-            }
-            if (storedZip) {
-              setUserZipCode(storedZip);
-            }
-            // No location at all — tell the visitor why nothing was asked,
-            // instead of failing silently (blocked prompt, prior denial).
-            if (!storedLocation) {
-              setDebugMessage('📍 Location unavailable — allow access in your browser settings, or search by ZIP below');
-              setTimeout(() => setDebugMessage(''), 6000);
-            }
-          }
-        }
-      );
+    const storedLocation = currentUser?.location
+      || (localStorage.getItem('userLocation') ? JSON.parse(localStorage.getItem('userLocation')) : null);
+    const storedZip = localStorage.getItem('userZipCode');
+    if (storedLocation?.lat && storedLocation?.lng) {
+      setUserLocation(storedLocation);
+      calculateMinZoom(storedLocation);
     }
+    if (storedZip) setUserZipCode(storedZip);
   };
-  
+
   const handleUpdateLocation = async () => {
     if (newLocation) {
       localStorage.setItem('userLocation', JSON.stringify(newLocation));
@@ -911,6 +825,16 @@ export default function Home() {
             >
               {locating ? '📍 Locating…' : '📍 Use My Location'}
             </Button>
+
+            {!userLocation && !locating && (
+              <div className="flex items-start gap-2 text-left bg-white/10 border border-white/20 rounded-lg px-3 py-2.5 text-sm text-slate-200">
+                <MapPin className="w-4 h-4 mt-0.5 flex-shrink-0 text-cyan-300" />
+                <p>
+                  <span className="font-semibold text-white">Location not set.</span>{' '}
+                  Tap <span className="font-semibold text-white">Use My Location</span> above and allow access when your browser asks, or search by ZIP code.
+                </p>
+              </div>
+            )}
 
             {userLocation && (
               <div className="text-sm text-slate-300 text-center bg-slate-800/50 rounded-lg py-2 px-4 backdrop-blur-sm">
