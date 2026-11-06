@@ -59,7 +59,7 @@ export default function SaleDatesCard({ dates = [], onAddDate, onRemoveDate }) {
             </div>
           </div>
         </div>
-        <Button onClick={handleAdd} variant="outline" className="w-full">
+        <Button onClick={handleAdd} className="w-full bg-orange-600 hover:bg-orange-700 text-white">
           <Plus className="w-4 h-4 mr-2" />
           Add Sale Date
         </Button>
