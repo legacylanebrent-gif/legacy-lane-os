@@ -113,12 +113,13 @@ export default function PrepareSale() {
           <Button variant="ghost" onClick={() => navigate('/MySales')} className="text-slate-600 hover:text-slate-900 -ml-2">
             <ArrowLeft className="w-4 h-4 mr-2" />Back to Sales
           </Button>
-          <h1 className="text-2xl sm:text-3xl font-serif font-bold text-slate-900 break-words">{sale.title}</h1>
+          <h1 className="text-2xl sm:text-3xl font-serif font-bold text-slate-900 break-words">Getting Your Sale Ready</h1>
+          <p className="text-sm font-medium text-slate-700 mt-0.5 break-words">{sale.title}</p>
           <div className="flex flex-wrap items-center gap-2 mt-1">
             <span className={`text-xs font-medium border rounded-full px-2.5 py-0.5 ${timingBadge}`}>
               {timing.phase}{timing.daysUntilFirst !== null && timing.phase !== 'POST-SALE' && timing.phase !== 'SALE DAYS' ? ` · ${timing.daysUntilFirst} day${timing.daysUntilFirst === 1 ? '' : 's'} to first date` : ''}
             </span>
-            <span className="text-xs text-slate-500">Preparation orchestration — reads your records; it does not change sale status.</span>
+            <span className="text-xs text-slate-500">See what's ready and what still needs your attention before sale day.</span>
           </div>
         </div>
         <Button variant="outline" size="sm" onClick={refresh} disabled={refreshing}>
