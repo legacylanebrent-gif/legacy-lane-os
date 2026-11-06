@@ -15,6 +15,7 @@ import GoalRing from '@/components/operator/dashboard/GoalRing';
 import SaleGallery from '@/components/operator/dashboard/SaleGallery';
 import RecentActivity from '@/components/operator/dashboard/RecentActivity';
 import CoolFindsCard from '@/components/operator/dashboard/CoolFindsCard';
+import LocalIsoCard from '@/components/operator/dashboard/LocalIsoCard';
 import { loadOperatorMoney } from '@/components/operator/dashboard/saleDayMetrics';
 import { Home, Eye, Heart, MessageSquare, Plus } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -171,6 +172,7 @@ export default function EstateSaleOperatorDashboard({ user }) {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <div className="lg:col-span-2 space-y-4">
           <MoneyPanel sales={sales} money={money} />
+          <LocalIsoCard user={user} />
           <CoolFindsCard user={user} />
         </div>
         <div className="space-y-4">
