@@ -31,6 +31,45 @@ export async function openAIPhoto(photo, type, requestId) {
   return { ...raw, provider: 'openai', model: 'gpt-4o-mini', provider_request_id: data.id, usage: data.usage || null };
 }
 
+/**
+ * Step 2 product search: a NAME-based Google Shopping lookup on SERPAPI, using the
+ * title and keywords Step 1 already wrote. This is a different question from the
+ * visual search — it asks "what do listings for this named item cost" instead of
+ * "what looks like this" — which is what rescues photos the visual search could
+ * not read. Name-matched, so it is evidence of asking prices, never identity proof.
+ */
+export async function shoppingPhoto(photo, basic) {
+  const key = secrets.get('SERPAPI_KEY');
+  if (!key) throw photoError('SerpAPI is not configured', 503);
+  const query = [basic?.title, ...(basic?.subject_keywords || []).slice(0, 3)]
+    .map(value => String(value || '').replace(/\s+/g, ' ').trim())
+    .filter(Boolean)
+    .join(' ')
+    .slice(0, 140);
+  if (!query) throw photoError('There is no item name to search for yet', 422);
+  const params = new URLSearchParams({ engine: 'google_shopping', q: query, hl: 'en', gl: 'us', api_key: key });
+  const response = await fetch(`https://serpapi.com/search?${params}`, { signal: AbortSignal.timeout(55000) });
+  const data = await response.json();
+  if (!response.ok || data.error) {
+    const error = photoError(data.error || 'SerpAPI product search failed', response.status === 200 ? 402 : response.status);
+    error.definite_rejection = true; throw error;
+  }
+  const matches = (data.shopping_results || [])
+    .filter(m => !`${m.link || ''} ${m.source || ''}`.toLowerCase().includes('estatesales.net'))
+    .slice(0, 10)
+    .map(m => {
+      const price = typeof m.extracted_price === 'number' ? m.extracted_price : Number(String(m.price || '').replace(/[^0-9.]/g, ''));
+      return { title: m.title || '', source: m.source || '', link: m.link || '', price: Number.isFinite(price) && price > 0 ? price : null, evidence: 'asking', match_quality: 'name_match' };
+    });
+  return {
+    matches,
+    price_note: 'Product-search asking prices for a name-matched item. Not sold prices and not a local estate-sale estimate.',
+    query,
+    provider: 'serpapi',
+    provider_request_id: data.search_metadata?.id || requestId,
+  };
+}
+
 export async function lensPhoto(photo, requestId) {
   const key = secrets.get('SERPAPI_KEY');
   if (!key) throw photoError('SerpAPI is not configured', 503);

@@ -61,7 +61,8 @@ export async function photoAnalysisProof() {
   };
 
   /* ── mock providers ── */
-  const calls = { describe: 0, research: 0, lens: 0 };
+  const calls = { describe: 0, research: 0, lens: 0, shopping: 0 };
+  let lastEvidence = null;
   let throttleDescribes = 0;
   const kindOf = id => {
     const i = Number(id.slice(1));
@@ -91,8 +92,18 @@ export async function photoAnalysisProof() {
     return { matches: [{ title: `Comparable ${photo.pipeline.id}`, price: 60, source: 'mock', link: 'https://example.test/c' }], price_note: 'Mock asking prices' };
   };
 
-  const research = async (photo, basic) => {
+  const shopping = async photo => {
+    calls.shopping += 1;
+    return {
+      matches: [{ title: `Product result ${photo.pipeline.id}`, price: 45, source: 'mock-shop', link: 'https://example.test/s' }],
+      price_note: 'Mock product prices',
+      query: `mock query ${photo.pipeline.id}`,
+    };
+  };
+
+  const research = async (photo, basic, evidence) => {
     calls.research += 1;
+    lastEvidence = evidence;
     const id = photo.pipeline.id;
     await new Promise(r => setTimeout(r, Number(id.slice(1)) % 3));
     const unsure = Number(id.slice(1)) % 29 === 0;
@@ -119,7 +130,7 @@ export async function photoAnalysisProof() {
     return { allowed: true, remaining: creditRemaining };
   };
 
-  const invoke = body => runPhotoAnalysis({ service, user, saleId: SALE, body, describe, research, lens, credits, spendCredit });
+  const invoke = body => runPhotoAnalysis({ service, user, saleId: SALE, body, describe, research, lens, shopping, credits, spendCredit });
 
   /** Runs the same bounded-concurrency loop the browser runs. */
   async function drain(lanes = 3) {
@@ -128,6 +139,21 @@ export async function photoAnalysisProof() {
     await Promise.all(Array.from({ length: lanes }, async () => {
       for (;;) {
         const result = await invoke({ action: 'next', credits_exhausted: exhausted });
+        if (result.exhausted) exhausted = true;
+        if (result.photo) processed += 1;
+        if (result.done) return;
+      }
+    }));
+    return processed;
+  }
+
+  /** Same loop the browser runs, restricted to one queue scope. */
+  async function drainScope(scope, lanes = 3) {
+    let processed = 0;
+    let exhausted = false;
+    await Promise.all(Array.from({ length: lanes }, async () => {
+      for (;;) {
+        const result = await invoke({ action: 'next', scope, credits_exhausted: exhausted });
         if (result.exhausted) exhausted = true;
         if (result.photo) processed += 1;
         if (result.done) return;
@@ -311,6 +337,77 @@ export async function photoAnalysisProof() {
   assert(record.images.filter(p => jobOf(p.pipeline.id)?.state === 'awaiting_credits').length === 0, 'topping up credits finishes the remaining research');
 
   /* ── 12. interrupted search: covered as step 0 above ── */
+
+  /* ── 13. Step 2 batch: product search only where it is still needed ── */
+  {
+    const finalJob = (id, classification, { research: done = null, review = [], state = 'final' } = {}) => ({
+      [JOB_KEY]: {
+        id: `job-${id}`,
+        revision: `r-${id}`,
+        state: done && done.identified !== false ? 'ready' : done ? 'needs_review' : 'failed',
+        stage: state,
+        attempts: 1,
+        classification,
+        basic: { title: `Basic ${id}`, description: `Basic description ${id}.` },
+        research: done,
+        review_flags: review,
+      },
+    });
+    const photo = (id, jobs, extra = {}) => ({
+      url: `https://example.test/${id}.jpg`,
+      name: `Name ${id}`,
+      description: `Saved copy ${id}.`,
+      price: null,
+      ...extra,
+      pipeline: { id, revision: `r-${id}`, edit_revision: 'initial', operator_fields: [], jobs },
+    });
+
+    record = {
+      id: SALE,
+      operator_id: user.id,
+      updated_date: `v${++version}`,
+      images: [
+        // single, already identified and priced -> must not be re-charged
+        photo('s1', finalJob('s1', 'single', { research: { identified: true, title: 'Researched s1', suggested_price: 24, evidence: { source: 'serpapi_google_lens', match_count: 1, matches: [] } } })),
+        // single, needs review, with the visual matches Step 1 already paid for
+        photo('s2', finalJob('s2', 'single', {
+          research: { identified: false, title: 'Basic s2', suggested_price: null, evidence: { source: 'serpapi_google_lens', match_count: 1, matches: [{ title: 'Cached visual match', price: 80 }] } },
+          review: ['Item could not be identified from the photo and search results'],
+        })),
+        // group -> never searched in Step 2
+        photo('g1', finalJob('g1', 'group')),
+        // needs review but on the operator hold -> never searched
+        photo('h1', finalJob('h1', 'single', { research: { identified: false, suggested_price: null, evidence: { source: 'serpapi_google_lens', match_count: 0, matches: [] } }, review: ['Item could not be identified from the photo and search results'] }), { skip_item: true }),
+        // failed single -> included
+        photo('s3', finalJob('s3', 'single')),
+        // never analyzed, not queued by Step 2 -> must stay untouched
+        photo('p-new', {}),
+      ],
+    };
+
+    const before = clone(calls);
+    const creditsBefore = creditRemaining;
+    const queue = await invoke({ action: 'step2_queue' });
+    assert(queue.queued === 2, `Step 2 queues only the single-item and needs-review photos (queued ${queue.queued})`);
+    assert(queue.counts?.step2 === 2, 'the Step 2 counter reports the queued work');
+    assert(jobOf('s1').state === 'ready', 'an already priced single item is not queued again');
+    assert(!jobOf('g1').research_kind, 'a group photo is never queued for Step 2');
+    assert(!jobOf('h1').research_kind, 'a photo on hold is never queued for Step 2');
+    assert(jobOf('s2').research_kind === 'keyword' && jobOf('s3').research_kind === 'keyword', 'needs-review and failed photos are queued for the product search');
+
+    await drainScope('step2');
+    assert(calls.describe === before.describe, 'Step 2 never re-runs the Step 1 description');
+    assert(calls.shopping === before.shopping + 2, 'Step 2 searches exactly the queued photos');
+    assert(calls.lens === before.lens, 'Step 2 never pays for a second visual search');
+    assert(creditsBefore - creditRemaining === 2, 'Step 2 costs one search per queued photo and nothing more');
+    assert(lastEvidence?.source === 'serpapi_google_shopping', 'Step 2 evidence is labelled as the product search');
+    assert((lastEvidence?.matches || []).some(m => m.title === 'Cached visual match'), 'matches Step 1 already paid for are folded in for free');
+    assert(!jobOf('p-new'), 'a Step 2 run never claims a photo it did not queue');
+    assert(photoOf('s2').name && jobOf('s2').research?.suggested_price === 24, 'a needs-review photo finishes Step 2 with a supported price');
+    const settled = await invoke({ action: 'status' });
+    assert(settled.counts.step2 === 0, 'no photo is left waiting for Step 2 after the batch');
+    creditRemaining = 1000;
+  }
 
   return {
     scope: '200 mocked photos driven through the production analysis function and conditional-write store',

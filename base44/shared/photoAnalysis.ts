@@ -59,11 +59,32 @@ export function viewState(photo, now = Date.now()) {
   return 'pending';
 }
 
+/**
+ * Step 2 covers single-item photos and anything still flagged for review, and
+ * deliberately skips photos that are already confidently identified and priced so
+ * a search is never paid for twice.
+ */
+export function step2Candidate(photo, now = Date.now()) {
+  if (holdPhoto(photo)) return false;
+  const state = viewState(photo, now);
+  if (state === 'inflight') return false;
+  const job = jobOf(photo);
+  // Work already queued for Step 2 keeps counting while it runs.
+  if (state === 'pending' && job?.research_kind !== 'keyword') return false;
+  // A room view or pile never gets a product search: there is no single item to
+  // name, so the answer could only be a misleading price for the wrong thing.
+  if ((job?.classification || photo?.pipeline?.classification) !== SINGLE) return false;
+  if (state === 'needs_review' || state === 'failed') return true;
+  const research = job?.research;
+  return !research || research.identified === false || !(research.suggested_price > 0);
+}
+
 export function summarize(images = [], now = Date.now()) {
-  const counts = { all: images.length, ready: 0, needs_review: 0, failed: 0, pending: 0, awaiting_credits: 0, inflight: 0, blocked: 0 };
+  const counts = { all: images.length, ready: 0, needs_review: 0, failed: 0, pending: 0, awaiting_credits: 0, inflight: 0, blocked: 0, step2: 0 };
   for (const photo of images) {
     const state = viewState(photo, now);
     counts[state] = (counts[state] || 0) + 1;
+    if (step2Candidate(photo, now)) counts.step2 += 1;
   }
   return counts;
 }
@@ -127,7 +148,7 @@ export function researchPrompt(basic, matches) {
   return [
     'You are writing the final listing copy for ONE estate-sale item, using BOTH the photograph and the search results below.',
     '',
-    'The search results are visual-similarity matches with the prices sellers are ASKING. They are not sold prices and they are not proof of identity.',
+    'The search results are either similar-looking photographs or product listings matched by the item name. Their prices are what sellers are ASKING. They are not sold prices and they are not proof of identity.',
     '',
     'What the photograph already shows:',
     `- draft title: ${basic?.title || '(none)'}`,
@@ -212,7 +233,8 @@ export async function researchWithProviders(service, photo, basic, lens) {
     confidence: pick(raw.confidence, ['high', 'medium', 'low'], 'low'),
     review_reasons: (raw.review_reasons || []).filter(Boolean).slice(0, 5),
     evidence: {
-      source: 'serpapi_google_lens',
+      source: lens?.source || 'serpapi_google_lens',
+      query: lens?.query || null,
       match_count: matches.length,
       avg_asking: prices.length ? Math.round(prices.reduce((a, b) => a + b, 0) / prices.length) : null,
       min_asking: prices.length ? Math.min(...prices) : null,
@@ -275,10 +297,13 @@ function reviewFlags(basic, research) {
 
 /* ─────────────────────────── claim ─────────────────────────── */
 
-function claimNext(images, now) {
+function claimNext(images, now, scope = null) {
   for (const photo of images) {
     if (holdPhoto(photo)) continue;
     const existing = jobOf(photo);
+    // A Step 2 run only ever touches the photos it queued, so it can never pick
+    // up new uploads that still owe a Step 1 description.
+    if (scope === 'step2' && existing?.research_kind !== 'keyword') continue;
     let resumable = false;
 
     if (!existing) resumable = true;
@@ -313,6 +338,8 @@ function claimNext(images, now) {
       classification_source: base.classification_source || null,
       basic: base.basic || null,
       research: base.research || null,
+      research_kind: base.research_kind || null,
+      lens_cache: base.lens_cache || null,
       review_flags: base.review_flags || [],
       error: null,
       retryable: false,
@@ -390,8 +417,21 @@ async function processClaimed(ctx) {
         const value = await finish(NEEDS_CREDITS);
         return { photo: value.photo, state: 'awaiting_credits', exhausted: true };
       }
-      const lens = await ctx.lens(target.photo);
-      const researched = await research(target.photo, job.basic, lens);
+      // Step 2 asks a different question than Step 1: a name-based product search
+      // instead of a fresh visual search, reusing the visual matches Step 1 already
+      // paid for (they cost nothing to read again).
+      const search = job.research_kind === 'keyword'
+        ? await ctx.shopping(target.photo, job.basic)
+        : await ctx.lens(target.photo);
+      const evidence = job.research_kind === 'keyword'
+        ? {
+            matches: [...(search.matches || []), ...(job.lens_cache || [])],
+            price_note: search.price_note,
+            query: search.query || null,
+            source: 'serpapi_google_shopping',
+          }
+        : search;
+      const researched = await research(target.photo, job.basic, evidence);
       await settle(j => ({ ...j, stage: 'researched', research: researched, review_flags: reviewFlags(j.basic, researched) }));
     }
 
@@ -430,6 +470,7 @@ export async function runPhotoAnalysis(ctx) {
   // The providers need the service client; the pipeline calls them with the photo only.
   const describe = ctx.describe || (photo => describeWithBase44(service, photo));
   const research = ctx.research || ((photo, basic, lens) => researchWithProviders(service, photo, basic, lens));
+  const shopping = ctx.shopping || (() => { throw photoError('The Step 2 product search is not configured', 503); });
 
   const loadSale = async () => {
     const sale = await service.entities.EstateSale.get(saleId);
@@ -450,12 +491,12 @@ export async function runPhotoAnalysis(ctx) {
   }
 
   if (action === 'next') {
-    const claim = await mutateSalePhotos(service, saleId, user, images => claimNext(images, Date.now()));
+    const claim = await mutateSalePhotos(service, saleId, user, images => claimNext(images, Date.now(), body.scope || null));
     const claimed = claim.value.claimed;
     if (!claimed) {
       return { done: true, counts: summarize(claim.images, Date.now()), credits: await safeCredits() };
     }
-    const outcome = await processClaimed({ ...ctx, saleId, target: claimed, describe, research, creditsExhausted: body.credits_exhausted === true });
+    const outcome = await processClaimed({ ...ctx, saleId, target: claimed, describe, research, shopping, creditsExhausted: body.credits_exhausted === true });
     return {
       done: false,
       photo: outcome.photo || null,
@@ -483,6 +524,42 @@ export async function runPhotoAnalysis(ctx) {
       return queued;
     });
     return { queued: result.value, counts: await snapshot(), credits: await safeCredits() };
+  }
+
+  if (action === 'step2_queue') {
+    const result = await mutateSalePhotos(service, saleId, user, images => {
+      let queued = 0;
+      for (const photo of images) {
+        if (!step2Candidate(photo)) continue;
+        const previous = jobOf(photo) || {};
+        photo.pipeline.jobs = {
+          ...photo.pipeline.jobs,
+          [JOB_KEY]: {
+            id: crypto.randomUUID(),
+            revision: photo.pipeline.revision,
+            state: 'pending',
+            stage: previous.basic ? 'described' : 'claimed',
+            claimed_at: null,
+            created_at: previous.created_at || new Date().toISOString(),
+            attempts: 0,
+            classification: previous.classification || null,
+            classification_source: previous.classification_source || null,
+            basic: previous.basic || null,
+            research: null,
+            research_kind: 'keyword',
+            // The visual matches Step 1 already paid for stay usable at no cost.
+            lens_cache: previous.research?.evidence?.matches || null,
+            review_flags: previous.review_flags || [],
+            error: null,
+            retryable: false,
+            retry_at: null,
+          },
+        };
+        queued += 1;
+      }
+      return queued;
+    });
+    return { queued: result.value, counts: summarize(result.images || [], Date.now()), credits: await safeCredits() };
   }
 
   const photoId = body.photo_id;
@@ -519,6 +596,7 @@ export async function runPhotoAnalysis(ctx) {
               classification: SINGLE,
               classification_source: 'operator',
               research: null,
+              research_kind: null,
               review_flags: ['Set to single item by you — research not run yet'],
               attempts: 0,
               error: null,
@@ -558,6 +636,7 @@ export async function runPhotoAnalysis(ctx) {
             classification: SINGLE,
             classification_source: 'operator',
             research: null,
+            research_kind: null,
             review_flags: [],
             attempts: 0,
             error: null,
@@ -577,6 +656,8 @@ export async function runPhotoAnalysis(ctx) {
           stage: fresh ? 'claimed' : (job.stage === 'final' ? 'described' : job.stage || 'claimed'),
           basic: fresh ? null : job.basic || null,
           research: fresh ? null : job.research || null,
+          research_kind: fresh ? null : job.research_kind || null,
+          lens_cache: fresh ? null : job.lens_cache || null,
           review_flags: [],
           attempts: 0,
           error: null,

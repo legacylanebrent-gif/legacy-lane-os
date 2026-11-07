@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { Sparkles, Loader2, RotateCcw, AlertTriangle, Wallet, Info } from 'lucide-react';
+import { Sparkles, Loader2, RotateCcw, AlertTriangle, Wallet, Info, Search } from 'lucide-react';
 import PhotoAnalysisCard from '@/components/estate/PhotoAnalysisCard';
 import { viewStateOf } from '@/lib/photoAnalysisState';
 
@@ -64,6 +64,23 @@ export default function SalePhotoAnalysisPanel({ saleId, analysis, photos = [] }
           {running ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
           {running ? 'Analyzing photos…' : counts && counts.ready + counts.needs_review + counts.awaiting_credits === total && total > 0 ? 'Re-check all photos' : 'Analyze Sale Photos'}
         </button>
+
+        <div className="rounded-lg border border-slate-200 bg-slate-50 p-2.5 space-y-2">
+          <button
+            type="button"
+            onClick={analysis.startStep2}
+            disabled={running || !saleId || !(counts?.step2 > 0)}
+            className="w-full inline-flex items-center justify-center gap-2 px-3 py-2 rounded-lg border border-cyan-600 bg-white text-cyan-800 font-semibold text-sm hover:bg-cyan-50 disabled:border-slate-200 disabled:bg-white disabled:text-slate-400 transition-colors"
+          >
+            {running ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
+            {`Step 2 — web search (${counts?.step2 || 0})`}
+          </button>
+          <p className="text-[11px] text-slate-600">
+            Step 2 runs the paid SERPAPI product search on single-item photos and on every single item still flagged for
+            review. It keeps the Step 1 copy, reuses the image matches already paid for, and skips photos that are already
+            confidently identified and priced — one search credit per photo, and never on room views or piles.
+          </p>
+        </div>
 
         <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-slate-500">
           {creditText && <span className="inline-flex items-center gap-1"><Wallet className="w-3 h-3" />{creditText}</span>}

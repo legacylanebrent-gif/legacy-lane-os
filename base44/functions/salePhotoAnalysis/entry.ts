@@ -1,6 +1,6 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.54';
 import { runPhotoAnalysis } from '../../shared/photoAnalysis.ts';
-import { lensPhoto } from '../../shared/photoProviders.ts';
+import { lensPhoto, shoppingPhoto } from '../../shared/photoProviders.ts';
 
 /**
  * The single canonical entry point for photo descriptions, identification and
@@ -23,6 +23,7 @@ export default async function (req) {
       credits: async () => (await base44.functions.invoke('checkGoogleLensCredits', { check_only: true })).data,
       spendCredit: async () => (await base44.functions.invoke('checkGoogleLensCredits', {})).data,
       lens: photo => lensPhoto(photo, crypto.randomUUID()),
+      shopping: (photo, basic) => shoppingPhoto(photo, basic),
     });
 
     return Response.json(result);

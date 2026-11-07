@@ -44,11 +44,11 @@ export default function useSalePhotoAnalysis({ saleId, onPhoto, onRunComplete })
     if (result.counts) setState(s => ({ ...s, counts: result.counts, credits: result.credits ?? s.credits }));
   };
 
-  const drain = async () => {
+  const drain = async scope => {
     let exhausted = false;
     await Promise.all(Array.from({ length: LANES }, async () => {
       for (;;) {
-        const result = await call({ action: 'next', credits_exhausted: exhausted });
+        const result = await call({ action: 'next', credits_exhausted: exhausted, ...(scope ? { scope } : {}) });
         if (result.exhausted) exhausted = true;
         settle(result);
         if (result.done) return;
@@ -77,6 +77,17 @@ export default function useSalePhotoAnalysis({ saleId, onPhoto, onRunComplete })
     await drain();
   });
 
+  /**
+   * Step 2: the paid web search only, for single-item photos and any photo that
+   * still needs review. Keeps the Step 1 copy and never re-runs it.
+   */
+  const startStep2 = guard(async () => {
+    const queued = await call({ action: 'step2_queue' });
+    if (queued.counts) setState(s => ({ ...s, counts: queued.counts, credits: queued.credits ?? s.credits }));
+    if (queued.queued > 0) await drain('step2');
+    else await refresh();
+  });
+
   const single = (photo, body, { follow = true } = {}) => guard(async () => {
     settle(await call({ ...body, ...ref(photo) }));
     if (follow) await drain();
@@ -87,6 +98,7 @@ export default function useSalePhotoAnalysis({ saleId, onPhoto, onRunComplete })
     state,
     refresh,
     start,
+    startStep2,
     stop: () => { runningRef.current = false; },
     retryFailed,
     retry: photo => single(photo, { action: 'retry' }),
