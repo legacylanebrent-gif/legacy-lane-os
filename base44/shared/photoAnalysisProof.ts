@@ -232,7 +232,7 @@ export async function photoAnalysisProof() {
   assert(jobOf(groupPhoto).research === null, 'switching back to group drops the item-level research claim');
 
   /* ── 9. applying a suggested price is an explicit operator action ── */
-  const priceTarget = 'p60';
+  const priceTarget = 'p1';
   const suggested = jobOf(priceTarget)?.research?.suggested_price;
   assert(typeof suggested === 'number', 'a suggested price exists to apply');
   assert(photoOf(priceTarget).price == null, 'suggested price is not the listing price');
@@ -250,7 +250,12 @@ export async function photoAnalysisProof() {
   assert(jobOf('p70') && jobOf('p70').revision === 'r70-new', 'replaced image was re-analyzed against its new revision');
 
   /* ── 11. exhausted credits keep completed work and basic descriptions ── */
-  record = { ...record, updated_date: `v${++version}`, images: makePhotos().map(p => ({ ...p, pipeline: { ...p.pipeline, jobs: {} } })) };
+  const creditScope = new Set(Array.from({ length: 40 }, (_, i) => `p${i}`));
+  record = {
+    ...record,
+    updated_date: `v${++version}`,
+    images: record.images.map(p => creditScope.has(p.pipeline.id) ? { ...p, name: '', description: '', ai_first_search_price: null, ai_deep_search_price: null, synopsis: '', pipeline: { ...p.pipeline, jobs: {}, operator_fields: (p.pipeline.operator_fields || []).filter(f => f !== 'name') } } : p),
+  };
   creditRemaining = 3;
   await drain(3);
   const awaiting = record.images.filter(p => jobOf(p.pipeline.id)?.state === 'awaiting_credits');
