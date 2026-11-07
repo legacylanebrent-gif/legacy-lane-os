@@ -186,7 +186,6 @@ Deno.serve(async (req) => {
         if (synopsis.trim()) aiFields.synopsis = synopsis.trim();
       }
 
-      let savedFields = [];
       if (Object.keys(aiFields).length > 0) {
         const images = [...(sale.images || [])];
         const idx = images.findIndex((img) => photoUrl(img) === image_url);
@@ -198,7 +197,7 @@ Deno.serve(async (req) => {
           if (changed.length > 0) {
             images[idx] = photo;
             await base44.asServiceRole.entities.EstateSale.update(sale_id, { images });
-            savedFields = changed;
+            savedFields.push(...changed);
             console.log('googleLensPricing: photo fields saved', { sale_id, image_url, changed });
           }
         }
@@ -208,6 +207,7 @@ Deno.serve(async (req) => {
     return Response.json({
       success: true,
       item_title: identityName,
+      saved_fields: savedFields,
       knowledge_graph: {
         title: knowledgeGraph?.title,
         type: knowledgeGraph?.type,

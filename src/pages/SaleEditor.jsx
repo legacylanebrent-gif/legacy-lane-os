@@ -1947,7 +1947,6 @@ Return ONLY the description text, no extra commentary.`
                           setSerpBatchProgress({ current: 0, total: remaining.length, stoppedAt: null });
                           setShowDeepSearchModal(true);
                           let processed = 0;
-                           let batchCount = 0;
                            for (let i = startFromIndex; i < formData.images.length; i++) {
                              const img = formData.images[i];
                              if (img.name) continue;
@@ -2015,7 +2014,6 @@ Return ONLY the description text, no extra commentary.`
                                    return { ...prev, images: updated };
                                  });
                                  processed++;
-                                 batchCount++;
                                  setSerpBatchProgress(prev => ({ ...prev, current: processed }));
 
                                  // Refresh credit display periodically during batch
@@ -2023,15 +2021,9 @@ Return ONLY the description text, no extra commentary.`
                                    setCreditRefreshTrigger(prev => prev + 1);
                                    setCreditDisplayKey(prev => prev + 1);
                                  }
-
-                                 // Save to DB every 10 images
-                                 if (batchCount >= 10) {
-                                   try {
-                                     const latest = formDataRef.current;
-                                     await base44.entities.EstateSale.update(saleId, { images: latest.images });
-                                   } catch (_) {}
-                                   batchCount = 0;
-                                 }
+                                 // This photo's result is already saved on the server, addressed by
+                                 // its own url. The whole photo list is deliberately never written here:
+                                 // a stale copy of it would revert work done on other photos.
                                }
                              } catch (e) {
                               console.warn(`AI search skipped image ${i + 1}:`, e.message);
@@ -2040,13 +2032,6 @@ Return ONLY the description text, no extra commentary.`
                              }
                              setSerpSearching(prev => ({ ...prev, [i]: false }));
                              await new Promise(r => setTimeout(r, 1000));
-                           }
-                           // Save any remaining images
-                           if (batchCount > 0) {
-                             try {
-                               const latest = formDataRef.current;
-                               await base44.entities.EstateSale.update(saleId, { images: latest.images });
-                             } catch (_) {}
                            }
                            // Final credit refresh after batch completes
                            setCreditRefreshTrigger(prev => prev + 1);
