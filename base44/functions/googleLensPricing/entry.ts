@@ -1,4 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
+import { applyPhotoFields, photoUrl } from '../../shared/photoFields.ts';
 
 Deno.serve(async (req) => {
   try {
@@ -122,11 +123,24 @@ Deno.serve(async (req) => {
     const priceMax = pricesRaw.length > 0 ? Math.max(...pricesRaw) : null;
     const priceAvg = pricesRaw.length > 0 ? Math.round(pricesRaw.reduce((a, b) => a + b, 0) / pricesRaw.length) : null;
 
+    // ── Identity that may be written onto the photo ──────────────────────────
+    // A commercial search match's title is the best available identification,
+    // but a placeholder is never an identification: "Unidentified Item" stays
+    // unidentified instead of being saved as the item's name.
+    const PLACEHOLDER_TITLES = /^(unidentified item|unknown item|unknown|item)$/i;
+    const realTitle = (value) => {
+      const text = String(value || '').trim();
+      return text && !PLACEHOLDER_TITLES.test(text) ? text : '';
+    };
+    const identityName =
+      realTitle(knowledgeGraph?.title) || realTitle(results[0]?.title) || '';
+
     // Save to SaleItemPricing entity if sale_id provided
     // Chapter 24 near-P0 — OWNERSHIP BEFORE WRITE: the caller must be
     // authorized for the parent sale before comparable/pricing evidence is
     // written against it. No cross-company evidence injection.
-    if (sale_id && results.length > 0) {
+    const savedFields = [];
+    if (sale_id) {
       const saleRows = await base44.asServiceRole.entities.EstateSale.filter({ id: sale_id });
       const sale = saleRows[0] || null;
       if (!sale) return Response.json({ error: 'Sale not found' }, { status: 404 });
@@ -136,24 +150,64 @@ Deno.serve(async (req) => {
       if (!isOperator && !isSaleTeam && !isAdmin) {
         return Response.json({ error: 'Only the sale operator (or an admin) may save pricing evidence for this sale.' }, { status: 403 });
       }
-      await base44.asServiceRole.entities.SaleItemPricing.create({
-        sale_id,
-        operator_id: saleRows[0]?.operator_id,
-        image_url,
-        item_title: results[0]?.title || knowledgeGraph?.title || 'Unidentified Item',
-        price_min: priceMin,
-        price_max: priceMax,
-        price_avg: priceAvg,
-        top_matches: results,
-        processed_by: user.email,
-        knowledge_graph_title: knowledgeGraph?.title || null,
-        knowledge_graph_type: knowledgeGraph?.type || null,
-      });
+      if (results.length > 0) {
+        await base44.asServiceRole.entities.SaleItemPricing.create({
+          sale_id,
+          operator_id: saleRows[0]?.operator_id,
+          image_url,
+          item_title: identityName || 'Unidentified Item',
+          price_min: priceMin,
+          price_max: priceMax,
+          price_avg: priceAvg,
+          top_matches: results,
+          processed_by: user.email,
+          knowledge_graph_title: knowledgeGraph?.title || null,
+          knowledge_graph_type: knowledgeGraph?.type || null,
+        });
+      }
+
+      // ── CANONICAL PER-PHOTO SAVE ───────────────────────────────────────────
+      // The result is persisted HERE, on the photo it belongs to, addressed by
+      // that photo's own url. Writing one index of the CURRENT stored sale is
+      // what makes it impossible for a batch run to give several photos the
+      // same title, or to re-apply an older copy of the whole photo list.
+      // 'fill_empty' never replaces a value a human already entered.
+      const aiFields = {};
+      if (identityName) aiFields.name = identityName;
+      if (priceAvg != null) aiFields.ai_first_search_price = priceAvg;
+      {
+        const priced = results.filter((m) => m.price && m.title).slice(0, 3);
+        let synopsis = '';
+        if (identityName) synopsis += `${identityName}.`;
+        if (priced.length > 0) {
+          synopsis += ` Currently listed for ${priced.map((m) => `${m.price} on ${m.source}`).join(', ')}.`;
+        }
+        if (priceMin && priceMax) synopsis += ` Market price range: $${priceMin}–$${priceMax}.`;
+        if (synopsis.trim()) aiFields.synopsis = synopsis.trim();
+      }
+
+      let savedFields = [];
+      if (Object.keys(aiFields).length > 0) {
+        const images = [...(sale.images || [])];
+        const idx = images.findIndex((img) => photoUrl(img) === image_url);
+        if (idx === -1) {
+          console.warn('googleLensPricing: photo no longer on this sale, nothing saved', { sale_id, image_url });
+        } else {
+          const current = typeof images[idx] === 'string' ? { url: images[idx] } : images[idx];
+          const { photo, changed } = applyPhotoFields(current, aiFields, 'fill_empty');
+          if (changed.length > 0) {
+            images[idx] = photo;
+            await base44.asServiceRole.entities.EstateSale.update(sale_id, { images });
+            savedFields = changed;
+            console.log('googleLensPricing: photo fields saved', { sale_id, image_url, changed });
+          }
+        }
+      }
     }
 
     return Response.json({
       success: true,
-      item_title: results[0]?.title || knowledgeGraph?.title || 'Unidentified Item',
+      item_title: identityName,
       knowledge_graph: {
         title: knowledgeGraph?.title,
         type: knowledgeGraph?.type,
