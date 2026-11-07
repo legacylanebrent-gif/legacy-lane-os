@@ -22,7 +22,7 @@ export async function runPhotoWork({ service, user, saleId, target, type, action
     }
     const active = images.reduce((n,p) => n + Object.values(p.pipeline.jobs || {}).filter(j => j.state === 'calling').length, 0);
     if (active >= 3) throw photoError('Three photo provider calls are already active; resume when they finish', 429);
-    const receipt = { id, revision: photo.pipeline.revision, edit_revision: photo.pipeline.edit_revision, state: 'calling', provider_calls: (old?.provider_calls || 0) + 1, at: new Date().toISOString() };
+    const receipt = { id, revision: photo.pipeline.revision, edit_revision: photo.pipeline.edit_revision, state: 'calling', attempts_reserved: (old?.attempts_reserved || 0) + 1, at: new Date().toISOString() };
     photo.pipeline.jobs = { ...photo.pipeline.jobs, [type]: receipt };
     return { owner: true, photo: structuredClone(photo), receipt };
   });

@@ -24,6 +24,6 @@ export async function photoEndpoint(req, forcedType = null) {
     return Response.json(result);
   } catch (error) {
     console.error('photo processing failed', { message: error.message, status: error.status });
-    return Response.json({ error: error.message }, { status: error.status || 500 });
+    return Response.json({ error: error.message }, { status: error.status || 500, headers: error.status === 429 ? { 'Retry-After': String(error.retry_after || 30) } : {} });
   }
 }

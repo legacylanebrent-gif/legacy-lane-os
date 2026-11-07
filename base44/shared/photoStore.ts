@@ -37,7 +37,16 @@ export async function mutateSalePhotos(service, saleId, user, mutate, options = 
     const value = await mutate(images, sale);
     const patch = { images, ...(options.patch || {}) };
     if (JSON.stringify(images) === JSON.stringify(sale.images || []) && !options.patch) return { sale, images, value, conflicts: attempt };
-    const result = await E.updateMany({ id: saleId, updated_date: sale.updated_date }, { $set: patch });
+    let result;
+    try {
+      result = await E.updateMany({ id: saleId, updated_date: sale.updated_date }, { $set: patch });
+    } catch (error) {
+      const status = error.status || error.response?.status;
+      if (attempt === 7 || !(status === 429 || status >= 500 || /network|fetch|timeout/i.test(error.message))) throw error;
+      const retryAfter = Number(error.response?.headers?.['retry-after'] || error.retry_after || (status === 429 ? 60 : 0));
+      await new Promise(resolve => setTimeout(resolve, Math.max(retryAfter * 1000, 250 * 2 ** attempt)));
+      continue;
+    }
     if (result.updated === 1) return { sale, images, value, conflicts: attempt };
     if (result.updated !== 0) throw photoError('Unrecognized conditional-write response; write not acknowledged', 503);
     await new Promise(resolve => setTimeout(resolve, 80 * 2 ** attempt + Math.random() * 80));

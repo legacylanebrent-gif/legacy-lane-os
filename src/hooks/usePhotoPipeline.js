@@ -1,14 +1,23 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import * as photoBatchEngine from '@/lib/photoBatchEngine';
 import { base44 } from '@/api/base44Client';
 import { salePhotoPipeline } from '@/lib/salePhotoPipeline';
 
 export default function usePhotoPipeline({ saleId, userId, imagesRef, onPhoto, onImages }) {
   const paused = useRef(false), running = useRef(false);
   const [state, setState] = useState({ running: false, total: 0, counts: {}, type: null, error: '' });
+  useEffect(() => {
+    if (!saleId || !userId) return;
+    const type = localStorage.getItem(`photoLastType:${userId}:${saleId}`);
+    const saved = type ? JSON.parse(localStorage.getItem(`photoPipeline:v2:${userId}:${saleId}:${type}`) || '{}') : {};
+    const values = Object.values(saved.statuses || {});
+    if (type) setState(s => ({ ...s, type, total: values.length, counts: Object.fromEntries(['completed', 'needs_review', 'failed', 'save_failed', 'stale'].map(v => [v, values.filter(x => x === v).length])) }));
+  }, [saleId, userId]);
   async function run(type, selected = null) {
     if (!saleId) { setState(s => ({ ...s, error: 'Save the sale before scanning.' })); return; }
     if (running.current) return;
     if (type === 'deep' && !window.confirm('Run explicit SerpAPI Deep Scan? This uses Deep Scan credits. Results are comparable asking prices, not sold prices.')) return;
+    localStorage.setItem(`photoLastType:${userId}:${saleId}`, type);
     running.current = true; paused.current = false;
     setState({ running: true, total: 0, counts: {}, type, error: '' });
     try {
@@ -16,7 +25,7 @@ export default function usePhotoPipeline({ saleId, userId, imagesRef, onPhoto, o
       const all = initialized.data.images;
       imagesRef.current = { ...imagesRef.current, images: all.map(photo => {
         const local = imagesRef.current?.images?.find(p => p.pipeline?.id === photo.pipeline?.id || p.url === photo.url);
-        return local?._dirty ? { ...photo, name: local.name, description: local.description, price: local.price, _dirty: true } : photo;
+        return local?._dirty ? local : photo;
       }) };
       onImages?.(all);
       const chosen = selected ? all.filter(p => selected.some(s => s.pipeline?.id ? s.pipeline.id === p.pipeline.id : s.url === p.url)) : all;
@@ -27,7 +36,7 @@ export default function usePhotoPipeline({ saleId, userId, imagesRef, onPhoto, o
         retainRecovery: value => localStorage.setItem(`${key}:recovery:${value.job.key}`, JSON.stringify(value))
       };
       const { runner, jobs } = salePhotoPipeline({
-        invoke: (name, body) => base44.functions.invoke(name, body), saleId, images: chosen, type, journal,
+        engine: photoBatchEngine, invoke: (name, body) => base44.functions.invoke(name, body), saleId, images: chosen, type, journal,
         isPaused: () => paused.current,
         isCurrent: job => (imagesRef.current?.images || []).some(p => p.pipeline?.id === job.photoId && p.pipeline?.revision === job.imageRevision),
         onPhoto,

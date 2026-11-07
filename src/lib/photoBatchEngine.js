@@ -250,7 +250,8 @@ export function createPhotoBatchRunner({
       } catch (error) {
         emit('save_error', { key: job.key, attempt, message: String(error?.message || error) });
         if (error.response?.status === 409 || error.status === 409) return { ok: false, stale: true };
-        if (attempt < maxSaveAttempts && isTransientError(error)) {
+        if (!isTransientError(error)) return { ok: false };
+        if (attempt < maxSaveAttempts) {
           const backoff = baseDelayMs * 2 ** (attempt - 1);
           await sleep(retryAfterMs(error) ?? backoff + Math.floor(random() * baseDelayMs));
         }

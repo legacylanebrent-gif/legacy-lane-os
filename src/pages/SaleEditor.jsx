@@ -148,7 +148,7 @@ export default function SaleEditor() {
     setFormData(prev => {
       const images = incoming.map(photo => {
         const local = prev.images.find(p => photo.pipeline?.id && p.pipeline?.id === photo.pipeline.id || p.url === photo.url);
-        return local?._dirty ? { ...photo, name: local.name, description: local.description, price: local.price, _dirty: true } : photo;
+        return local?._dirty ? local : photo;
       });
       const next = { ...prev, images };
       formDataRef.current = next;
@@ -160,7 +160,7 @@ export default function SaleEditor() {
     onImages: mergeStoredPhotos,
     onPhoto: photo => {
       setFormData(prev => {
-        const next = { ...prev, images: prev.images.map(p => p.pipeline?.id === photo.pipeline?.id ? p._dirty ? { ...photo, name: p.name, description: p.description, price: p.price, _dirty: true } : photo : p) };
+        const next = { ...prev, images: prev.images.map(p => p.pipeline?.id === photo.pipeline?.id ? p._dirty ? { ...p, pipeline: { ...photo.pipeline, revision: p.pipeline.revision, edit_revision: p.pipeline.edit_revision } } : photo : p) };
         formDataRef.current = next;
         return next;
       });
