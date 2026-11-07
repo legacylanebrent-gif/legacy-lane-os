@@ -13,7 +13,7 @@ export default function usePhotoPipeline({ saleId, userId, imagesRef, onPhoto, o
     const values = Object.values(saved.statuses || {});
     if (type) setState(s => ({ ...s, type, total: values.length, counts: Object.fromEntries(['completed', 'needs_review', 'failed', 'save_failed', 'stale'].map(v => [v, values.filter(x => x === v).length])) }));
   }, [saleId, userId]);
-  async function run(type, selected = null) {
+  async function run(type, selected = null, options = {}) {
     if (!saleId) { setState(s => ({ ...s, error: 'Save the sale before scanning.' })); return; }
     if (running.current) return;
     if (type === 'deep' && !window.confirm('Run explicit SerpAPI Deep Scan? This uses Deep Scan credits. Results are comparable asking prices, not sold prices.')) return;
@@ -37,6 +37,7 @@ export default function usePhotoPipeline({ saleId, userId, imagesRef, onPhoto, o
       };
       const { runner, jobs } = salePhotoPipeline({
         engine: photoBatchEngine, invoke: (name, body) => base44.functions.invoke(name, body), saleId, images: chosen, type, journal,
+        retryUnknown: options.retryUnknown === true,
         isPaused: () => paused.current,
         isCurrent: job => (imagesRef.current?.images || []).some(p => p.pipeline?.id === job.photoId && p.pipeline?.revision === job.imageRevision),
         onPhoto,

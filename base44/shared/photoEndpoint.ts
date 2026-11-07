@@ -11,7 +11,7 @@ export async function photoEndpoint(req, forcedType = null) {
     if (!body.sale_id || !(body.photo_id || body.image_url)) return Response.json({ error: 'sale_id and photo_id are required' }, { status: 400 });
     const type = forcedType || body.type;
     if (type === 'deep' && body.explicit_deep !== true) return Response.json({ error: 'Deep Scan requires explicit confirmation', status: 400 }, { status: 400 });
-    const result = await runPhotoWork({ service: base44.asServiceRole, user, saleId: body.sale_id, target: body, type, action: body.action || 'run', provider: async (photo, kind, id) => {
+    const result = await runPhotoWork({ service: base44.asServiceRole, user, saleId: body.sale_id, target: body, type, action: body.action || 'run', retryUnknown: body.retry_unknown === true, provider: async (photo, kind, id) => {
       if (kind !== 'deep') return openAIPhoto(photo, kind, id);
       // Authorization, photo validity, revision and duplicate claim are checked
       // BEFORE credits or any paid provider call.

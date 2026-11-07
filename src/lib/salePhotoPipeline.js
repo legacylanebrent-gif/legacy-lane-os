@@ -1,6 +1,6 @@
 // Production adapter. Tests supply the SDK transport, never a second scan/save
 // implementation. Paid provider responses are retained independently of saves.
-export function salePhotoPipeline({ engine, invoke, saleId, images, type, journal, onPhoto, onEvent, isPaused, isCurrent }) {
+export function salePhotoPipeline({ engine, invoke, saleId, images, type, journal, onPhoto, onEvent, isPaused, isCurrent, retryUnknown = false }) {
   const { createPhotoBatchRunner, buildJobs } = engine;
   const request = async (name, body) => {
     try { return await invoke(name, body); }
@@ -17,7 +17,7 @@ export function salePhotoPipeline({ engine, invoke, saleId, images, type, journa
     checkpoint: state => journal?.write?.(state), isPaused, isJobCurrent: isCurrent,
     scanFn: async job => {
       const { data } = await request(type === 'deep' ? 'googleLensPricing' : 'identifySalePhoto', {
-        sale_id: saleId, photo_id: job.photoId, image_url: job.photoUrl, image_revision: job.imageRevision, type, explicit_deep: type === 'deep'
+        sale_id: saleId, photo_id: job.photoId, image_url: job.photoUrl, image_revision: job.imageRevision, type, explicit_deep: type === 'deep', retry_unknown: retryUnknown
       });
       if (data.state === 'receipt_save_failed') {
         journal?.retainRecovery?.({ job, data });

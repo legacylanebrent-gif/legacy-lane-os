@@ -82,8 +82,8 @@ export default function SalePricingTool() {
     setLoadingPhoto(imageUrl);
     try {
       const selected = imagesRef.current.images.filter(p => p.url === imageUrl);
-      if (selected.some(p => !p.pipeline?.classification)) await pipeline.run('classify', selected);
-      await pipeline.run('deep', selected);
+      if (selected.some(p => !p.pipeline?.classification)) await pipeline.run('classify', selected, { retryUnknown: true });
+      await pipeline.run('deep', selected, { retryUnknown: true });
       await loadSavedPricings(selectedSale.id);
     } finally { setLoadingPhoto(null); }
   };
