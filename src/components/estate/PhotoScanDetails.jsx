@@ -14,6 +14,7 @@ export default function PhotoScanDetails({ photo, pipeline }) {
       <p>Identification confidence: {standard.confidence || 'unknown'}. {standard.uncertainty_note || 'Visual identification is not authentication.'}</p>
       <p className="text-muted-foreground">Not an appraisal or verified comparable sale. Your listing price is unchanged.</p>
     </div>}
+    {Object.entries(info.jobs || {}).filter(([, job]) => ['failed', 'outcome_unknown', 'receipt_save_failed', 'stale'].includes(job.state)).map(([type, job]) => <p key={type} className="text-destructive">{type}: {job.error || job.state}. Unknown provider outcomes are not automatically charged again.</p>)}
     <div className="flex flex-wrap gap-2">
       <Button type="button" size="sm" variant="outline" disabled={pipeline.state.running} onClick={() => pipeline.run('classify', [photo])}>Classify</Button>
       <Button type="button" size="sm" disabled={pipeline.state.running || info.classification !== 'single'} onClick={() => pipeline.run('standard', [photo])}>Standard Identify &amp; Price</Button>

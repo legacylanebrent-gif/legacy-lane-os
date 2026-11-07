@@ -40,7 +40,10 @@ export default function usePhotoPipeline({ saleId, userId, imagesRef, onPhoto, o
         isPaused: () => paused.current,
         isCurrent: job => (imagesRef.current?.images || []).some(p => p.pipeline?.id === job.photoId && p.pipeline?.revision === job.imageRevision),
         onPhoto,
-        onEvent: event => { if (event.type === 'status') setState(s => ({ ...s, counts: Object.fromEntries(['completed', 'needs_review', 'failed', 'save_failed', 'stale'].map(v => [v, [...runner.status.values()].filter(x => x === v).length])) })); }
+        onEvent: event => {
+          if (event.type === 'scan_error' || event.type === 'save_error') setState(s => ({ ...s, error: event.message }));
+          if (event.type === 'status') setState(s => ({ ...s, counts: Object.fromEntries(['completed', 'needs_review', 'failed', 'save_failed', 'stale'].map(v => [v, [...runner.status.values()].filter(x => x === v).length])) }));
+        }
       });
       setState(s => ({ ...s, total: jobs.length }));
       if (!jobs.length) setState(s => ({ ...s, error: type === 'classify' ? 'No eligible photos.' : 'No eligible single-item photos. Run initial classification first; review multiple or uncertain photos separately.' }));

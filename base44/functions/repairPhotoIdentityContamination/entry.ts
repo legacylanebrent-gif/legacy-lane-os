@@ -20,12 +20,15 @@ export default async function(req) {
     const backup = await verifiedPrivateSnapshot(base44.asServiceRole, { version: 1, sale_id: sale.id, at: new Date().toISOString(), images });
     const confirmed = new Set(body.confirm_photo_ids || []);
     const at = new Date().toISOString();
+    const backupRecord = await base44.asServiceRole.entities.PhotoRepairBackup.create({ sale_id: sale.id, file_uri: backup.file_uri, sha256: backup.sha256, verified_at: at, verified_by: user.id, photo_ids: images.map(p => p.pipeline.id) });
+    const durableReference = await base44.asServiceRole.entities.PhotoRepairBackup.get(backupRecord.id);
+    if (durableReference.sha256 !== backup.sha256 || durableReference.file_uri !== backup.file_uri) throw new Error('Durable backup reference verification failed; no repair performed.');
     await mutateSalePhotos(base44.asServiceRole, sale.id, user, current => {
       for (const candidate of candidates) {
         const photo = current.find(p => p.pipeline.id === candidate.pipeline.id);
         if (!photo || JSON.stringify(photo) !== JSON.stringify(candidate)) throw photoError('Photo changed after backup; repair refused. Create a fresh backup.');
         photo.pipeline.review_required = true;
-        photo.pipeline.repair_backup_uri = backup.file_uri;
+        photo.pipeline.jobs.repair = { backup_id: backupRecord.id, sha256: backup.sha256, at };
         photo.pipeline.repair_backup_sha256 = backup.sha256;
         // Suspected labels stay visible unless individually confirmed for clearing.
         if (confirmed.has(photo.pipeline.id)) {
@@ -34,6 +37,6 @@ export default async function(req) {
         }
       }
     });
-    return Response.json({ ...report, ...backup, labels_cleared: candidates.filter(p => confirmed.has(p.pipeline.id)).length, labels_retained_for_review: candidates.filter(p => !confirmed.has(p.pipeline.id)).length });
+    return Response.json({ ...report, ...backup, backup_record_id: backupRecord.id, labels_cleared: candidates.filter(p => confirmed.has(p.pipeline.id)).length, labels_retained_for_review: candidates.filter(p => !confirmed.has(p.pipeline.id)).length });
   } catch (error) { return Response.json({ error: error.message }, { status: error.status || 500 }); }
 }

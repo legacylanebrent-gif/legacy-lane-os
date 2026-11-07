@@ -1,0 +1,57 @@
+{
+  "name": "PhotoRepairBackup",
+  "type": "object",
+  "description": "Verified private snapshot reference created BEFORE a photo repair. The snapshot bytes live in private file storage, never entity fields. Not a competing photo or merchandise record.",
+  "properties": {
+    "sale_id": {
+      "type": "string"
+    },
+    "file_uri": {
+      "type": "string"
+    },
+    "sha256": {
+      "type": "string"
+    },
+    "verified_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "verified_by": {
+      "type": "string"
+    },
+    "photo_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "required": [
+    "sale_id",
+    "file_uri",
+    "sha256",
+    "verified_at"
+  ],
+  "rls": {
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

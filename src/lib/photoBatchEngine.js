@@ -208,7 +208,7 @@ export function createPhotoBatchRunner({
   const status = new Map(); // key -> queued|running|completed|needs_review|failed|save_failed|stale
   // Lets a caller resume after a refresh by handing back previously persisted statuses.
   if (initialStatus) {
-    for (const [key, value] of Object.entries(initialStatus)) status.set(key, value);
+    for (const [key, value] of Object.entries(initialStatus)) status.set(key, value === 'running' ? 'queued' : value);
   }
   const results = new Map();
   const pendingSaves = new Map(initialPendingSaves.map(entry => [entry.job.key, entry]));
