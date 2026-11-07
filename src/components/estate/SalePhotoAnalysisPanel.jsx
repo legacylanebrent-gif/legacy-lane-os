@@ -30,6 +30,8 @@ export default function SalePhotoAnalysisPanel({ saleId, analysis, photos = [] }
 
   const total = counts?.all ?? photos.length;
   const awaiting = counts?.awaiting_credits || 0;
+  const blocked = counts?.blocked || 0;
+  const filters = blocked > 0 ? [...FILTERS, { key: 'blocked', label: 'On hold' }] : FILTERS;
   const remaining = credits?.remaining;
   const creditText = typeof remaining === 'number'
     ? (remaining >= 999999 ? 'Unlimited searches available' : `${remaining} search${remaining === 1 ? '' : 'es'} remaining this month`)
@@ -98,11 +100,19 @@ export default function SalePhotoAnalysisPanel({ saleId, analysis, photos = [] }
           </div>
         )}
 
+        {blocked > 0 && !running && (
+          <p className="text-[11px] text-slate-600 bg-slate-50 border border-slate-200 rounded-lg p-2">
+            {blocked} photo{blocked === 1 ? ' is' : 's are'} on hold because {blocked === 1 ? 'it is' : 'they are'} marked
+            skip / do not scan. {blocked === 1 ? 'It is' : 'They are'} not analyzed and never searched. Open the
+            <span className="font-semibold"> On hold </span> filter below to take one off hold and analyze it.
+          </p>
+        )}
+
         {error && <p className="text-xs text-red-600" role="alert">{error}</p>}
       </div>
 
       <div className="grid grid-cols-2 gap-2">
-        {FILTERS.map(({ key, label }) => {
+        {filters.map(({ key, label }) => {
           const count = key === 'all' ? total : (counts?.[key] || 0);
           const active = filter === key;
           return (
@@ -132,6 +142,7 @@ export default function SalePhotoAnalysisPanel({ saleId, analysis, photos = [] }
               onReanalyze={analysis.reanalyze}
               onResearch={analysis.research}
               onClassify={analysis.classify}
+              onRelease={analysis.releaseHold}
             />
           ))}
         </div>

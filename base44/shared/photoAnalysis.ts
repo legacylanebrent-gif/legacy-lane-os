@@ -488,10 +488,19 @@ export async function runPhotoAnalysis(ctx) {
   const photoId = body.photo_id;
   if (!photoId) throw photoError('photo_id is required for this action', 400);
 
-  if (action === 'retry' || action === 'reanalyze' || action === 'research' || action === 'classify') {
+  if (action === 'retry' || action === 'reanalyze' || action === 'research' || action === 'classify' || action === 'release_hold') {
     const result = await mutateSalePhotos(service, saleId, user, images => {
       const photo = locatePhoto(images, { photo_id: photoId, image_revision: body.image_revision });
-      if (holdPhoto(photo)) throw photoError('This photo is on hold. Clear the hold before analyzing it.', 422);
+      // release_hold is the operator taking their own skip/do-not-scan marker off
+      // this one photo so it can be analyzed; every other action needs the hold cleared.
+      const releasing = action === 'release_hold';
+      if (!releasing && holdPhoto(photo)) throw photoError('This photo is on hold. Clear the hold before analyzing it.', 422);
+      if (releasing) {
+        photo.skip_item = false;
+        photo.serp_search_status = null;
+        photo.skip_serp_search = false;
+        photo.skip_updated_at = null;
+      }
       const job = photo.pipeline.jobs?.[JOB_KEY] || {};
 
       if (action === 'classify') {
@@ -558,8 +567,8 @@ export async function runPhotoAnalysis(ctx) {
         return { photo: structuredClone(photo) };
       }
 
-      // retry / reanalyze: clear the failure, keep every completed checkpoint.
-      const fresh = action === 'reanalyze';
+      // retry / reanalyze / release_hold: clear the failure, keep every completed checkpoint.
+      const fresh = action === 'reanalyze' || releasing;
       photo.pipeline.jobs = {
         ...photo.pipeline.jobs,
         [JOB_KEY]: {

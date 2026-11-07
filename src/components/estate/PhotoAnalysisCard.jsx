@@ -23,7 +23,7 @@ const LABEL = {
 
 const reasonList = job => (job?.review_flags || []).filter(Boolean);
 
-export default function PhotoAnalysisCard({ photo, index, state, busy, onRetry, onReanalyze, onResearch, onClassify }) {
+export default function PhotoAnalysisCard({ photo, index, state, busy, onRetry, onReanalyze, onResearch, onClassify, onRelease }) {
   const job = photo?.pipeline?.jobs?.analysis;
   const research = job?.research;
   const suggested = research?.suggested_price;
@@ -74,7 +74,17 @@ export default function PhotoAnalysisCard({ photo, index, state, busy, onRetry, 
       </div>
 
       <div className="flex flex-wrap gap-1.5 px-2.5 pb-2.5">
-        {held && <span className="text-[10px] text-slate-500">On hold — clear the hold in the item list to analyze it.</span>}
+        {held && (
+          <>
+            <span className="text-[10px] text-slate-500 w-full">
+              On hold — you marked this photo skip / do not scan, so analysis skips it.
+            </span>
+            <button type="button" disabled={busy} onClick={() => onRelease(photo)}
+              className="inline-flex items-center gap-1 px-2 py-1 rounded border border-cyan-300 bg-cyan-50 text-[11px] font-semibold text-cyan-800 disabled:opacity-50">
+              <RefreshCw className="w-3 h-3" /> Take off hold &amp; analyze
+            </button>
+          </>
+        )}
         {!held && (state === 'failed' || state === 'awaiting_credits') && (
           <button type="button" disabled={busy} onClick={() => onRetry(photo)}
             className="inline-flex items-center gap-1 px-2 py-1 rounded border border-slate-300 bg-white text-[11px] font-medium text-slate-700 disabled:opacity-50">

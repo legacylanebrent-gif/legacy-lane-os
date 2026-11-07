@@ -91,6 +91,8 @@ export default function useSalePhotoAnalysis({ saleId, onPhoto, onRunComplete })
     retryFailed,
     retry: photo => single(photo, { action: 'retry' }),
     reanalyze: photo => single(photo, { action: 'reanalyze' }),
+    /** Take the operator's own skip / do-not-scan marker off one photo, then analyze it. */
+    releaseHold: photo => single(photo, { action: 'release_hold' }),
     research: photo => single(photo, { action: 'research' }),
     classify: (photo, classification) => single(photo, { action: 'classify', classification }),
     saveFields: (photo, fields) => single(photo, { action: 'save_fields', fields }, { follow: false }),
