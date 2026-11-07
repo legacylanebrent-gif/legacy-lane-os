@@ -97,7 +97,7 @@ export default function SaleGallery({ sales, limit = 6 }) {
             return (
               <Link
                 key={sale.id}
-                to={`/PrepareSale?saleId=${sale.id}`}
+                to={`/SaleEditor?saleId=${sale.id}`}
                 className="group overflow-hidden rounded-2xl border border-slate-200 bg-white transition-all hover:-translate-y-0.5 hover:shadow-md"
               >
                 <div className="relative h-32 bg-slate-900">
