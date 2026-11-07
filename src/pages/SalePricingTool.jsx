@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import usePhotoPipeline from '@/hooks/usePhotoPipeline';
+import { step2Eligible } from '@/lib/photoAssessment';
 import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -34,7 +35,12 @@ export default function SalePricingTool() {
 
   useEffect(() => {
     if (selectedSale) {
-      const imgs = (selectedSale.images || []).map(img => typeof img === 'string' ? img : img.url).filter(Boolean);
+      // Step 2 consumes the persisted Step 1 selection: Skip and unresolved
+      // Needs Review photos are never offered for scanning here.
+      const imgs = (selectedSale.images || [])
+        .filter(img => typeof img === 'string' || step2Eligible(img))
+        .map(img => (typeof img === 'string' ? img : img.url))
+        .filter(Boolean);
       setPhotos(imgs);
       setCurrentPhotoIndex(0);
       loadSavedPricings(selectedSale.id);
@@ -173,7 +179,12 @@ export default function SalePricingTool() {
               <div className="flex items-center justify-between">
                 <div>
                   <h2 className="font-bold text-slate-900">{selectedSale.title}</h2>
-                  <p className="text-sm text-slate-500">{analyzedCount} of {photos.length} photos analyzed</p>
+                  <p className="text-sm text-slate-500">
+                    {analyzedCount} of {photos.length} photos selected for scanning analyzed
+                  </p>
+                  <p className="text-xs text-slate-400">
+                    {(selectedSale.images || []).length - photos.length} photo(s) stay out of Step 2 (skipped or needs review).
+                  </p>
                 </div>
                 <Button
                   onClick={analyzeAll}

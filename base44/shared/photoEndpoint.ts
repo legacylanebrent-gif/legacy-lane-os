@@ -1,6 +1,8 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.54';
 import { runPhotoWork } from './photoWork.ts';
 import { openAIPhoto, lensPhoto } from './photoProviders.ts';
+import { runPhotoAssessment } from './photoAssessment.ts';
+import { assessPhotoWithBase44 } from './photoAssessmentLlm.ts';
 
 export async function photoEndpoint(req, forcedType = null) {
   try {
@@ -10,6 +12,16 @@ export async function photoEndpoint(req, forcedType = null) {
     const body = await req.json().catch(() => ({}));
     if (!body.sale_id || !(body.photo_id || body.image_url)) return Response.json({ error: 'sale_id and photo_id are required' }, { status: 400 });
     const type = forcedType || body.type;
+    // Step 1 photo sorting. Base44's onboard LLM only — no direct OpenAI and no
+    // SerpAPI call is reachable from this branch.
+    if (type === 'assess') {
+      const result = await runPhotoAssessment({
+        service: base44.asServiceRole, user, saleId: body.sale_id, target: body,
+        action: body.action || 'run', retryFailed: body.retry_failed === true,
+        assess: photo => assessPhotoWithBase44(base44.asServiceRole, photo),
+      });
+      return Response.json(result);
+    }
     if (type === 'deep' && body.explicit_deep !== true) return Response.json({ error: 'Deep Scan requires explicit confirmation', status: 400 }, { status: 400 });
     const result = await runPhotoWork({ service: base44.asServiceRole, user, saleId: body.sale_id, target: body, type, action: body.action || 'run', retryUnknown: body.retry_unknown === true, provider: async (photo, kind, id) => {
       if (kind !== 'deep') return openAIPhoto(photo, kind, id);

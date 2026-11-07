@@ -1,5 +1,6 @@
 import { mutateSalePhotos, locatePhoto, blockedPhoto, photoError } from './photoStore.ts';
 import { applyScanReceipt } from './photoMutations.ts';
+import { step2Eligible } from './photoAssessment.ts';
 
 // Provider calls are short. A claim older than this lease never recorded an
 // answer (closed tab, dropped request), so it is abandoned — not active.
@@ -26,7 +27,8 @@ export async function runPhotoWork({ service, user, saleId, target, type, action
     }
     const photo = locatePhoto(images, target);
     if (blockedPhoto(photo)) throw photoError('Photo is marked do not search', 422);
-    if (type !== 'classify' && photo.pipeline.classification !== 'single') throw photoError('Classify this photo first; only single-item photos can use this scan', 422);
+    // Step 2 consumes the Step 1 selection: Skip and unresolved Needs Review never scan.
+    if (type !== 'classify' && !step2Eligible(photo)) throw photoError('This photo is not selected for scanning in Step 1. Choose Scan for it there, then scan it.', 422);
     const old = photo.pipeline.jobs?.[type];
     if (old?.revision === photo.pipeline.revision) {
       if (old.result || old.state === 'calling') return { owner: false, photo, receipt: old };

@@ -1,3 +1,5 @@
+import { step2Eligible } from '@/lib/photoAssessment';
+
 // Production adapter. Tests supply the SDK transport, never a second scan/save
 // implementation. Paid provider responses are retained independently of saves.
 export function salePhotoPipeline({ engine, invoke, saleId, images, type, journal, onPhoto, onEvent, isPaused, isCurrent, retryUnknown = false }) {
@@ -9,7 +11,13 @@ export function salePhotoPipeline({ engine, invoke, saleId, images, type, journa
       throw error;
     }
   };
-  const jobs = buildJobs({ images, scanType: type, isBlocked: p => p.skip_item || p.skip_serp_search || p.excluded_from_public || p.serp_search_status === 'do_not_search' || (type !== 'classify' && p.pipeline?.classification !== 'single') });
+  // Step 2 consumes the Step 1 selection: only photos decided "Scan" are eligible.
+  const isBlocked = p => {
+    if (p.skip_item || p.excluded_from_public || p.serp_search_status === 'do_not_search') return true;
+    if (type === 'classify') return !!p.skip_serp_search;
+    return !step2Eligible(p);
+  };
+  const jobs = buildJobs({ images, scanType: type, isBlocked });
   const old = journal?.read?.() || {};
   const runner = createPhotoBatchRunner({
     concurrency: 3, maxScanAttempts: 3, maxSaveAttempts: 4, baseDelayMs: 1000,

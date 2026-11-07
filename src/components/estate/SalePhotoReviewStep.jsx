@@ -1,228 +1,193 @@
-import React, { useEffect, useState } from "react";
-import { base44 } from "@/api/base44Client";
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { Sparkles, Loader2, RotateCcw, AlertTriangle, ShieldAlert } from 'lucide-react';
+import usePhotoSorting from '@/hooks/usePhotoSorting';
+import PhotoSortCard from '@/components/estate/PhotoSortCard';
+import { assessmentOf } from '@/lib/photoAssessment';
+
+const FILTERS = [
+  { key: 'needs_review', label: 'Needs Review' },
+  { key: 'scan', label: 'Scan' },
+  { key: 'skip', label: 'Skip' },
+  { key: 'all', label: 'All' },
+];
 
 export default function SalePhotoReviewStep({ saleId, onStepComplete }) {
-  const [photos, setPhotos] = useState([]);
-  const [checkedSkipUrls, setCheckedSkipUrls] = useState(new Set());
-  const [originalSkipUrls, setOriginalSkipUrls] = useState(new Set());
-  const [currentUser, setCurrentUser] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [saved, setSaved] = useState(false);
+  const { photos, loading, running, progress, savingIds, error, sort, override } = usePhotoSorting(saleId);
+  const [filter, setFilter] = useState('all');
+  const wasRunning = useRef(false);
 
-  useEffect(() => {
-    if (saleId) loadPhotos();
-  }, [saleId]);
-
-  async function loadPhotos() {
-    setLoading(true);
-    try {
-      const [user, sales] = await Promise.all([
-        base44.auth.me(),
-        base44.entities.EstateSale.filter({ id: saleId })
-      ]);
-      setCurrentUser(user);
-
-      const sale = sales[0];
-      if (!sale) return;
-
-      const images = (sale.images || []).map(img => ({
-        ...img,
-        skip_serp_search: img.skip_serp_search === true,
-        serp_search_status: img.skip_serp_search === true ? "do_not_search" : (img.serp_search_status || "search_allowed"),
-      }));
-
-      const existingSkipUrls = new Set(
-        images.filter(img => img.skip_serp_search === true).map(img => img.url)
-      );
-
-      setPhotos(images);
-      setCheckedSkipUrls(existingSkipUrls);
-      setOriginalSkipUrls(existingSkipUrls);
-      setSaved(existingSkipUrls.size > 0 || images.length > 0);
-    } catch (err) {
-      console.error("Error loading sale photos:", err);
-      alert("Could not load sale photos.");
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  function toggleSkip(url) {
-    setSaved(false);
-    setCheckedSkipUrls(prev => {
-      const next = new Set(prev);
-      if (next.has(url)) next.delete(url);
-      else next.add(url);
-      return next;
+  const counts = useMemo(() => {
+    const totals = { scan: 0, skip: 0, needs_review: 0, failed: 0, unassessed: 0, total: photos.length };
+    photos.forEach(photo => {
+      const assessment = assessmentOf(photo);
+      if (assessment.status === 'failed') totals.failed += 1;
+      else if (assessment.status === 'assessed') totals[assessment.decision] += 1;
+      else totals.unassessed += 1;
     });
-  }
+    return totals;
+  }, [photos]);
 
-  async function saveSelections() {
-    setSaving(true);
-    try {
-      const now = new Date().toISOString();
-      const userLabel = currentUser?.email || currentUser?.id || "unknown";
+  // Exceptions first: once sorting finishes, show Needs Review if any exist.
+  useEffect(() => {
+    if (wasRunning.current && !running && counts.needs_review > 0) setFilter('needs_review');
+    wasRunning.current = running;
+  }, [running, counts.needs_review]);
 
-      const updatedImages = photos.map(img => {
-        const shouldSkip = checkedSkipUrls.has(img.url);
-        return {
-          ...img,
-          skip_serp_search: shouldSkip,
-          serp_search_status: shouldSkip ? "do_not_search" : "search_allowed",
-          skip_updated_at: now,
-        };
-      });
+  const visible = useMemo(() => photos.filter(photo => {
+    if (filter === 'all') return true;
+    const assessment = assessmentOf(photo);
+    if (filter === 'failed') return assessment.status === 'failed';
+    if (filter === 'unassessed') return assessment.status !== 'assessed' && assessment.status !== 'failed';
+    return assessment.status === 'assessed' && assessment.decision === filter;
+  }), [photos, filter]);
 
-      // Only the skip decision is written, per photo, on the server — the rest of
-      // each photo's stored content (AI results, operator text) is left alone.
-      await base44.functions.invoke('saveSaleImageChanges', {
-        sale_id: saleId,
-        updates: updatedImages.map(img => ({
-          photo_id: img.pipeline?.id,
-          image_revision: img.pipeline?.revision,
-          image_url: img.url,
-          fields: {
-            skip_serp_search: img.skip_serp_search,
-            serp_search_status: img.serp_search_status,
-            skip_updated_at: now,
-          },
-        })),
-      });
+  const retryOne = photo => sort({ retryFailed: true, onlyIds: [photo.pipeline?.id] });
+  const percent = progress.total ? Math.round((progress.done / progress.total) * 100) : 0;
 
-      setPhotos(updatedImages);
-      setOriginalSkipUrls(new Set(checkedSkipUrls));
-      setSaved(true);
-    } catch (err) {
-      console.error("Error saving Step 1 selections:", err);
-      alert("Selections did not save. Please try again.");
-    } finally {
-      setSaving(false);
-    }
-  }
-
-  const hasUnsavedChanges =
-    checkedSkipUrls.size !== originalSkipUrls.size ||
-    [...checkedSkipUrls].some(url => !originalSkipUrls.has(url));
-
-  const searchCount = photos.length - checkedSkipUrls.size;
-  const skipCount = checkedSkipUrls.size;
-
-  if (loading) return <div className="p-6 text-slate-500">Loading images...</div>;
+  if (loading) return <div className="p-6 text-slate-500">Loading photos…</div>;
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="bg-white border border-slate-200 rounded-xl p-5 space-y-4">
+    <div className="space-y-4">
+      <div className="bg-white border border-slate-200 rounded-xl p-4 space-y-3">
         <div>
-          <h2 className="text-xl font-bold text-slate-900">Step 1: Choose Images Not to Search</h2>
+          <h2 className="text-lg font-bold text-slate-900">Step 1: Photo Review</h2>
           <p className="text-sm text-slate-600 mt-1">
-            All images default to <strong>Search Yes</strong>. Check only the images that should be skipped.
-            Click <strong>Save Step 1 Selections</strong> before continuing to Step 2.
+            AI selects photos suitable for individual-item scanning. Room views and mixed-item photos stay in your
+            sale gallery and are skipped in Step 2. You can change any selection.
           </p>
         </div>
-        <div className="grid grid-cols-3 gap-3">
-          <div className="bg-green-50 border border-green-200 rounded-lg p-3">
-            <div className="text-xs text-green-700 font-medium">Will Search</div>
-            <div className="text-2xl font-bold text-green-800">{searchCount}</div>
-          </div>
-          <div className="bg-red-50 border border-red-200 rounded-lg p-3">
-            <div className="text-xs text-red-700 font-medium">Do Not Search</div>
-            <div className="text-2xl font-bold text-red-800">{skipCount}</div>
-          </div>
-          <div className="bg-slate-50 border border-slate-200 rounded-lg p-3">
-            <div className="text-xs text-slate-600 font-medium">Total Images</div>
-            <div className="text-2xl font-bold text-slate-800">{photos.length}</div>
-          </div>
+
+        <div className="space-y-2">
+          <button
+            type="button"
+            onClick={() => sort()}
+            disabled={running || counts.unassessed === 0}
+            className="w-full inline-flex items-center justify-center gap-2 px-4 py-3 rounded-lg bg-cyan-600 text-white font-semibold text-sm hover:bg-cyan-700 disabled:bg-slate-300 disabled:text-slate-500 transition-colors"
+          >
+            {running ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+            {running ? `Sorting ${progress.done} of ${progress.total}…` : 'AI Sort Photos'}
+          </button>
+          <p className="text-[11px] text-slate-500">
+            {photos.length === 0
+              ? 'Add photos to this sale first.'
+              : counts.unassessed === 0
+                ? 'Every photo has been sorted. Change any selection below, or continue to Step 2.'
+                : `${counts.unassessed} photo${counts.unassessed === 1 ? '' : 's'} not sorted yet. Uses Base44's built-in AI — integration credits apply.`}
+          </p>
+          {running && (
+            <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
+              <div className="h-full bg-cyan-500 transition-all" style={{ width: `${percent}%` }} />
+            </div>
+          )}
         </div>
+
+        {counts.failed > 0 && (
+          <div className="flex items-start gap-2 bg-red-50 border border-red-200 rounded-lg p-2.5">
+            <AlertTriangle className="w-4 h-4 text-red-600 flex-shrink-0 mt-0.5" />
+            <div className="flex-1 min-w-0">
+              <p className="text-xs font-semibold text-red-800">
+                {counts.failed} photo{counts.failed === 1 ? '' : 's'} could not be assessed. They stay out of Step 2 until they are sorted or you set them yourself.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => sort({ retryFailed: true })}
+              disabled={running}
+              className="inline-flex items-center gap-1 px-2 py-1 rounded border border-red-300 bg-white text-red-700 text-[11px] font-semibold disabled:opacity-50"
+            >
+              <RotateCcw className="w-3 h-3" /> Retry Failed
+            </button>
+          </div>
+        )}
+
+        {error && <p className="text-sm text-red-600" role="alert">{error}</p>}
       </div>
 
-      {/* Chapter 6 P2 — sensitive-material reminder before any search/publishing step */}
-      <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
-        <p className="text-sm font-semibold text-amber-800">Sensitive material — STOP · SEPARATE · ESCALATE</p>
-        <p className="text-xs text-amber-700 mt-1">
-          Before photographing or cataloging contents, separate documents, IDs, medications, financial information,
-          private photos, and other sensitive material for operator/client review. Do not search, catalog, or publish
-          images that may contain sensitive material — mark them "Do Not Search".
+      <div className="bg-amber-50 border border-amber-200 rounded-xl p-3">
+        <p className="text-xs font-semibold text-amber-800 flex items-center gap-1.5">
+          <ShieldAlert className="w-3.5 h-3.5" /> Sensitive material — STOP · SEPARATE · ESCALATE
+        </p>
+        <p className="text-[11px] text-amber-700 mt-1">
+          Separate documents, IDs, medications, financial information and private photos before cataloging, and set
+          those photos to Skip.
         </p>
       </div>
 
-      {/* Photo Grid */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
-        {photos.map((photo, index) => {
-          const isChecked = checkedSkipUrls.has(photo.url);
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+        {FILTERS.map(({ key, label }) => {
+          const count = key === 'all' ? counts.total : counts[key];
+          const active = filter === key;
           return (
-            <div
-              key={photo.url || index}
-              className={`bg-white border rounded-xl overflow-hidden shadow-sm transition-all ${
-                isChecked ? "border-red-400 ring-2 ring-red-100" : "border-slate-200"
-              }`}
+            <button
+              key={key}
+              type="button"
+              onClick={() => setFilter(key)}
+              className={`rounded-lg border px-2 py-2 text-left transition-colors ${active ? 'border-cyan-600 bg-cyan-50' : 'border-slate-200 bg-white hover:border-slate-300'}`}
             >
-              <div className="aspect-square bg-slate-100">
-                <img
-                  src={photo.url}
-                  alt={`Photo ${index + 1}`}
-                  className="w-full h-full object-cover"
-                  loading="lazy"
-                />
-              </div>
-              <label className="flex items-start gap-2 p-2.5 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={isChecked}
-                  onChange={() => toggleSkip(photo.url)}
-                  className="mt-0.5 accent-red-600"
-                />
-                <div>
-                  <div className="text-xs font-semibold text-slate-800">Do Not Search</div>
-                  <div className="text-[10px] text-slate-500">
-                    {isChecked ? "Will be skipped" : "Default: Search Yes"}
-                  </div>
-                </div>
-              </label>
-            </div>
+              <span className="block text-[11px] font-medium text-slate-500">{label}</span>
+              <span className={`block text-lg font-bold ${key === 'needs_review' && count ? 'text-amber-600' : 'text-slate-800'}`}>{count}</span>
+            </button>
           );
         })}
       </div>
 
-      {/* Sticky Footer */}
-      <div className="bg-white border border-slate-200 rounded-xl p-4 flex flex-col sm:flex-row gap-3 justify-between items-center sticky bottom-2 shadow-md">
-        <div className="text-sm">
-          {hasUnsavedChanges && (
-            <span className="text-red-600 font-medium">⚠ Unsaved changes — save before continuing.</span>
+      {(counts.failed > 0 || counts.unassessed > 0) && (
+        <div className="flex gap-2">
+          {counts.failed > 0 && (
+            <button
+              type="button"
+              onClick={() => setFilter('failed')}
+              className={`px-2.5 py-1 rounded-full border text-[11px] font-medium ${filter === 'failed' ? 'border-red-500 bg-red-50 text-red-700' : 'border-slate-200 bg-white text-slate-500'}`}
+            >
+              Failed {counts.failed}
+            </button>
           )}
-          {!hasUnsavedChanges && saved && (
-            <span className="text-green-700 font-medium">✓ Step 1 selections saved.</span>
+          {counts.unassessed > 0 && (
+            <button
+              type="button"
+              onClick={() => setFilter('unassessed')}
+              className={`px-2.5 py-1 rounded-full border text-[11px] font-medium ${filter === 'unassessed' ? 'border-slate-500 bg-slate-50 text-slate-700' : 'border-slate-200 bg-white text-slate-500'}`}
+            >
+              Not sorted {counts.unassessed}
+            </button>
           )}
         </div>
-        <div className="flex gap-3">
-          <button
-            type="button"
-            onClick={saveSelections}
-            disabled={saving}
-            className="px-5 py-2.5 rounded-lg bg-slate-900 text-white font-semibold text-sm disabled:bg-slate-300 hover:bg-slate-700 transition-colors"
-          >
-            {saving ? "Saving..." : "Save Step 1 Selections"}
-          </button>
-          <button
-            type="button"
-            disabled={hasUnsavedChanges || saving || !saved}
-            onClick={() => {
-              if (hasUnsavedChanges) {
-                alert("Please save Step 1 selections before continuing.");
-                return;
-              }
-              onStepComplete && onStepComplete();
-            }}
-            className={`px-5 py-2.5 rounded-lg font-semibold text-sm transition-colors ${
-              !hasUnsavedChanges && saved && !saving
-                ? "bg-green-600 text-white hover:bg-green-700"
-                : "bg-slate-200 text-slate-400 cursor-not-allowed"
-            }`}
-          >
-            Continue to Step 2 →
-          </button>
+      )}
+
+      {visible.length === 0 ? (
+        <p className="text-sm text-slate-500 text-center py-8">
+          {photos.length === 0 ? 'No photos yet.' : 'No photos in this filter.'}
+        </p>
+      ) : (
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2.5">
+          {visible.map(photo => (
+            <PhotoSortCard
+              key={photo.pipeline?.id || photo.url}
+              photo={photo}
+              index={photos.indexOf(photo)}
+              assessment={assessmentOf(photo)}
+              saving={savingIds.includes(photo.pipeline?.id)}
+              onOverride={override}
+              onRetry={retryOne}
+            />
+          ))}
         </div>
+      )}
+
+      <div className="bg-white border border-slate-200 rounded-xl p-3 sticky bottom-2 shadow-md space-y-2">
+        <button
+          type="button"
+          onClick={() => onStepComplete && onStepComplete()}
+          disabled={counts.scan === 0}
+          className="w-full px-4 py-3 rounded-lg bg-green-600 text-white font-semibold text-sm hover:bg-green-700 disabled:bg-slate-200 disabled:text-slate-400 transition-colors"
+        >
+          Continue to Step 2 — Scan {counts.scan} Photo{counts.scan === 1 ? '' : 's'}
+        </button>
+        <p className="text-[11px] text-slate-500 text-center">
+          {counts.scan === 0
+            ? 'Select at least one photo for scanning.'
+            : `${counts.needs_review} needs review and ${counts.skip} skipped stay out of Step 2. Nothing is deleted — every photo stays in your sale gallery.`}
+        </p>
       </div>
     </div>
   );
