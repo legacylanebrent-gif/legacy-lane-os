@@ -1,144 +1,39 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
-import {
-  photoUrl,
-  isBlank,
-  looksLikeInventedSeoCopy,
-  sharedTitleCountFor,
-} from '../../shared/photoFields.ts';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.54';
+import { mutateSalePhotos, photoError } from '../../shared/photoStore.ts';
+import { sharedTitleCountFor, looksLikeInventedSeoCopy } from '../../shared/photoFields.ts';
+import { verifiedPrivateSnapshot } from '../../shared/photoRepairBackup.ts';
 
-/**
- * Reversible repair for photos polluted by the retired nightly SEO job.
- *
- * What it does (per photo, in place):
- *  - keeps the polluted values in `name_before_repair` / `description_before_repair`
- *  - clears ONLY `name` and `description` (the invented identity)
- *  - flags `identity_review_required` so an operator decides what to do next
- *  - leaves synopsis, prices, categories and every operator field untouched
- *
- * It never calls a paid provider, never resends photos for a scan, and only
- * touches photos that match the contamination signature AND share a duplicate
- * title with other photos in the same sale. `restore: true` puts the backup
- * values back.
- *
- * Body: { sale_id?: string, dry_run?: boolean, restore?: boolean, limit?: number }
- */
-Deno.serve(async (req) => {
+export default async function(req) {
   try {
     const base44 = createClientFromRequest(req);
     const user = await base44.auth.me();
-    if (user?.role !== 'admin') {
-      return Response.json({ error: 'Admin access required' }, { status: 403 });
-    }
-
-    let body = {};
-    try { body = await req.json(); } catch { body = {}; }
-    const dryRun = body?.dry_run !== false;
-    const restore = body?.restore === true;
-    const limit = Math.min(Number(body?.limit) || 200, 500);
-
-    const sales = body?.sale_id
-      ? await base44.asServiceRole.entities.EstateSale.filter({ id: body.sale_id })
-      : await base44.asServiceRole.entities.EstateSale.list('-updated_date', 100);
-
-    const report = { dry_run: dryRun, restore, sales_scanned: 0, photos_flagged: 0, photos_restored: 0, sales: [] };
-
-    for (const sale of sales) {
-      const images = sale.images || [];
-      if (images.length === 0) continue;
-      report.sales_scanned++;
-
-      const nextImages = [];
-      const flagged = [];
-
-      for (const img of images) {
-        if (!img || typeof img !== 'object') { nextImages.push(img); continue; }
-
-        if (restore) {
-          if (img.identity_repaired_at) {
-            const restored = { ...img };
-            if (img.name_before_repair !== undefined) restored.name = img.name_before_repair;
-            if (img.description_before_repair !== undefined) restored.description = img.description_before_repair;
-            delete restored.name_before_repair;
-            delete restored.description_before_repair;
-            delete restored.identity_repaired_at;
-            delete restored.identity_review_required;
-            nextImages.push(restored);
-            flagged.push({ url: photoUrl(img), action: 'restored' });
-          } else {
-            nextImages.push(img);
-          }
-          continue;
+    if (user?.role !== 'admin') return Response.json({ error: 'Admin access required' }, { status: 403 });
+    const body = await req.json().catch(() => ({}));
+    if (!body.sale_id) return Response.json({ error: 'An explicit sale_id is required. No broad repair.' }, { status: 400 });
+    if (body.restore) return Response.json({ error: 'Earlier cleared values have no recoverable backup. Future snapshots must be reviewed explicitly before restoring.' }, { status: 409 });
+    const initialized = await mutateSalePhotos(base44.asServiceRole, body.sale_id, user, () => null);
+    const { sale, images } = initialized;
+    const candidates = images.filter(p => p.name && !p.pipeline.operator_fields?.includes('name') && (looksLikeInventedSeoCopy(p, sale, sharedTitleCountFor(p, images)) || sharedTitleCountFor(p, images) >= 3 || /mid.century.*(credenza|sideboard)|vintage.*(credenza|sideboard)/i.test(p.name)));
+    const report = { sale_id: sale.id, dry_run: body.dry_run !== false, suspected_count: candidates.length, candidates: candidates.map(p => ({ photo_id: p.pipeline.id, image_revision: p.pipeline.revision, url: p.url, name: p.name })), prior_cleared_values_recoverable: false };
+    if (body.dry_run !== false || !candidates.length) return Response.json(report);
+    // Back up and read back the complete snapshot BEFORE any content mutation.
+    const backup = await verifiedPrivateSnapshot(base44.asServiceRole, { version: 1, sale_id: sale.id, at: new Date().toISOString(), images });
+    const confirmed = new Set(body.confirm_photo_ids || []);
+    const at = new Date().toISOString();
+    await mutateSalePhotos(base44.asServiceRole, sale.id, user, current => {
+      for (const candidate of candidates) {
+        const photo = current.find(p => p.pipeline.id === candidate.pipeline.id);
+        if (!photo || JSON.stringify(photo) !== JSON.stringify(candidate)) throw photoError('Photo changed after backup; repair refused. Create a fresh backup.');
+        photo.pipeline.review_required = true;
+        photo.pipeline.repair_backup_uri = backup.file_uri;
+        photo.pipeline.repair_backup_sha256 = backup.sha256;
+        // Suspected labels stay visible unless individually confirmed for clearing.
+        if (confirmed.has(photo.pipeline.id)) {
+          photo.name = ''; photo.pipeline.repaired_at = at;
+          photo.pipeline.edit_revision = crypto.randomUUID();
         }
-
-        if (img.identity_repaired_at) { nextImages.push(img); continue; }
-
-        const shared = sharedTitleCountFor(img, images);
-        const invented = looksLikeInventedSeoCopy(img, sale, shared);
-        // A title shared by 5+ photos in ONE sale is not a per-photo identification,
-        // whatever else the photo carries: the same label cannot describe five
-        // different photographs. Its name is cleared; real scan evidence is kept.
-        // 5+ identical labels is impossible for distinct photographs on its own;
-        // 3+ with no scan evidence at all is the same signature: a label shared
-        // across photos while nothing about those photos was ever scanned.
-        const massDuplicated = shared >= 5 || (shared >= 3
-          && isBlank(img.synopsis) && isBlank(img.ai_first_search_price)
-          && isBlank(img.ai_deep_search_price) && isBlank(img.serp_search_status));
-        if (!invented && !massDuplicated) { nextImages.push(img); continue; }
-
-        // Photos backed by a real scan keep their description and prices; only
-        // the shared label is removed. Untouched template copy is cleared fully.
-        const keepEvidence = !isBlank(img.synopsis) || !isBlank(img.ai_first_search_price)
-          || !isBlank(img.ai_deep_search_price) || !isBlank(img.serp_search_status);
-
-        flagged.push({
-          url: photoUrl(img),
-          action: (dryRun ? 'would_clear' : 'cleared') + (keepEvidence ? '_name_only' : ''),
-          previous_name: img.name || '',
-        });
-
-        if (dryRun) { nextImages.push(img); continue; }
-
-        const repaired = {
-          ...img,
-          name_before_repair: img.name || '',
-          description_before_repair: img.description || '',
-          name: '',
-          ...(keepEvidence ? {} : { description: '' }),
-          name_source: null,
-          description_source: null,
-          identity_review_required: true,
-          identity_repaired_at: new Date().toISOString(),
-        };
-        nextImages.push(repaired);
       }
-
-      if (flagged.length > 0) {
-        if (restore) report.photos_restored += flagged.length;
-        else report.photos_flagged += flagged.length;
-
-        if (!dryRun) {
-          await base44.asServiceRole.entities.EstateSale.update(sale.id, { images: nextImages });
-        }
-        report.sales.push({
-          sale_id: sale.id,
-          title: sale.title,
-          photos: flagged.length,
-          sample: flagged.slice(0, 3),
-        });
-      }
-      if (report.photos_flagged + report.photos_restored >= limit) break;
-    }
-
-    console.log('repairPhotoIdentityContamination', {
-      dryRun, restore,
-      sales_scanned: report.sales_scanned,
-      photos_flagged: report.photos_flagged,
-      photos_restored: report.photos_restored,
     });
-
-    return Response.json(report);
-  } catch (error) {
-    console.error('repairPhotoIdentityContamination error:', error);
-    return Response.json({ error: error.message }, { status: 500 });
-  }
-});
+    return Response.json({ ...report, ...backup, labels_cleared: candidates.filter(p => confirmed.has(p.pipeline.id)).length, labels_retained_for_review: candidates.filter(p => !confirmed.has(p.pipeline.id)).length });
+  } catch (error) { return Response.json({ error: error.message }, { status: error.status || 500 }); }
+}

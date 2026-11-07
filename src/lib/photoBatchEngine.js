@@ -24,13 +24,14 @@ export const SCAN_DEEP = 'deep';
 export function photoKey(image) {
   if (!image) return '';
   if (typeof image === 'string') return image;
+  if (image.pipeline?.id) return image.pipeline.id;
   const url = image.url;
   if (typeof url === 'object' && url) return url.url || '';
   return url || '';
 }
 
 export function photoUrlOf(image) {
-  return photoKey(image);
+  return typeof image === 'string' ? image : typeof image?.url === 'object' ? image.url.url : image?.url || '';
 }
 
 function blank(value) {
@@ -49,6 +50,7 @@ const MULTI_WORDS = /multi|several|group|lot|room|contents/i;
 export function normalizeScanResult(raw, { scanType = SCAN_STANDARD } = {}) {
   const result = {
     scan_type: scanType,
+    raw,
     classification: 'uncertain',
     confidence: 'unknown',
     identity: null,
@@ -138,6 +140,7 @@ export function normalizeScanResult(raw, { scanType = SCAN_STANDARD } = {}) {
   }
 
   if (!blank(raw.uncertainty_note)) result.uncertainty.push(String(raw.uncertainty_note));
+  if (classification !== 'single' || raw.identified === false) { result.identity = null; result.price = null; }
   return result;
 }
 
@@ -149,9 +152,11 @@ export function buildJobs({ images, scanType = SCAN_STANDARD, isBlocked = () => 
     if (!key) return;
     if (typeof img === 'object' && img && isBlocked(img)) return;
     jobs.push({
-      key,
+      key: `${key}:${img.pipeline?.revision || 'legacy'}:${scanType}`,
+      photoId: img.pipeline?.id || null,
+      imageRevision: img.pipeline?.revision || null,
       scanType,
-      photoUrl: key,
+      photoUrl: photoUrlOf(img),
       index_hint: jobs.length, // display only — never used to associate results
     });
   });
@@ -163,7 +168,7 @@ const PERMANENT = /401|403|404|400|invalid|unauthorized|forbidden|not found/i;
 
 export function isTransientError(error) {
   const message = String((error && (error.message || error.error)) || error || '');
-  const status = Number(error && (error.status || error.statusCode));
+  const status = Number(error && (error.status || error.statusCode || error.response?.status));
   if (status === 429 || status >= 500) return true;
   if (status >= 400 && status < 500) return false;
   if (PERMANENT.test(message) && !TRANSIENT.test(message)) return false;
@@ -171,7 +176,7 @@ export function isTransientError(error) {
 }
 
 function retryAfterMs(error) {
-  const value = error && (error.retryAfter || error.retry_after);
+  const value = error && (error.retryAfter ?? error.retry_after ?? error.response?.headers?.['retry-after']);
   if (!value) return null;
   const seconds = Number(value);
   if (Number.isFinite(seconds)) return Math.max(0, seconds * 1000);
@@ -192,6 +197,9 @@ export function createPhotoBatchRunner({
   onEvent = () => {},
   random = Math.random,
   initialStatus = null,
+  initialPendingSaves = [],
+  checkpoint = () => {},
+  isPaused = () => false,
 }) {
   if (typeof scanFn !== 'function' || typeof saveFn !== 'function') {
     throw new Error('createPhotoBatchRunner requires scanFn and saveFn');
@@ -203,7 +211,7 @@ export function createPhotoBatchRunner({
     for (const [key, value] of Object.entries(initialStatus)) status.set(key, value);
   }
   const results = new Map();
-  const pendingSaves = new Map();
+  const pendingSaves = new Map(initialPendingSaves.map(entry => [entry.job.key, entry]));
   const inFlight = new Set();
 
   const emit = (type, payload) => {
@@ -212,6 +220,7 @@ export function createPhotoBatchRunner({
 
   function setStatus(key, value, extra = {}) {
     status.set(key, value);
+    checkpoint({ statuses: Object.fromEntries(status), pendingSaves: [...pendingSaves.values()] });
     emit('status', { key, status: value, ...extra });
   }
 
@@ -240,7 +249,8 @@ export function createPhotoBatchRunner({
         return { ok: true };
       } catch (error) {
         emit('save_error', { key: job.key, attempt, message: String(error?.message || error) });
-        if (attempt < maxSaveAttempts) {
+        if (error.response?.status === 409 || error.status === 409) return { ok: false, stale: true };
+        if (attempt < maxSaveAttempts && isTransientError(error)) {
           const backoff = baseDelayMs * 2 ** (attempt - 1);
           await sleep(retryAfterMs(error) ?? backoff + Math.floor(random() * baseDelayMs));
         }
@@ -264,6 +274,13 @@ export function createPhotoBatchRunner({
         return;
       }
 
+      const retained = pendingSaves.get(key);
+      if (retained) {
+        const saved = await attemptSave(job, retained.result);
+        if (saved.ok || saved.stale) pendingSaves.delete(key);
+        setStatus(key, saved.ok ? 'completed' : saved.stale ? 'stale' : 'save_failed');
+        return;
+      }
       const scan = await withScanRetry(job);
       if (!scan.ok) {
         setStatus(key, 'failed', { message: String(scan.error?.message || scan.error) });
@@ -279,6 +296,7 @@ export function createPhotoBatchRunner({
       results.set(key, result);
 
       const saved = await attemptSave(job, result);
+      if (saved.stale) { setStatus(key, 'stale'); return; }
       if (!saved.ok) {
         pendingSaves.set(key, { job, result });
         setStatus(key, 'save_failed');
@@ -297,6 +315,7 @@ export function createPhotoBatchRunner({
     const queue = [...jobs];
     const workers = Array.from({ length: Math.max(1, Math.min(concurrency, queue.length || 1)) }, async () => {
       while (queue.length > 0) {
+        if (isPaused()) return;
         const job = queue.shift();
         if (!job) return;
         await processJob(job);

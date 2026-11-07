@@ -79,7 +79,9 @@ export default function SalePhotoReviewStep({ saleId, onStepComplete }) {
       await base44.functions.invoke('saveSaleImageChanges', {
         sale_id: saleId,
         updates: updatedImages.map(img => ({
-          url: img.url,
+          photo_id: img.pipeline?.id,
+          image_revision: img.pipeline?.revision,
+          image_url: img.url,
           fields: {
             skip_serp_search: img.skip_serp_search,
             serp_search_status: img.serp_search_status,

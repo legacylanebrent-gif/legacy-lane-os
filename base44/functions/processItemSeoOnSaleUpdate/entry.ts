@@ -14,7 +14,7 @@
  */
 
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
-import OpenAI from 'npm:openai';
+import { mutateSalePhotos, locatePhoto, blockedPhoto } from '../../shared/photoStore.ts';
 
 function toSlug(str) {
   if (!str) return '';
@@ -29,46 +29,12 @@ function buildItemSlug(itemName, shortId) {
   return '/items/' + (base.length > max ? base.substring(0, max) : base) + suffix;
 }
 
-async function detectItemMetadata(openai, image) {
-  const completion = await openai.chat.completions.create({
-    model: 'gpt-4o-mini',
-    response_format: { type: 'json_object' },
-    temperature: 0.2,
-    max_tokens: 600,
-    messages: [{
-      role: 'user',
-      content: `You are an estate sale item expert. Extract structured metadata from this item.
-
-Item name: ${image.name || 'Unknown'}
-Description: ${image.description || 'None'}
-Price: ${image.price || 'Unknown'}
-
-Return JSON only:
-{
-  "canonical_name": "clean canonical name e.g. Pyrex Butterprint Cinderella Mixing Bowl",
-  "normalized_name": "lowercase canonical name for dedup",
-  "category": "Furniture|Jewelry|Art|Kitchenware|Clothing|Collectibles|Books|Electronics|Tools|Decor|Linens|Toys|China & Glassware|Silver & Metalware|Other",
-  "subcategory": "more specific type",
-  "item_type": "single word item type e.g. bowl, chair, painting",
-  "brand": "brand name or empty",
-  "manufacturer": "manufacturer or empty",
-  "model": "model name or empty",
-  "pattern": "pattern name if applicable or empty",
-  "style": "design era/style e.g. Mid-Century Modern or empty",
-  "material": "primary material or empty",
-  "color": "primary color or empty",
-  "era": "decade/era e.g. 1950s or empty",
-  "country_of_origin": "country or empty",
-  "short_description": "1-2 sentence collector-grade summary",
-  "long_description": "3-4 sentence SEO-rich description",
-  "historical_context": "1 sentence historical/collector context or empty",
-  "search_keywords": ["keyword1","keyword2","keyword3","keyword4","keyword5"],
-  "confidence_score": 0-100
-}`
-    }]
-  });
-  try { return JSON.parse(completion.choices[0].message.content); }
-  catch { return { canonical_name: image.name, normalized_name: (image.name || '').toLowerCase(), category: '', confidence_score: 40 }; }
+function detectItemMetadata(image) {
+  // Metadata projection ONLY. No second identity inference or provider call.
+  return { canonical_name: image.name, normalized_name: image.name.toLowerCase().trim(), category: image.categories?.[0] || '', short_description: image.description || '', long_description: image.description || '', search_keywords: image.categories || [], confidence_score: 0 };
+}
+function sourceFingerprint(photo, sale) {
+  return JSON.stringify([photo.pipeline?.revision, photo.pipeline?.edit_revision, photo.name, photo.description, photo.price, photo.categories, photo.url, sale.status, sale.property_address?.city, sale.property_address?.state]);
 }
 
 async function upsertSeoItemProfile(base44, image, metadata, sale, shortId, knowledgeId) {
@@ -137,10 +103,12 @@ async function upsertSeoPage(base44, image, metadata, sale, slug, seoProfileId, 
   }
 }
 
-Deno.serve(async (req) => {
+export default async function(req) {
   try {
     const base44 = createClientFromRequest(req);
-    const body = await req.json();
+    const user = await base44.auth.me();
+    if (user?.role !== 'admin') return Response.json({ error: 'Admin access required' }, { status: 403 });
+    const body = await req.json().catch(() => ({}));
     const saleId = body?.data?.id || body?.event?.entity_id || body?.sale_id;
     if (!saleId) return Response.json({ error: 'sale_id required' }, { status: 400 });
 
@@ -148,20 +116,27 @@ Deno.serve(async (req) => {
     if (!sales.length) return Response.json({ error: 'Sale not found' }, { status: 404 });
     const sale = sales[0];
 
-    const images = (sale.images || []).filter(img => img.name && img.name.trim());
-    if (!images.length) return Response.json({ message: 'No named items', processed: 0 });
-
-    const openai = new OpenAI({ apiKey: Deno.env.get('OPENAI_API_KEY') });
+    const images = ['upcoming', 'active', 'completed'].includes(sale.status) ? (sale.images || []).filter(img => img.name?.trim() && img.pipeline?.id && !blockedPhoto(img) && !img.pipeline.review_required && img.pipeline.operator_fields?.includes('name') && img.pipeline.jobs?.seo?.result?.fingerprint !== sourceFingerprint(img, sale)) : [];
+    if (!images.length) return Response.json({ message: 'No changed operator-approved public items', processed: 0, provider_calls: 0 });
     let processed = 0;
     const errors = [];
 
     for (let i = 0; i < images.length; i++) {
       const image = images[i];
       try {
-        const shortId = sale.id.substring(0, 8) + '-' + i;
-
-        // 1. AI metadata extraction (one call per item)
-        const metadata = await detectItemMetadata(openai, image);
+        const fingerprint = sourceFingerprint(image, sale);
+        const claim = await mutateSalePhotos(base44.asServiceRole, sale.id, user, (currentImages, currentSale) => {
+          const photo = locatePhoto(currentImages, { photo_id: image.pipeline.id, image_revision: image.pipeline.revision });
+          if (sourceFingerprint(photo, currentSale) !== fingerprint || blockedPhoto(photo)) return false;
+          const previous = photo.pipeline.jobs?.seo;
+          // A partial side-effect attempt is not automatically replayed.
+          if (previous?.state === 'processing' || previous?.result?.fingerprint === fingerprint) return false;
+          photo.pipeline.jobs.seo = { state: 'processing', result: { fingerprint }, at: new Date().toISOString() };
+          return true;
+        });
+        if (!claim.value) continue;
+        const shortId = image.pipeline.id;
+        const metadata = detectItemMetadata(image);
 
         // 2. Route everything through central matching service
         const matchRes = await base44.asServiceRole.functions.invoke('itemMatchingService', {
@@ -197,7 +172,8 @@ Deno.serve(async (req) => {
           ai_metadata: metadata,
         });
 
-        const knowledgeId = matchRes?.item_knowledge_id;
+        const knowledgeId = matchRes?.data?.item_knowledge_id;
+        if (!knowledgeId) throw new Error('Knowledge projection did not return a record ID');
 
         // 3. SEOItemProfile + SEOPage — only if knowledge was matched/created
         if (knowledgeId) {
@@ -206,6 +182,10 @@ Deno.serve(async (req) => {
           await upsertSeoPage(base44, image, metadata, sale, slug, seoProfileId, knowledgeId);
         }
 
+        await mutateSalePhotos(base44.asServiceRole, sale.id, user, currentImages => {
+          const photo = locatePhoto(currentImages, { photo_id: image.pipeline.id, image_revision: image.pipeline.revision });
+          if (photo.pipeline.jobs?.seo?.result?.fingerprint === fingerprint) photo.pipeline.jobs.seo.state = 'completed';
+        });
         processed++;
       } catch (err) {
         errors.push({ item: image.name, error: err.message });
@@ -215,8 +195,8 @@ Deno.serve(async (req) => {
       if (i < images.length - 1) await new Promise(r => setTimeout(r, 350));
     }
 
-    return Response.json({ message: `Processed ${processed}/${images.length} items`, processed, total: images.length, errors: errors.length ? errors : undefined });
+    return Response.json({ message: `Projected ${processed}/${images.length} changed approved items`, processed, total: images.length, provider_calls: 0, errors: errors.length ? errors : undefined });
   } catch (error) {
-    return Response.json({ error: error.message }, { status: 500 });
+    return Response.json({ error: error.message }, { status: error.status || 500 });
   }
-});
+}

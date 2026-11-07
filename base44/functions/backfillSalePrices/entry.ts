@@ -1,6 +1,7 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.54';
+import { mutateSalePhotos, authorizePhotoSale, blockedPhoto } from '../../shared/photoStore.ts';
 
-Deno.serve(async (req) => {
+export default async function(req) {
   try {
     const base44 = createClientFromRequest(req);
     const user = await base44.auth.me();
@@ -13,6 +14,7 @@ Deno.serve(async (req) => {
     const sales = await base44.asServiceRole.entities.EstateSale.filter({ id: sale_id });
     if (!sales.length) return Response.json({ error: 'Sale not found' }, { status: 404 });
     const sale = sales[0];
+    authorizePhotoSale(sale, user);
 
     // Fetch ALL SaleItemPricing records for this sale
     const pricingRecords = await base44.asServiceRole.entities.SaleItemPricing.filter({ sale_id });
@@ -37,7 +39,11 @@ Deno.serve(async (req) => {
     const filled = updatedImages.filter(img => img.ai_first_search_price != null).length;
     const total = updatedImages.length;
 
-    await base44.asServiceRole.entities.EstateSale.update(sale_id, { images: updatedImages });
+    await mutateSalePhotos(base44.asServiceRole, sale_id, user, images => {
+      for (const photo of images) {
+        if (!blockedPhoto(photo) && !photo.ai_deep_search_price && priceMap[photo.url] != null) photo.ai_deep_search_price = priceMap[photo.url];
+      }
+    });
 
     return Response.json({
       success: true,
@@ -49,4 +55,4 @@ Deno.serve(async (req) => {
   } catch (error) {
     return Response.json({ error: error.message }, { status: 500 });
   }
-});
+}

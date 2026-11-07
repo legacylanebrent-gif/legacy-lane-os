@@ -1,6 +1,7 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.54';
+import { mutateSalePhotos, blockedPhoto } from '../../shared/photoStore.ts';
 
-Deno.serve(async (req) => {
+export default async function(req) {
   try {
     const base44 = createClientFromRequest(req);
     const user = await base44.auth.me();
@@ -44,7 +45,13 @@ Deno.serve(async (req) => {
         });
 
         if (saleCleaned > 0) {
-          await base44.asServiceRole.entities.EstateSale.update(sale.id, { images: updatedImages });
+          await mutateSalePhotos(base44.asServiceRole, sale.id, user, current => {
+            for (const photo of current) if (blockedPhoto(photo)) {
+              photo.name = ''; photo.description = ''; photo.synopsis = ''; photo.price = null;
+              photo.ai_first_search_price = null; photo.ai_deep_search_price = null;
+              photo.pipeline.edit_revision = crypto.randomUUID();
+            }
+          });
           totalSales++;
           totalImagesCleaned += saleCleaned;
         }
@@ -63,4 +70,4 @@ Deno.serve(async (req) => {
     console.error('cleanSkippedImageData error:', error);
     return Response.json({ error: error.message }, { status: 500 });
   }
-});
+}

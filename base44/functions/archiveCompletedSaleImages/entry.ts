@@ -1,4 +1,5 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.54';
+import { mutateSalePhotos } from '../../shared/photoStore.ts';
 
 /**
  * Nightly job that:
@@ -9,13 +10,13 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
  * The metadata (name, description, price) is preserved — only the URL gets the resize suffix appended.
  * Already-resized URLs (containing ?w=400) are skipped to avoid double-processing.
  */
-Deno.serve(async (req) => {
+export default async function(req) {
   try {
     const base44 = createClientFromRequest(req);
 
     // Allow admin manual trigger OR scheduled (no user auth needed for scheduled)
     const user = await base44.auth.me().catch(() => null);
-    if (user && user.role !== 'admin') {
+    if (!user || user.role !== 'admin') {
       return Response.json({ error: 'Forbidden' }, { status: 403 });
     }
 
@@ -45,19 +46,16 @@ Deno.serve(async (req) => {
 
       if (!lastDate || lastDate >= today) continue; // Sale hasn't ended yet
 
-      // Rewrite image URLs to 400px resize param
-      const updatedImages = (sale.images || []).map(img => {
-        if (!img.url) return img;
-        // Skip if already has resize param
-        if (img.url.includes('?w=') || img.url.includes('&w=')) return img;
-        imagesResized++;
-        return { ...img, url: `${img.url}?w=400` };
-      });
-
-      await base44.asServiceRole.entities.EstateSale.update(sale.id, {
-        status: 'completed',
-        images: updatedImages,
-      });
+      const saved = await mutateSalePhotos(base44.asServiceRole, sale.id, user, images => {
+        // A CDN presentation URL is not a new image/content revision. Stable
+        // identity and original URL survive; resize only the thumbnail reference.
+        for (const image of images) {
+          if (!image.url || image.thumbnail_url) continue;
+          image.thumbnail_url = `${image.url}${image.url.includes('?') ? '&' : '?'}w=400`;
+          imagesResized++;
+        }
+      }, { patch: { status: 'completed' } });
+      const updatedImages = saved.images;
 
       completedCount++;
       results.push({ id: sale.id, title: sale.title, last_date: lastDate, images: updatedImages.length });
@@ -72,4 +70,4 @@ Deno.serve(async (req) => {
   } catch (error) {
     return Response.json({ error: error.message }, { status: 500 });
   }
-});
+}

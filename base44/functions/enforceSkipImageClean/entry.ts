@@ -1,6 +1,7 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.54';
+import { mutateSalePhotos } from '../../shared/photoStore.ts';
 
-Deno.serve(async (req) => {
+export default async function(req) {
   try {
     const base44 = createClientFromRequest(req);
     const payload = await req.json();
@@ -27,8 +28,9 @@ Deno.serve(async (req) => {
       return Response.json({ error: user ? 'Forbidden' : 'Unauthorized' }, { status: user ? 403 : 401 });
     }
 
-    const images = sale.images || [];
     let cleaned = 0;
+    await mutateSalePhotos(base44.asServiceRole, saleId, user, images => {
+    cleaned = 0;
     const cleanedImages = images.map((img) => {
       if (typeof img === 'string') return { url: img, name: '', description: '' };
 
@@ -59,13 +61,12 @@ Deno.serve(async (req) => {
       };
     });
 
-    if (cleaned > 0) {
-      await base44.asServiceRole.entities.EstateSale.update(saleId, { images: cleanedImages });
-    }
+    if (cleaned > 0) images.splice(0, images.length, ...cleanedImages);
+    });
 
     return Response.json({ success: true, cleaned });
   } catch (error) {
     console.error('enforceSkipImageClean error:', error);
     return Response.json({ error: error.message }, { status: 500 });
   }
-});
+}

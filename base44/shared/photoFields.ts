@@ -15,7 +15,6 @@ export const AI_OWNED_FIELDS = [
   'name',
   'description',
   'synopsis',
-  'price',
   'ai_first_search_price',
   'ai_deep_search_price',
   'categories',

@@ -11,7 +11,9 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import CommunicationsPanel from '@/components/saleops/CommunicationsPanel';
 import LaborEntriesPanel from '@/components/saleops/LaborEntriesPanel';
 import SaleSkipGuideModal from '@/components/estate/SaleSkipGuideModal';
-import { runQuickScan } from '@/lib/quickScan';
+import usePhotoPipeline from '@/hooks/usePhotoPipeline';
+import PhotoPipelineControls from '@/components/estate/PhotoPipelineControls';
+import PhotoScanDetails from '@/components/estate/PhotoScanDetails';
 import { SOURCE_EXCLUSION_RULE, filterAllowedSources } from '@/lib/excludedSources';
 import SaleNotesPanel from '@/components/saleops/SaleNotesPanel';
 import ReferralSourceCard from '@/components/saleops/ReferralSourceCard';
@@ -140,6 +142,30 @@ export default function SaleEditor() {
     sale_team: [],
     site_assessment: {},
     distance_miles: null
+  });
+
+  const mergeStoredPhotos = (incoming) => {
+    setFormData(prev => {
+      const images = incoming.map(photo => {
+        const local = prev.images.find(p => photo.pipeline?.id && p.pipeline?.id === photo.pipeline.id || p.url === photo.url);
+        return local?._dirty ? { ...photo, name: local.name, description: local.description, price: local.price, _dirty: true } : photo;
+      });
+      const next = { ...prev, images };
+      formDataRef.current = next;
+      return next;
+    });
+  };
+  const pipeline = usePhotoPipeline({
+    saleId, userId: user?.id, imagesRef: formDataRef,
+    onImages: mergeStoredPhotos,
+    onPhoto: photo => {
+      setFormData(prev => {
+        const next = { ...prev, images: prev.images.map(p => p.pipeline?.id === photo.pipeline?.id ? p._dirty ? { ...photo, name: p.name, description: p.description, price: p.price, _dirty: true } : photo : p) };
+        formDataRef.current = next;
+        return next;
+      });
+      if (photo.pipeline?.jobs?.deep?.result) setSerpResults(prev => ({ ...prev, [photo.url]: photo.pipeline.jobs.deep.result }));
+    }
   });
 
   // Keep saleIdRef in sync so auto-save closure has latest value
@@ -287,8 +313,11 @@ export default function SaleEditor() {
 
   const loadSale = async (id) => {
     try {
-      const sales = await base44.entities.EstateSale.filter({ id });
-      const saleData = sales[0];
+      const [sales, initialized] = await Promise.all([
+        base44.entities.EstateSale.filter({ id }),
+        base44.functions.invoke('saveSaleImageChanges', { sale_id: id })
+      ]);
+      const saleData = sales[0] ? { ...sales[0], images: initialized.data.images } : null;
       if (!saleData) throw new Error('Sale not found');
 
       setOriginalStatus(saleData.status || 'draft');
@@ -603,30 +632,7 @@ export default function SaleEditor() {
     setFormData(prev => ({ ...prev, sale_dates: prev.sale_dates.filter((_, i) => i !== index) }));
   };
 
-  const handleRegenerateDescription = async (index) => {
-    const image = formData.images[index];
-    if (!image.name) return;
-    if (image.skip_item || image.skip_serp_search || image.serp_search_status === 'do_not_search') {
-      alert('This image is marked as skipped. Un-skip it first.');
-      return;
-    }
-    setRegeneratingDesc(prev => ({ ...prev, [index]: true }));
-    try {
-      const response = await base44.integrations.Core.InvokeLLM({
-        prompt: `Generate a detailed, accurate description for this estate sale item titled: "${image.name}". Focus on key features, condition indicators, what makes it valuable or interesting, and any relevant historical or collector context. Keep it concise but informative (2-3 sentences).`,
-      });
-      const description = response.trim();
-      setPhotoDescriptions(prev => ({ ...prev, [image.url]: description }));
-      const updated = [...formData.images];
-      updated[index].description = description;
-      setFormData({ ...formData, images: updated });
-    } catch (error) {
-      console.error('Error generating description:', error);
-      alert('Failed to generate description');
-    } finally {
-      setRegeneratingDesc(prev => ({ ...prev, [index]: false }));
-    }
-  };
+  const handleRegenerateDescription = (index) => pipeline.run('standard', [formData.images[index]]);
 
   const handleGenerateFeaturedTags = async () => {
     const itemsWithInfo = formData.images.filter(img => img.name && img.description);
@@ -652,110 +658,9 @@ export default function SaleEditor() {
 
   const cleanTitle = (raw) => raw ? raw.replace(/\s*[-|—]\s*(etsy|ebay|amazon|walmart|1stdibs|ruby lane|chairish|bonanza|mercari|poshmark|facebook|google|bing|estatesales\.net|estatesales)[^\S\n]*/gi, '').trim() : raw;
 
-  const handleSerpSearch = async (index) => {
-    const image = formData.images[index];
-    if (!image.url) return;
-    if (image.skip_item || image.skip_serp_search || image.serp_search_status === 'do_not_search') {
-      alert('This image is marked as skipped. Un-skip it first.');
-      return;
-    }
-    setSerpSearching(prev => ({ ...prev, [index]: true }));
-    try {
-      // Check credits first
-      try {
-        const creditCheck = await base44.functions.invoke('checkGoogleLensCredits', {});
-        if (!creditCheck.data.allowed) {
-          alert(creditCheck.data.reason || 'No Google Lens searches remaining. Purchase more credits to continue.');
-          setSerpSearching(prev => ({ ...prev, [index]: false }));
-          return;
-        }
-      } catch (creditErr) {
-        // If check fails, proceed with the search (backward compatibility)
-        console.warn('Credit check failed, proceeding anyway:', creditErr.message);
-      }
-
-      const res = await base44.functions.invoke('googleLensPricing', { image_url: image.url, sale_id: saleId });
-      const data = res.data;
-      setSerpResults(prev => ({ ...prev, [image.url]: data }));
-
-      const updatedImages = [...formData.images];
-      const img = { ...updatedImages[index] };
-
-      if (data.item_title && !img.name) {
-        const cleanedTitle = cleanTitle(data.item_title);
-        img.name = cleanedTitle;
-        setPhotoTitles(pt => ({ ...pt, [image.url]: cleanedTitle }));
-      }
-
-      if (!img.synopsis) {
-        const withPrices = (data.matches || []).filter(m => m.price && m.title);
-        const withTitles = (data.matches || []).filter(m => m.title);
-        const sources = withPrices.slice(0, 3);
-        const knownTitle = cleanTitle(data.item_title) || (withTitles[0] && cleanTitle(withTitles[0].title));
-        let syn = '';
-        if (knownTitle) syn += `${knownTitle}.`;
-        if (sources.length > 0) {
-          const priceList = sources.map(m => `${m.price} on ${m.source}`).join(', ');
-          syn += ` Currently listed for ${priceList}.`;
-        }
-        if (data.price_range?.min && data.price_range?.max) {
-          syn += ` Market price range: $${data.price_range.min}–$${data.price_range.max}.`;
-        }
-        if (syn.trim()) {
-          img.synopsis = syn.trim();
-        }
-      }
-
-      // The AI/market figure is an estimate, never the operator's listing price:
-      // googleLensPricing already stored it in ai_first_search_price.
-
-      updatedImages[index] = img;
-      setFormData(prev => ({ ...prev, images: updatedImages }));
-      
-      // Refresh credit display after successful search
-      setCreditRefreshTrigger(prev => prev + 1);
-      setCreditDisplayKey(prev => prev + 1);
-    } catch (e) {
-      console.error('SerpAI Search error:', e.message);
-      setSerpResults(prev => ({ ...prev, [image.url]: { error: e.message } }));
-      if (/run out|credits|quota|limit|payment|account/i.test(e.message)) {
-        alert('AI search credits have been exhausted. Please contact support to continue.');
-      }
-    } finally {
-      setSerpSearching(prev => ({ ...prev, [index]: false }));
-    }
-  };
-
-  const handleQuickScan = async () => {
-    const toScan = formData.images
-      .map((img, i) => ({ img, i }))
-      .filter(({ img, i }) => !img.name && !img.description && !img.skip_item && !img.skip_serp_search && img.serp_search_status !== 'do_not_search' && multiItemFlags[i] === undefined);
-
-    if (toScan.length === 0) {
-      alert('All images have already been scanned or processed.');
-      return;
-    }
-
-    setQuickScanning(true);
-    quickScanCancelRef.current = false;
-    setQuickScanProgress({ current: 0, total: toScan.length });
-
-    try {
-      await runQuickScan({
-        entries: toScan,
-        onResult: (i, isMulti) => setMultiItemFlags(prev => ({ ...prev, [i]: isMulti })),
-        onProgress: (current, total) => setQuickScanProgress({ current, total }),
-        shouldCancel: () => quickScanCancelRef.current,
-      });
-    } finally {
-      setQuickScanning(false);
-      setQuickScanProgress({ current: 0, total: 0 });
-    }
-  };
-
-  const cancelQuickScan = () => {
-    quickScanCancelRef.current = true;
-  };
+  const handleSerpSearch = index => pipeline.run('deep', [formData.images[index]]);
+  const handleQuickScan = () => pipeline.run('classify');
+  const cancelQuickScan = () => pipeline.pause();
 
   const handleMultiItemAssess = async (index) => {
     const image = formData.images[index];
@@ -832,8 +737,11 @@ Be practical and realistic for an estate sale context.`,
       // array from browser state is what used to put older titles back.
       const photo = formData.images[index];
       if (photo?.url) {
-        await base44.functions.invoke('updateSaleImage', {
+        const saved = await base44.functions.invoke('updateSaleImage', {
           sale_id: currentSaleId,
+          photo_id: photo.pipeline?.id,
+          image_revision: photo.pipeline?.revision,
+          edit_revision: photo.pipeline?.edit_revision,
           image_url: photo.url,
           mode: 'overwrite',
           fields: {
@@ -844,6 +752,7 @@ Be practical and realistic for an estate sale context.`,
             categories: photo.categories || [],
           },
         });
+        setFormData(prev => ({ ...prev, images: prev.images.map(p => p.pipeline?.id === saved.data.photo.pipeline.id ? saved.data.photo : p) }));
       }
     } catch (e) {
       console.error('Failed to save image data:', e.message);
@@ -873,7 +782,9 @@ Be practical and realistic for an estate sale context.`,
       try {
         await base44.functions.invoke('toggleSaleImageSkip', {
           sale_id: currentSaleId,
-          image_index: index,
+          photo_id: img.pipeline?.id,
+          image_url: img.url,
+          image_revision: img.pipeline?.revision,
           skip_item: newImg.skip_item,
           skip_saved_name: newImg.skip_saved_name || '',
           skip_saved_description: newImg.skip_saved_description || '',
@@ -1174,7 +1085,7 @@ Be practical and realistic for an estate sale context.`,
       try {
         await base44.functions.invoke('saveSaleImageChanges', {
           sale_id: currentSaleId,
-          updates: [{ url: updatedImages[index].url, fields: { rotation: newRot } }],
+          updates: [{ photo_id: img.pipeline?.id, image_url: img.url, image_revision: img.pipeline?.revision, fields: { rotation: newRot } }],
         });
       } catch (e) {
         console.error('Failed to persist rotation:', e.message);
@@ -1217,7 +1128,7 @@ Be practical and realistic for an estate sale context.`,
         // Order only — the server keeps each photo's own stored content.
         await base44.functions.invoke('saveSaleImageChanges', {
           sale_id: currentSaleId,
-          order: items.map(i => i.url),
+          order: items.map(i => i.pipeline?.id || i.url),
         });
       }
     }
@@ -1850,7 +1761,11 @@ Return ONLY the description text, no extra commentary.`
                             </button>
                           </div>
                           <button
-                            onClick={(e) => { e.stopPropagation(); setFormData({ ...formData, images: formData.images.filter((_, i) => i !== index) }); }}
+                            onClick={async (e) => {
+                              e.stopPropagation();
+                              if (saleId) await base44.functions.invoke('saveSaleImageChanges', { sale_id: saleId, remove: [{ photo_id: image.pipeline?.id, image_url: image.url, image_revision: image.pipeline?.revision }] });
+                              setFormData(prev => ({ ...prev, images: prev.images.filter(p => p !== image) }));
+                            }}
                             className="absolute top-1 right-1 bg-red-500 text-white rounded p-1 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-auto"
                           >
                             <X className="w-3 h-3" />
@@ -1894,229 +1809,7 @@ Return ONLY the description text, no extra commentary.`
                        Print Pricing Sheet
                      </Button>
 
-                    <Button variant="outline" size="sm" className="text-blue-600 border-blue-600 w-full hidden" onClick={async () => {
-                      const toProcess = formData.images.filter(img => img.name && img.description);
-                      if (toProcess.length === 0) { alert('All images must have title and description first'); return; }
-                      if (!window.confirm(`Batch deep search pricing for ${toProcess.length} items. This may take a few minutes. Continue?`)) return;
-                      for (let i = 0; i < formData.images.length; i++) {
-                        const img = formData.images[i];
-                        if (!img.name || !img.description) continue;
-                        setRegeneratingPrice(prev => ({ ...prev, [i]: true }));
-                        try {
-                          const response = await base44.integrations.Core.InvokeLLM({
-                            prompt: `Research current market prices for: "${img.name}"\n\nSearch multiple sources (eBay sold listings, online marketplaces, antique dealers).\nReturn a JSON with pricing data.\n\n${SOURCE_EXCLUSION_RULE}`,
-                            add_context_from_internet: true,
-                            file_urls: [img.url],
-                            response_json_schema: {
-                              type: "object",
-                              properties: {
-                                sources: { type: "array", items: { type: "object", properties: { site: { type: "string" }, price: { type: "number" } } } }
-                              }
-                            }
-                          });
-                          const sources = filterAllowedSources(response.sources);
-                          if (sources.length > 0) {
-                            const prices = sources.map(s => s.price);
-                            const lowPrice = Math.min(...prices);
-                            const highPrice = Math.max(...prices);
-                            const avgPrice = Math.round(sources.reduce((sum, s) => sum + s.price, 0) / sources.length);
-                            setPhotoPricing(prev => ({ ...prev, [img.url]: { sources, low_price: lowPrice, high_price: highPrice, average_price: avgPrice } }));
-                            setFormData(prev => {
-                              const updated = [...prev.images];
-                              updated[i] = { ...updated[i], ai_deep_search_price: avgPrice };
-                              return { ...prev, images: updated };
-                            });
-                            if (saleId) {
-                              try {
-                                const existingPricing = await base44.entities.ItemPricing.filter({ sale_id: saleId, photo_url: img.url });
-                                const pricingData = { sale_id: saleId, photo_url: img.url, sources, low_price: lowPrice, high_price: highPrice };
-                                if (existingPricing.length > 0) {
-                                  await base44.entities.ItemPricing.update(existingPricing[0].id, pricingData);
-                                } else {
-                                  await base44.entities.ItemPricing.create(pricingData);
-                                }
-                              } catch (saveError) {
-                                console.error('Error saving pricing to database:', saveError);
-                              }
-                            }
-                          }
-                        } catch (error) { console.error(error); }
-                        setRegeneratingPrice(prev => ({ ...prev, [i]: false }));
-                        await new Promise(r => setTimeout(r, 1000));
-                      }
-                    }}>
-                      <Sparkles className="w-4 h-4 mr-2" />
-                      Batch Deep Search Price
-                    </Button>
-                    {(() => {
-                        const unprocessed = formData.images.filter(img => !img.name && img.skip_item !== true);
-                        const resumeIndex = serpBatchProgress.stoppedAt;
-                        const runBatch = async (startFromIndex = 0) => {
-                         if (!saleId) { alert('Save the sale first'); return; }
-                         const remaining = formData.images.slice(startFromIndex).filter((img, relIdx) => {
-                         const absIdx = startFromIndex + relIdx;
-                         const statusOk = img.serp_search_status === "search_allowed" || img.serp_search_status === undefined || img.serp_search_status === null;
-                         return !img.name && !multiItemFlags[absIdx] && img.skip_item !== true &&
-                          img.skip_serp_search !== true && img.serp_search_status !== "do_not_search" && statusOk;
-                         });
-                         if (remaining.length === 0) { alert('All eligible images have already been processed. Multi-item images are skipped — use "Multi-Item AI Assess" on those.'); return; }
-                         const flaggedCount = formData.images.slice(startFromIndex).filter((img, relIdx) => multiItemFlags[startFromIndex + relIdx]).length;
-                         const msg = `${remaining.length} image(s) will be processed via AI image search.${flaggedCount > 0 ? `\n\n${flaggedCount} multi-item image(s) will be skipped — use "Multi-Item AI Assess" on those.` : ''}\n\nContinue?`;
-                         if (!window.confirm(msg)) return;
-                          setSerpBatchRunning(true);
-                          setSerpBatchProgress({ current: 0, total: remaining.length, stoppedAt: null });
-                          setShowDeepSearchModal(true);
-                          let processed = 0;
-                           for (let i = startFromIndex; i < formData.images.length; i++) {
-                             const img = formData.images[i];
-                             if (img.name) continue;
-                             if (multiItemFlags[i]) continue;
-                             if (img.skip_item === true) continue;
-                             // Safety check: never search images marked as do_not_search
-                             if (img.skip_serp_search === true || img.serp_search_status === "do_not_search") continue;
-                             setDeepSearchModalIndex(i);
-                             setSerpSearching(prev => ({ ...prev, [i]: true }));
-                             try {
-                               // Check credits before each search
-                               try {
-                                 const creditCheck = await base44.functions.invoke('checkGoogleLensCredits', {});
-                                 if (!creditCheck.data.allowed) {
-                                   setSerpBatchProgress(prev => ({ ...prev, stoppedAt: i, current: processed }));
-                                   setSerpSearching({});
-                                   setSerpBatchRunning(false);
-                                   setShowDeepSearchModal(false);
-                                   alert(`Google Lens credit limit reached after ${processed} image(s).\n\nPurchase more credits to continue.`);
-                                   return;
-                                 }
-                               } catch (creditErr) {
-                                 console.warn('Credit check failed, proceeding anyway:', creditErr.message);
-                               }
-
-                               const res = await base44.functions.invoke('googleLensPricing', { image_url: img.url, sale_id: saleId });
-                               const data = res.data;
-                               if (data.error) {
-                                 console.warn(`AI search skipped image ${i + 1}: ${data.error}`);
-                                 setSerpResults(prev => ({ ...prev, [img.url]: { error: data.error } }));
-                                 processed++;
-                                 setSerpBatchProgress(prev => ({ ...prev, current: processed }));
-                                 if (/run out|credits|quota|limit|payment|account/i.test(data.error)) {
-                                   setSerpBatchProgress(prev => ({ ...prev, stoppedAt: i, current: processed }));
-                                   setSerpSearching({});
-                                   setSerpBatchRunning(false);
-                                   setShowDeepSearchModal(false);
-                                   alert(`AI search credits exhausted after ${processed} image(s).\n\nPlease contact support, then click "Resume from image ${i + 1}" to continue.`);
-                                   return;
-                                 }
-                               } else {
-                                 setSerpResults(prev => ({ ...prev, [img.url]: data }));
-                                 setFormData(prev => {
-                                   const updated = [...prev.images];
-                                   const item = { ...updated[i] };
-                                   if (data.item_title && !item.name) {
-                                     const t = cleanTitle(data.item_title);
-                                     item.name = t;
-                                     setPhotoTitles(pt => ({ ...pt, [img.url]: t }));
-                                   }
-                                   if (!item.synopsis) {
-                                     const withPrices = (data.matches || []).filter(m => m.price && m.title);
-                                     const sources = withPrices.slice(0, 3);
-                                     const knownTitle = cleanTitle(data.item_title);
-                                     let syn = '';
-                                     if (knownTitle) syn += `${knownTitle}.`;
-                                     if (sources.length > 0) syn += ` Currently listed for ${sources.map(m => `${m.price} on ${m.source}`).join(', ')}.`;
-                                     if (data.price_range?.min && data.price_range?.max) syn += ` Market price range: $${data.price_range.min}–$${data.price_range.max}.`;
-                                     if (syn.trim()) {
-                                       item.synopsis = syn.trim();
-                                     }
-                                   }
-                                   if (data.price_range?.avg) item.ai_first_search_price = data.price_range.avg;
-                                   updated[i] = item;
-                                   return { ...prev, images: updated };
-                                 });
-                                 processed++;
-                                 setSerpBatchProgress(prev => ({ ...prev, current: processed }));
-
-                                 // Refresh credit display periodically during batch
-                                 if (processed % 5 === 0) {
-                                   setCreditRefreshTrigger(prev => prev + 1);
-                                   setCreditDisplayKey(prev => prev + 1);
-                                 }
-                                 // This photo's result is already saved on the server, addressed by
-                                 // its own url. The whole photo list is deliberately never written here:
-                                 // a stale copy of it would revert work done on other photos.
-                               }
-                             } catch (e) {
-                              console.warn(`AI search skipped image ${i + 1}:`, e.message);
-                              processed++;
-                              setSerpBatchProgress(prev => ({ ...prev, current: processed }));
-                             }
-                             setSerpSearching(prev => ({ ...prev, [i]: false }));
-                             await new Promise(r => setTimeout(r, 1000));
-                           }
-                           // Final credit refresh after batch completes
-                           setCreditRefreshTrigger(prev => prev + 1);
-                           setCreditDisplayKey(prev => prev + 1);
-
-                           setSerpBatchRunning(false);
-                           setShowDeepSearchModal(false);
-                           setSerpBatchProgress({ current: 0, total: 0, stoppedAt: null });
-                           };
-                        const multiItemCount = Object.values(multiItemFlags).filter(Boolean).length;
-                        const unscanned = formData.images.filter((img, i) => !img.name && !img.description && multiItemFlags[i] === undefined).length;
-                        runBatchRef.current = runBatch;
-                        return (
-                           <>
-                             <Button variant="outline" size="sm" className="text-slate-700 border-slate-400 font-semibold text-xs h-auto py-2 leading-tight" onClick={() => setShowSkipGuideModal(true)}>
-                               <span className="mr-1.5 w-4 h-4 rounded-full bg-slate-700 text-white text-[10px] font-bold inline-flex items-center justify-center flex-shrink-0">1</span>
-                               <span className="whitespace-normal text-left">Flag Photos to Skip</span>
-                             </Button>
-                             {step1Completed && (<>
-                             <Button variant="outline" size="sm" className={`text-xs h-auto py-2 leading-tight whitespace-normal text-left ${quickScanning ? 'text-red-600 border-red-400 bg-red-50' : 'text-teal-600 border-teal-600'}`} disabled={serpBatchRunning} onClick={() => (quickScanning ? cancelQuickScan() : setShowQuickScanGuideModal(true))}>
-                               <span className={`mr-1.5 w-4 h-4 rounded-full text-white text-[10px] font-bold inline-flex items-center justify-center flex-shrink-0 ${quickScanning ? 'bg-red-600' : 'bg-teal-600'}`}>2</span>
-                               {quickScanning
-                                 ? `Stop scan (${quickScanProgress.current}/${quickScanProgress.total})`
-                                 : `Quick AI Scan${unscanned > 0 ? ` (${unscanned})` : ''}${multiItemCount > 0 ? ` · ${multiItemCount} multi` : ''}`}
-                             </Button>
-                             <Button variant="outline" size="sm" className="text-purple-600 border-purple-600 text-xs h-auto py-2 leading-tight whitespace-normal text-left" disabled={serpBatchRunning || quickScanning} onClick={() => setShowDeepSearchGuideModal(true)}>
-                               <span className="mr-1.5 w-4 h-4 rounded-full bg-purple-600 text-white text-[10px] font-bold inline-flex items-center justify-center flex-shrink-0">3</span>
-                               {serpBatchRunning ? `Processing... (${serpBatchProgress.current}/${serpBatchProgress.total})` : `Deep Search${unprocessed.length > 0 ? ` (${unprocessed.length - multiItemCount})` : ''}`}
-                             </Button>
-                            {resumeIndex !== null && resumeIndex !== undefined && (
-                              <Button variant="outline" size="sm" className="text-orange-600 border-orange-600 text-xs h-auto py-2 leading-tight" disabled={serpBatchRunning} onClick={() => runBatch(resumeIndex)}>
-                                <Scan className="w-3 h-3 mr-1 flex-shrink-0" />
-                                Resume #{resumeIndex + 1}
-                              </Button>
-                            )}
-                            </>)}
-                          </>
-                        );
-                      })()}
-                      {step1Completed && <Button variant="outline" size="sm" className="text-blue-600 border-blue-600 text-xs h-auto py-2 leading-tight whitespace-normal text-left" onClick={async () => {
-                        if (!window.confirm('Step 4: Regenerate descriptions for all items that have a title?')) return;
-                        for (let i = 0; i < formData.images.length; i++) {
-                          const img = formData.images[i];
-                          if (!img.name) continue;
-                          if (img.skip_item || img.skip_serp_search || img.serp_search_status === 'do_not_search') continue;
-                          setRegeneratingDesc(prev => ({ ...prev, [i]: true }));
-                          try {
-                            const response = await base44.integrations.Core.InvokeLLM({
-                              prompt: `Generate a detailed, accurate description for this estate sale item titled: "${img.name}". Focus on key features, condition indicators, what makes it valuable or interesting, and any relevant historical or collector context. Keep it concise but informative (2-3 sentences).`,
-                            });
-                            const description = response.trim();
-                            setPhotoDescriptions(prev => ({ ...prev, [img.url]: description }));
-                            setFormData(prev => {
-                              const updated = [...prev.images];
-                              updated[i] = { ...updated[i], description };
-                              return { ...prev, images: updated };
-                            });
-                          } catch (e) { console.error(e); }
-                          setRegeneratingDesc(prev => ({ ...prev, [i]: false }));
-                          await new Promise(r => setTimeout(r, 500));
-                        }
-                      }}>
-                        <span className="mr-1.5 w-4 h-4 rounded-full bg-blue-600 text-white text-[10px] font-bold inline-flex items-center justify-center flex-shrink-0">4</span>
-                        Regenerate Descriptions
-                        </Button>}
+                    <PhotoPipelineControls pipeline={pipeline} onSkip={() => setShowSkipGuideModal(true)} />
                     </div>
                     {!step1Completed && saleId ? (
                       <SalePhotoReviewStep
@@ -2185,10 +1878,11 @@ Return ONLY the description text, no extra commentary.`
                          (image.price != null && String(image.price).includes(q)) ||
                          (image.synopsis || '').toLowerCase().includes(q)
                        );
-                     }).map((image, index) => {
+                     }).map((image) => {
+                       const index = formData.images.findIndex(p => image.pipeline?.id ? p.pipeline?.id === image.pipeline.id : p.url === image.url);
                        const isExpanded = expandedCards[index];
                        return (
-                       <Card key={index} className="overflow-hidden">
+                       <Card key={image.pipeline?.id || image.url} className="overflow-hidden">
                          <button
                            type="button"
                            onClick={() => setExpandedCards(prev => prev[index] ? {} : { [index]: true })}
@@ -2245,7 +1939,7 @@ Return ONLY the description text, no extra commentary.`
                                 if (currentSaleId) {
                                   try {
                                     await base44.functions.invoke('toggleSaleImageSkip', {
-                                      sale_id: currentSaleId, image_index: index, skip_item: false,
+                                      sale_id: currentSaleId, photo_id: image.pipeline?.id, image_url: image.url, image_revision: image.pipeline?.revision, skip_item: false,
                                       skip_saved_name: '', skip_saved_description: '', clear_data: true,
                                     });
                                   } catch (e) {
@@ -2260,17 +1954,18 @@ Return ONLY the description text, no extra commentary.`
 
                           {/* Right: Form fields in a more compact 2-col layout */}
                           {step1Completed && <div className="flex-1 min-w-0 space-y-3">
+                            <PhotoScanDetails photo={image} pipeline={pipeline} />
                             {/* Name + AI Price row */}
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                               <div>
                                 <Label htmlFor={`name-${index}`} className="text-xs">Name</Label>
                                 <Textarea
                                   id={`name-${index}`} placeholder="Item name"
-                                  value={photoTitles[image.url] || image.name || ''}
+                                  value={photoTitles[image.url] ?? image.name ?? ''}
                                   onChange={(e) => {
                                     setPhotoTitles(prev => ({ ...prev, [image.url]: e.target.value }));
                                     const updated = [...formData.images];
-                                    updated[index].name = e.target.value;
+                                    updated[index] = { ...updated[index], name: e.target.value, _dirty: true };
                                     setFormData({ ...formData, images: updated });
                                   }}
                                   className="text-sm min-h-[44px] w-full" rows={2}
@@ -2284,7 +1979,7 @@ Return ONLY the description text, no extra commentary.`
                                     value={image.price || ''}
                                     onChange={(e) => {
                                       const updated = [...formData.images];
-                                      updated[index].price = e.target.value ? parseFloat(e.target.value) : null;
+                                      updated[index] = { ...updated[index], price: e.target.value ? parseFloat(e.target.value) : null, _dirty: true };
                                       setFormData({ ...formData, images: updated });
                                     }}
                                     className="text-sm font-medium flex-1"
@@ -2303,11 +1998,11 @@ Return ONLY the description text, no extra commentary.`
                               <Label htmlFor={`desc-${index}`} className="text-xs">Description</Label>
                               <Textarea
                                 id={`desc-${index}`} placeholder="Item description"
-                                value={photoDescriptions[image.url] || image.description || ''}
+                                value={photoDescriptions[image.url] ?? image.description ?? ''}
                                 onChange={(e) => {
                                   setPhotoDescriptions(prev => ({ ...prev, [image.url]: e.target.value }));
                                   const updated = [...formData.images];
-                                  updated[index].description = e.target.value;
+                                  updated[index] = { ...updated[index], description: e.target.value, _dirty: true };
                                   setFormData({ ...formData, images: updated });
                                 }}
                                 className="text-sm min-h-[56px] w-full" rows={2}
@@ -2406,11 +2101,7 @@ Return ONLY the description text, no extra commentary.`
 
                             {/* Action buttons — 2-col grid on mobile, 4-col on desktop */}
                             <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
-                              {!(image.name && image.description) && !image.skip_item && !image.skip_serp_search && image.serp_search_status !== 'do_not_search' && (
-                               <Button type="button" variant="outline" size="sm" className="text-xs border-purple-400 text-purple-700 hover:bg-purple-50" onClick={() => handleSerpSearch(index)} disabled={serpSearching[index]}>
-                                 <Scan className="w-3 h-3 mr-1" />{serpSearching[index] ? '...' : 'AI Search'}
-                               </Button>
-                              )}
+
                               <Button type="button" size="sm" className="text-xs bg-green-600 hover:bg-green-700 text-white" onClick={() => handleSaveImage(index)} disabled={savingImageIndex === index}>
                                 {savingImageIndex === index ? 'Saving...' : '💾 Save'}
                               </Button>

@@ -1,8 +1,10 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.54';
+import { mutateSalePhotos, authorizePhotoSale } from '../../shared/photoStore.ts';
+import { structuralPhotoEdit } from '../../shared/photoMutations.ts';
 
 // Reconstructs the EstateSale images array from SaleItemPricing records
 // Only adds images that are NOT already in the sale's images array
-Deno.serve(async (req) => {
+export default async function(req) {
   try {
     const base44 = createClientFromRequest(req);
     const user = await base44.auth.me();
@@ -15,6 +17,7 @@ Deno.serve(async (req) => {
     const sales = await base44.asServiceRole.entities.EstateSale.filter({ id: sale_id });
     if (!sales.length) return Response.json({ error: 'Sale not found' }, { status: 404 });
     const sale = sales[0];
+    authorizePhotoSale(sale, user);
 
     // Fetch ALL SaleItemPricing records sorted by created_date
     const pricingRecords = await base44.asServiceRole.entities.SaleItemPricing.filter(
@@ -66,7 +69,10 @@ Deno.serve(async (req) => {
 
     const merged = [...existingUpdated, ...newImages];
 
-    await base44.asServiceRole.entities.EstateSale.update(sale_id, { images: merged });
+    await mutateSalePhotos(base44.asServiceRole, sale_id, user, images => {
+      structuralPhotoEdit(images, { append: newImages });
+      // Recovery adds missing files, never infers identity from old URL matches.
+    });
 
     return Response.json({
       success: true,
@@ -78,4 +84,4 @@ Deno.serve(async (req) => {
   } catch (error) {
     return Response.json({ error: error.message }, { status: 500 });
   }
-});
+}

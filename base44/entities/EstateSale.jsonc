@@ -39,7 +39,7 @@
     },
     "company_id": {
       "type": "string",
-      "description": "Canonical EstateSalen Company ID owning this sale. Additive in Phase 1 \u2014 legacy operator_id ownership is preserved. Inventory derives company ownership from its sale."
+      "description": "Canonical owning Company ID; legacy operator_id ownership is preserved."
     },
     "property_address": {
       "type": "object",
@@ -78,7 +78,7 @@
     },
     "distance_miles": {
       "type": "number",
-      "description": "Chapter 5 P1 \u2014 operational distance snapshot from the operator's operating base to this sale location, captured at save time when both geocodes exist. Null = UNKNOWN; the system never invents 0-mile precision. Not recalculated when the operating base changes \u2014 only on an explicit save of this sale (its snapshot records the distance as known at that time).",
+      "description": "Operational distance snapshot from operating base; null is unknown, never invented zero. Recomputed only on explicit save.",
       "rls": {
         "read": {
           "$or": [
@@ -134,7 +134,7 @@
     "distance_calculated_at": {
       "type": "string",
       "format": "date-time",
-      "description": "Chapter 5 P1 \u2014 when the distance snapshot was captured.",
+      "description": "Distance snapshot timestamp.",
       "rls": {
         "read": {
           "$or": [
@@ -189,15 +189,13 @@
     },
     "site_assessment": {
       "type": "object",
-      "description": "Chapter 5 P1 \u2014 CANONICAL operational site assessment: practical property factors that affect the work, sale economics, and sale-day operations. This is the single editable copy (no second property/site entity, no deal-side duplicate). Captured at consultation/site visit via the sale editor. It is an operational assessment, NOT a home inspection and NOT the investor-oriented Property entity. Unknown defaults are honest: the system never guesses site conditions. Chapter 9 P1 adds access_details \u2014 the practical PRIVATE access plan (key/access method, alarm considerations, gate access, pets, association requirements, contractors, occupied/restricted areas, access windows). Chapter 13 P1 PRIVACY: field-level read is restricted to the sale owner (operator), the creator, and platform admins \u2014 LEAST PRIVILEGE. Assignment to the sale team is NOT sufficient authorization to read the site assessment and its sensitive access plan (alarm/gate codes, key locations); the operator briefs staff through tasks and team-safe excluded-area records.",
+      "description": "Canonical PRIVATE operational site assessment, not a home inspection. Owner/creator/admin only; sale-team assignment does not grant access to codes, key locations or alarm plans. Never project access credentials into public pages, marketing, proposals, agreements or unnecessary AI context.",
       "properties": {
         "property_type": {
-          "type": "string",
-          "description": "Operator's shorthand for the property (single-family home, condo, apartment building, estate property, storage unit, commercial space...)."
+          "type": "string"
         },
         "approx_size": {
-          "type": "string",
-          "description": "Approximate size sense (e.g. 2-bedroom, ~3000 sq ft, small condo, packed 3-story house)."
+          "type": "string"
         },
         "stairs_levels": {
           "type": "string",
@@ -246,8 +244,7 @@
             "significant",
             "unknown"
           ],
-          "default": "unknown",
-          "description": "HOA / community restrictions affecting signage, hours, traffic, or the sale itself. This field IS the Chapter 5 community-restrictions checklist \u2014 there is no second checklist system."
+          "default": "unknown"
         },
         "loading_access": {
           "type": "string",
@@ -270,8 +267,7 @@
           "default": "unknown"
         },
         "storage_areas": {
-          "type": "string",
-          "description": "Garage, outbuildings, attic, basement, sheds, off-site storage \u2014 where contents live beyond the main living space."
+          "type": "string"
         },
         "pickup_constraints": {
           "type": "string",
@@ -284,59 +280,47 @@
           "default": "unknown"
         },
         "sale_day_restrictions": {
-          "type": "string",
-          "description": "HOA rules, permitted time windows, noise/sign restrictions, traffic constraints, and other sale-day conditions."
+          "type": "string"
         },
         "access_details": {
           "type": "object",
-          "description": "Chapter 9 P1 \u2014 the practical property ACCESS PLAN for preparation and sale-day work: key/access method, alarm considerations, gate access, pets, association requirements, contractors, occupied areas, restricted rooms, access windows. HIGHLY SENSITIVE and PRIVATE: alarm codes, gate codes, and key locations must never be projected to proposals, agreements, public pages, Marketing Kit, case studies, or any AI context that does not need them. Chapter 13 P1: never readable by sale-team members through the sale record \u2014 least privilege; owner/admin only. Client documents may reference RESPONSIBILITY for access without embedding codes or key locations (the agreement merge variable is access RESPONSIBILITIES only).",
+          "description": "HIGHLY SENSITIVE private access plan. Never public or team-readable. Client documents may reference responsibility, never credentials.",
           "properties": {
             "key_access_method": {
-              "type": "string",
-              "description": "How the team gets in \u2014 the RESPONSIBILITY/METHOD record (e.g. 'client meets at 9am', 'lockbox on rear rail', 'agent holds keys'). Avoid recording codes here when responsibilities suffice."
+              "type": "string"
             },
             "alarm_considerations": {
-              "type": "string",
-              "description": "PRIVATE operational note \u2014 alarm system behavior, disarming responsibility, monitoring-company considerations. Never projected into client documents by default."
+              "type": "string"
             },
             "gate_access": {
-              "type": "string",
-              "description": "PRIVATE \u2014 gate/entry procedures. Codes stay here, never in proposals, agreements, public pages, or marketing."
+              "type": "string"
             },
             "pets": {
-              "type": "string",
-              "description": "Pets on site and handling expectations during preparation and sale days."
+              "type": "string"
             },
             "association_requirements": {
-              "type": "string",
-              "description": "Concrete association/HOA access requirements beyond the site_assessment summary (check-in, insurance certificate, vendor rules)."
+              "type": "string"
             },
             "contractors": {
-              "type": "string",
-              "description": "Outside contractors expected on site (cleanout, movers, specialists) and access arrangements."
+              "type": "string"
             },
             "occupied_areas": {
-              "type": "string",
-              "description": "Areas still occupied or off-limits for the family's personal use during preparation."
+              "type": "string"
             },
             "restricted_rooms": {
-              "type": "string",
-              "description": "Rooms/areas where work is restricted, postponed, or requires explicit client presence."
+              "type": "string"
             },
             "access_windows": {
-              "type": "string",
-              "description": "Permitted working hours / access windows agreed with the client or association."
+              "type": "string"
             },
             "notes": {
-              "type": "string",
-              "description": "Any other access-plan context."
+              "type": "string"
             }
           },
           "default": {}
         },
         "notes": {
-          "type": "string",
-          "description": "Any other operational factor that affects the work."
+          "type": "string"
         }
       },
       "default": {},
@@ -405,7 +389,7 @@
         "archived"
       ],
       "default": "draft",
-      "description": "Type-agnostic public/operational sale state. draft is PRIVATE (operator/team/admin only); upcoming/active/completed are the deliberate public listing states; archived is private again."
+      "description": "Draft/archived are private; upcoming/active/completed are deliberate public listing states."
     },
     "images": {
       "type": "array",
@@ -423,7 +407,7 @@
           },
           "synopsis": {
             "type": "string",
-            "description": "AI-generated internal synopsis visible only to the operator. Not shown publicly."
+            "description": "Internal AI research synopsis, not public copy."
           },
           "rotation": {
             "type": "number",
@@ -441,54 +425,106 @@
           },
           "skip_item": {
             "type": "boolean",
-            "default": false,
-            "description": "Marked as 'Don't Search' by user"
+            "default": false
           },
           "skip_saved_name": {
-            "type": "string",
-            "description": "Saved name before skip was toggled"
+            "type": "string"
           },
           "skip_saved_description": {
-            "type": "string",
-            "description": "Saved description before skip was toggled"
+            "type": "string"
           },
           "skip_updated_at": {
-            "type": "string",
-            "description": "Timestamp when skip was toggled"
+            "type": "string"
           },
           "skip_serp_search": {
-            "type": "boolean",
-            "description": "Legacy skip search flag"
+            "type": "boolean"
           },
           "serp_search_status": {
-            "type": "string",
-            "description": "Status from SalePhotoReviewStep (search_allowed, do_not_search, etc)"
+            "type": "string"
           },
           "ai_first_search_price": {
             "type": "number",
-            "description": "AI-suggested price from initial search"
+            "description": "Standard model estate-sale estimate; never asking price."
           },
           "ai_deep_search_price": {
             "type": "number",
-            "description": "AI-suggested price from deep search"
+            "description": "Deep Scan comparable asking-price average; not sold evidence."
           },
           "thumbnail_url": {
-            "type": "string",
-            "description": "Pre-generated thumbnail URL"
+            "type": "string"
           },
           "excluded_from_public": {
             "type": "boolean",
             "default": false,
-            "description": "Chapter 13 P1 \u2014 RETAINED-PRIVATE photo. Set when the client KEEPS this merchandise/photo (image-level KEEP merchandise decision). A retained/excluded photo is PRIVATE BY DEFAULT: it never appears in the public gallery, Marketing Kit, public website, or social imagery. Metadata flag only \u2014 existing production files are preserved, never duplicated or deleted."
+            "description": "Retained/KEEP merchandise photo; private by default, excluded from public gallery, Marketing Kit, website and social imagery. Files are preserved."
+          },
+          "name_source": {
+            "type": "string"
+          },
+          "description_source": {
+            "type": "string"
+          },
+          "ai_updated_at": {
+            "type": "string"
+          },
+          "ai_result_id": {
+            "type": "string"
+          },
+          "pipeline": {
+            "type": "object",
+            "description": "Stable photo identity, image/content revision, operator edit revision, saved classification and durable provider receipts. No credentials or file bytes. Internal operational metadata, never public presentation.",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "revision": {
+                "type": "string"
+              },
+              "edit_revision": {
+                "type": "string"
+              },
+              "classification": {
+                "type": "string"
+              },
+              "classification_reason": {
+                "type": "string"
+              },
+              "operator_fields": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "review_required": {
+                "type": "boolean"
+              },
+              "repair_backup_uri": {
+                "type": "string"
+              },
+              "repair_backup_sha256": {
+                "type": "string"
+              },
+              "repaired_at": {
+                "type": "string"
+              },
+              "jobs": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            },
+            "additionalProperties": false
           }
         }
       },
-      "description": "Array of image objects with metadata",
+      "description": "Photos with per-photo metadata. Identity and structural writers use conditional updates, not stale whole-array replacement.",
       "default": []
     },
     "image_thumbnails": {
       "type": "object",
-      "description": "Lightweight map of image index to thumbnail URL (avoids payload issues with large images arrays)",
+      "description": "Lightweight thumbnail URL map.",
       "default": {},
       "additionalProperties": {
         "type": "string"
@@ -520,7 +556,6 @@
       "items": {
         "type": "string"
       },
-      "description": "Furniture, Art, Jewelry, etc.",
       "default": []
     },
     "total_items": {
@@ -692,7 +727,7 @@
         "website",
         "other"
       ],
-      "description": "Chapter 2 P1 \u2014 PROJECTION of the structured referral source from the linked SaleConversionPipeline deal (copied when the deal is linked to this sale). Display/source attribution only; the pipeline deal remains the capture point.",
+      "description": "Projection from the linked pipeline deal; the deal remains the capture point.",
       "rls": {
         "read": {
           "$or": [
@@ -747,7 +782,7 @@
     },
     "referral_source_name": {
       "type": "string",
-      "description": "Chapter 2 P1 \u2014 PROJECTION of the referrer name from the linked SaleConversionPipeline deal.",
+      "description": "Referrer name projected from the linked pipeline deal.",
       "rls": {
         "read": {
           "$or": [
@@ -811,7 +846,6 @@
     "local_featured_until": {
       "type": "string",
       "format": "date-time",
-      "description": "Expiry timestamp for local featured status (set to 30 days from activation)",
       "rls": {
         "read": {
           "$or": [
@@ -903,11 +937,7 @@
                   }
                 },
                 {
-                  "data.sale_team": {
-                    "$in": [
-                      "{{user.id}}"
-                    ]
-                  }
+                  "data.operator_id": "{{user.id}}"
                 }
               ]
             },
@@ -922,7 +952,6 @@
     },
     "email_campaign_price": {
       "type": "number",
-      "description": "Price paid for email campaign",
       "rls": {
         "read": {
           "$or": [
@@ -949,7 +978,6 @@
     },
     "sms_campaign_price": {
       "type": "number",
-      "description": "Price paid for SMS campaign",
       "rls": {
         "read": {
           "$or": [
@@ -961,11 +989,7 @@
                   }
                 },
                 {
-                  "data.sale_team": {
-                    "$in": [
-                      "{{user.id}}"
-                    ]
-                  }
+                  "data.operator_id": "{{user.id}}"
                 }
               ]
             },
@@ -980,17 +1004,14 @@
     },
     "early_sign_in_enabled": {
       "type": "boolean",
-      "default": true,
-      "description": "Whether early sign-in list is allowed for this sale"
+      "default": true
     },
     "buyout_config": {
       "type": "object",
-      "description": "Configuration for buyout events \u2014 only applies when sale_type is buyout_or_cleanout",
       "properties": {
         "bid_deadline": {
           "type": "string",
-          "format": "date-time",
-          "description": "Deadline for resellers to submit buyout bids"
+          "format": "date-time"
         },
         "buyout_mode": {
           "type": "string",
@@ -998,60 +1019,48 @@
             "full_buyout",
             "cherry_pick"
           ],
-          "default": "full_buyout",
-          "description": "Full buyout = all or nothing; cherry_pick = resellers can pick individual items"
+          "default": "full_buyout"
         },
         "reseller_radius_miles": {
           "type": "integer",
-          "default": 25,
-          "description": "Marketing radius in miles to notify resellers"
+          "default": 25
         },
         "minimum_bid": {
-          "type": "number",
-          "description": "Minimum acceptable buyout bid (whole dollars)"
+          "type": "number"
         },
         "estimated_total_value": {
-          "type": "number",
-          "description": "Estimated total value of all contents (whole dollars)"
+          "type": "number"
         },
         "inventory_summary": {
-          "type": "string",
-          "description": "Brief summary of what is included in the buyout"
+          "type": "string"
         },
         "pickup_deadline": {
           "type": "string",
-          "format": "date",
-          "description": "Deadline for the winning bidder to remove all items"
+          "format": "date"
         },
         "payment_terms": {
-          "type": "string",
-          "description": "Payment terms for the buyout (e.g. cash, certified check, wire transfer)"
+          "type": "string"
         },
         "reseller_registration_required": {
           "type": "boolean",
-          "default": true,
-          "description": "Whether resellers must register before bidding"
+          "default": true
         },
         "max_reseller_spots": {
-          "type": "integer",
-          "description": "Maximum number of resellers who can participate"
+          "type": "integer"
         },
         "highlights": {
-          "type": "string",
-          "description": "Notable or high-value items to promote in the buyout listing"
+          "type": "string"
         },
         "cleanout_required": {
           "type": "boolean",
-          "default": false,
-          "description": "Whether the property must be completely emptied (cleanout)"
+          "default": false
         }
       },
       "default": null
     },
     "promoted_to_all_users": {
       "type": "boolean",
-      "default": false,
-      "description": "Whether this sale is promoted to all platform users"
+      "default": false
     },
     "sale_team": {
       "type": "array",
@@ -1059,7 +1068,7 @@
         "type": "string"
       },
       "default": [],
-      "description": "User IDs of team members assigned to manage this sale",
+      "description": "Assigned team User IDs; sale is source of truth.",
       "rls": {
         "read": {
           "$or": [
@@ -1113,32 +1122,26 @@
       }
     },
     "seo_title": {
-      "type": "string",
-      "description": "SEO optimized page title"
+      "type": "string"
     },
     "seo_description": {
-      "type": "string",
-      "description": "SEO meta description"
+      "type": "string"
     },
     "seo_slug": {
-      "type": "string",
-      "description": "URL slug for SEO"
+      "type": "string"
     },
     "seo_keywords": {
       "type": "array",
       "items": {
         "type": "string"
       },
-      "default": [],
-      "description": "SEO keywords"
+      "default": []
     },
     "ai_summary": {
-      "type": "string",
-      "description": "AI-generated summary of the sale"
+      "type": "string"
     },
     "schema_json": {
-      "type": "object",
-      "description": "JSON-LD structured data schema"
+      "type": "object"
     },
     "indexed_status": {
       "type": "string",
@@ -1149,32 +1152,29 @@
         "not_indexed",
         "unknown"
       ],
-      "default": "not_submitted",
-      "description": "Google indexing status"
+      "default": "not_submitted"
     },
     "website_slug": {
       "type": "string",
-      "description": "Public website URL slug (human-readable, normalized, URL-safe; Company-scoped unique; deterministic initial generation with collision-safe ordinal suffixes). Presentation/routing identity ONLY \u2014 never replaces the canonical Sale ID. Generated server-side."
+      "description": "Company-scoped public routing slug, server-generated, never a replacement for Sale ID."
     },
     "source_deal_id": {
       "type": "string",
-      "description": "Chapter 13 P1 \u2014 ACTIVATION PROVENANCE: the SaleConversionPipeline deal this active project was activated from. The deal's estate_sale_id link points back here; this field lets the sale itself answer WHERE DID THIS ACTIVE PROJECT COME FROM? even before/without the deal link."
+      "description": "Activation provenance reference to the pipeline deal."
     },
     "activation": {
       "type": "object",
       "default": {},
-      "description": "Chapter 13 P1 \u2014 activation provenance snapshot (references only \u2014 immutable snapshot truth stays in the proposal/agreement records and is never copied here): deal, accepted proposal, executed agreement, when, and who activated.",
+      "description": "Immutable activation provenance references; proposal/agreement truth is never copied here.",
       "properties": {
         "deal_id": {
           "type": "string"
         },
         "proposal_id": {
-          "type": "string",
-          "description": "The ACCEPTED SaleProposal at activation time, when one exists (reference, never a copy)."
+          "type": "string"
         },
         "agreement_id": {
-          "type": "string",
-          "description": "The EXECUTED/READY SaleAgreement at activation time, when one exists (reference, never a copy)."
+          "type": "string"
         },
         "activated_at": {
           "type": "string",
@@ -1191,19 +1191,16 @@
     "communication_plan": {
       "type": "object",
       "default": {},
-      "description": "Chapter 13 P1 \u2014 the project's CLIENT COMMUNICATION PLAN: primary communication contact, preferred method, and update cadence. This is OPERATIONAL PREFERENCE ONLY \u2014 it is NEVER marketing consent, and an SMS preference is NEVER SMS marketing consent. Customer.io / marketing consent state is never created or changed by this field.",
+      "description": "Routine client communication preference only; never marketing or SMS consent. Involvement is not client authority.",
       "properties": {
         "primary_contact_id": {
-          "type": "string",
-          "description": "Optional canonical Contact link for the primary communication contact."
+          "type": "string"
         },
         "primary_contact_name": {
-          "type": "string",
-          "description": "Who the operator communicates with routinely (client or family member). INVOLVEMENT IS NOT AUTHORITY \u2014 the authorized decision-makers live in SaleAuthority."
+          "type": "string"
         },
         "relationship": {
-          "type": "string",
-          "description": "Relationship to the client/estate (e.g. daughter, executor, attorney)."
+          "type": "string"
         },
         "preferred_method": {
           "type": "string",
@@ -1212,8 +1209,7 @@
             "SMS",
             "PHONE",
             "OTHER"
-          ],
-          "description": "How this contact prefers routine project updates. PREFERENCE \u2260 CONSENT \u2014 it never opts anyone into marketing."
+          ]
         },
         "cadence": {
           "type": "string",
@@ -1223,19 +1219,17 @@
             "TWICE_WEEKLY",
             "MILESTONE",
             "CUSTOM"
-          ],
-          "description": "How often the operator committed to updating the client. Informs the human (and optional client-update tasks); nothing is auto-sent."
+          ]
         },
         "update_note": {
-          "type": "string",
-          "description": "Custom cadence / context in the operator's words."
+          "type": "string"
         }
       }
     },
     "excluded_areas": {
       "type": "array",
       "default": [],
-      "description": "Chapter 13 P1 \u2014 areas EXCLUDED / RESTRICTED FROM SALE (rooms, closets, cabinets, storage, outbuildings the client retains or restricts). TEAM-SAFE by design: names and notes only \u2014 never access codes or credentials (those live in the operator-only site_assessment.access_details). Deliberately on the sale (team-readable), not the operator-private consultation deal.",
+      "description": "Team-safe retained/restricted areas, never credentials. Family deadlines are distinct from team task deadlines.",
       "items": {
         "type": "object",
         "properties": {
@@ -1243,8 +1237,7 @@
             "type": "string"
           },
           "name": {
-            "type": "string",
-            "description": "Area name (e.g. Primary bedroom closet, Garage workshop, Attic)."
+            "type": "string"
           },
           "type": {
             "type": "string",
@@ -1259,18 +1252,15 @@
             "default": "room"
           },
           "note": {
-            "type": "string",
-            "description": "Why it is excluded / handling notes (team-safe, no codes)."
+            "type": "string"
           },
           "family_deadline": {
             "type": "string",
-            "format": "date",
-            "description": "Chapter 13 P1 \u2014 CLIENT/FAMILY ACTION DEADLINE: the date the family committed to handle this area by (e.g. remove retained items). Deliberately distinct from any team task due date \u2014 this is the family's own commitment, surfaced on the timeline, never a scheduling engine."
+            "format": "date"
           },
           "resolved": {
             "type": "boolean",
-            "default": false,
-            "description": "Family/owner confirmed the area is handled."
+            "default": false
           },
           "resolved_at": {
             "type": "string",
@@ -1282,17 +1272,15 @@
     "prep_zones": {
       "type": "array",
       "default": [],
-      "description": "Chapter 14 P1 \u2014 TEAM-READABLE PREP ZONES (rooms / work areas) for preparation. Same projection pattern as excluded_areas: deliberately ON THE SALE (team-readable), NOT on the operator-private Chapter 12 consultation deal. source_type/source_id preserves provenance back to the consultation room a zone originated from WITHOUT exposing private consultation content \u2014 only the room NAME is projected, so the two never drift independently. Zone notes are TEAM-SAFE (no codes/credentials). Prep status is honest human-set state \u2014 no percentage progress anywhere. Discovery counts are DERIVED at read time from SaleDiscovery records, never stored here. Chapter 17 P1 extends the SAME zone with the smallest staging layer (purpose, category plan, signage/equipment needs, lighting/flow concerns, staging notes, and a sale-day status that NEVER overwrites Chapter 14 preparation truth) \u2014 there is NO second room/staging system. Chapter 22 P1: prep zones are also the suggested room list for the FINAL WALKTHROUGH (human confirmations recorded in transition.walkthrough).",
+      "description": "Canonical team-readable preparation/staging zone registry. Consultation provenance projects room names only. Human-set prep and sale-day states are independent; discovery counts are derived, never stored. Category plans never auto-relocate Items. No credentials or private consultation notes.",
       "items": {
         "type": "object",
         "properties": {
           "zone_id": {
-            "type": "string",
-            "description": "Stable zone identifier (referenced by SaleDiscovery.zone_id, Item.zone_id, and work-zone QR signs)."
+            "type": "string"
           },
           "name": {
-            "type": "string",
-            "description": "Zone/room name (Living Room, Basement, Garage, Attic...)."
+            "type": "string"
           },
           "source_type": {
             "type": "string",
@@ -1301,12 +1289,10 @@
               "EXCLUDED_AREA",
               "MANUAL"
             ],
-            "default": "MANUAL",
-            "description": "Chapter 14 P1-7 \u2014 where this zone came from."
+            "default": "MANUAL"
           },
           "source_id": {
-            "type": "string",
-            "description": "Provenance reference (consultation room_id) when source_type is CONSULTATION_ROOM."
+            "type": "string"
           },
           "prep_status": {
             "type": "string",
@@ -1318,16 +1304,13 @@
               "ready_for_inventory",
               "complete"
             ],
-            "default": "untouched",
-            "description": "Chapter 14 P1-8 \u2014 deterministic preparation state, human-set. WAITING states pair with the canonical open decision/research records; never a percentage. Chapter 17 P1: PREPARATION truth \u2014 the separate sale_day_status carries the sale-day operational state and this history is never overwritten."
+            "default": "untouched"
           },
           "assignee_user_id": {
-            "type": "string",
-            "description": "User ID of the responsible team member. Work assignment itself reuses SaleTask (ASSIGN WORK creates a task) \u2014 this is the zone-level responsibility display."
+            "type": "string"
           },
           "assignee_name": {
-            "type": "string",
-            "description": "Assignee display-name snapshot."
+            "type": "string"
           },
           "access_class": {
             "type": "string",
@@ -1339,8 +1322,7 @@
               "PICKUP_ONLY",
               "CHECKOUT"
             ],
-            "default": "UNCLASSIFIED",
-            "description": "Chapter 14 P1-37 \u2014 customer access plan for this area. Reuses the Chapter 8/13 security walkthrough; UNCLASSIFIED is the honest default, never guessed."
+            "default": "UNCLASSIFIED"
           },
           "security_flags": {
             "type": "array",
@@ -1353,29 +1335,24 @@
                 "other_security_concern"
               ]
             },
-            "default": [],
-            "description": "Chapter 14 P1-38 \u2014 sightline/security attention flags. Planning aids only \u2014 never a claim of surveillance or safety."
+            "default": []
           },
           "removal_route_note": {
-            "type": "string",
-            "description": "Chapter 14 P1-41 \u2014 large-item removal route / special concern for this zone. Chapter 21 transaction/pickup state is untouched."
+            "type": "string"
           },
           "protection_note": {
-            "type": "string",
-            "description": "Chapter 14 P1-39 \u2014 property-protection concern for this zone (floors, walls, doors, stairs, landscaping, architectural features)."
+            "type": "string"
           },
           "condition_photo_uri": {
             "type": "string",
-            "description": "Chapter 14 P1-40 \u2014 PRIVATE pre-sale property-condition photo (private storage; viewed via short-lived signed URL). NEVER public gallery or marketing."
+            "description": "PRIVATE property-condition photo file_uri; never marketing."
           },
           "notes": {
-            "type": "string",
-            "description": "Team-safe prep notes (no codes/credentials)."
+            "type": "string"
           },
           "completed_at": {
             "type": "string",
-            "format": "date-time",
-            "description": "When prep_status was set to complete."
+            "format": "date-time"
           },
           "staging_purpose": {
             "type": "string",
@@ -1385,19 +1362,16 @@
               "STORAGE",
               "CHECKOUT",
               "OTHER"
-            ],
-            "description": "Chapter 17 P1-1 \u2014 the zone's role in the temporary retail environment. Absent = not yet planned (honest unknown)."
+            ]
           },
           "category_plan": {
             "type": "array",
             "default": [],
-            "description": "Chapter 17 P1-7 \u2014 PLANNING intent for merchandise categories in this zone. A PLAN ONLY: Item locations change only when merchandise physically moves; nothing is ever auto-relocated. References the existing Item.category vocabulary \u2014 no competing category truth.",
             "items": {
               "type": "object",
               "properties": {
                 "category": {
-                  "type": "string",
-                  "description": "Existing Item category (or 'other')."
+                  "type": "string"
                 },
                 "intent": {
                   "type": "string",
@@ -1405,12 +1379,10 @@
                     "KEEP_HERE",
                     "CONSOLIDATE_TO"
                   ],
-                  "default": "KEEP_HERE",
-                  "description": "Keep this category displayed here, or plan to consolidate it into another zone."
+                  "default": "KEEP_HERE"
                 },
                 "target_zone_id": {
-                  "type": "string",
-                  "description": "Destination zone when intent is CONSOLIDATE_TO (planning reference only)."
+                  "type": "string"
                 },
                 "note": {
                   "type": "string"
@@ -1419,12 +1391,10 @@
             }
           },
           "signage_needs": {
-            "type": "string",
-            "description": "Chapter 17 P1-1 \u2014 signs this zone needs (category, directional, restricted...). Team-safe."
+            "type": "string"
           },
           "equipment_needs": {
-            "type": "string",
-            "description": "Chapter 17 P1-1 \u2014 tables/racks/lighting equipment this zone needs (actual equipment truth stays in SaleEquipmentAssignment \u2014 this is the plan)."
+            "type": "string"
           },
           "lighting_concern": {
             "type": "string",
@@ -1434,16 +1404,13 @@
               "additional_needed",
               "unknown"
             ],
-            "default": "unknown",
-            "description": "Chapter 17 P1 \u2014 honest lighting state for merchandising visibility. unknown until assessed; never a claim the space is safe or code-compliant."
+            "default": "unknown"
           },
           "flow_concerns": {
-            "type": "string",
-            "description": "Chapter 17 P1-4/P1-5 \u2014 customer-flow / bottleneck observations for this zone (narrow passage, doorway, stairs, queue conflict, removal conflict). Team-safe; never access codes."
+            "type": "string"
           },
           "staging_notes": {
-            "type": "string",
-            "description": "Chapter 17 P1-1 \u2014 team-safe staging notes. NEVER private consultation content, codes, or credentials (those stay in the operator-only consultation deal / access plan)."
+            "type": "string"
           },
           "sale_day_status": {
             "type": "string",
@@ -1453,8 +1420,7 @@
               "DEPLETED",
               "CONSOLIDATE",
               "CLOSED"
-            ],
-            "description": "Chapter 17 P1-37 \u2014 SALE-DAY operational state, deliberately a SEPARATE field from prep_status so Chapter 14 preparation history is never overwritten. Absent = pre-opening / not applicable. Human-set; marking CONSOLIDATE never auto-moves Items."
+            ]
           }
         }
       }
@@ -1462,23 +1428,19 @@
     "customer_flow": {
       "type": "object",
       "default": {},
-      "description": "Chapter 17 P1-3/P1-4 \u2014 the sale's practical CUSTOMER PATH: entry, exit, checkout location, and queue notes. Operational strings only \u2014 NOT floor-plan/CAD architecture, and NEVER private access/security details (those stay in the operator-only site_assessment.access_details). Safe buyer-facing subsets of this plan may render on the public sale guide.",
+      "description": "Practical customer path, not CAD, legal occupancy or security certification. Never private access/security credentials.",
       "properties": {
         "entry_note": {
-          "type": "string",
-          "description": "Where customers enter (e.g. 'Front porch door')."
+          "type": "string"
         },
         "exit_note": {
-          "type": "string",
-          "description": "Where customers exit / where large purchases leave (e.g. 'Side door to driveway')."
+          "type": "string"
         },
         "checkout_location": {
-          "type": "string",
-          "description": "Where checkout is set up (e.g. 'Dining room table by the stairs')."
+          "type": "string"
         },
         "queue_note": {
-          "type": "string",
-          "description": "Where the line should form and what it must not block."
+          "type": "string"
         },
         "notes": {
           "type": "string"
@@ -1488,89 +1450,75 @@
     "pickup_plan": {
       "type": "object",
       "default": {},
-      "description": "Chapter 13 P1 \u2014 project-level DEFAULT large-item pickup plan (window/location/instructions) for buyer pickups. A planning default only: Chapter 21 transaction truth stays on Item records and checkout \u2014 this plan never alters it.",
+      "description": "Project-level planning defaults only; canonical transaction/pickup truth remains on Item and checkout.",
       "properties": {
         "pickup_window": {
-          "type": "string",
-          "description": "Default pickup window (e.g. 'Sat 3pm\u20135pm, Sun 12pm\u20134pm')."
+          "type": "string"
         },
         "pickup_location": {
-          "type": "string",
-          "description": "Where buyers pick up (e.g. 'Side driveway, 2nd garage door')."
+          "type": "string"
         },
         "instructions": {
-          "type": "string",
-          "description": "Default pickup instructions for buyers."
+          "type": "string"
         }
       }
     },
     "entry_management": {
       "type": "object",
       "default": {},
-      "description": "Chapter 20 P1-8/P1-9 \u2014 the sale's ENTRY OPERATING MODE and capacity PROCEDURE, operator-defined. This is the operator's own procedure \u2014 NEVER a legal or fire-code occupancy certification, and capacity_target is the operator's own working number, not a code limit. Team-visible (shown to the entry staffer in My Sale Day). Absent mode = not yet decided (honest unknown).",
+      "description": "Operator-defined entry/capacity procedure, never a fire-code or legal occupancy certification. Absent mode is unknown.",
       "properties": {
         "mode": {
           "type": "string",
           "enum": [
             "OPEN_ENTRY",
             "CAPACITY_CONTROLLED"
-          ],
-          "description": "OPEN_ENTRY = customers enter freely. CAPACITY_CONTROLLED = the operator manages the flow per the procedure below."
+          ]
         },
         "capacity_target": {
-          "type": "integer",
-          "description": "Operator's own working target for approximate people inside at once (operator procedure \u2014 never a code/legal capacity)."
+          "type": "integer"
         },
         "one_out_one_in": {
           "type": "boolean",
-          "default": false,
-          "description": "Operator procedure: one-out-one-in when the target is reached."
+          "default": false
         },
         "procedure_note": {
-          "type": "string",
-          "description": "The operator's entry procedure in their own words (group entry, stroller/bag rules, line management...)."
+          "type": "string"
         },
         "instructions": {
-          "type": "string",
-          "description": "Any other team-facing entry instructions (team-safe \u2014 no access codes; those stay in the operator-only access plan)."
+          "type": "string"
         }
       }
     },
     "client_day_plan": {
       "type": "object",
       "default": {},
-      "description": "Chapter 20 P1-53/P1-55 \u2014 the sale-day CLIENT PRESENCE PLAN: whether the client/family is expected or on site, and TEAM-SAFE sale-day instructions/boundaries. Deliberately holds NO private contact information (routine communication identity lives in communication_plan; private notes stay private) \u2014 only what the team operationally needs: CLIENT EXPECTED / CLIENT ON SITE plus the operator's team-safe instructions. A client's presence is NEVER client authority (decision-makers live in SaleAuthority; Chapter 19 P0 decision enforcement is untouched).",
+      "description": "Team-safe sale-day client presence/boundaries only. Presence is not authority. No private contact details or notes.",
       "properties": {
         "client_expected": {
-          "type": "boolean",
-          "description": "The client/family is expected to visit during the sale."
+          "type": "boolean"
         },
         "expected_time": {
-          "type": "string",
-          "description": "When they are expected (free text \u2014 'Sat morning', 'after 1pm')."
+          "type": "string"
         },
         "client_on_site": {
-          "type": "boolean",
-          "description": "Operator-set: the client is currently on site. Team-visible operational fact only."
+          "type": "boolean"
         },
         "boundaries_note": {
-          "type": "string",
-          "description": "Team-safe boundaries while the client is present (merchandise conversations, pricing involvement, private areas) \u2014 stated so any staffer can read it. No private client notes."
+          "type": "string"
         },
         "instructions": {
-          "type": "string",
-          "description": "Other team-safe sale-day instructions tied to the client visit (e.g. 'let the operator know when they arrive')."
+          "type": "string"
         }
       }
     },
     "transition": {
       "type": "object",
       "default": {},
-      "description": "Chapter 22 P1 \u2014 the sale's TRANSITION COMPLETION block: the client's objective, the property deadline that drives the project, what FINISHED means for this engagement, the final human-verified walkthrough, the buyout award, and the human completion approval. SALE COMPLETE \u2260 TRANSITION COMPLETE: the sale event ends (status) and financial settlement finalizes independently; this block records when the PROPERTY TRANSITION itself concluded \u2014 a conclusion the system supports only after required obligations have endings (approveTransitionCompletion gate). Completion is DERIVED from canonical records plus human approval \u2014 this block stores the human-approved conclusion and planning inputs, never a parallel truth store.",
+      "description": "Human-approved transition completion, independent of sale-event status or settlement. Canonical records plus approval determine readiness, never this block alone.",
       "properties": {
         "objective": {
           "type": "object",
-          "description": "The client's actual transition objective \u2014 THE CLIENT'S OBJECTIVE DEFINES SUCCESS. 'Everything gone' is not a scope.",
           "properties": {
             "key": {
               "type": "string",
@@ -1584,8 +1532,7 @@
               ]
             },
             "notes": {
-              "type": "string",
-              "description": "The objective in the client's/operator's own words \u2014 nuance is never reduced to the enum."
+              "type": "string"
             },
             "achieved": {
               "type": "string",
@@ -1593,8 +1540,7 @@
                 "YES",
                 "PARTIAL",
                 "NO"
-              ],
-              "description": "Operator-recorded honest judgment on whether the objective was achieved (recorded at/after completion)."
+              ]
             },
             "achieved_note": {
               "type": "string"
@@ -1603,7 +1549,7 @@
         },
         "property_deadline": {
           "type": "object",
-          "description": "The real project-driving property deadline (closing, walkthrough, move, cleaning, possession, turnover). Absent date = NO DEADLINE RECORDED \u2014 unknown stays unknown, never silently 'no deadline needed'.",
+          "description": "Absent date means no deadline recorded, not no deadline needed.",
           "properties": {
             "date": {
               "type": "string",
@@ -1622,14 +1568,13 @@
               ]
             },
             "note": {
-              "type": "string",
-              "description": "Source/context of the deadline."
+              "type": "string"
             }
           }
         },
         "completion_standard": {
           "type": "object",
-          "description": "What FINISHED means for THIS project \u2014 tied back to the accepted SaleScope, never an assumed 'empty house'.",
+          "description": "Agreed engagement scope, never an assumed empty house.",
           "properties": {
             "standard": {
               "type": "string",
@@ -1646,8 +1591,7 @@
             },
             "requires_item_disposition": {
               "type": "boolean",
-              "default": true,
-              "description": "Whether every remaining tracked item must have a recorded disposition/reason before completion (NOTHING IS LEFTOVER \u2014 everything has a next status)."
+              "default": true
             },
             "note": {
               "type": "string"
@@ -1656,7 +1600,7 @@
         },
         "buyout_award": {
           "type": "object",
-          "description": "Chapter 22 P0-9 \u2014 the accepted BUYOUT on this sale's remaining merchandise, written ONLY through the sanctioned setTransitionEventScope path (client-authorized decision required; protected merchandise is structurally rejected from the included list).",
+          "description": "Sanctioned setTransitionEventScope only, requiring client-authorized decision and rejecting protected merchandise.",
           "properties": {
             "buyer_name": {
               "type": "string"
@@ -1668,8 +1612,7 @@
               "type": "string"
             },
             "decision_id": {
-              "type": "string",
-              "description": "Canonical SaleClientDecision evidencing client approval of this buyout."
+              "type": "string"
             },
             "authorized_by_name": {
               "type": "string"
@@ -1694,14 +1637,13 @@
             },
             "transferred_at": {
               "type": "string",
-              "format": "date-time",
-              "description": "When the bulk transfer physically completed (absent = not transferred)."
+              "format": "date-time"
             }
           }
         },
         "walkthrough": {
           "type": "object",
-          "description": "Chapter 22 P1 \u2014 the FINAL WALKTHROUGH: area-by-area HUMAN confirmations (software records the operator's confirmation; software does NOT claim it physically inspected anything). Anything intentionally remaining carries a reason.",
+          "description": "Human area-by-area confirmations; software does not physically inspect. Intentionally remaining merchandise requires an exception reason.",
           "properties": {
             "areas": {
               "type": "array",
@@ -1730,19 +1672,17 @@
                     "type": "string"
                   },
                   "exception_note": {
-                    "type": "string",
-                    "description": "Why something intentionally remains here (BUYER PICKUP / CLIENT RETAINED / DONATION PENDING / PROVIDER PENDING / SPECIALIST / OUTSIDE SCOPE / OTHER EXPLAINED)."
+                    "type": "string"
                   }
                 }
               }
             },
             "condition_note": {
-              "type": "string",
-              "description": "Factual final property-condition observations (walls, floors, stairs, doors...). Never an inspection claim."
+              "type": "string"
             },
             "condition_photo_uri": {
               "type": "string",
-              "description": "PRIVATE completion photo (private storage file_uri; viewed via short-lived signed URL)."
+              "description": "PRIVATE completion photo file_uri."
             },
             "completed_at": {
               "type": "string",
@@ -1753,7 +1693,7 @@
         "transition_completed_at": {
           "type": "string",
           "format": "date-time",
-          "description": "Human-approved TRANSITION COMPLETE conclusion (written by approveTransitionCompletion after all required obligations have endings). Absent = TRANSITION OPEN."
+          "description": "Human approval through approveTransitionCompletion only; absent means open."
         },
         "completed_by": {
           "type": "string"
@@ -1769,7 +1709,7 @@
     "access_closeout": {
       "type": "object",
       "default": {},
-      "description": "Chapter 23 P1 \u2014 the smallest truthful ACCESS CLOSEOUT record for the project: the operator's human confirmation of what happened to keys, lockbox, and access devices at the end of the engagement. Human confirmation only \u2014 the software never claims a device was physically returned. Codes/credentials are NEVER stored here (they stay in the operator-only access plan). Absent = NOT YET CONFIRMED, which blocks project close until the operator records a status.",
+      "description": "Human confirmation of keys/access devices returned, transferred or disabled. No credentials. Absent/unresolved blocks close.",
       "properties": {
         "status": {
           "type": "string",
@@ -1779,12 +1719,10 @@
             "RETURNED",
             "TRANSFERRED",
             "DISABLED"
-          ],
-          "description": "NOT_APPLICABLE = no company-held access devices for this project. UNRESOLVED = a device is still outstanding. RETURNED / TRANSFERRED / DISABLED = the operator's human confirmation of the ending. Never automatic."
+          ]
         },
         "note": {
-          "type": "string",
-          "description": "What was returned/transferred, to whom \u2014 team-safe, never codes."
+          "type": "string"
         },
         "closed_at": {
           "type": "string",
@@ -1798,7 +1736,7 @@
     "discount_schedule": {
       "type": "array",
       "default": [],
-      "description": "Chapter 16 P1-39/P1-40 \u2014 the operator's PLANNED discount stages for this sale (Day 1 full price, Day 2, final hours...). OPERATOR-DEFINED PLAN ONLY: the system never applies a discount automatically; a stage is guidance for the team, and an Item marked excluded_from_discounts is never silently discounted \u2014 applying a stage to such an item is an explicit human price change through the normal price-change path (changeItemPrice), never a batch effect. Chapter 17 P1: discount SIGNS may be printed from this plan \u2014 a printed sign is a SNAPSHOT and never modifies Item.price. Chapter 20 P1-25/P1-26: checkout and the Live Sale Command Center DISPLAY the current stage as cashier guidance; a human still applies any authorized discount.",
+      "description": "Operator-defined planned guidance only, never automatically applied. Item excluded_from_discounts requires explicit human handling. Printed signs are snapshots, never price changes.",
       "items": {
         "type": "object",
         "properties": {
@@ -1806,21 +1744,17 @@
             "type": "string"
           },
           "name": {
-            "type": "string",
-            "description": "Stage name (e.g. 'Day 2', 'Final Hours')."
+            "type": "string"
           },
           "start_at": {
             "type": "string",
-            "format": "date-time",
-            "description": "When the stage begins (optional)."
+            "format": "date-time"
           },
           "discount_percent": {
-            "type": "number",
-            "description": "Planned percent off the current price at this stage."
+            "type": "number"
           },
           "note": {
-            "type": "string",
-            "description": "Operator note (e.g. 'Everything except jewelry and the dining set')."
+            "type": "string"
           }
         }
       }
