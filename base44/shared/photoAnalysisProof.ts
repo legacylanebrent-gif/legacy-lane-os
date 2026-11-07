@@ -124,9 +124,11 @@ export async function photoAnalysisProof() {
   /** Runs the same bounded-concurrency loop the browser runs. */
   async function drain(lanes = 3) {
     let processed = 0;
+    let exhausted = false;
     await Promise.all(Array.from({ length: lanes }, async () => {
       for (;;) {
-        const result = await invoke({ action: 'next' });
+        const result = await invoke({ action: 'next', credits_exhausted: exhausted });
+        if (result.exhausted) exhausted = true;
         if (result.photo) processed += 1;
         if (result.done) return;
       }
@@ -265,7 +267,8 @@ export async function photoAnalysisProof() {
   assert(awaiting.every(p => !!p.description), 'awaiting-credit photos keep their basic description');
   assert(awaiting.every(p => p.ai_first_search_price == null), 'awaiting-credit photos never carry an invented price');
   creditRemaining = 1000;
-  await invoke({ action: 'next' });
+  const requeuedForCredits = await invoke({ action: 'retry_failed' });
+  assert(requeuedForCredits.queued >= awaiting.length, 'awaiting-credit photos can be requeued');
   await drain(3);
   assert(record.images.filter(p => jobOf(p.pipeline.id)?.state === 'awaiting_credits').length === 0, 'topping up credits finishes the remaining research');
 

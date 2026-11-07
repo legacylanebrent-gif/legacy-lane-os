@@ -327,7 +327,7 @@ function claimNext(images, now) {
 /* ─────────────────────────── processing ─────────────────────────── */
 
 async function processClaimed(ctx) {
-  const { service, user, saleId, target, describe, research, credits, spendCredit } = ctx;
+  const { service, user, saleId, target, describe, research, credits, spendCredit, creditsExhausted } = ctx;
   const ref = { photo_id: target.photo.pipeline.id, image_revision: target.photo.pipeline.revision };
   const meta = { service, user, saleId };
   const started = Date.now();
@@ -370,6 +370,12 @@ async function processClaimed(ctx) {
         return { released: true };
       }
       const NEEDS_CREDITS = 'Awaiting search credits for identification and pricing';
+      // Once this run knows credits are gone, further single-item photos are
+      // marked without re-checking, so group photos behind them still finish.
+      if (creditsExhausted) {
+        const value = await finish(NEEDS_CREDITS);
+        return { photo: value.photo, state: 'awaiting_credits', exhausted: true };
+      }
       const budget = await credits();
       if (!budget?.allowed) {
         const value = await finish(NEEDS_CREDITS);
@@ -448,7 +454,7 @@ export async function runPhotoAnalysis(ctx) {
     if (!claimed) {
       return { done: true, counts: summarize(claim.images, Date.now()), credits: await safeCredits() };
     }
-    const outcome = await processClaimed({ ...ctx, saleId, target: claimed, describe, research });
+    const outcome = await processClaimed({ ...ctx, saleId, target: claimed, describe, research, creditsExhausted: body.credits_exhausted === true });
     return {
       done: false,
       photo: outcome.photo || null,
@@ -466,7 +472,7 @@ export async function runPhotoAnalysis(ctx) {
       let queued = 0;
       for (const photo of images) {
         const job = jobOf(photo);
-        if (!job || !['failed', 'outcome_unknown'].includes(job.state)) continue;
+        if (!job || !['failed', 'outcome_unknown', 'awaiting_credits'].includes(job.state)) continue;
         photo.pipeline.jobs = {
           ...photo.pipeline.jobs,
           [JOB_KEY]: { ...job, state: 'pending', attempts: 0, error: null, retryable: false, retry_at: null, claimed_at: null, stage: job.stage === 'final' ? 'described' : job.stage },
