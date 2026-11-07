@@ -1813,7 +1813,12 @@ Return ONLY the description text, no extra commentary.`
                      </Button>
 
                     </div>
-                    <SalePhotoAnalysisPanel saleId={saleId} analysis={analysis} photos={formData.images} />
+                    <SalePhotoAnalysisPanel
+                      saleId={saleId}
+                      analysis={analysis}
+                      photos={formData.images}
+                      onRemovePhoto={photo => setFormData(prev => ({ ...prev, images: prev.images.filter(p => p.pipeline?.id !== photo.pipeline?.id) }))}
+                    />
 
                     <div className="space-y-3">
                      <div className="relative">

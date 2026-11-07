@@ -1,5 +1,6 @@
-import React from 'react';
-import { Loader2, RotateCcw, Search, RefreshCw, Check, AlertTriangle, ImageOff } from 'lucide-react';
+import React, { useState } from 'react';
+import { Loader2, RotateCcw, Search, RefreshCw, Check, AlertTriangle, ImageOff, ExternalLink, Pencil, Trash2 } from 'lucide-react';
+import PhotoOperatorEditor from '@/components/estate/PhotoOperatorEditor';
 
 const TONE = {
   ready: 'bg-green-50 border-green-200 text-green-700',
@@ -23,13 +24,20 @@ const LABEL = {
 
 const reasonList = job => (job?.review_flags || []).filter(Boolean);
 
-export default function PhotoAnalysisCard({ photo, index, state, busy, onRetry, onReanalyze, onResearch, onClassify, onRelease }) {
+export default function PhotoAnalysisCard({ photo, index, state, busy, onRetry, onReanalyze, onResearch, onClassify, onRelease, onSaveFields, onDelete }) {
+  const [editing, setEditing] = useState(false);
   const job = photo?.pipeline?.jobs?.analysis;
   const research = job?.research;
   const suggested = research?.suggested_price;
   const reasons = reasonList(job);
   const classification = job?.classification;
   const held = state === 'blocked';
+  // Manual review happens once the photo is not being worked on, so it is
+  // available for every item after Step 2 finishes.
+  const canOperate = state !== 'inflight';
+  const lensUrl = photo?.url
+    ? `https://lens.google.com/uploadbyurl?url=${encodeURIComponent(photo.url)}`
+    : null;
 
   return (
     <div className="bg-white border border-slate-200 rounded-xl overflow-hidden">
@@ -73,7 +81,35 @@ export default function PhotoAnalysisCard({ photo, index, state, busy, onRetry, 
         </div>
       </div>
 
+      {editing && (
+        <PhotoOperatorEditor
+          photo={photo}
+          busy={busy}
+          onSave={fields => onSaveFields(photo, fields)}
+          onClose={() => setEditing(false)}
+        />
+      )}
+
       <div className="flex flex-wrap gap-1.5 px-2.5 pb-2.5">
+        {canOperate && lensUrl && (
+          <a
+            href={lensUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1 px-2 py-1 rounded border border-cyan-600 bg-cyan-50 text-[11px] font-semibold text-cyan-800 hover:bg-cyan-100"
+          >
+            <ExternalLink className="w-3 h-3" /> Google Lens
+          </a>
+        )}
+        {canOperate && (
+          <button
+            type="button"
+            onClick={() => setEditing(value => !value)}
+            className={`inline-flex items-center gap-1 px-2 py-1 rounded border text-[11px] font-medium ${editing ? 'border-cyan-600 bg-cyan-50 text-cyan-800' : 'border-slate-300 bg-white text-slate-700'}`}
+          >
+            <Pencil className="w-3 h-3" /> {editing ? 'Close editor' : 'Edit title, price'}
+          </button>
+        )}
         {held && (
           <>
             <span className="text-[10px] text-slate-500 w-full">
@@ -113,6 +149,12 @@ export default function PhotoAnalysisCard({ photo, index, state, busy, onRetry, 
           <button type="button" disabled={busy} onClick={() => onResearch(photo)}
             className="inline-flex items-center gap-1 px-2 py-1 rounded border border-indigo-300 bg-indigo-50 text-[11px] font-medium text-indigo-800 disabled:opacity-50">
             <Search className="w-3 h-3" /> Search again
+          </button>
+        )}
+        {canOperate && (
+          <button type="button" disabled={busy} onClick={() => onDelete(photo)}
+            className="inline-flex items-center gap-1 px-2 py-1 rounded border border-red-300 bg-white text-[11px] font-medium text-red-700 hover:bg-red-50 disabled:opacity-50">
+            <Trash2 className="w-3 h-3" /> Delete
           </button>
         )}
       </div>

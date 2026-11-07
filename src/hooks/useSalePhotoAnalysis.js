@@ -65,12 +65,12 @@ export default function useSalePhotoAnalysis({ saleId, onPhoto, onRunComplete })
   };
 
   const guard = (work, mode = null) => async (...args) => {
-    if (!saleId) { setState(s => ({ ...s, error: 'Save the sale before analyzing photos.' })); return; }
-    if (runningRef.current) return;
+    if (!saleId) { setState(s => ({ ...s, error: 'Save the sale before analyzing photos.' })); return false; }
+    if (runningRef.current) return false;
     runningRef.current = true;
     setState(s => ({ ...s, running: true, mode, progress: null, error: '' }));
-    try { await work(...args); }
-    catch (error) { setState(s => ({ ...s, error: error.message })); }
+    try { await work(...args); return true; }
+    catch (error) { setState(s => ({ ...s, error: error.message })); return false; }
     finally { runningRef.current = false; setState(s => ({ ...s, running: false, mode: null, progress: null })); }
   };
 

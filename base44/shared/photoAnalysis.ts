@@ -680,6 +680,16 @@ export async function runPhotoAnalysis(ctx) {
     for (const key of ['name', 'description']) {
       if (Object.hasOwn(body.fields || {}, key)) fields[key] = String(body.fields[key] ?? '');
     }
+    // The operator's own price. Only ever written by this explicit action.
+    if (Object.hasOwn(body.fields || {}, 'price')) {
+      const raw = body.fields.price;
+      if (raw === null || raw === undefined || raw === '') fields.price = null;
+      else {
+        const price = Number(raw);
+        if (!Number.isFinite(price) || price < 0) throw photoError('Enter a valid price', 422);
+        fields.price = price;
+      }
+    }
     const result = await mutateSalePhotos(service, saleId, user, images => {
       const photo = locatePhoto(images, { photo_id: photoId, image_revision: body.image_revision });
       if (body.edit_revision && photo.pipeline.edit_revision !== body.edit_revision) {

@@ -2,6 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { Sparkles, Loader2, RotateCcw, AlertTriangle, Wallet, Info, Search } from 'lucide-react';
 import PhotoAnalysisCard from '@/components/estate/PhotoAnalysisCard';
 import { viewStateOf } from '@/lib/photoAnalysisState';
+import { base44 } from '@/api/base44Client';
 
 const FILTERS = [
   { key: 'all', label: 'All' },
@@ -10,7 +11,7 @@ const FILTERS = [
   { key: 'failed', label: 'Failed' },
 ];
 
-export default function SalePhotoAnalysisPanel({ saleId, analysis, photos = [] }) {
+export default function SalePhotoAnalysisPanel({ saleId, analysis, photos = [], onRemovePhoto }) {
   const [filter, setFilter] = useState('all');
   const { counts, credits, running, mode, progress, error } = analysis.state;
   const step2Running = running && mode === 'step2';
@@ -28,6 +29,20 @@ export default function SalePhotoAnalysisPanel({ saleId, analysis, photos = [] }
     if (filter === 'failed') return state === 'failed';
     return state === filter;
   });
+
+  const removePhoto = async photo => {
+    if (!saleId) return;
+    if (!window.confirm('Remove this photo and its item from the sale?')) return;
+    try {
+      await base44.functions.invoke('saveSaleImageChanges', {
+        sale_id: saleId,
+        remove: [{ photo_id: photo.pipeline?.id, image_revision: photo.pipeline?.revision }],
+      });
+      onRemovePhoto?.(photo);
+    } catch (error) {
+      window.alert(error.response?.data?.error || error.message || 'Could not remove this photo.');
+    }
+  };
 
   const total = counts?.all ?? photos.length;
   const awaiting = counts?.awaiting_credits || 0;
@@ -53,6 +68,10 @@ export default function SalePhotoAnalysisPanel({ saleId, analysis, photos = [] }
           </p>
           <p className="text-[11px] text-slate-500 mt-1">
             Every photo saves the moment it finishes, so you can leave this page and come back. A finished search is never charged twice.
+          </p>
+          <p className="text-[11px] text-slate-500 mt-1">
+            Once an item is analyzed, open <span className="font-semibold">Google Lens</span> to check it yourself, edit its title,
+            description and price, or delete it. Your edits are never overwritten by a later analysis.
           </p>
         </div>
 
@@ -171,6 +190,8 @@ export default function SalePhotoAnalysisPanel({ saleId, analysis, photos = [] }
               onResearch={analysis.research}
               onClassify={analysis.classify}
               onRelease={analysis.releaseHold}
+              onSaveFields={analysis.saveFields}
+              onDelete={removePhoto}
             />
           ))}
         </div>

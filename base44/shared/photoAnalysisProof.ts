@@ -279,10 +279,11 @@ export async function photoAnalysisProof() {
   await invoke({ action: 'reanalyze', photo_id: 'p50' });
   await invoke({ action: 'next' });
   const p50 = photoOf('p50');
-  await invoke({ action: 'save_fields', photo_id: 'p50', image_revision: p50.pipeline.revision, edit_revision: p50.pipeline.edit_revision, fields: { name: 'Operator wins', description: 'Operator description' } });
+  await invoke({ action: 'save_fields', photo_id: 'p50', image_revision: p50.pipeline.revision, edit_revision: p50.pipeline.edit_revision, fields: { name: 'Operator wins', description: 'Operator description', price: 42 } });
   await invoke({ action: 'reanalyze', photo_id: 'p50' });
   await drain(3);
   assert(photoOf('p50').name === 'Operator wins', 'a later AI run never overwrites an operator edit');
+  assert(photoOf('p50').price === 42, 'the operator price is saved and kept through a re-analysis');
 
   /* ── 8. operator classification change routes the next run ── */
   const groupPhoto = 'p100'; // 100 % 5 === 0 -> group
