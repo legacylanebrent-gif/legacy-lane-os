@@ -1812,25 +1812,10 @@ Return ONLY the description text, no extra commentary.`
                        Print Pricing Sheet
                      </Button>
 
-                    <PhotoPipelineProgress pipeline={pipeline} />
-                    <PhotoPipelineControls pipeline={pipeline} onSkip={() => setShowSkipGuideModal(true)} />
                     </div>
-                    {!step1Completed && saleId ? (
-                      <SalePhotoReviewStep
-                        saleId={saleId}
-                        onStepComplete={() => {
-                          setStep1Completed(true);
-                          // Reload formData images so serp batch has updated statuses
-                          base44.entities.EstateSale.filter({ id: saleId }).then(res => {
-                            if (res[0]) setFormData(prev => ({ ...prev, images: res[0].images || [] }));
-                          });
-                        }}
-                      />
-                    ) : !step1Completed && !saleId ? (
-                      <p className="text-slate-500 text-sm py-4">Save the sale first to begin Step 1 photo review.</p>
-                    ) : null}
+                    <SalePhotoAnalysisPanel saleId={saleId} analysis={analysis} photos={formData.images} />
 
-                    <div className={step1Completed ? "space-y-3" : "hidden"}>
+                    <div className="space-y-3">
                      <div className="relative">
                        <Input
                          placeholder="Search items by name, description, or price..."
@@ -1960,7 +1945,6 @@ Return ONLY the description text, no extra commentary.`
 
                           {/* Right: Form fields in a more compact 2-col layout */}
                           {step1Completed && <div className="flex-1 min-w-0 space-y-3">
-                            <PhotoScanDetails photo={image} pipeline={pipeline} />
                             {/* Name + AI Price row */}
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                               <div>
