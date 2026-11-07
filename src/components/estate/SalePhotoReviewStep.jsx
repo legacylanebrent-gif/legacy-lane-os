@@ -71,11 +71,22 @@ export default function SalePhotoReviewStep({ saleId, onStepComplete }) {
           skip_serp_search: shouldSkip,
           serp_search_status: shouldSkip ? "do_not_search" : "search_allowed",
           skip_updated_at: now,
-          skip_updated_by: userLabel,
         };
       });
 
-      await base44.entities.EstateSale.update(saleId, { images: updatedImages });
+      // Only the skip decision is written, per photo, on the server — the rest of
+      // each photo's stored content (AI results, operator text) is left alone.
+      await base44.functions.invoke('saveSaleImageChanges', {
+        sale_id: saleId,
+        updates: updatedImages.map(img => ({
+          url: img.url,
+          fields: {
+            skip_serp_search: img.skip_serp_search,
+            serp_search_status: img.serp_search_status,
+            skip_updated_at: now,
+          },
+        })),
+      });
 
       setPhotos(updatedImages);
       setOriginalSkipUrls(new Set(checkedSkipUrls));

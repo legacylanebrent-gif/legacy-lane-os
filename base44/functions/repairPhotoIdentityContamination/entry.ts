@@ -77,7 +77,12 @@ Deno.serve(async (req) => {
         // A title shared by 5+ photos in ONE sale is not a per-photo identification,
         // whatever else the photo carries: the same label cannot describe five
         // different photographs. Its name is cleared; real scan evidence is kept.
-        const massDuplicated = shared >= 5;
+        // 5+ identical labels is impossible for distinct photographs on its own;
+        // 3+ with no scan evidence at all is the same signature: a label shared
+        // across photos while nothing about those photos was ever scanned.
+        const massDuplicated = shared >= 5 || (shared >= 3
+          && isBlank(img.synopsis) && isBlank(img.ai_first_search_price)
+          && isBlank(img.ai_deep_search_price) && isBlank(img.serp_search_status));
         if (!invented && !massDuplicated) { nextImages.push(img); continue; }
 
         // Photos backed by a real scan keep their description and prices; only

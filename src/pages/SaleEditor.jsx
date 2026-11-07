@@ -408,11 +408,10 @@ export default function SaleEditor() {
     setFormData(prev => ({ ...prev, images: newImages }));
     setExpandedCards(computeDefaultExpanded(newImages));
 
-    // Save to DB in one shot
     const currentSaleId = saleIdRef.current;
     if (currentSaleId) {
       try {
-        await base44.entities.EstateSale.update(currentSaleId, { images: newImages });
+        await base44.functions.invoke('saveSaleImageChanges', { sale_id: currentSaleId, append: newImages });
       } catch (dbErr) {
         console.error('DB save after import failed:', dbErr.message);
         alert('Photos uploaded but save to sale failed. Please click Save manually.');
@@ -707,9 +706,8 @@ export default function SaleEditor() {
         }
       }
 
-      if (data.price_range?.avg && !img.price) {
-        img.price = data.price_range.avg;
-      }
+      // The AI/market figure is an estimate, never the operator's listing price:
+      // googleLensPricing already stored it in ai_first_search_price.
 
       updatedImages[index] = img;
       setFormData(prev => ({ ...prev, images: updatedImages }));
@@ -830,7 +828,23 @@ Be practical and realistic for an estate sale context.`,
     }
     setSavingImageIndex(index);
     try {
-      await base44.entities.EstateSale.update(currentSaleId, { images: formData.images });
+      // Save ONLY this photo, addressed by its own url. Writing the whole photo
+      // array from browser state is what used to put older titles back.
+      const photo = formData.images[index];
+      if (photo?.url) {
+        await base44.functions.invoke('updateSaleImage', {
+          sale_id: currentSaleId,
+          image_url: photo.url,
+          mode: 'overwrite',
+          fields: {
+            name: photo.name || '',
+            description: photo.description || '',
+            synopsis: photo.synopsis || '',
+            price: photo.price === '' || photo.price === undefined ? null : photo.price,
+            categories: photo.categories || [],
+          },
+        });
+      }
     } catch (e) {
       console.error('Failed to save image data:', e.message);
       alert('Failed to save image data: ' + e.message);
@@ -866,8 +880,7 @@ Be practical and realistic for an estate sale context.`,
         });
       } catch (e) {
         console.error('Failed to persist skip toggle:', e.message);
-        // Fallback: try direct update
-        await base44.entities.EstateSale.update(currentSaleId, { images: newImages });
+        await base44.functions.invoke('saveSaleImageChanges', { sale_id: currentSaleId, updates: [{ url: img.url, fields: { skip_item: newImg.skip_item, skip_saved_name: newImg.skip_saved_name || '', skip_saved_description: newImg.skip_saved_description || '', skip_updated_at: newImg.skip_updated_at || null } }] });
       }
     }
   };
@@ -1159,7 +1172,10 @@ Be practical and realistic for an estate sale context.`,
     const currentSaleId = saleIdRef.current;
     if (currentSaleId) {
       try {
-        await base44.entities.EstateSale.update(currentSaleId, { images: updatedImages });
+        await base44.functions.invoke('saveSaleImageChanges', {
+          sale_id: currentSaleId,
+          updates: [{ url: updatedImages[index].url, fields: { rotation: newRot } }],
+        });
       } catch (e) {
         console.error('Failed to persist rotation:', e.message);
       }
@@ -1198,7 +1214,11 @@ Be practical and realistic for an estate sale context.`,
       setFormData(prev => ({ ...prev, images: items }));
       const currentSaleId = saleIdRef.current;
       if (currentSaleId) {
-        await base44.entities.EstateSale.update(currentSaleId, { images: items });
+        // Order only — the server keeps each photo's own stored content.
+        await base44.functions.invoke('saveSaleImageChanges', {
+          sale_id: currentSaleId,
+          order: items.map(i => i.url),
+        });
       }
     }
     setDragIndex(null);
@@ -2229,7 +2249,7 @@ Return ONLY the description text, no extra commentary.`
                                       skip_saved_name: '', skip_saved_description: '', clear_data: true,
                                     });
                                   } catch (e) {
-                                    await base44.entities.EstateSale.update(currentSaleId, { images: updatedImages });
+                                    await base44.functions.invoke('saveSaleImageChanges', { sale_id: currentSaleId, updates: [{ url: image.url, fields: { skip_item: false } }] });
                                   }
                                 }
                               }}
