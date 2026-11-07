@@ -11,10 +11,8 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import CommunicationsPanel from '@/components/saleops/CommunicationsPanel';
 import LaborEntriesPanel from '@/components/saleops/LaborEntriesPanel';
 import SaleSkipGuideModal from '@/components/estate/SaleSkipGuideModal';
-import usePhotoPipeline from '@/hooks/usePhotoPipeline';
-import PhotoPipelineControls from '@/components/estate/PhotoPipelineControls';
-import PhotoPipelineProgress from '@/components/estate/PhotoPipelineProgress';
-import PhotoScanDetails from '@/components/estate/PhotoScanDetails';
+import useSalePhotoAnalysis from '@/hooks/useSalePhotoAnalysis';
+import SalePhotoAnalysisPanel from '@/components/estate/SalePhotoAnalysisPanel';
 import { SOURCE_EXCLUSION_RULE, filterAllowedSources } from '@/lib/excludedSources';
 import SaleNotesPanel from '@/components/saleops/SaleNotesPanel';
 import ReferralSourceCard from '@/components/saleops/ReferralSourceCard';
@@ -31,7 +29,6 @@ import SaleClientPermissionsModal from '@/components/estate/SaleClientPermission
 import DeepSearchPricingModal from '@/components/estate/DeepSearchPricingModal';
 import StarterPublishFeeModal from '@/components/estate/StarterPublishFeeModal';
 import ZipAddressEntry from '@/components/estate/ZipAddressEntry';
-import SalePhotoReviewStep from '@/components/estate/SalePhotoReviewStep';
 import ProfileCompletionGate, { isProfileComplete } from '@/components/profile/ProfileCompletionGate';
 import GoogleLensCreditDisplay from '@/components/pricing/GoogleLensCreditDisplay';
 import { getImageSrc } from '@/utils/imageOptimizer';
@@ -156,16 +153,22 @@ export default function SaleEditor() {
       return next;
     });
   };
-  const pipeline = usePhotoPipeline({
-    saleId, userId: user?.id, imagesRef: formDataRef,
-    onImages: mergeStoredPhotos,
+  // Canonical photo analysis. Every photo carries its own saved job, so work
+  // survives a reload and a finished search is never paid for twice.
+  const analysis = useSalePhotoAnalysis({
+    saleId,
     onPhoto: photo => {
       setFormData(prev => {
         const next = { ...prev, images: prev.images.map(p => p.pipeline?.id === photo.pipeline?.id ? p._dirty ? { ...p, pipeline: { ...photo.pipeline, revision: p.pipeline.revision, edit_revision: p.pipeline.edit_revision } } : photo : p) };
         formDataRef.current = next;
         return next;
       });
-      if (photo.pipeline?.jobs?.deep?.result) setSerpResults(prev => ({ ...prev, [photo.url]: photo.pipeline.jobs.deep.result }));
+    },
+    onRunComplete: () => {
+      if (!saleId) return;
+      base44.entities.EstateSale.filter({ id: saleId }).then(res => {
+        if (res[0]) mergeStoredPhotos(res[0].images || []);
+      });
     }
   });
 
@@ -634,7 +637,7 @@ export default function SaleEditor() {
     setFormData(prev => ({ ...prev, sale_dates: prev.sale_dates.filter((_, i) => i !== index) }));
   };
 
-  const handleRegenerateDescription = (index) => pipeline.run('standard', [formData.images[index]]);
+  const handleRegenerateDescription = (index) => analysis.reanalyze(formData.images[index]);
 
   const handleGenerateFeaturedTags = async () => {
     const itemsWithInfo = formData.images.filter(img => img.name && img.description);
@@ -660,9 +663,9 @@ export default function SaleEditor() {
 
   const cleanTitle = (raw) => raw ? raw.replace(/\s*[-|—]\s*(etsy|ebay|amazon|walmart|1stdibs|ruby lane|chairish|bonanza|mercari|poshmark|facebook|google|bing|estatesales\.net|estatesales)[^\S\n]*/gi, '').trim() : raw;
 
-  const handleSerpSearch = index => pipeline.run('deep', [formData.images[index]]);
-  const handleQuickScan = () => pipeline.run('classify');
-  const cancelQuickScan = () => pipeline.pause();
+  const handleSerpSearch = index => analysis.reanalyze(formData.images[index]);
+  const handleQuickScan = () => analysis.start();
+  const cancelQuickScan = () => analysis.stop();
 
   const handleMultiItemAssess = async (index) => {
     const image = formData.images[index];
