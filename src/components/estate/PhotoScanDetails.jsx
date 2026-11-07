@@ -8,6 +8,8 @@ export default function PhotoScanDetails({ photo, pipeline }) {
     <p className="text-muted-foreground">Classification: {info.classification || 'not run'}{info.classification_reason ? ` · ${info.classification_reason}` : ''}</p>
     {(info.review_required || /mid.century.*(credenza|sideboard)|vintage.*(credenza|sideboard)/i.test(photo.name || '')) && <p className="font-medium text-destructive">Identity needs operator review. The existing label remains visible until reviewed.</p>}
     {standard && <div className="rounded border border-border bg-muted p-2">
+      <p>Suggested identity: {standard.name || 'Not confidently identified'}</p>
+      {standard.description && <p>{standard.description}</p>}
       <p>Estate-sale price estimate (model only): {standard.estimated_price == null ? 'unavailable' : `$${standard.estimated_price}`}</p>
       <p>Identification confidence: {standard.confidence || 'unknown'}. {standard.uncertainty_note || 'Visual identification is not authentication.'}</p>
       <p className="text-muted-foreground">Not an appraisal or verified comparable sale. Your listing price is unchanged.</p>

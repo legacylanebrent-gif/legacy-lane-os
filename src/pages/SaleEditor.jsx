@@ -440,7 +440,8 @@ export default function SaleEditor() {
     const currentSaleId = saleIdRef.current;
     if (currentSaleId) {
       try {
-        await base44.functions.invoke('saveSaleImageChanges', { sale_id: currentSaleId, append: newImages });
+        const saved = await base44.functions.invoke('saveSaleImageChanges', { sale_id: currentSaleId, append: newImages });
+        mergeStoredPhotos(saved.data.images);
       } catch (dbErr) {
         console.error('DB save after import failed:', dbErr.message);
         alert('Photos uploaded but save to sale failed. Please click Save manually.');
@@ -766,9 +767,7 @@ Be practical and realistic for an estate sale context.`,
   const handleToggleSkip = async (index) => {
     const currentSaleId = saleId || new URLSearchParams(window.location.search).get('saleId');
     const img = formData.images[index];
-    const newImg = img.skip_item
-      ? { ...img, skip_item: false, name: '', description: '', synopsis: '', price: null, ai_first_search_price: null, ai_deep_search_price: null, skip_saved_name: '', skip_saved_description: '' }
-      : { ...img, skip_item: true, skip_saved_name: img.name || '', skip_saved_description: img.description || '', name: '', description: '', skip_updated_at: new Date().toISOString() };
+    const newImg = { ...img, skip_item: !img.skip_item, skip_updated_at: new Date().toISOString() };
 
     // Update local state
     const newImages = [...formData.images];
@@ -1938,10 +1937,12 @@ Return ONLY the description text, no extra commentary.`
                                 setFormData(prev => ({ ...prev, images: updatedImages }));
                                 if (currentSaleId) {
                                   try {
-                                    await base44.functions.invoke('toggleSaleImageSkip', {
+                                    const cleared = await base44.functions.invoke('toggleSaleImageSkip', {
                                       sale_id: currentSaleId, photo_id: image.pipeline?.id, image_url: image.url, image_revision: image.pipeline?.revision, skip_item: false,
                                       skip_saved_name: '', skip_saved_description: '', clear_data: true,
                                     });
+                                    const freshPhoto = cleared.data.images.find(p => p.pipeline?.id === image.pipeline?.id || p.url === image.url);
+                                    setFormData(prev => ({ ...prev, images: prev.images.map(p => p.url === image.url ? freshPhoto : p) }));
                                   } catch (e) {
                                     await base44.functions.invoke('saveSaleImageChanges', { sale_id: currentSaleId, updates: [{ url: image.url, fields: { skip_item: false } }] });
                                   }

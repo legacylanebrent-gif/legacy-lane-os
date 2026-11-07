@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import usePhotoPipeline from '@/hooks/usePhotoPipeline';
 import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -17,6 +18,15 @@ export default function SalePricingTool() {
   const [loadingSales, setLoadingSales] = useState(true);
   const [processingAll, setProcessingAll] = useState(false);
   const [userPrices, setUserPrices] = useState({});
+  const [userId, setUserId] = useState(null);
+  const imagesRef = useRef({ images: [] });
+  const pipeline = usePhotoPipeline({ saleId: selectedSale?.id, userId, imagesRef,
+    onImages: images => { imagesRef.current = { images }; },
+    onPhoto: photo => {
+      imagesRef.current = { images: imagesRef.current.images.map(p => p.pipeline?.id === photo.pipeline?.id ? photo : p) };
+      if (photo.pipeline?.jobs?.deep?.result) setPricingResults(prev => ({ ...prev, [photo.url]: { ...photo.pipeline.jobs.deep.result, item_title: photo.name || '' } }));
+    }
+  });
 
   useEffect(() => {
     loadSales();
@@ -33,6 +43,8 @@ export default function SalePricingTool() {
 
   const loadSales = async () => {
     try {
+      const currentUser = await base44.auth.me();
+      setUserId(currentUser.id);
       const data = await base44.entities.EstateSale.list('-created_date', 50);
       setSales(data.filter(s => s.images && s.images.length > 0));
     } catch (e) {
@@ -44,7 +56,18 @@ export default function SalePricingTool() {
 
   const loadSavedPricings = async (saleId) => {
     try {
-      const data = await base44.entities.SaleItemPricing.filter({ sale_id: saleId });
+      const [legacy, sale] = await Promise.all([
+        base44.entities.SaleItemPricing.filter({ sale_id: saleId }),
+        base44.entities.EstateSale.get(saleId)
+      ]);
+      imagesRef.current = { images: sale.images || [] };
+      const byUrl = new Map(legacy.map(p => [p.image_url, p]));
+      for (const photo of sale.images || []) {
+        const result = photo.pipeline?.jobs?.deep?.result;
+        if (!result) continue;
+        byUrl.set(photo.url, { ...result, id: photo.pipeline.id, image_url: photo.url, item_title: photo.name || '', price_min: result.price_range?.min, price_max: result.price_range?.max, price_avg: result.price_range?.avg, user_price: photo.price });
+      }
+      const data = [...byUrl.values()];
       setSavedPricings(data);
       // Pre-populate results from saved
       const saved = {};
@@ -55,33 +78,23 @@ export default function SalePricingTool() {
     }
   };
 
-  const analyzePhoto = async (imageUrl) => {
+  const analyzePhoto = async imageUrl => {
     setLoadingPhoto(imageUrl);
     try {
-      const res = await base44.functions.invoke('googleLensPricing', {
-        image_url: imageUrl,
-        sale_id: selectedSale.id,
-      });
-      setPricingResults(prev => ({ ...prev, [imageUrl]: res.data }));
-      // Reload saved
+      const selected = imagesRef.current.images.filter(p => p.url === imageUrl);
+      if (selected.some(p => !p.pipeline?.classification)) await pipeline.run('classify', selected);
+      await pipeline.run('deep', selected);
       await loadSavedPricings(selectedSale.id);
-    } catch (e) {
-      console.error(e);
-      setPricingResults(prev => ({ ...prev, [imageUrl]: { error: e.message } }));
-    } finally {
-      setLoadingPhoto(null);
-    }
+    } finally { setLoadingPhoto(null); }
   };
 
   const analyzeAll = async () => {
     setProcessingAll(true);
-    for (const photo of photos) {
-      if (!pricingResults[photo]) {
-        await analyzePhoto(photo);
-        await new Promise(r => setTimeout(r, 1000)); // rate limit
-      }
-    }
-    setProcessingAll(false);
+    try {
+      if (imagesRef.current.images.some(p => !p.pipeline?.classification)) await pipeline.run('classify');
+      await pipeline.run('deep');
+      await loadSavedPricings(selectedSale.id);
+    } finally { setProcessingAll(false); }
   };
 
   // Chapter 14 P1-13 — RESEARCH/PRIVACY HOLD guard: a photo marked do-not-search
@@ -96,11 +109,12 @@ export default function SalePricingTool() {
       alert('RESEARCH / PRIVACY HOLD: this photo is marked do-not-search. Resolve the hold before pricing — research needed is not low value.');
       return;
     }
-    const existing = savedPricings.find(p => p.image_url === imageUrl);
-    if (existing) {
-      await base44.entities.SaleItemPricing.update(existing.id, { user_price: parseFloat(price) });
-      await loadSavedPricings(selectedSale.id);
-    }
+    const amount = Number(price);
+    if (!Number.isFinite(amount) || amount < 0 || price === '') return;
+    const sale = await base44.entities.EstateSale.get(selectedSale.id);
+    const photo = sale.images.find(p => p.url === imageUrl);
+    await base44.functions.invoke('updateSaleImage', { sale_id: selectedSale.id, photo_id: photo.pipeline?.id, image_url: imageUrl, image_revision: photo.pipeline?.revision, edit_revision: photo.pipeline?.edit_revision, fields: { price: amount } });
+    await loadSavedPricings(selectedSale.id);
   };
 
   const currentPhoto = photos[currentPhotoIndex];
@@ -115,7 +129,8 @@ export default function SalePricingTool() {
         </div>
         <div>
           <h1 className="text-xl font-bold text-slate-900">Google Lens Pricing Tool</h1>
-          <p className="text-sm text-slate-500">Analyze sale photos to get real market pricing</p>
+          <p className="text-sm text-slate-500">Explicit Deep Scan: comparable asking prices, not verified sold prices</p>
+          {pipeline.state.error && <p className="text-sm text-destructive" role="alert">{pipeline.state.error}</p>}
         </div>
       </div>
 

@@ -5,6 +5,7 @@ const STRUCTURAL = ['rotation', 'skip_item', 'skip_serp_search', 'serp_search_st
 const OPERATOR_FIELDS = ['name', 'description', 'synopsis', 'price', 'categories'];
 export function operatorPhotoEdit(images, target, fields) {
   const photo = locatePhoto(images, target);
+  if (blockedPhoto(photo) && Object.hasOwn(fields, 'price') && fields.price !== photo.price) throw photoError('Resolve the do-not-search hold before pricing.', 422);
   if (target.edit_revision && photo.pipeline.edit_revision !== target.edit_revision) throw photoError('Newer operator edit exists; reload before saving.');
   for (const key of OPERATOR_FIELDS) if (Object.hasOwn(fields, key)) photo[key] = fields[key];
   photo.pipeline.edit_revision = crypto.randomUUID();
