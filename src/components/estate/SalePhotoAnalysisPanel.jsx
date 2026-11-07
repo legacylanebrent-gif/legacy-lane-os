@@ -12,7 +12,8 @@ const FILTERS = [
 
 export default function SalePhotoAnalysisPanel({ saleId, analysis, photos = [] }) {
   const [filter, setFilter] = useState('all');
-  const { counts, credits, running, error } = analysis.state;
+  const { counts, credits, running, mode, progress, error } = analysis.state;
+  const step2Running = running && mode === 'step2';
 
   const states = useMemo(() => {
     const map = {};
@@ -61,8 +62,10 @@ export default function SalePhotoAnalysisPanel({ saleId, analysis, photos = [] }
           disabled={running || !saleId || photos.length === 0}
           className="w-full inline-flex items-center justify-center gap-2 px-4 py-3 rounded-lg bg-cyan-600 text-white font-semibold text-sm hover:bg-cyan-700 disabled:bg-slate-300 disabled:text-slate-500 transition-colors"
         >
-          {running ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
-          {running ? 'Analyzing photos…' : counts && counts.ready + counts.needs_review + counts.awaiting_credits === total && total > 0 ? 'Re-check all photos' : 'Analyze Sale Photos'}
+          {running && mode !== 'step2' ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+          {step2Running ? 'Step 1 is idle — Step 2 is running below'
+            : running ? 'Analyzing photos…'
+            : counts && counts.ready + counts.needs_review + counts.awaiting_credits === total && total > 0 ? 'Re-check all photos' : 'Analyze Sale Photos'}
         </button>
 
         <div className="rounded-lg border border-slate-200 bg-slate-50 p-2.5 space-y-2">
@@ -72,9 +75,17 @@ export default function SalePhotoAnalysisPanel({ saleId, analysis, photos = [] }
             disabled={running || !saleId || !(counts?.step2 > 0)}
             className="w-full inline-flex items-center justify-center gap-2 px-3 py-2 rounded-lg border border-cyan-600 bg-white text-cyan-800 font-semibold text-sm hover:bg-cyan-50 disabled:border-slate-200 disabled:bg-white disabled:text-slate-400 transition-colors"
           >
-            {running ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
-            {`Step 2 — web search (${counts?.step2 || 0})`}
+            {step2Running ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
+            {step2Running
+              ? (progress ? `Searching the web — ${progress.done} of ${progress.total} done` : 'Starting the web search…')
+              : `Step 2 — web search (${counts?.step2 || 0})`}
           </button>
+          {step2Running && progress?.total > 0 && (
+            <div className="h-1.5 w-full overflow-hidden rounded-full bg-slate-200">
+              <div className="h-full bg-cyan-600 transition-all duration-300"
+                style={{ width: `${Math.round((progress.done / progress.total) * 100)}%` }} />
+            </div>
+          )}
           <p className="text-[11px] text-slate-600">
             Step 2 runs the paid SERPAPI product search on single-item photos and on every single item still flagged for
             review. It keeps the Step 1 copy, reuses the image matches already paid for, and skips photos that are already

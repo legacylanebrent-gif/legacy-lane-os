@@ -15,7 +15,7 @@ const ref = photo => ({
 });
 
 export default function useSalePhotoAnalysis({ saleId, onPhoto, onRunComplete }) {
-  const [state, setState] = useState({ counts: null, credits: null, running: false, error: '' });
+  const [state, setState] = useState({ counts: null, credits: null, running: false, mode: null, progress: null, error: '' });
   const runningRef = useRef(false);
 
   const call = useCallback(async body => {
@@ -41,7 +41,13 @@ export default function useSalePhotoAnalysis({ saleId, onPhoto, onRunComplete })
 
   const settle = result => {
     if (result.photo) onPhoto?.(result.photo);
-    if (result.counts) setState(s => ({ ...s, counts: result.counts, credits: result.credits ?? s.credits }));
+    if (result.counts || result.photo) setState(s => ({
+      ...s,
+      counts: result.counts || s.counts,
+      credits: result.credits ?? s.credits,
+      // One finished photo is visible progress even when the totals do not move.
+      progress: s.progress && result.photo ? { ...s.progress, done: s.progress.done + 1 } : s.progress,
+    }));
   };
 
   const drain = async scope => {
@@ -58,24 +64,24 @@ export default function useSalePhotoAnalysis({ saleId, onPhoto, onRunComplete })
     await refresh();
   };
 
-  const guard = work => async (...args) => {
+  const guard = (work, mode = null) => async (...args) => {
     if (!saleId) { setState(s => ({ ...s, error: 'Save the sale before analyzing photos.' })); return; }
     if (runningRef.current) return;
     runningRef.current = true;
-    setState(s => ({ ...s, running: true, error: '' }));
+    setState(s => ({ ...s, running: true, mode, progress: null, error: '' }));
     try { await work(...args); }
     catch (error) { setState(s => ({ ...s, error: error.message })); }
-    finally { runningRef.current = false; setState(s => ({ ...s, running: false })); }
+    finally { runningRef.current = false; setState(s => ({ ...s, running: false, mode: null, progress: null })); }
   };
 
   /** Analyze every photo that still needs work, then stop. */
-  const start = guard(drain);
+  const start = guard(drain, 'step1');
 
   /** Requeue failed / interrupted / credit-blocked photos, then run them. */
   const retryFailed = guard(async () => {
     await call({ action: 'retry_failed' });
     await drain();
-  });
+  }, 'step1');
 
   /**
    * Step 2: the paid web search only, for single-item photos and any photo that
@@ -84,9 +90,11 @@ export default function useSalePhotoAnalysis({ saleId, onPhoto, onRunComplete })
   const startStep2 = guard(async () => {
     const queued = await call({ action: 'step2_queue' });
     if (queued.counts) setState(s => ({ ...s, counts: queued.counts, credits: queued.credits ?? s.credits }));
-    if (queued.queued > 0) await drain('step2');
-    else await refresh();
-  });
+    if (queued.queued > 0) {
+      setState(s => ({ ...s, progress: { total: queued.queued, done: 0 } }));
+      await drain('step2');
+    } else await refresh();
+  }, 'step2');
 
   const single = (photo, body, { follow = true } = {}) => guard(async () => {
     settle(await call({ ...body, ...ref(photo) }));
