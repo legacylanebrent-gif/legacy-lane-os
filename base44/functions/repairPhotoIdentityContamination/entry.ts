@@ -98,7 +98,7 @@ Deno.serve(async (req) => {
           name_before_repair: img.name || '',
           description_before_repair: img.description || '',
           name: '',
-          description: '',
+          ...(keepEvidence ? {} : { description: '' }),
           name_source: null,
           description_source: null,
           identity_review_required: true,
