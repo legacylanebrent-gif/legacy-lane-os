@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { Sparkles, CheckCircle, AlertCircle } from 'lucide-react';
+import { SOURCE_EXCLUSION_RULE } from '@/lib/excludedSources';
 
 export default function BatchLabelModal({ open, onClose, images, saleId, onLabelsApplied }) {
   const [processing, setProcessing] = useState(false);
@@ -62,7 +63,9 @@ Look at this estate sale photo and provide:
    - Used price: A realistic estate sale price based on condition
 4. Detailed price comparisons from specific sources with actual prices found on each site
 
-Be specific and practical. Focus on the main item in the photo.`;
+Be specific and practical. Focus on the main item in the photo.
+
+${SOURCE_EXCLUSION_RULE}`;
 
         const result = await base44.integrations.Core.InvokeLLM({
           prompt,

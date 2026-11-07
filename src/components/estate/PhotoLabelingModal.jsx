@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Sparkles, Check, X, Package } from 'lucide-react';
+import { SOURCE_EXCLUSION_RULE, filterAllowedSources } from '@/lib/excludedSources';
 
 export default function PhotoLabelingModal({ open, onClose, image, imageIndex, saleId, onApprove }) {
   const saleScope = useSaleScope(saleId);
@@ -49,7 +50,9 @@ Look at this estate sale photo and provide:
    - Used price: A realistic estate sale price based on condition
 4. Detailed price comparisons from specific sources with actual prices found on each site
 
-Be specific and practical. Focus on the main item in the photo.`;
+Be specific and practical. Focus on the main item in the photo.
+
+${SOURCE_EXCLUSION_RULE}`;
 
       const result = await base44.integrations.Core.InvokeLLM({
         prompt,
@@ -82,6 +85,7 @@ Be specific and practical. Focus on the main item in the photo.`;
         }
       });
 
+      result.price_comparisons = filterAllowedSources(result.price_comparisons);
       setSuggestions(result);
       setEditedName(result.name || '');
       setEditedNewPrice(result.new_price?.toString() || '');
@@ -162,7 +166,9 @@ Look at this estate sale photo and provide:
    - Used price: A realistic estate sale price based on condition
 4. Detailed price comparisons from specific sources with actual prices found on each site
 
-Be specific and practical. Focus on the main item in the photo that matches "${editedName}".`;
+Be specific and practical. Focus on the main item in the photo that matches "${editedName}".
+
+${SOURCE_EXCLUSION_RULE}`;
 
       const result = await base44.integrations.Core.InvokeLLM({
         prompt,
@@ -195,6 +201,7 @@ Be specific and practical. Focus on the main item in the photo that matches "${e
         }
       });
 
+      result.price_comparisons = filterAllowedSources(result.price_comparisons);
       setSuggestions(result);
       setEditedName(result.name || editedName);
       setEditedNewPrice(result.new_price?.toString() || editedNewPrice);

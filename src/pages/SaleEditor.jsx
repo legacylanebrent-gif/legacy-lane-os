@@ -651,7 +651,7 @@ export default function SaleEditor() {
     }
   };
 
-  const cleanTitle = (raw) => raw ? raw.replace(/\s*[-|—]\s*(etsy|ebay|amazon|walmart|1stdibs|ruby lane|chairish|bonanza|mercari|poshmark|facebook|google|bing)[^\S\n]*/gi, '').trim() : raw;
+  const cleanTitle = (raw) => raw ? raw.replace(/\s*[-|—]\s*(etsy|ebay|amazon|walmart|1stdibs|ruby lane|chairish|bonanza|mercari|poshmark|facebook|google|bing|estatesales\.net|estatesales)[^\S\n]*/gi, '').trim() : raw;
 
   const handleSerpSearch = async (index) => {
     const image = formData.images[index];
