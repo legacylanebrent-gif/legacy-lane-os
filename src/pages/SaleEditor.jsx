@@ -11,6 +11,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import CommunicationsPanel from '@/components/saleops/CommunicationsPanel';
 import LaborEntriesPanel from '@/components/saleops/LaborEntriesPanel';
 import SaleSkipGuideModal from '@/components/estate/SaleSkipGuideModal';
+import { runQuickScan } from '@/lib/quickScan';
 import SaleNotesPanel from '@/components/saleops/SaleNotesPanel';
 import ReferralSourceCard from '@/components/saleops/ReferralSourceCard';
 import { Badge } from '@/components/ui/badge';
@@ -116,6 +117,7 @@ export default function SaleEditor() {
   const isInitialLoad = useRef(true);
   const saleIdRef = useRef(null);
   const runBatchRef = useRef(null);
+  const quickScanCancelRef = useRef(false);
   const formDataRef = useRef(null);
   const originalLocationRef = useRef(null);
 
@@ -736,38 +738,24 @@ export default function SaleEditor() {
     }
 
     setQuickScanning(true);
+    quickScanCancelRef.current = false;
     setQuickScanProgress({ current: 0, total: toScan.length });
 
-    // Run all scans in parallel (batches of 5 to avoid overwhelming)
-    const BATCH = 5;
-    let done = 0;
-    for (let b = 0; b < toScan.length; b += BATCH) {
-      const chunk = toScan.slice(b, b + BATCH);
-      await Promise.all(chunk.map(async ({ img, i }) => {
-        try {
-          const res = await base44.integrations.Core.InvokeLLM({
-            prompt: `Look at this photo. Answer only: is this a photo of MULTIPLE different items (like a shelf of books, a table of mugs, a cabinet of pans, a pile of tools, boxes of misc items, etc)? Or is it a SINGLE identifiable item?\n\nReply with JSON only.`,
-            file_urls: [img.url],
-            response_json_schema: {
-              type: "object",
-              properties: {
-                is_multi_item: { type: "boolean" },
-                reason: { type: "string" }
-              }
-            }
-          });
-          setMultiItemFlags(prev => ({ ...prev, [i]: res.is_multi_item === true }));
-        } catch (e) {
-          console.warn(`Quick scan failed for image ${i}:`, e.message);
-          setMultiItemFlags(prev => ({ ...prev, [i]: false }));
-        }
-        done++;
-        setQuickScanProgress({ current: done, total: toScan.length });
-      }));
+    try {
+      await runQuickScan({
+        entries: toScan,
+        onResult: (i, isMulti) => setMultiItemFlags(prev => ({ ...prev, [i]: isMulti })),
+        onProgress: (current, total) => setQuickScanProgress({ current, total }),
+        shouldCancel: () => quickScanCancelRef.current,
+      });
+    } finally {
+      setQuickScanning(false);
+      setQuickScanProgress({ current: 0, total: 0 });
     }
+  };
 
-    setQuickScanning(false);
-    setQuickScanProgress({ current: 0, total: 0 });
+  const cancelQuickScan = () => {
+    quickScanCancelRef.current = true;
   };
 
   const handleMultiItemAssess = async (index) => {
@@ -2072,10 +2060,10 @@ Return ONLY the description text, no extra commentary.`
                                <span className="whitespace-normal text-left">Flag Photos to Skip</span>
                              </Button>
                              {step1Completed && (<>
-                             <Button variant="outline" size="sm" className="text-teal-600 border-teal-600 text-xs h-auto py-2 leading-tight whitespace-normal text-left" disabled={quickScanning || serpBatchRunning} onClick={() => setShowQuickScanGuideModal(true)}>
-                               <span className="mr-1.5 w-4 h-4 rounded-full bg-teal-600 text-white text-[10px] font-bold inline-flex items-center justify-center flex-shrink-0">2</span>
+                             <Button variant="outline" size="sm" className={`text-xs h-auto py-2 leading-tight whitespace-normal text-left ${quickScanning ? 'text-red-600 border-red-400 bg-red-50' : 'text-teal-600 border-teal-600'}`} disabled={serpBatchRunning} onClick={() => (quickScanning ? cancelQuickScan() : setShowQuickScanGuideModal(true))}>
+                               <span className={`mr-1.5 w-4 h-4 rounded-full text-white text-[10px] font-bold inline-flex items-center justify-center flex-shrink-0 ${quickScanning ? 'bg-red-600' : 'bg-teal-600'}`}>2</span>
                                {quickScanning
-                                 ? `Scanning... (${quickScanProgress.current}/${quickScanProgress.total})`
+                                 ? `Stop scan (${quickScanProgress.current}/${quickScanProgress.total})`
                                  : `Quick AI Scan${unscanned > 0 ? ` (${unscanned})` : ''}${multiItemCount > 0 ? ` · ${multiItemCount} multi` : ''}`}
                              </Button>
                              <Button variant="outline" size="sm" className="text-purple-600 border-purple-600 text-xs h-auto py-2 leading-tight whitespace-normal text-left" disabled={serpBatchRunning || quickScanning} onClick={() => setShowDeepSearchGuideModal(true)}>
