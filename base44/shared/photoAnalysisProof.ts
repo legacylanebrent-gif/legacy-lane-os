@@ -62,7 +62,7 @@ export async function photoAnalysisProof() {
 
   /* ── mock providers ── */
   const calls = { describe: 0, research: 0, lens: 0, shopping: 0 };
-  let lastEvidence = null;
+  const evidenceBy = {};
   let throttleDescribes = 0;
   const kindOf = id => {
     const i = Number(id.slice(1));
@@ -103,7 +103,7 @@ export async function photoAnalysisProof() {
 
   const research = async (photo, basic, evidence) => {
     calls.research += 1;
-    lastEvidence = evidence;
+    evidenceBy[photo.pipeline.id] = evidence;
     const id = photo.pipeline.id;
     await new Promise(r => setTimeout(r, Number(id.slice(1)) % 3));
     const unsure = Number(id.slice(1)) % 29 === 0;
@@ -400,8 +400,9 @@ export async function photoAnalysisProof() {
     assert(calls.shopping === before.shopping + 2, 'Step 2 searches exactly the queued photos');
     assert(calls.lens === before.lens, 'Step 2 never pays for a second visual search');
     assert(creditsBefore - creditRemaining === 2, 'Step 2 costs one search per queued photo and nothing more');
-    assert(lastEvidence?.source === 'serpapi_google_shopping', 'Step 2 evidence is labelled as the product search');
-    assert((lastEvidence?.matches || []).some(m => m.title === 'Cached visual match'), 'matches Step 1 already paid for are folded in for free');
+    assert(evidenceBy.s2?.source === 'serpapi_google_shopping', 'Step 2 evidence is labelled as the product search');
+    assert((evidenceBy.s2?.matches || []).some(m => m.title === 'Cached visual match'), 'matches Step 1 already paid for are folded in for free');
+    assert((evidenceBy.s2?.matches || []).some(m => m.title === 'Product result s2'), 'the new product results lead the evidence');
     assert(!jobOf('p-new'), 'a Step 2 run never claims a photo it did not queue');
     assert(photoOf('s2').name && jobOf('s2').research?.suggested_price === 24, 'a needs-review photo finishes Step 2 with a supported price');
     const settled = await invoke({ action: 'status' });
