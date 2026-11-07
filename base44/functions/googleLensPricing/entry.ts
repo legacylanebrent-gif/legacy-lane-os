@@ -63,8 +63,22 @@ Deno.serve(async (req) => {
     }
 
     // Extract visual matches with pricing
-    const visualMatches = serpData.visual_matches || [];
+    const rawVisualMatches = serpData.visual_matches || [];
     const knowledgeGraph = serpData.knowledge_graph || {};
+
+    // ── HARD SOURCE EXCLUSION: estatesales.net is never searched, cited or priced from ──
+    // Matches from that domain are dropped before titles, prices, ranges or saved
+    // evidence are produced, so nothing from it can reach a description or estimate.
+    const BLOCKED_DOMAINS = ['estatesales.net'];
+    const isBlockedMatch = (match) => {
+      const haystack = `${match?.link || ''} ${match?.source || ''} ${match?.title || ''}`.toLowerCase().replace(/\s+/g, '');
+      return BLOCKED_DOMAINS.some((domain) => haystack.includes(domain));
+    };
+    const visualMatches = rawVisualMatches.filter((match) => !isBlockedMatch(match));
+    const excludedCount = rawVisualMatches.length - visualMatches.length;
+    if (excludedCount > 0) {
+      console.log(`Excluded ${excludedCount} blocked-source match(es) from the pricing search.`);
+    }
 
     const results = visualMatches.slice(0, 10).map(match => {
       // SerpAPI price can be a string, number, or object like {value: 25, extracted_value: 25, currency: '$'}
@@ -147,6 +161,7 @@ Deno.serve(async (req) => {
       price_range: { min: priceMin, max: priceMax, avg: priceAvg },
       matches: results,
       total_matches: visualMatches.length,
+      excluded_blocked_sources: excludedCount,
     });
 
   } catch (error) {

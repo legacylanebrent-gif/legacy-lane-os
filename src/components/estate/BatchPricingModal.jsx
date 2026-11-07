@@ -4,6 +4,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Loader2, CheckCircle2, AlertCircle, DollarSign } from 'lucide-react';
+import { SOURCE_EXCLUSION_RULE, isBlockedSource } from '@/lib/excludedSources';
 
 export default function BatchPricingModal({ 
   open, 
@@ -87,6 +88,8 @@ INSTRUCTIONS:
 
 5. Return 3 real prices from your research on the specified sites, plus a realistic price range.
 
+${SOURCE_EXCLUSION_RULE}
+
 Return ONLY valid JSON:
 {
   "site1_name": "exact site name",
@@ -116,15 +119,16 @@ Return ONLY valid JSON:
           });
 
           const result = response.data || response;
+          // Blocked sources (estatesales.net) are dropped even if the model cites them.
           const sources = [
             { site: result.site1_name, price: Math.round(result.site1_price || 0) },
             { site: result.site2_name, price: Math.round(result.site2_price || 0) },
             { site: result.site3_name, price: Math.round(result.site3_price || 0) }
-          ];
+          ].filter(s => s.price > 0 && !isBlockedSource(s.site));
 
-          const avgPrice = Math.round(
-            sources.reduce((sum, s) => sum + s.price, 0) / sources.length
-          );
+          const avgPrice = sources.length > 0
+            ? Math.round(sources.reduce((sum, s) => sum + s.price, 0) / sources.length)
+            : 0;
 
           const pricingResult = {
             sources,
@@ -134,7 +138,7 @@ Return ONLY valid JSON:
           };
 
           // Auto-fill price if empty
-          if (onPriceUpdated && (!image.price || image.price === 0)) {
+          if (onPriceUpdated && avgPrice > 0 && (!image.price || image.price === 0)) {
             onPriceUpdated(actualIndex, avgPrice);
           }
 

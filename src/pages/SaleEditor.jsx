@@ -12,6 +12,7 @@ import CommunicationsPanel from '@/components/saleops/CommunicationsPanel';
 import LaborEntriesPanel from '@/components/saleops/LaborEntriesPanel';
 import SaleSkipGuideModal from '@/components/estate/SaleSkipGuideModal';
 import { runQuickScan } from '@/lib/quickScan';
+import { SOURCE_EXCLUSION_RULE, filterAllowedSources } from '@/lib/excludedSources';
 import SaleNotesPanel from '@/components/saleops/SaleNotesPanel';
 import ReferralSourceCard from '@/components/saleops/ReferralSourceCard';
 import { Badge } from '@/components/ui/badge';
@@ -878,7 +879,7 @@ Be practical and realistic for an estate sale context.`,
     setRegeneratingPrice(prev => ({ ...prev, [index]: true }));
     try {
       const response = await base44.integrations.Core.InvokeLLM({
-        prompt: `Research current market prices for: "${image.name}"\n\nSearch multiple sources (eBay sold listings, online marketplaces, antique dealers).\nReturn a JSON with pricing data.`,
+        prompt: `Research current market prices for: "${image.name}"\n\nSearch multiple sources (eBay sold listings, online marketplaces, antique dealers).\nReturn a JSON with pricing data.\n\n${SOURCE_EXCLUSION_RULE}`,
         add_context_from_internet: true,
         file_urls: [image.url],
         response_json_schema: {
@@ -888,7 +889,7 @@ Be practical and realistic for an estate sale context.`,
           }
         }
       });
-      const sources = response.sources || [];
+      const sources = filterAllowedSources(response.sources);
       if (sources.length > 0) {
         const prices = sources.map(s => s.price);
         const lowPrice = Math.min(...prices);
@@ -1883,7 +1884,7 @@ Return ONLY the description text, no extra commentary.`
                         setRegeneratingPrice(prev => ({ ...prev, [i]: true }));
                         try {
                           const response = await base44.integrations.Core.InvokeLLM({
-                            prompt: `Research current market prices for: "${img.name}"\n\nSearch multiple sources (eBay sold listings, online marketplaces, antique dealers).\nReturn a JSON with pricing data.`,
+                            prompt: `Research current market prices for: "${img.name}"\n\nSearch multiple sources (eBay sold listings, online marketplaces, antique dealers).\nReturn a JSON with pricing data.\n\n${SOURCE_EXCLUSION_RULE}`,
                             add_context_from_internet: true,
                             file_urls: [img.url],
                             response_json_schema: {
@@ -1893,7 +1894,7 @@ Return ONLY the description text, no extra commentary.`
                               }
                             }
                           });
-                          const sources = response.sources || [];
+                          const sources = filterAllowedSources(response.sources);
                           if (sources.length > 0) {
                             const prices = sources.map(s => s.price);
                             const lowPrice = Math.min(...prices);
