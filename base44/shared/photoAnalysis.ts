@@ -427,8 +427,9 @@ export async function runPhotoAnalysis(ctx) {
   const { service, user, saleId, body } = ctx;
   const action = body.action || 'next';
   const now = Date.now();
-  const describe = ctx.describe || describeWithBase44;
-  const research = ctx.research || researchWithProviders;
+  // The providers need the service client; the pipeline calls them with the photo only.
+  const describe = ctx.describe || (photo => describeWithBase44(service, photo));
+  const research = ctx.research || ((photo, basic, lens) => researchWithProviders(service, photo, basic, lens));
 
   const loadSale = async () => {
     const sale = await service.entities.EstateSale.get(saleId);
