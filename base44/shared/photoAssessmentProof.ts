@@ -150,8 +150,8 @@ export async function photoAssessmentProof() {
   });
 
   // 3. Operator overrides persist and survive repeat sorting.
-  await runPhotoAssessment({ service, user, saleId: record.id, target: { photo_id: 'p5', image_revision: 'r5' }, action: 'override', decision: 'skip' });
-  await runPhotoAssessment({ service, user, saleId: record.id, target: { photo_id: 'p6', image_revision: 'r6' }, action: 'override', decision: 'scan' });
+  await runPhotoAssessment({ service, user, saleId: record.id, target: { photo_id: 'p5', image_revision: 'r5', decision: 'skip' }, action: 'override' });
+  await runPhotoAssessment({ service, user, saleId: record.id, target: { photo_id: 'p6', image_revision: 'r6', decision: 'scan' }, action: 'override' });
   await check('operator override is stored with its source', () => {
     const overridden = assessmentOf(photoById('p5'));
     assert(overridden.decision === 'skip' && overridden.source === 'operator', `p5 ${overridden.decision}/${overridden.source}`);

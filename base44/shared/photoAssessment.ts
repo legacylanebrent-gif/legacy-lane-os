@@ -76,7 +76,13 @@ export function assessmentOf(photo) {
  */
 export function step2Eligible(photo) {
   const assessment = assessmentOf(photo);
-  if (assessment.status === 'none') return photo?.pipeline?.classification === 'single';
+  if (assessment.status === 'none') {
+    // A photo that WAS assessed keeps an older classification after its image is
+    // replaced; that is a stale result, not a current decision. Only photos that
+    // never had an assessment fall back to the historical classification.
+    if (photo?.pipeline?.jobs?.assessment) return false;
+    return photo?.pipeline?.classification === 'single';
+  }
   return assessment.status === 'assessed' && assessment.decision === 'scan';
 }
 
