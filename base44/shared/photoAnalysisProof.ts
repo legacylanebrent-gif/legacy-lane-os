@@ -139,6 +139,44 @@ export async function photoAnalysisProof() {
   const photoOf = id => record.images.find(p => p.pipeline.id === id);
   const jobOf = id => photoOf(id)?.pipeline?.jobs?.[JOB_KEY];
 
+  /* ── 0. a search whose request died is disclosed, never silently re-billed ── */
+  {
+    const interruptedId = 'p1';
+    record = { id: SALE, operator_id: user.id, updated_date: 'v0', images: makePhotos().slice(1, 2) };
+    const staleClaim = new Date(Date.now() - 10 * 60 * 1000).toISOString();
+    const only = photoOf(interruptedId);
+    only.pipeline.jobs = {
+      [JOB_KEY]: {
+        id: 'job-interrupted',
+        revision: only.pipeline.revision,
+        state: 'running',
+        stage: 'researching',
+        claimed_at: staleClaim,
+        created_at: staleClaim,
+        attempts: 1,
+        classification: 'single',
+        basic: { title: `Basic item ${interruptedId}`, description: `A single photographed item ${interruptedId}.` },
+        research: null,
+      },
+    };
+    record = { ...record, updated_date: `v${++version}` };
+
+    const beforeInterrupt = clone(calls);
+    const step = await invoke({ action: 'next' });
+    const interrupted = jobOf(interruptedId) || {};
+    const note = `state=${interrupted.state} stage=${interrupted.stage} revision_ok=${interrupted.revision === only.pipeline.revision} claimed=${step.photo?.pipeline.id || 'none'} total=${step.counts?.all}`;
+    assert(interrupted.state === 'outcome_unknown', `an interrupted paid search is disclosed as outcome unknown (${note})`);
+    assert(interrupted.retryable === false && /outcome is unknown/i.test(interrupted.error || ''), 'the interrupted search explains why it will not retry itself');
+    assert(calls.lens === beforeInterrupt.lens && calls.research === beforeInterrupt.research, 'an interrupted search is never silently re-billed');
+    assert(step.photo?.pipeline.id !== interruptedId, 'the interrupted photo is not quietly run again');
+
+    await invoke({ action: 'retry_failed' });
+    await drain(3);
+    assert(!!jobOf(interruptedId)?.research, 'a deliberate retry completes the interrupted search');
+    for (const key of Object.keys(calls)) calls[key] = 0;
+    creditRemaining = 1000;
+  }
+
   /* ── 1. fresh 200-photo run, mixed kinds ── */
   record = { id: SALE, operator_id: user.id, updated_date: 'v0', images: makePhotos() };
   const processed = await drain(3);
@@ -272,19 +310,7 @@ export async function photoAnalysisProof() {
   await drain(3);
   assert(record.images.filter(p => jobOf(p.pipeline.id)?.state === 'awaiting_credits').length === 0, 'topping up credits finishes the remaining research');
 
-  /* ── 12. interrupted search is disclosed, never silently re-billed ── */
-  await invoke({ action: 'reanalyze', photo_id: 'p80' });
-  const claim = await invoke({ action: 'next' });
-  const interruptedId = claim.photo?.pipeline.id || 'p80';
-  const interruptedJob = jobOf(interruptedId);
-  if (interruptedJob) {
-    interruptedJob.state = 'running';
-    interruptedJob.stage = 'researching';
-    interruptedJob.claimed_at = new Date(Date.now() - 10 * 60 * 1000).toISOString();
-    record = { ...record, updated_date: `v${++version}` };
-  }
-  await invoke({ action: 'next' });
-  assert(jobOf(interruptedId).state === 'outcome_unknown', 'an interrupted paid search is disclosed as outcome unknown');
+  /* ── 12. interrupted search: covered as step 0 above ── */
 
   return {
     scope: '200 mocked photos driven through the production analysis function and conditional-write store',
