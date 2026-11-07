@@ -160,17 +160,18 @@ export function researchPrompt(basic, matches) {
     evidence,
     '',
     'Write back:',
-    '- title: accurate, specific, at most ten words. Use what the photo shows plus only those results that clearly match the pictured item.',
+    '- title: accurate, specific, at most ten words. A plain, correct name is a good answer (for example "Beige upholstered three-seat sofa") — never withhold the name of an ordinary object just because its maker or model is unknown.',
     '- description: two to three short factual sentences a buyer would find useful.',
-    '- suggested_price: the price you would put on this item at a 2-3 day LOCAL estate sale, in US dollars. Not retail, not an internet asking price, not an auction result. Use null when the evidence does not support a number.',
+    '- suggested_price: the price you would put on this item at a 2-3 day LOCAL estate sale, in US dollars. Not retail, not an internet asking price, not an auction result. Work from the comparable asking prices above, brought down for local pickup and the short selling window. Use null only when there is no usable evidence at all.',
     '- price_low / price_high: the reasonable local range, or null.',
     '- price_basis: one sentence the operator can read explaining how you reached the price (for example "Comparable brass candlesticks ask $18-45 online; local sale pricing well below that at $12-18.").',
     '',
     'HARD RULES',
     '- Never claim an artist, maker, signature, edition, authenticity, material, dimension, age or condition unless the photograph or a clearly matching result supports it. Absent evidence, say nothing about it.',
-    '- If the results do not clearly match the pictured item, do not use them for identity and add that to review_reasons.',
     '- Never invent a comparable listing.',
-    '- If identification is unreliable, set identified to false, keep a generic accurate title, and explain in review_reasons.',
+    '- An ordinary object always gets a name and a price. Do not set identified to false, and do not return a null price, only because the brand or model is unknown — a generic but accurate name priced from comparable asking prices is the expected answer.',
+    '- Only results that clearly match the pictured item may inform the title or the price. Leave a mismatched result out of the reasoning entirely.',
+    '- Use review_reasons only for facts the operator should confirm by hand (a possible maker, signature, era or material). A review reason never replaces the price.',
     '',
     'Return JSON: identified, title, description, suggested_price, price_low, price_high, price_basis, confidence ("high", "medium" or "low"), review_reasons (array of short strings, empty when nothing is uncertain).',
   ].join('\n');
@@ -220,16 +221,19 @@ export async function researchWithProviders(service, photo, basic, lens) {
   const raw = await askLlm(service, researchPrompt(basic, matches), [photo.url], RESEARCH_SCHEMA);
   const title = String(raw.title || '').trim();
   const description = String(raw.description || '').trim();
-  const identified = raw.identified === true && !!title;
+  // A named item is a usable result. The operator confirms the finer points (maker,
+  // signature, era) by hand in the final review step, so an unknown brand never
+  // discards the research or the price the search produced.
+  const identified = !!title;
   const prices = matches.map(m => m.price).filter(p => typeof p === 'number' && p > 0);
   return {
     identified,
     title: title || basic?.title || '',
     description: description || basic?.description || '',
-    suggested_price: identified ? clampPrice(raw.suggested_price) : null,
-    price_low: identified ? clampPrice(raw.price_low) : null,
-    price_high: identified ? clampPrice(raw.price_high) : null,
-    price_basis: identified ? String(raw.price_basis || '').trim() : '',
+    suggested_price: clampPrice(raw.suggested_price),
+    price_low: clampPrice(raw.price_low),
+    price_high: clampPrice(raw.price_high),
+    price_basis: String(raw.price_basis || '').trim(),
     confidence: pick(raw.confidence, ['high', 'medium', 'low'], 'low'),
     review_reasons: (raw.review_reasons || []).filter(Boolean).slice(0, 5),
     evidence: {
