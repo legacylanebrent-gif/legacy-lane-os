@@ -339,6 +339,23 @@ async function processClaimed(ctx) {
     return value;
   };
 
+  // One atomic write that both applies the listing fields and records the
+  // operator-facing state. Re-running it is idempotent.
+  const finish = async (holdReason = null) => {
+    const value = await patchJob(meta, ref, job.id, (j, photo) => {
+      const flags = reviewFlags(j.basic, j.research);
+      if (holdReason) flags.push(holdReason);
+      j.stage = 'final';
+      j.review_flags = [...new Set(flags)];
+      j.finished_at = new Date().toISOString();
+      j.state = holdReason ? 'awaiting_credits' : (j.review_flags.length ? 'needs_review' : 'ready');
+      applyResult(photo, j);
+      return j;
+    });
+    job = value.job;
+    return value;
+  };
+
   try {
     if (job.stage === 'claimed') {
       const basic = await describe(target.photo);
@@ -352,28 +369,19 @@ async function processClaimed(ctx) {
         await settle(j => ({ ...j, state: 'pending', claimed_at: null }));
         return { released: true };
       }
+      const NEEDS_CREDITS = 'Awaiting search credits for identification and pricing';
       const budget = await credits();
       if (!budget?.allowed) {
-        const value = await settle(j => {
-          const photo = { ...target.photo };
-          j.state = 'awaiting_credits';
-          j.stage = 'final';
-          j.review_flags = reviewFlags(j.basic, null).concat('Awaiting search credits for identification and pricing');
-          applyResult(photo, j);
-          return { ...j, review_flags: reviewFlags(j.basic, null).concat('Awaiting search credits for identification and pricing') };
-        });
-        // Re-apply with the awaited job's flags.
-        const done = await patchJob(meta, ref, job.id, j => {
-          applyResult(target.photo, j);
-          return j;
-        });
-        return { photo: done.photo, state: 'awaiting_credits', exhausted: true, remaining: budget?.remaining ?? 0 };
+        const value = await finish(NEEDS_CREDITS);
+        return { photo: value.photo, state: 'awaiting_credits', exhausted: true, remaining: budget?.remaining ?? 0 };
       }
 
+      // Checkpoint before the paid call: an interrupted search is recorded as an
+      // unknown outcome instead of being silently re-billed.
       await settle(j => ({ ...j, stage: 'researching' }));
       const spend = await spendCredit();
       if (spend && spend.allowed === false) {
-        const value = await settle(j => ({ ...j, stage: 'described', state: 'awaiting_credits', review_flags: reviewFlags(j.basic, null).concat('Awaiting search credits for identification and pricing') }));
+        const value = await finish(NEEDS_CREDITS);
         return { photo: value.photo, state: 'awaiting_credits', exhausted: true };
       }
       const lens = await ctx.lens(target.photo);
@@ -381,16 +389,7 @@ async function processClaimed(ctx) {
       await settle(j => ({ ...j, stage: 'researched', research: researched, review_flags: reviewFlags(j.basic, researched) }));
     }
 
-    const value = await patchJob(meta, ref, job.id, j => {
-      const flags = reviewFlags(j.basic, j.research);
-      const applied = { ...j, stage: 'final', review_flags: flags, state: flags.length ? 'needs_review' : 'ready', finished_at: new Date().toISOString() };
-      return { ...applied, applied: true };
-    });
-    // Fields are written relative to the freshly-read photo, never a stale copy.
-    const done = await patchJob(meta, ref, job.id, (j, photo) => {
-      applyResult(photo, j);
-      return j;
-    });
+    const done = await finish();
     return { photo: done.photo, state: done.job.state };
   } catch (error) {
     const status = error.status || 500;
@@ -460,6 +459,23 @@ export async function runPhotoAnalysis(ctx) {
       counts: await snapshot(),
       credits: await safeCredits(),
     };
+  }
+
+  if (action === 'retry_failed') {
+    const result = await mutateSalePhotos(service, saleId, user, images => {
+      let queued = 0;
+      for (const photo of images) {
+        const job = jobOf(photo);
+        if (!job || !['failed', 'outcome_unknown'].includes(job.state)) continue;
+        photo.pipeline.jobs = {
+          ...photo.pipeline.jobs,
+          [JOB_KEY]: { ...job, state: 'pending', attempts: 0, error: null, retryable: false, retry_at: null, claimed_at: null, stage: job.stage === 'final' ? 'described' : job.stage },
+        };
+        queued += 1;
+      }
+      return queued;
+    });
+    return { queued: result.value, counts: await snapshot(), credits: await safeCredits() };
   }
 
   const photoId = body.photo_id;
@@ -596,23 +612,6 @@ export async function runPhotoAnalysis(ctx) {
       return structuredClone(photo);
     });
     return { photo: result.value, counts: await snapshot() };
-  }
-
-  if (action === 'retry_failed') {
-    const result = await mutateSalePhotos(service, saleId, user, images => {
-      let queued = 0;
-      for (const photo of images) {
-        const job = jobOf(photo);
-        if (!job || !['failed', 'outcome_unknown'].includes(job.state)) continue;
-        photo.pipeline.jobs = {
-          ...photo.pipeline.jobs,
-          [JOB_KEY]: { ...job, state: 'pending', attempts: 0, error: null, retryable: false, retry_at: null, claimed_at: null, stage: job.stage === 'final' ? 'described' : job.stage },
-        };
-        queued += 1;
-      }
-      return queued;
-    });
-    return { queued: result.value, counts: await snapshot(), credits: await safeCredits() };
   }
 
   throw photoError(`Unknown action: ${action}`, 400);
