@@ -5,7 +5,7 @@ import { salePhotoPipeline } from '@/lib/salePhotoPipeline';
 
 export default function usePhotoPipeline({ saleId, userId, imagesRef, onPhoto, onImages }) {
   const paused = useRef(false), running = useRef(false);
-  const [state, setState] = useState({ running: false, total: 0, counts: {}, type: null, error: '' });
+  const [state, setState] = useState({ running: false, total: 0, counts: {}, type: null, error: '', cleared: false });
   useEffect(() => {
     if (!saleId || !userId) return;
     const type = localStorage.getItem(`photoLastType:${userId}:${saleId}`);
@@ -19,7 +19,7 @@ export default function usePhotoPipeline({ saleId, userId, imagesRef, onPhoto, o
     if (type === 'deep' && !window.confirm('Run explicit SerpAPI Deep Scan? This uses Deep Scan credits. Results are comparable asking prices, not sold prices.')) return;
     localStorage.setItem(`photoLastType:${userId}:${saleId}`, type);
     running.current = true; paused.current = false;
-    setState({ running: true, total: 0, counts: {}, type, error: '' });
+    setState({ running: true, total: 0, counts: {}, type, error: '', cleared: false });
     try {
       const initialized = await base44.functions.invoke('saveSaleImageChanges', { sale_id: saleId });
       const all = initialized.data.images;
@@ -54,5 +54,22 @@ export default function usePhotoPipeline({ saleId, userId, imagesRef, onPhoto, o
       setState(s => ({ ...s, error: error.response?.data?.error || error.message }));
     } finally { running.current = false; setState(s => ({ ...s, running: false })); }
   }
-  return { state, run, pause: () => { paused.current = true; } };
+  // Clears the saved run log only. Photo records keep their own history, so no
+  // scan result and no error evidence is deleted.
+  function reset() {
+    if (running.current || !state.type) return;
+    const key = `photoPipeline:v2:${userId}:${saleId}:${state.type}`;
+    Object.keys(localStorage)
+      .filter(k => k === key || k.startsWith(`${key}:recovery:`))
+      .forEach(k => localStorage.removeItem(k));
+    setState(s => ({ ...s, total: 0, counts: {}, error: '', cleared: true }));
+  }
+
+  function retryInterrupted() {
+    if (running.current || !state.type) return;
+    if (!window.confirm('Retry the photos that did not finish? An interrupted attempt may already have been charged by the provider, so retrying can use credits again.')) return;
+    run(state.type, null, { retryUnknown: true });
+  }
+
+  return { state, run, reset, retryInterrupted, pause: () => { paused.current = true; } };
 }

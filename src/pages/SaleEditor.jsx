@@ -13,6 +13,7 @@ import LaborEntriesPanel from '@/components/saleops/LaborEntriesPanel';
 import SaleSkipGuideModal from '@/components/estate/SaleSkipGuideModal';
 import usePhotoPipeline from '@/hooks/usePhotoPipeline';
 import PhotoPipelineControls from '@/components/estate/PhotoPipelineControls';
+import PhotoPipelineProgress from '@/components/estate/PhotoPipelineProgress';
 import PhotoScanDetails from '@/components/estate/PhotoScanDetails';
 import { SOURCE_EXCLUSION_RULE, filterAllowedSources } from '@/lib/excludedSources';
 import SaleNotesPanel from '@/components/saleops/SaleNotesPanel';
@@ -1808,6 +1809,7 @@ Return ONLY the description text, no extra commentary.`
                        Print Pricing Sheet
                      </Button>
 
+                    <PhotoPipelineProgress pipeline={pipeline} />
                     <PhotoPipelineControls pipeline={pipeline} onSkip={() => setShowSkipGuideModal(true)} />
                     </div>
                     {!step1Completed && saleId ? (
