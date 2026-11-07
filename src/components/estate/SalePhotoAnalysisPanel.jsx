@@ -1,6 +1,7 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Sparkles, Loader2, RotateCcw, AlertTriangle, Wallet, Info, Search } from 'lucide-react';
 import PhotoAnalysisCard from '@/components/estate/PhotoAnalysisCard';
+import PhotoRunDialog from '@/components/estate/PhotoRunDialog';
 import { viewStateOf } from '@/lib/photoAnalysisState';
 import { base44 } from '@/api/base44Client';
 
@@ -13,8 +14,12 @@ const FILTERS = [
 
 export default function SalePhotoAnalysisPanel({ saleId, analysis, photos = [], onRemovePhoto }) {
   const [filter, setFilter] = useState('all');
+  const [runDialogHidden, setRunDialogHidden] = useState(false);
   const { counts, credits, running, mode, progress, error } = analysis.state;
   const step2Running = running && mode === 'step2';
+
+  // Every new run announces itself again, even after the last one was hidden.
+  useEffect(() => { if (running) setRunDialogHidden(false); }, [running]);
 
   const states = useMemo(() => {
     const map = {};
@@ -45,6 +50,7 @@ export default function SalePhotoAnalysisPanel({ saleId, analysis, photos = [], 
   };
 
   const total = counts?.all ?? photos.length;
+  const analyzed = counts ? Math.max(0, total - (counts.pending || 0) - (counts.blocked || 0)) : null;
   const awaiting = counts?.awaiting_credits || 0;
   const blocked = counts?.blocked || 0;
   const filters = blocked > 0 ? [...FILTERS, { key: 'blocked', label: 'On hold' }] : FILTERS;
@@ -55,6 +61,15 @@ export default function SalePhotoAnalysisPanel({ saleId, analysis, photos = [], 
 
   return (
     <div className="space-y-3">
+      <PhotoRunDialog
+        open={running && !runDialogHidden && mode !== 'save'}
+        mode={mode}
+        progress={progress}
+        analyzed={analyzed}
+        total={total}
+        onHide={() => setRunDialogHidden(true)}
+      />
+
       <div className="bg-white border border-slate-200 rounded-xl p-3.5 space-y-3">
         <div>
           <h2 className="text-base font-bold text-slate-900">Analyze Sale Photos</h2>
@@ -114,7 +129,13 @@ export default function SalePhotoAnalysisPanel({ saleId, analysis, photos = [], 
 
         <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-slate-500">
           {creditText && <span className="inline-flex items-center gap-1"><Wallet className="w-3 h-3" />{creditText}</span>}
-          {counts && <span className="inline-flex items-center gap-1"><Info className="w-3 h-3" />{total - (counts.pending || 0) - (counts.blocked || 0)} of {total} analyzed</span>}
+          {counts && <span className="inline-flex items-center gap-1"><Info className="w-3 h-3" />{analyzed} of {total} analyzed</span>}
+          {running && runDialogHidden && (
+            <button type="button" onClick={() => setRunDialogHidden(false)}
+              className="inline-flex items-center gap-1 font-semibold text-cyan-700 underline">
+              <Loader2 className="w-3 h-3 animate-spin" /> Show progress
+            </button>
+          )}
           {!saleId && <span className="text-amber-700">Save the sale first to analyze photos.</span>}
         </div>
 

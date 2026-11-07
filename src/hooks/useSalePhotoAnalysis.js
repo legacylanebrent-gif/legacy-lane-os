@@ -96,11 +96,11 @@ export default function useSalePhotoAnalysis({ saleId, onPhoto, onRunComplete })
     } else await refresh();
   }, 'step2');
 
-  const single = (photo, body, { follow = true } = {}) => guard(async () => {
+  const single = (photo, body, { follow = true, mode = 'single' } = {}) => guard(async () => {
     settle(await call({ ...body, ...ref(photo) }));
     if (follow) await drain();
     else await refresh();
-  })();
+  }, mode)();
 
   return {
     state,
@@ -115,7 +115,7 @@ export default function useSalePhotoAnalysis({ saleId, onPhoto, onRunComplete })
     releaseHold: photo => single(photo, { action: 'release_hold' }),
     research: photo => single(photo, { action: 'research' }),
     classify: (photo, classification) => single(photo, { action: 'classify', classification }),
-    saveFields: (photo, fields) => single(photo, { action: 'save_fields', fields }, { follow: false }),
-    applyPrice: photo => single(photo, { action: 'apply_price' }, { follow: false }),
+    saveFields: (photo, fields) => single(photo, { action: 'save_fields', fields }, { follow: false, mode: 'save' }),
+    applyPrice: photo => single(photo, { action: 'apply_price' }, { follow: false, mode: 'save' }),
   };
 }

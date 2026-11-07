@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Loader2, RotateCcw, Search, RefreshCw, Check, AlertTriangle, ImageOff, ExternalLink, Pencil, Trash2 } from 'lucide-react';
 import PhotoOperatorEditor from '@/components/estate/PhotoOperatorEditor';
+import PhotoSerpMatches from '@/components/estate/PhotoSerpMatches';
 
 const TONE = {
   ready: 'bg-green-50 border-green-200 text-green-700',
@@ -35,6 +36,9 @@ export default function PhotoAnalysisCard({ photo, index, state, busy, onRetry, 
   // Manual review happens once the photo is not being worked on, so it is
   // available for every item after Step 2 finishes.
   const canOperate = state !== 'inflight';
+  // A run disables every card's buttons, so say why instead of going quietly grey.
+  const working = state === 'inflight';
+  const waiting = busy && !working;
   const lensUrl = photo?.url
     ? `https://lens.google.com/uploadbyurl?url=${encodeURIComponent(photo.url)}`
     : null;
@@ -81,6 +85,10 @@ export default function PhotoAnalysisCard({ photo, index, state, busy, onRetry, 
         </div>
       </div>
 
+      <div className="px-2.5">
+        <PhotoSerpMatches research={research} />
+      </div>
+
       {editing && (
         <PhotoOperatorEditor
           photo={photo}
@@ -91,6 +99,16 @@ export default function PhotoAnalysisCard({ photo, index, state, busy, onRetry, 
       )}
 
       <div className="flex flex-wrap gap-1.5 px-2.5 pb-2.5">
+        {working && (
+          <span className="w-full inline-flex items-center gap-1 text-[10px] font-medium text-cyan-700">
+            <Loader2 className="w-3 h-3 animate-spin" /> Reading the photo, then the web search — each step saves as it finishes.
+          </span>
+        )}
+        {waiting && (
+          <span className="w-full text-[10px] text-slate-500">
+            Analysis is running on another photo right now, so these buttons stay locked until it finishes.
+          </span>
+        )}
         {canOperate && lensUrl && (
           <a
             href={lensUrl}
