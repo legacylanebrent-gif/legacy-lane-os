@@ -18,8 +18,8 @@ import SaleNotesPanel from '@/components/saleops/SaleNotesPanel';
 import ReferralSourceCard from '@/components/saleops/ReferralSourceCard';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
-import { Progress } from '@/components/ui/progress';
-import { ArrowLeft, Plus, X, Camera, Sparkles, Scan, Brain, Wand2, FileDown, Printer, ChevronsDownUp, ChevronsUpDown, Rocket, RotateCw, RotateCcw } from 'lucide-react';
+
+import { ArrowLeft, Plus, X, Camera, Sparkles, Brain, Wand2, FileDown, Printer, ChevronsDownUp, ChevronsUpDown, Rocket, RotateCw, RotateCcw } from 'lucide-react';
 import jsPDF from 'jspdf';
 import * as XLSX from 'xlsx';
 import { Switch } from '@/components/ui/switch';
@@ -29,7 +29,7 @@ import SaleClientPermissionsModal from '@/components/estate/SaleClientPermission
 import DeepSearchPricingModal from '@/components/estate/DeepSearchPricingModal';
 import StarterPublishFeeModal from '@/components/estate/StarterPublishFeeModal';
 import ZipAddressEntry from '@/components/estate/ZipAddressEntry';
-import ProfileCompletionGate, { isProfileComplete } from '@/components/profile/ProfileCompletionGate';
+import { isProfileComplete } from '@/components/profile/ProfileCompletionGate';
 import GoogleLensCreditDisplay from '@/components/pricing/GoogleLensCreditDisplay';
 import { getImageSrc } from '@/utils/imageOptimizer';
 import PdfGenerationModal from '@/components/estate/PdfGenerationModal';
