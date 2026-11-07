@@ -1347,6 +1347,7 @@ Be practical and realistic for an estate sale context.`,
         <DeepSearchProgressModal
           open={showDeepSearchModal}
           currentIndex={deepSearchModalIndex}
+          currentCount={serpBatchProgress.current}
           totalCount={serpBatchProgress.total}
           images={formData.images}
           imageThumbnails={imageThumbnails}
@@ -1976,6 +1977,8 @@ Return ONLY the description text, no extra commentary.`
                                if (data.error) {
                                  console.warn(`AI search skipped image ${i + 1}: ${data.error}`);
                                  setSerpResults(prev => ({ ...prev, [img.url]: { error: data.error } }));
+                                 processed++;
+                                 setSerpBatchProgress(prev => ({ ...prev, current: processed }));
                                  if (/run out|credits|quota|limit|payment|account/i.test(data.error)) {
                                    setSerpBatchProgress(prev => ({ ...prev, stoppedAt: i, current: processed }));
                                    setSerpSearching({});
@@ -2031,6 +2034,8 @@ Return ONLY the description text, no extra commentary.`
                                }
                              } catch (e) {
                               console.warn(`AI search skipped image ${i + 1}:`, e.message);
+                              processed++;
+                              setSerpBatchProgress(prev => ({ ...prev, current: processed }));
                              }
                              setSerpSearching(prev => ({ ...prev, [i]: false }));
                              await new Promise(r => setTimeout(r, 1000));

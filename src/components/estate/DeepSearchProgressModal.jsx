@@ -3,11 +3,14 @@ import { Progress } from '@/components/ui/progress';
 import { Scan, X } from 'lucide-react';
 import { getImageSrc } from '@/utils/imageOptimizer';
 
-export default function DeepSearchProgressModal({ open, currentIndex, totalCount, images, imageThumbnails }) {
+export default function DeepSearchProgressModal({ open, currentIndex, currentCount = 0, totalCount, images, imageThumbnails }) {
   if (!open) return null;
 
   const image = currentIndex >= 0 && currentIndex < images.length ? images[currentIndex] : null;
-  const pct = totalCount > 0 ? Math.round((currentIndex + 1) / totalCount * 100) : 0;
+  // Progress counts images actually processed in this run — never the gallery position.
+  const done = Math.min(Math.max(currentCount, 0), totalCount || 0);
+  const shown = totalCount > 0 ? Math.min(done + 1, totalCount) : 0;
+  const pct = totalCount > 0 ? Math.min(100, Math.round((done / totalCount) * 100)) : 0;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
@@ -35,7 +38,7 @@ export default function DeepSearchProgressModal({ open, currentIndex, totalCount
         <div className="space-y-2">
           <div className="flex justify-between text-sm">
             <span className="font-semibold text-purple-700">
-              Image {currentIndex + 1} of {totalCount}
+              Image {shown} of {totalCount}
             </span>
             <span className="text-slate-500">{pct}%</span>
           </div>
