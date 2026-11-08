@@ -46,7 +46,7 @@ function addressOf(sale) {
   return [a.street, a.city, a.state].filter(Boolean).join(', ') || 'Address not set';
 }
 
-export default function SaleSpotlight({ sale, onCreateSale, onEditSale }) {
+export default function SaleSpotlight({ sale, onCreateSale }) {
   if (!sale) {
     return (
       <div className="rounded-2xl border border-dashed border-slate-300 bg-white/70 p-6 text-center">
@@ -113,11 +113,9 @@ export default function SaleSpotlight({ sale, onCreateSale, onEditSale }) {
             <Link to="/MySaleDay">
               <Button variant="outline">My Sale Day</Button>
             </Link>
-            {onEditSale && (
-              <Button variant="ghost" className="text-slate-600" onClick={() => onEditSale(sale)}>
-                Edit details
-              </Button>
-            )}
+            <Link to={`/SaleEditor?saleId=${sale.id}`}>
+              <Button variant="ghost" className="text-slate-600">Edit details</Button>
+            </Link>
           </div>
         </div>
       </div>

@@ -95,11 +95,6 @@ export default function EstateSaleOperatorDashboard({ user }) {
     }
   };
 
-  const handleEditSale = (sale) => {
-    setEditingSale(sale);
-    setCreateModalOpen(true);
-  };
-
   const handleModalClose = () => {
     setCreateModalOpen(false);
     setEditingSale(null);
@@ -152,7 +147,7 @@ export default function EstateSaleOperatorDashboard({ user }) {
         onOpenSales={() => navigate(createPageUrl('MySales'))}
       />
 
-      <SaleSpotlight sale={nextSale} onCreateSale={openCreateModal} onEditSale={handleEditSale} />
+      <SaleSpotlight sale={nextSale} onCreateSale={openCreateModal} />
 
       <TodayStrip sale={activeSale || nextSale} />
 
