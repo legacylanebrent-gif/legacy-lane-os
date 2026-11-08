@@ -47,6 +47,7 @@ export default function ItemInspectDialog({ open, item, zones, onClose, onAddToC
             )}
           </div>
           <p className="text-2xl font-bold text-orange-600">${item.price?.toLocaleString()}</p>
+          {item.brand && <p className="text-slate-600 text-xs">Brand: {item.brand}</p>}
           <p className="text-slate-600 text-xs">{loc ? `Location: ${loc}` : 'Location: not assigned'}</p>
           <div className="grid grid-cols-2 gap-2 text-xs pt-1">
             <span className="text-slate-500">Verification: {(item.verification_status || 'UNVERIFIED').replace(/_/g, ' ').toLowerCase()}</span>

@@ -8,7 +8,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import NotificationsDropdown from '@/components/notifications/NotificationsDropdown';
 import { 
-  ArrowLeft, Heart, Share2, MapPin, Calendar, Tag, Package,
+  ArrowLeft, Heart, Share2, MapPin, Calendar, Tag, Package, Award,
   Image as ImageIcon, ShoppingBag, Phone, Mail, ExternalLink, Edit, Save, X, MessageSquare, LogIn, LogOut, LayoutDashboard
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
@@ -346,6 +346,12 @@ export default function ItemDetail() {
                       <Badge variant="outline" className="text-xs">
                        <Tag className="w-3 h-3 mr-1" />
                        {formatLabel(item.category)}
+                      </Badge>
+                      )}
+                      {item.brand && (
+                      <Badge variant="outline" className="text-xs">
+                       <Award className="w-3 h-3 mr-1" />
+                       {item.brand}
                       </Badge>
                       )}
                       {item.condition && (

@@ -297,6 +297,9 @@ export default function MarketplaceItemDetail() {
                 </div>
 
                 <h1 className="text-3xl font-bold text-slate-900 mb-2">{item.title}</h1>
+                {item.brand && (
+                  <p className="text-sm font-medium text-slate-700 mb-1">Brand: {item.brand}</p>
+                )}
                 <p className="text-slate-600 mb-6">{item.description}</p>
 
                 {/* Seller Info */}
