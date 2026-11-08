@@ -64,6 +64,7 @@ const PAGE_TITLES = {
   MarketingTasks: 'Marketing',
   OperatorDashboard: 'Estate Sale Company Owner Dashboard',
   OperatorProfile: 'Estate Sale Company Owner Profile',
+  IsoCenter: 'My Searches',
   AdminUsers: 'Admin — Users',
 };
 

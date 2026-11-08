@@ -28,6 +28,7 @@ export const ALL_NAV_ITEMS = [
   { page: 'Dashboard',              label: 'Dashboard',              icon: LayoutDashboard, group: 'Main' },
   { page: 'MyProfile',              label: 'My Profile',             icon: User,            group: 'Main' },
   { page: 'MyLinks',                label: 'My Links',               icon: Link2,           group: 'Main' },
+  { page: 'IsoCenter',              label: 'My Searches',            icon: Search,          group: 'Main' },
 
   // ── ESTATE SALES (operator core) ────────────────────────────────────────────
   { page: 'MySales',                label: 'My Sales',               icon: Building2,       group: 'Estate Sales' },

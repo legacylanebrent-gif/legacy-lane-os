@@ -480,8 +480,10 @@ export function scoreIsoCandidate(iso: any, candidate: IsoCandidate): IsoScore {
     }
   }
 
-  const substantive = reasons.some(r => /brand|item type|category|wording/.test(r));
-  const quality = !substantive || score < 26 ? null : (score >= 55 ? 'strong' : 'possible');
+  // A bare category match is not enough for a suggestion: require a brand, the item
+  // type itself, or real wording overlap before a candidate is offered at all.
+  const substantive = reasons.some(r => /brand|item type|wording/.test(r));
+  const quality = !substantive || score < 32 ? null : (score >= 55 ? 'strong' : 'possible');
   return { score: Math.max(0, Math.min(100, score)), quality, reasons, unknowns, excluded: null, matchedVia };
 }
 

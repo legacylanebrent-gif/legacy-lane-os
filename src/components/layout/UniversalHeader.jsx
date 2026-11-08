@@ -119,6 +119,11 @@ export default function UniversalHeader({ user: userProp, isAuthenticated: isAut
                         <Target className="w-4 h-4 mr-2 text-orange-500" /> ISO Wanted Items 🔥
                       </Link>
                     </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link to="/IsoCenter" className="cursor-pointer font-medium">
+                        <Target className="w-4 h-4 mr-2 text-cyan-600" /> My Searches &amp; Matches
+                      </Link>
+                    </DropdownMenuItem>
                     {(['estate_sale_operator', 'real_estate_agent', 'vendor', 'reseller', 'consignor', 'diy_seller', 'collector_dealer', 'investor'].includes(user?.primary_account_type) || user?.role === 'admin') && (
                       <DropdownMenuItem asChild>
                         <Link to="/AdminDashboard" className="cursor-pointer font-medium text-orange-600">

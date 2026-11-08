@@ -168,6 +168,7 @@ import PropstreamAgentLeads from './pages/PropstreamAgentLeads';
 import MobileHome from './pages/MobileHome';
 import MobileAppShell from '@/components/layout/MobileAppShell';
 import CollectorDealerDashboard from './pages/CollectorDealerDashboard';
+import IsoCenter from './pages/IsoCenter';
 import RewardDetail from './pages/RewardDetail';
 import ReferCompany from './pages/ReferCompany';
 import MyCalendar from './pages/MyCalendar';
@@ -341,6 +342,7 @@ const AuthenticatedApp = () => {
       <Route path="/ViewStorageContents" element={<LayoutWrapper currentPageName="ViewStorageContents"><ViewStorageContents /></LayoutWrapper>} />
       <Route path="/ResellerDashboard" element={<LayoutWrapper currentPageName="ResellerDashboard"><ResellerDashboard /></LayoutWrapper>} />
       <Route path="/CollectorDealerDashboard" element={<LayoutWrapper currentPageName="CollectorDealerDashboard"><CollectorDealerDashboard /></LayoutWrapper>} />
+      <Route path="/IsoCenter" element={<LayoutWrapper currentPageName="IsoCenter"><IsoCenter /></LayoutWrapper>} />
       <Route path="/RewardDetail" element={<RewardDetail />} />
       <Route path="/ReferCompany" element={<LayoutWrapper currentPageName="ReferCompany"><ReferCompany /></LayoutWrapper>} />
       <Route path="/MyCalendar" element={<LayoutWrapper currentPageName="MyCalendar"><MyCalendar /></LayoutWrapper>} />

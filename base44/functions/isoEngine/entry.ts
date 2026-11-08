@@ -139,7 +139,10 @@ export default async function (req: Request): Promise<Response> {
           { wanted_item_id: { $in: isoIds } },
           { limit: 300, sort: '-last_matched_at' },
         );
-        matches = rows(matchRes);
+        // Only rows this engine produced are customer-facing: they carry a quality
+        // and a source. Older records without them cannot be explained, so they are
+        // left out rather than shown as unexplained numbers.
+        matches = rows(matchRes).filter((m: any) => m.match_quality && m.source_type);
       }
       const prefsRes = await base44.entities.NotificationPreference.filter({ user_id: user.id }, { limit: 1 }).catch(() => []);
       return Response.json({ isos, matches, intakes: rows(intakeRes), prefs: rows(prefsRes)[0] || null });
@@ -407,7 +410,7 @@ export default async function (req: Request): Promise<Response> {
         created.push(iso);
       }
 
-      await base44.entities.IsoIntake.update(intake.id, {
+      const savedIntake = await base44.entities.IsoIntake.update(intake.id, {
         created_interest_count: created.length,
         skipped_duplicates: skipped,
       });
@@ -420,7 +423,7 @@ export default async function (req: Request): Promise<Response> {
         }
       }
 
-      return Response.json({ intake, created, skipped });
+      return Response.json({ intake: savedIntake, created, skipped });
     }
 
     // ── Match control ──
