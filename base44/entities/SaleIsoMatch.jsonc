@@ -1,21 +1,23 @@
 {
   "name": "SaleIsoMatch",
   "type": "object",
-  "description": "One possible match between a buyer's ISO ('in search of') request and an item in one estate sale, produced by the operator-initiated ISO match scan. Written only by the sanctioned scanSaleIsoMatches function, which resolves every id, name and price from stored records \u2014 never from model output. A match is a suggestion for the operator to check, never a sale, a reservation, or proof that the buyer still wants the item. The operator can dismiss a match that isn't right; a dismissal is preserved across later scans of the same sale.",
+  "description": "One match between an ISO (WantedItem) and one candidate item, produced by the shared ISO matching engine (base44/shared/isoMatching.ts) \u2014 never by model output directly. The same table serves the customer's ISO dashboard and the operator's per-sale ISO scan: a match is a suggestion to check, not a sale, a reservation, or proof the buyer still wants the item. Item-level matches (a specific published sale photo, inventory item, or marketplace listing) are kept separate from sale-level leads (a brand associated with a sale, with no specific item linked). Missing price, brand, condition or location stays 'unknown' \u2014 never invented. Dismissed or hidden matches are preserved across later scans so feedback is never silently discarded.",
   "properties": {
     "sale_id": {
-      "type": "string"
+      "type": "string",
+      "description": "Sale the match belongs to; empty for marketplace/inventory matches outside a sale."
     },
     "operator_id": {
       "type": "string",
-      "description": "Owner of the sale the match belongs to (access anchor)."
+      "description": "Owner of the sale or item the match belongs to (access anchor for operators)."
     },
     "wanted_item_id": {
       "type": "string",
       "description": "The buyer's ISO record (WantedItem)."
     },
     "buyer_id": {
-      "type": "string"
+      "type": "string",
+      "description": "Customer who owns the ISO (access anchor for the customer dashboard)."
     },
     "buyer_name": {
       "type": "string"
@@ -33,9 +35,36 @@
       "type": "string",
       "description": "Short snapshot of the ISO's brand, category or budget, for the operator's scan."
     },
+    "source_type": {
+      "type": "string",
+      "enum": [
+        "sale_item",
+        "sale_photo",
+        "sale_level",
+        "inventory",
+        "marketplace"
+      ],
+      "default": "sale_item",
+      "enumColors": [
+        "green",
+        "green",
+        "yellow",
+        "blue",
+        "purple"
+      ],
+      "description": "Where the candidate came from. sale_level is a brand/sale association with no specific item linked \u2014 a lead, never an item-level match."
+    },
     "item_key": {
       "type": "string",
-      "description": "Stable key of the sale item: photo:<photo id> for a sale photo, item:<inventory id> for an inventory record."
+      "description": "Stable key of the matched unit: photo:<photo id> for a sale photo, item:<inventory id> for an inventory record, marketplace:<listing id> for a marketplace listing, sale:<sale id> for a sale-level lead."
+    },
+    "identity_key": {
+      "type": "string",
+      "description": "Deduplication key for the same physical item across inventory and marketplace (the Item id), so one item is never shown twice."
+    },
+    "unique_key": {
+      "type": "string",
+      "description": "wanted_item_id::item_key \u2014 the dedupe rule for repeated and concurrent scans."
     },
     "item_id": {
       "type": "string",
@@ -47,13 +76,90 @@
     "item_price": {
       "type": "number"
     },
+    "item_brand": {
+      "type": "string"
+    },
+    "brand_source": {
+      "type": "string",
+      "enum": [
+        "item",
+        "photo",
+        "sale",
+        "none"
+      ],
+      "default": "none",
+      "description": "Which record the brand came from. A sale-level brand never makes every item in the sale a brand match."
+    },
+    "item_condition": {
+      "type": "string"
+    },
+    "city": {
+      "type": "string"
+    },
+    "state": {
+      "type": "string"
+    },
+    "image_url": {
+      "type": "string"
+    },
+    "match_quality": {
+      "type": "string",
+      "enum": [
+        "strong",
+        "possible"
+      ],
+      "default": "possible",
+      "enumColors": [
+        "green",
+        "yellow"
+      ]
+    },
+    "matched_via": {
+      "type": "string",
+      "enum": [
+        "item",
+        "photo",
+        "sale_brand",
+        "sale_text"
+      ],
+      "default": "item"
+    },
     "confidence": {
       "type": "number",
-      "description": "Model's confidence this item satisfies the ISO, 0-100. A prompt for the operator's judgement, not a guarantee."
+      "description": "Structured similarity score 0-100. A prompt for the operator's or customer's judgement, not a guarantee."
     },
     "reason": {
       "type": "string",
-      "description": "Short plain-language reason the item satisfies the ISO."
+      "description": "Short plain-language explanation of why this matched."
+    },
+    "unknown_attributes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "What could not be verified for this candidate (price, brand, condition, location...). Never filled with guesses."
+    },
+    "availability": {
+      "type": "string",
+      "enum": [
+        "available",
+        "unavailable",
+        "unknown"
+      ],
+      "default": "unknown",
+      "enumColors": [
+        "green",
+        "red",
+        "gray"
+      ],
+      "description": "Availability snapshot from the source record at the last scan. Unavailable matches stay visible as history but are never presented as available."
+    },
+    "availability_note": {
+      "type": "string"
+    },
+    "sale_status": {
+      "type": "string"
     },
     "status": {
       "type": "string",
@@ -67,19 +173,59 @@
         "gray"
       ]
     },
+    "feedback": {
+      "type": "string",
+      "enum": [
+        "none",
+        "relevant",
+        "not_meant",
+        "hidden"
+      ],
+      "default": "none",
+      "enumColors": [
+        "gray",
+        "green",
+        "yellow",
+        "red"
+      ],
+      "description": "Customer feedback on this match only. 'hidden' keeps the item out of this ISO forever; it never changes other searches."
+    },
+    "feedback_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "seen": {
+      "type": "boolean",
+      "default": false
+    },
+    "notified_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Set when this match was included in a notification batch \u2014 prevents duplicate alerts on retries."
+    },
+    "first_seen_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "last_matched_at": {
+      "type": "string",
+      "format": "date-time"
+    },
     "scanned_at": {
       "type": "string",
       "format": "date-time"
     }
   },
   "required": [
-    "sale_id",
     "wanted_item_id",
     "item_key"
   ],
   "rls": {
     "read": {
       "$or": [
+        {
+          "data.buyer_id": "{{user.id}}"
+        },
         {
           "data.operator_id": "{{user.id}}"
         },

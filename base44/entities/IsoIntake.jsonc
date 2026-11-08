@@ -1,0 +1,204 @@
+{
+  "name": "IsoIntake",
+  "type": "object",
+  "description": "The brief intake behind a collector/reseller list: who the customer buys as, their specialties, typical budget and sourcing area. It stores only the shared starting preferences \u2014 every saved interest is an individually manageable WantedItem linked by parent_intake_id, never a copy of this record. Private to the customer who created it.",
+  "properties": {
+    "buyer_id": {
+      "type": "string",
+      "description": "Customer who ran the intake (access anchor)."
+    },
+    "buyer_name": {
+      "type": "string"
+    },
+    "list_name": {
+      "type": "string"
+    },
+    "role": {
+      "type": "string",
+      "enum": [
+        "collector",
+        "reseller",
+        "both"
+      ],
+      "default": "collector",
+      "enumColors": [
+        "blue",
+        "purple",
+        "green"
+      ]
+    },
+    "specialties": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "The customer's own words for their main interests."
+    },
+    "categories": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    },
+    "item_types": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    },
+    "brands": {
+      "type": "array",
+      "default": [],
+      "description": "Brands selected from the canonical Brand registry, grouped by tier where the catalog supports it.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "brand_id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "tier": {
+            "type": "string",
+            "enum": [
+              "accessible",
+              "midrange",
+              "premium",
+              "unknown"
+            ],
+            "default": "unknown"
+          }
+        }
+      }
+    },
+    "exclusions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Things to leave out across the whole list."
+    },
+    "budget_min": {
+      "type": "number"
+    },
+    "budget_max": {
+      "type": "number"
+    },
+    "sourcing": {
+      "type": "object",
+      "default": {},
+      "properties": {
+        "city": {
+          "type": "string"
+        },
+        "state": {
+          "type": "string"
+        },
+        "zip_code": {
+          "type": "string"
+        },
+        "radius_miles": {
+          "type": "integer"
+        }
+      }
+    },
+    "pickup_ok": {
+      "type": "boolean",
+      "default": true
+    },
+    "shipping_ok": {
+      "type": "boolean",
+      "default": true
+    },
+    "match_mode": {
+      "type": "string",
+      "enum": [
+        "exact",
+        "similar"
+      ],
+      "default": "similar"
+    },
+    "created_interest_count": {
+      "type": "integer",
+      "default": 0
+    },
+    "skipped_duplicates": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Interests that were not created because the customer already had an equivalent one."
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "saved"
+      ],
+      "default": "saved",
+      "enumColors": [
+        "gray",
+        "green"
+      ]
+    }
+  },
+  "required": [
+    "buyer_id"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.buyer_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "$or": [
+        {
+          "data.buyer_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.buyer_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.buyer_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

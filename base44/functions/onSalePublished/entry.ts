@@ -13,6 +13,7 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
 import { activateSaleListings } from '../../shared/marketplaceListing.ts';
 import { queueSaleCapture } from '../../shared/itemObservation.ts';
+import { rematchAgainstSale } from '../../shared/isoMatching.ts';
 
 Deno.serve(async (req) => {
   try {
@@ -50,6 +51,15 @@ Deno.serve(async (req) => {
       console.log('Central item capture:', JSON.stringify(capture));
     } catch (e) {
       console.error('Central item capture failed:', e && e.message);
+    }
+
+    // ISO interests re-match against this sale's newly eligible units. Runs in the
+    // shared matching engine, so no ISO is notified twice for the same item.
+    try {
+      const iso = await rematchAgainstSale(base44.asServiceRole, saleId);
+      console.log('ISO re-match for published sale:', JSON.stringify(iso));
+    } catch (e) {
+      console.error('ISO re-match failed:', e && e.message);
     }
 
     // Buyout events are operator-only — no SEO, just notify resellers

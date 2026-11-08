@@ -1,27 +1,66 @@
 {
   "name": "WantedItem",
   "type": "object",
+  "description": "ISO \u2014 one 'in search of' interest created by a customer. This is the single ISO record used by every entry path (describe, guided answers, photo identification, collector list). It keeps the customer's original wording, the structured criteria used for matching, the confirmed reference photo, and lifecycle status. It never asserts that a brand, material, age or model was authenticated: attributes the customer or the AI could not establish stay labeled uncertain. Written by the customer through the sanctioned isoEngine function; readable by its owner, by admins, and publicly only when the customer chose public visibility and it is active. It does not notify anyone by itself \u2014 matches live in SaleIsoMatch and notifications are created by the matching engine.",
   "properties": {
     "buyer_id": {
-      "type": "string"
+      "type": "string",
+      "description": "Owner of this ISO (access anchor)."
     },
     "buyer_name": {
       "type": "string"
     },
     "title": {
-      "type": "string"
+      "type": "string",
+      "description": "Short name of what the customer is looking for."
     },
     "description": {
-      "type": "string"
+      "type": "string",
+      "description": "Customer-confirmed description used for matching."
+    },
+    "original_wording": {
+      "type": "string",
+      "description": "What the customer originally typed, kept verbatim \u2014 never rewritten by AI."
     },
     "brand": {
       "type": "string"
+    },
+    "brand_id": {
+      "type": "string",
+      "description": "Canonical Brand record when the brand exists in the registry. Matching still honors the alias list below."
+    },
+    "brand_aliases": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Alternate names for the same brand (from the canonical Brand record) so matching is not missed by wording."
+    },
+    "brand_status": {
+      "type": "string",
+      "enum": [
+        "confirmed_by_customer",
+        "suggested_uncertain",
+        "none"
+      ],
+      "default": "none",
+      "enumColors": [
+        "green",
+        "yellow",
+        "gray"
+      ],
+      "description": "A brand the customer stated is a stated requirement, never an authenticated brand. A brand the AI proposed from a photo stays 'suggested_uncertain' until the customer confirms it."
     },
     "category": {
       "type": "string"
     },
     "subcategory": {
       "type": "string"
+    },
+    "item_type": {
+      "type": "string",
+      "description": "Plain item type (sofa, credenza, necklace) used as a structured match signal."
     },
     "style": {
       "type": "string"
@@ -34,6 +73,71 @@
     },
     "color": {
       "type": "string"
+    },
+    "intent": {
+      "type": "string",
+      "enum": [
+        "one_time",
+        "ongoing"
+      ],
+      "default": "ongoing",
+      "enumColors": [
+        "blue",
+        "green"
+      ],
+      "description": "One-time: stop after finding it. Ongoing: keep matching after purchases. Always confirmed by the customer."
+    },
+    "intent_confirmed": {
+      "type": "boolean",
+      "default": false,
+      "description": "True only when the customer explicitly confirmed the intent; an AI suggestion never sets it."
+    },
+    "purpose": {
+      "type": "string",
+      "enum": [
+        "personal",
+        "collector",
+        "reseller",
+        "other"
+      ],
+      "default": "personal"
+    },
+    "match_mode": {
+      "type": "string",
+      "enum": [
+        "exact",
+        "similar"
+      ],
+      "default": "similar",
+      "description": "exact = this specific item/model is required; similar = same look or style is acceptable."
+    },
+    "required_attributes": {
+      "type": "object",
+      "default": {},
+      "additionalProperties": true,
+      "description": "Attributes the item must have (customer-confirmed only)."
+    },
+    "flexible_preferences": {
+      "type": "object",
+      "default": {},
+      "additionalProperties": true,
+      "description": "Nice-to-haves that improve ranking but never block a match."
+    },
+    "uncertain_attributes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Attributes that remain uncertain after confirmation. Never promoted to fact."
+    },
+    "exclusions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Things the customer does not want \u2014 a match containing any of these is rejected."
     },
     "budget_min": {
       "type": "number"
@@ -49,7 +153,8 @@
         "used_like_new",
         "used_good",
         "used_fair"
-      ]
+      ],
+      "default": "any"
     },
     "distance": {
       "type": "integer"
@@ -57,7 +162,15 @@
     "zip_code": {
       "type": "string"
     },
+    "state": {
+      "type": "string",
+      "description": "Customer sourcing state when known; used only when pickup-only was chosen."
+    },
     "shipping_ok": {
+      "type": "boolean",
+      "default": true
+    },
+    "pickup_ok": {
       "type": "boolean",
       "default": true
     },
@@ -65,6 +178,143 @@
       "type": "boolean",
       "default": false,
       "description": "If true, dealers/operators may contact this buyer about their search preference"
+    },
+    "reference_photo_uri": {
+      "type": "string",
+      "description": "PRIVATE storage file_uri of the customer's reference photo. Private by default and never shown publicly unless the customer explicitly chose to share it. View only through a short-lived signed URL."
+    },
+    "reference_photo_shared": {
+      "type": "boolean",
+      "default": false,
+      "description": "True only when the customer explicitly chose to share the reference photo."
+    },
+    "identification": {
+      "type": "object",
+      "default": {},
+      "description": "Photo-assisted identification summary shown to the customer for confirmation. Proposed values are never authenticated facts.",
+      "properties": {
+        "summary": {
+          "type": "string"
+        },
+        "item_type": {
+          "type": "string"
+        },
+        "category": {
+          "type": "string"
+        },
+        "style": {
+          "type": "string"
+        },
+        "material": {
+          "type": "string"
+        },
+        "colors": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": []
+        },
+        "features": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": []
+        },
+        "brand_suggestion": {
+          "type": "string"
+        },
+        "brand_supported": {
+          "type": "boolean",
+          "default": false,
+          "description": "True only when the photograph itself shows brand evidence (label, hallmark, logo). Never inferred from style."
+        },
+        "multiple_objects": {
+          "type": "boolean",
+          "default": false
+        },
+        "focused_object": {
+          "type": "string",
+          "description": "Which object of several the customer selected."
+        },
+        "uncertainties": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": []
+        },
+        "needs_closer_photo": {
+          "type": "boolean",
+          "default": false
+        },
+        "confirmed_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "clarification_answers": {
+      "type": "object",
+      "default": {},
+      "additionalProperties": true,
+      "description": "Answers to the (at most three) adaptive clarification questions, kept so questions are not repeated."
+    },
+    "entry_path": {
+      "type": "string",
+      "enum": [
+        "describe",
+        "guided",
+        "photo",
+        "list",
+        "item",
+        "legacy"
+      ],
+      "default": "describe"
+    },
+    "parent_intake_id": {
+      "type": "string",
+      "description": "The collector/reseller list intake this interest was generated from, when applicable."
+    },
+    "duplicate_key": {
+      "type": "string",
+      "description": "Normalized fingerprint (brand + item type + category + title words) used to prevent duplicate or substantially overlapping interests for the same customer."
+    },
+    "alerts_enabled": {
+      "type": "boolean",
+      "default": true,
+      "description": "Customer-controlled per-interest alert switch; also respects NotificationPreference."
+    },
+    "match_counts": {
+      "type": "object",
+      "default": {},
+      "properties": {
+        "strong": {
+          "type": "integer",
+          "default": 0
+        },
+        "possible": {
+          "type": "integer",
+          "default": 0
+        },
+        "unseen": {
+          "type": "integer",
+          "default": 0
+        }
+      }
+    },
+    "last_matched_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "fulfilled_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "fulfilled_item_key": {
+      "type": "string",
+      "description": "The match the customer marked as found \u2014 a human decision, never inferred from a view, save or contact."
     },
     "item_knowledge_id": {
       "type": "string",
@@ -81,11 +331,21 @@
       "type": "string",
       "enum": [
         "active",
+        "paused",
         "fulfilled",
+        "archived",
         "expired",
         "cancelled"
       ],
-      "default": "active"
+      "default": "active",
+      "enumColors": [
+        "green",
+        "yellow",
+        "blue",
+        "gray",
+        "gray",
+        "red"
+      ]
     },
     "public_visibility": {
       "type": "boolean",
@@ -103,5 +363,65 @@
   "required": [
     "buyer_id",
     "title"
-  ]
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.buyer_id": "{{user.id}}"
+        },
+        {
+          "$and": [
+            {
+              "data.public_visibility": true
+            },
+            {
+              "data.status": "active"
+            }
+          ]
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "$or": [
+        {
+          "data.buyer_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.buyer_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.buyer_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
 }
