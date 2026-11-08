@@ -1,0 +1,151 @@
+{
+  "name": "ItemObservationJob",
+  "type": "object",
+  "description": "Durable progress record for central item capture. One job either captures ONE sale (job_type sale_capture) or walks a list of published sales (job_type backfill). The cursor is the resume point, so an interrupted run continues where it stopped and a retry never duplicates an observation. Written only by the sanctioned capture engine.",
+  "properties": {
+    "job_type": {
+      "type": "string",
+      "enum": [
+        "sale_capture",
+        "backfill"
+      ],
+      "default": "sale_capture"
+    },
+    "trigger": {
+      "type": "string",
+      "enum": [
+        "publish",
+        "refresh",
+        "sold_refresh",
+        "backfill",
+        "manual"
+      ],
+      "default": "publish"
+    },
+    "scope_sale_id": {
+      "type": "string",
+      "description": "The sale being captured (sale_capture jobs)."
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "queued",
+        "processing",
+        "completed",
+        "partial",
+        "failed"
+      ],
+      "default": "queued",
+      "enumColors": [
+        "gray",
+        "blue",
+        "green",
+        "yellow",
+        "red"
+      ]
+    },
+    "target_sale_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Backfill scope, captured at start so a resumable walk never changes underneath the run."
+    },
+    "total_sales": {
+      "type": "integer",
+      "default": 0
+    },
+    "cursor_unit_index": {
+      "type": "integer",
+      "default": 0,
+      "description": "Resume point inside the sale's unit list (photos first, then inventory items)."
+    },
+    "cursor_sale_index": {
+      "type": "integer",
+      "default": 0,
+      "description": "Resume point inside target_sale_ids (backfill jobs)."
+    },
+    "units_total": {
+      "type": "integer",
+      "default": 0
+    },
+    "units_processed": {
+      "type": "integer",
+      "default": 0
+    },
+    "created_count": {
+      "type": "integer",
+      "default": 0
+    },
+    "updated_count": {
+      "type": "integer",
+      "default": 0
+    },
+    "unchanged_count": {
+      "type": "integer",
+      "default": 0
+    },
+    "withdrawn_count": {
+      "type": "integer",
+      "default": 0
+    },
+    "failed_count": {
+      "type": "integer",
+      "default": 0
+    },
+    "sales_completed": {
+      "type": "integer",
+      "default": 0
+    },
+    "sales_skipped": {
+      "type": "integer",
+      "default": 0
+    },
+    "attempts": {
+      "type": "integer",
+      "default": 0
+    },
+    "last_error": {
+      "type": "string"
+    },
+    "started_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "last_batch_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "completed_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "job_type",
+    "status"
+  ],
+  "rls": {
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

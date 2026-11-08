@@ -28,6 +28,18 @@ Deno.serve(async (req) => {
       sold_price: sold_price || item.sold_price,
     });
 
+    // Central item database — refresh this sale's sold evidence (operator-reported
+    // price now, transaction link when a checkout order line exists). Never blocks
+    // the sale itself; capture failure is recoverable from the admin view.
+    if (item.estate_sale_id) {
+      try {
+        const { refreshSaleObservations } = await import('../../shared/itemObservation.ts');
+        await refreshSaleObservations(base44.asServiceRole, item.estate_sale_id);
+      } catch (captureError) {
+        console.error('Central item capture refresh failed:', captureError && captureError.message);
+      }
+    }
+
     // Trigger SEO regeneration with sold price
     try {
       const seoResponse = await base44.functions.invoke('generateItemSEO', {

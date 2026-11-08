@@ -12,6 +12,7 @@
 
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
 import { activateSaleListings } from '../../shared/marketplaceListing.ts';
+import { queueSaleCapture } from '../../shared/itemObservation.ts';
 
 Deno.serve(async (req) => {
   try {
@@ -38,6 +39,17 @@ Deno.serve(async (req) => {
       console.log('Marketplace listing activation:', JSON.stringify(activation));
     } catch (e) {
       console.error('Marketplace listing activation failed:', e && e.message);
+    }
+
+    // Central item database — queue this sale's item observations and run the first
+    // bounded batch. Idempotent per sale: a republish or duplicate event updates the
+    // same observations instead of creating new ones. Failure here never blocks
+    // publication; the capture stays queued and is recoverable from the admin view.
+    try {
+      const capture = await queueSaleCapture(base44.asServiceRole, saleId, { trigger: 'publish', maxUnits: 60 });
+      console.log('Central item capture:', JSON.stringify(capture));
+    } catch (e) {
+      console.error('Central item capture failed:', e && e.message);
     }
 
     // Buyout events are operator-only — no SEO, just notify resellers

@@ -1,0 +1,332 @@
+{
+  "name": "ItemObservation",
+  "type": "object",
+  "description": "CENTRAL ITEM OBSERVATION \u2014 one row per source unit of one sale: a named sale photograph, or one inventory Item record. This is the evidence layer, deliberately separate from the normalized classification layer (ItemKnowledge): several sales can describe similar items and each stays its own independent observation. Written ONLY by the sanctioned capture engine (base44/shared/itemObservation.ts, invoked on publish, by the admin view and by the backfill). Never written by a browser. Missing data stays empty/null and is never invented: an unretained initial price is labelled 'unavailable', an ended sale is not proof an item sold, and a bundle total is never divided into invented per-item prices. Withdrawn or invalid observations carry active_for_pricing = false so they can never be used as pricing evidence.",
+  "properties": {
+    "unique_key": {
+      "type": "string",
+      "description": "Stable evidence identity: <source_sale_id>::<source_item_key>. The dedupe rule for republishing, retries and duplicate events."
+    },
+    "source_sale_id": {
+      "type": "string"
+    },
+    "source_item_key": {
+      "type": "string",
+      "description": "photo:<pipeline photo id> for a sale photograph, item:<Item id> for an inventory record."
+    },
+    "source_item_id": {
+      "type": "string",
+      "description": "Inventory Item id when this observation comes from an Item record."
+    },
+    "source_photo_id": {
+      "type": "string",
+      "description": "The photo's stable pipeline id when this observation comes from a sale photograph."
+    },
+    "operator_id": {
+      "type": "string"
+    },
+    "operator_name": {
+      "type": "string"
+    },
+    "company_id": {
+      "type": "string"
+    },
+    "captured_from": {
+      "type": "string",
+      "enum": [
+        "publish",
+        "refresh",
+        "backfill",
+        "sold_refresh",
+        "manual"
+      ],
+      "default": "publish"
+    },
+    "representation": {
+      "type": "string",
+      "enum": [
+        "single",
+        "lot",
+        "group",
+        "unknown"
+      ],
+      "default": "unknown",
+      "description": "What the source record represents. A group photograph is retained for its description but is never a priced item; a lot stays one bundle observation."
+    },
+    "sale_status": {
+      "type": "string"
+    },
+    "sale_dates": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    },
+    "title": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "brand": {
+      "type": "string",
+      "description": "Only a brand the source record actually carries. Never inferred during capture."
+    },
+    "category": {
+      "type": "string"
+    },
+    "subcategory": {
+      "type": "string"
+    },
+    "condition": {
+      "type": "string"
+    },
+    "material": {
+      "type": "string"
+    },
+    "model": {
+      "type": "string"
+    },
+    "dimensions": {
+      "type": "string"
+    },
+    "attributes_json": {
+      "type": "object",
+      "default": {},
+      "additionalProperties": true,
+      "description": "Additional attributes carried by the source record (maker, era, serial, size, condition notes...). Facts only, never generated."
+    },
+    "image_url": {
+      "type": "string",
+      "description": "Durable media reference to one representative photograph. Never image bytes."
+    },
+    "thumbnail_url": {
+      "type": "string"
+    },
+    "city": {
+      "type": "string"
+    },
+    "state": {
+      "type": "string"
+    },
+    "zip": {
+      "type": "string"
+    },
+    "currency": {
+      "type": "string",
+      "default": "USD"
+    },
+    "initial_asking_price": {
+      "type": "number",
+      "description": "The asking price at the first capture. Null when it was never retained."
+    },
+    "initial_price_status": {
+      "type": "string",
+      "enum": [
+        "captured_at_publish",
+        "first_observed",
+        "unavailable"
+      ],
+      "default": "unavailable",
+      "description": "How the initial asking price was obtained. 'unavailable' means the original price was never retained \u2014 the current price is never substituted for it."
+    },
+    "current_asking_price": {
+      "type": "number"
+    },
+    "price_changes": {
+      "type": "array",
+      "default": [],
+      "description": "Append-only asking-price changes actually observed, with timestamps.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "from": {
+            "type": "number"
+          },
+          "to": {
+            "type": "number"
+          }
+        }
+      }
+    },
+    "identification_provenance": {
+      "type": "string",
+      "enum": [
+        "operator_entered",
+        "ai_suggested",
+        "operator_confirmed",
+        "unknown"
+      ],
+      "default": "unknown"
+    },
+    "pricing_provenance": {
+      "type": "string",
+      "enum": [
+        "operator_entered",
+        "ai_suggested",
+        "operator_confirmed",
+        "unknown"
+      ],
+      "default": "unknown"
+    },
+    "outcome": {
+      "type": "string",
+      "enum": [
+        "asking",
+        "operator_reported_sold",
+        "transaction_linked_sold",
+        "unknown"
+      ],
+      "default": "unknown",
+      "description": "Kept strictly separate: asking, operator-reported sold, transaction-linked sold, and unknown. A sale ending alone never marks an item sold."
+    },
+    "sold_price": {
+      "type": "number",
+      "description": "Total amount for this observation's own record \u2014 the transaction amount when transaction-linked, otherwise the operator's reported sold price. For a lot this is the bundle total, never a split allocation."
+    },
+    "sold_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "sold_quantity": {
+      "type": "number"
+    },
+    "operator_reported_sold_price": {
+      "type": "number"
+    },
+    "transaction_refs": {
+      "type": "array",
+      "default": [],
+      "description": "Checkout records supporting the sold evidence (order ids/numbers, item amounts, quantities).",
+      "items": {
+        "type": "object",
+        "properties": {
+          "order_id": {
+            "type": "string"
+          },
+          "order_number": {
+            "type": "string"
+          },
+          "amount": {
+            "type": "number"
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "at": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "refund_refs": {
+      "type": "array",
+      "default": [],
+      "items": {
+        "type": "object",
+        "properties": {
+          "refund_id": {
+            "type": "string"
+          },
+          "order_id": {
+            "type": "string"
+          },
+          "amount": {
+            "type": "number"
+          },
+          "status": {
+            "type": "string"
+          },
+          "at": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "net_merchandise_amount": {
+      "type": "number",
+      "description": "Transaction amount less refunds recorded against the same order. Merchandise only \u2014 taxes and fees are never folded in here."
+    },
+    "bundle_note": {
+      "type": "string",
+      "description": "Set when the evidence is a bundle/lot total with no recorded per-item split. No allocation is invented."
+    },
+    "capture_status": {
+      "type": "string",
+      "enum": [
+        "captured",
+        "incomplete",
+        "withdrawn"
+      ],
+      "default": "captured",
+      "enumColors": [
+        "green",
+        "yellow",
+        "gray"
+      ],
+      "description": "withdrawn = the source record was removed, the sale was archived, or the observation became invalid. It stays as history but can never be pricing evidence."
+    },
+    "active_for_pricing": {
+      "type": "boolean",
+      "default": false,
+      "description": "Only priced, non-withdrawn, non-group observations are eligible pricing evidence."
+    },
+    "capture_error": {
+      "type": "string"
+    },
+    "source_updated_at": {
+      "type": "string"
+    },
+    "first_captured_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "last_captured_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "capture_version": {
+      "type": "number",
+      "default": 1
+    },
+    "normalized_knowledge_id": {
+      "type": "string",
+      "description": "Link to the normalized ItemKnowledge classification, when one already exists. Capture never runs new AI classification."
+    },
+    "normalized_name": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "unique_key",
+    "source_sale_id",
+    "source_item_key"
+  ],
+  "rls": {
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}
