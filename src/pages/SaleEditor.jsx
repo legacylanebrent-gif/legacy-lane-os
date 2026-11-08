@@ -47,6 +47,7 @@ import { applyDistanceSnapshot } from '@/components/saleops/distanceSnapshot';
 
 import { SALE_STATUSES } from '@/components/estate/saleEditorShared';
 import SaleDatesCard from '@/components/estate/SaleDatesCard';
+import ObservationCaptureStatus from '@/components/repository/ObservationCaptureStatus';
 
 export default function SaleEditor() {
   const navigate = useNavigate();
@@ -1798,6 +1799,7 @@ Return ONLY the description text, no extra commentary.`
                 </div>
               </TabsContent>
               <TabsContent value="descriptions" className="space-y-4">
+                <ObservationCaptureStatus saleId={formData.id || saleId} saleStatus={formData.status} />
                 {formData.images.length === 0 ? (
                   <p className="text-slate-500 text-center py-8">No photos added yet</p>
                 ) : (

@@ -157,6 +157,7 @@ import AdminHousioSync from './pages/AdminHousioSync';
 import ResellerPackupEventEditor from './pages/ResellerPackupEventEditor';
 import ResellerPackupEvents from './pages/ResellerPackupEvents';
 import AdminCentralRepository from './pages/AdminCentralRepository';
+import AdminItemObservations from './pages/AdminItemObservations';
 import LandingPageBizInABox from './pages/LandingPageBizInABox';
 import LaunchCommandCenter from './pages/LaunchCommandCenter';
 import NotificationAnalytics from './pages/NotificationAnalytics';
@@ -495,6 +496,7 @@ const AuthenticatedApp = () => {
       <Route path="/ResellerPackupEventEditor" element={<LayoutWrapper currentPageName="ResellerPackupEventEditor"><ResellerPackupEventEditor /></LayoutWrapper>} />
       <Route path="/ResellerPackupEvents" element={<LayoutWrapper currentPageName="ResellerPackupEvents"><ResellerPackupEvents /></LayoutWrapper>} />
       <Route path="/AdminCentralRepository" element={<LayoutWrapper currentPageName="AdminCentralRepository"><AdminCentralRepository /></LayoutWrapper>} />
+      <Route path="/AdminItemObservations" element={<LayoutWrapper currentPageName="AdminItemObservations"><AdminItemObservations /></LayoutWrapper>} />
       <Route path="/NotificationAnalytics" element={<LayoutWrapper currentPageName="NotificationAnalytics"><NotificationAnalytics /></LayoutWrapper>} />
       <Route path="/RelationshipHealthDashboard" element={<LayoutWrapper currentPageName="RelationshipHealthDashboard"><RelationshipHealthDashboard /></LayoutWrapper>} />
       <Route path="/RelationshipsDashboard" element={<LayoutWrapper currentPageName="RelationshipsDashboard"><RelationshipsDashboard /></LayoutWrapper>} />

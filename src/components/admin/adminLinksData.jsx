@@ -80,6 +80,7 @@ export const ADMIN_LINK_SECTIONS = [
     title: '🤖 Repository & AI',
     links: [
       { page: 'AdminCentralRepository', label: 'Central Repository', icon: Database },
+      { page: 'AdminItemObservations', label: 'Central Item Database', icon: Database },
       { page: 'AdminAIOperator', label: 'Admin AI Operator', icon: Bot },
       { page: 'AdminAICredits', label: 'AI Credit Management', icon: Zap },
       { page: 'AutonomousRunsDashboard', label: 'Autonomous Runs', icon: Brain },
