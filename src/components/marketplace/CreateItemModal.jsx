@@ -13,6 +13,7 @@ import { Badge } from '@/components/ui/badge';
 import { Upload, X, Store, ShoppingCart, MapPin } from 'lucide-react';
 import CategoryFields from './CategoryFields';
 import SmartAuctionScheduler from './SmartAuctionScheduler';
+import BrandInput from '@/components/brands/BrandInput';
 
 const CATEGORIES = [
   'antiques', 'art', 'artwork_prints_posters', 'books_media',
@@ -49,6 +50,7 @@ const EMPTY_FORM = {
   description: '',
   category: 'furniture',
   condition: 'used_good',
+  brand: '',
   price: '',
   quantity: 1,
   // Listing type
@@ -112,6 +114,7 @@ export default function CreateItemModal({ open, onClose, onSuccess, item, saleId
         description: item.description || '',
         category: item.category || 'furniture',
         condition: item.condition || 'used_good',
+        brand: item.brand || '',
         price: item.price || '',
         quantity: item.quantity || 1,
         listing_type: item.listing_type || 'for_sale',
@@ -198,6 +201,7 @@ export default function CreateItemModal({ open, onClose, onSuccess, item, saleId
         description: formData.description,
         category: formData.category,
         condition: formData.condition,
+        brand: formData.brand || '',
         price: parseFloat(formData.price),
         quantity: formData.quantity,
         listing_type: formData.listing_type,
@@ -400,6 +404,18 @@ export default function CreateItemModal({ open, onClose, onSuccess, item, saleId
                 </SelectContent>
               </Select>
             </div>
+          </div>
+
+          <div>
+            <Label htmlFor="brand">Brand / Maker</Label>
+            <BrandInput
+              id="brand"
+              value={formData.brand}
+              onChange={next => setFormData(current => ({ ...current, brand: next }))}
+              placeholder="Brand or maker — leave blank if unknown"
+              inputClassName="flex h-10 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-cyan-600 focus:outline-none"
+              hint="Pick a brand from the shared list, or type a new one to add it."
+            />
           </div>
 
           {/* Category-specific fields */}

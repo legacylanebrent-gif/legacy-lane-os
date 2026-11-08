@@ -12,6 +12,7 @@ import { researchBlocked, overridePayload } from '@/components/saleops/researchG
 import { LEVELS, LEVEL_META, levelRank, suggestLevel, locationDisplay, formatItemNumber } from '@/components/saleops/inventoryLevels';
 import { logItemChange } from '@/components/saleops/itemHistory';
 import PhotoLibrarySection from '@/components/inventory/PhotoLibrarySection';
+import BrandInput from '@/components/brands/BrandInput';
 
 const CATEGORIES = [
   'furniture', 'art', 'jewelry', 'home_decor', 'antiques', 'collectibles',
@@ -639,7 +640,12 @@ export default function UnifiedItemForm({ item = null, saleId = null, onClose, o
               <div className="grid grid-cols-3 gap-4">
                 <div className="space-y-2">
                   <label className="block font-semibold text-slate-900 text-sm">Brand</label>
-                  <Input value={formData.brand} onChange={e => set('brand', e.target.value)} placeholder="Brand/manufacturer" />
+                  <BrandInput
+                    value={formData.brand}
+                    onChange={next => set('brand', next)}
+                    placeholder="Brand/manufacturer"
+                    inputClassName="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-cyan-600 focus:outline-none"
+                  />
                 </div>
                 <div className="space-y-2">
                   <label className="block font-semibold text-slate-900 text-sm">Size</label>

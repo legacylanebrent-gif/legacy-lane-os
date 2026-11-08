@@ -1,6 +1,6 @@
-import React, { useEffect, useId, useState } from 'react';
+import React, { useState } from 'react';
 import { Loader2, Check, X } from 'lucide-react';
-import { base44 } from '@/api/base44Client';
+import BrandInput from '@/components/brands/BrandInput';
 
 /**
  * The operator's own title / description / brand / price for one photo.
@@ -19,19 +19,6 @@ export default function PhotoOperatorEditor({ photo, brand, busy, onSave, onClos
   });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
-  const [brandNames, setBrandNames] = useState([]);
-  const brandListId = useId();
-
-  useEffect(() => {
-    let active = true;
-    base44.entities.Brand.filter({ status: 'active' }, { sort: 'name', limit: 300 })
-      .then(page => {
-        if (!active) return;
-        setBrandNames((page.items || []).map(entry => entry.name).filter(Boolean));
-      })
-      .catch(() => { if (active) setBrandNames([]); });
-    return () => { active = false; };
-  }, []);
 
   const set = key => event => setForm(current => ({ ...current, [key]: event.target.value }));
 
@@ -64,19 +51,14 @@ export default function PhotoOperatorEditor({ photo, brand, busy, onSave, onClos
       </div>
       <div>
         <label className="block text-[10px] font-semibold uppercase tracking-wide text-slate-500">Brand</label>
-        <input
+        <BrandInput
           value={form.brand}
-          onChange={set('brand')}
-          list={brandListId}
+          onChange={next => setForm(current => ({ ...current, brand: next }))}
           placeholder="Brand or maker — leave blank if unknown"
-          className={`${field} mt-0.5`}
+          wrapperClassName="mt-0.5"
+          inputClassName={field}
+          hint="Pick a brand from the list, or type a new one to add it. Only enter a brand you can actually support."
         />
-        <datalist id={brandListId}>
-          {brandNames.map(name => <option key={name} value={name} />)}
-        </datalist>
-        <p className="mt-0.5 text-[10px] text-slate-500">
-          Pick a brand already on the list, or type a new one to add it. Only enter a brand you can actually support.
-        </p>
       </div>
       <div>
         <label className="block text-[10px] font-semibold uppercase tracking-wide text-slate-500">Price</label>
