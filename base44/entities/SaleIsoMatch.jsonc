@@ -1,0 +1,109 @@
+{
+  "name": "SaleIsoMatch",
+  "type": "object",
+  "description": "One possible match between a buyer's ISO ('in search of') request and an item in one estate sale, produced by the operator-initiated ISO match scan. Written only by the sanctioned scanSaleIsoMatches function, which resolves every id, name and price from stored records \u2014 never from model output. A match is a suggestion for the operator to check, never a sale, a reservation, or proof that the buyer still wants the item. The operator can dismiss a match that isn't right; a dismissal is preserved across later scans of the same sale.",
+  "properties": {
+    "sale_id": {
+      "type": "string"
+    },
+    "operator_id": {
+      "type": "string",
+      "description": "Owner of the sale the match belongs to (access anchor)."
+    },
+    "wanted_item_id": {
+      "type": "string",
+      "description": "The buyer's ISO record (WantedItem)."
+    },
+    "buyer_id": {
+      "type": "string"
+    },
+    "buyer_name": {
+      "type": "string"
+    },
+    "dealer_contact_allowed": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the buyer opened their ISO to dealer/operator contact. Only these buyers may be reached about a match."
+    },
+    "iso_title": {
+      "type": "string",
+      "description": "Snapshot of what the buyer asked for, as stored on the ISO."
+    },
+    "iso_detail": {
+      "type": "string",
+      "description": "Short snapshot of the ISO's brand, category or budget, for the operator's scan."
+    },
+    "item_key": {
+      "type": "string",
+      "description": "Stable key of the sale item: photo:<photo id> for a sale photo, item:<inventory id> for an inventory record."
+    },
+    "item_id": {
+      "type": "string",
+      "description": "Inventory item id when the match points at an Item record, otherwise empty."
+    },
+    "item_name": {
+      "type": "string"
+    },
+    "item_price": {
+      "type": "number"
+    },
+    "confidence": {
+      "type": "number",
+      "description": "Model's confidence this item satisfies the ISO, 0-100. A prompt for the operator's judgement, not a guarantee."
+    },
+    "reason": {
+      "type": "string",
+      "description": "Short plain-language reason the item satisfies the ISO."
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "new",
+        "dismissed"
+      ],
+      "default": "new",
+      "enumColors": [
+        "green",
+        "gray"
+      ]
+    },
+    "scanned_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "sale_id",
+    "wanted_item_id",
+    "item_key"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.operator_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

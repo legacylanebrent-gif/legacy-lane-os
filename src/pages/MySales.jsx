@@ -10,10 +10,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import CreateVIPEventModal from '@/components/vip/CreateVIPEventModal';
 import BuyoutModal from '@/components/estate/BuyoutModal';
 import BuyerMatchModal from '@/components/estate/BuyerMatchModal';
+import SaleIsoMatchModal from '@/components/iso/SaleIsoMatchModal';
 import SaleExpensesModal from '@/components/expenses/SaleExpensesModal';
 import { 
         Plus, Search, Calendar, MapPin, Eye, Heart, DollarSign,
-        Package, Edit, TrendingUp, Star, Briefcase, Trash, FileText, BarChart3, Megaphone, Download, Globe, Users, Receipt, Sparkles, ChevronDown, ChevronUp, BookOpen, Pin, UserCheck, Rocket, Building2, ClipboardCheck, ListChecks, CalendarDays, ClipboardList, Wrench
+        Package, Edit, TrendingUp, Star, Briefcase, Trash, FileText, BarChart3, Megaphone, Download, Globe, Users, Receipt, Sparkles, ChevronDown, ChevronUp, BookOpen, Pin, UserCheck, Rocket, Building2, ClipboardCheck, ListChecks, CalendarDays, ClipboardList, Wrench, Target
       } from 'lucide-react';
 import SocialCampaignModal from '@/components/social/SocialCampaignModal';
 import LiquidationProgressModal from '@/components/estate/LiquidationProgressModal';
@@ -78,6 +79,7 @@ export default function MySales() {
   const [featuringId, setFeaturingId] = useState(null);
   const [matchingSaleId, setMatchingSaleId] = useState(null);
   const [buyerMatchData, setBuyerMatchData] = useState(null);
+  const [isoMatchSale, setIsoMatchSale] = useState(null);
   const [liquidationModal, setLiquidationModal] = useState({ open: false, step: 'confirm', error: null });
   const [liquidationSale, setLiquidationSale] = useState(null);
   const [fiveAndUnderModal, setFiveAndUnderModal] = useState({ open: false, step: 'confirm', error: null });
@@ -513,6 +515,12 @@ export default function MySales() {
         matchData={buyerMatchData}
       />
 
+      <SaleIsoMatchModal
+        open={!!isoMatchSale}
+        sale={isoMatchSale}
+        onClose={() => setIsoMatchSale(null)}
+      />
+
       <BuyoutModal
         open={showBuyoutModal}
         onClose={() => {
@@ -702,6 +710,7 @@ export default function MySales() {
 
                            <StageSection label="2. Inventory &amp; Preparation">
                              <Button variant="outline" size="sm" asChild className={`${btnClass} border-purple-500 hover:bg-purple-50`}><Link to={createPageUrl('SaleInventory') + '?saleId=' + sale.id}><Package className="w-3 h-3 mr-1 flex-shrink-0" />Inventory</Link></Button>
+                             <Button variant="outline" size="sm" onClick={() => setIsoMatchSale(sale)} className={`${btnClass} border-fuchsia-500 hover:bg-fuchsia-50`}><Target className="w-3 h-3 mr-1 flex-shrink-0" />ISO Matches</Button>
                              {!isCompleted && isElite && (
                                <Button variant="outline" size="sm" onClick={() => handleBuyerMatch(sale.id)} disabled={matchingSaleId === sale.id}
                                  className={`${btnClass} border-emerald-500 hover:bg-emerald-50`}
