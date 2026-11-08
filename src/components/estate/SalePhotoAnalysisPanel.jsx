@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Sparkles, Loader2, RotateCcw, AlertTriangle, Wallet, Info, Search } from 'lucide-react';
+import { Sparkles, Loader2, RotateCcw, AlertTriangle, Wallet, Info, Search, PackageCheck } from 'lucide-react';
 import PhotoAnalysisCard from '@/components/estate/PhotoAnalysisCard';
 import PhotoRunDialog from '@/components/estate/PhotoRunDialog';
 import { viewStateOf } from '@/lib/photoAnalysisState';
@@ -34,6 +34,78 @@ export default function SalePhotoAnalysisPanel({ saleId, analysis, photos = [], 
     if (filter === 'failed') return state === 'failed';
     return state === filter;
   });
+
+  // Photos already turned into inventory items, so a photo can never create two.
+  const [promoted, setPromoted] = useState({});
+  const [selected, setSelected] = useState(() => new Set());
+  const [creating, setCreating] = useState(false);
+  const [createResult, setCreateResult] = useState(null);
+
+  const keyOf = photo => photo.pipeline?.id || photo.url;
+
+  const loadPromoted = async () => {
+    if (!saleId) return;
+    try {
+      const page = await base44.entities.Item.filter(
+        { estate_sale_id: saleId },
+        { limit: 2000, fields: ['id', 'item_number', 'specs'] },
+      );
+      const map = {};
+      (page.items || []).forEach(item => {
+        const source = item.specs?.photo_source;
+        if (source?.photo_id) map[source.photo_id] = { id: item.id, item_number: item.item_number };
+      });
+      setPromoted(map);
+    } catch (error) {
+      console.error('Could not load promoted photos:', error.message);
+    }
+  };
+
+  useEffect(() => { loadPromoted(); }, [saleId]);
+
+  const eligible = photos.filter(photo => !promoted[keyOf(photo)] && !photo.excluded_from_public);
+  const selectedKeys = eligible.filter(photo => selected.has(keyOf(photo))).map(keyOf);
+  const allSelected = eligible.length > 0 && selectedKeys.length === eligible.length;
+
+  const toggleSelect = (photo, on) => {
+    setSelected(prev => {
+      const next = new Set(prev);
+      if (on) next.add(keyOf(photo));
+      else next.delete(keyOf(photo));
+      return next;
+    });
+  };
+
+  const createItems = async () => {
+    if (!saleId || selectedKeys.length === 0) return;
+    setCreating(true);
+    setCreateResult(null);
+    try {
+      const response = await base44.functions.invoke('createItemsFromPhotos', {
+        sale_id: saleId,
+        photo_ids: selectedKeys,
+      });
+      const data = response.data || {};
+      const parts = [`${data.created_count || 0} item${data.created_count === 1 ? '' : 's'} added to inventory`];
+      if (data.skipped_count) parts.push(`${data.skipped_count} skipped`);
+      if (data.failed_count) parts.push(`${data.failed_count} failed`);
+      const unpriced = (data.created || []).filter(item => item.needs_price).length;
+      if (unpriced) parts.push(`${unpriced} need a price`);
+      setCreateResult({
+        tone: data.failed_count ? 'warn' : 'ok',
+        message: parts.join(' · '),
+        details: [...(data.skipped || []), ...(data.failed || [])].slice(0, 4),
+      });
+      setSelected(new Set());
+      await loadPromoted();
+    } catch (error) {
+      const raw = error?.response?.data?.error;
+      const message = typeof raw === 'string' ? raw : raw?.message || error.message;
+      setCreateResult({ tone: 'error', message: message || 'Could not create the items.', details: [] });
+    } finally {
+      setCreating(false);
+    }
+  };
 
   const removePhoto = async photo => {
     if (!saleId) return;
@@ -179,6 +251,53 @@ export default function SalePhotoAnalysisPanel({ saleId, analysis, photos = [], 
         {error && <p className="text-xs text-red-600" role="alert">{error}</p>}
       </div>
 
+      <div className="bg-white border border-slate-200 rounded-xl p-3 space-y-2">
+        <label className="flex items-center gap-2 text-[12px] font-semibold text-slate-700">
+          <input
+            type="checkbox"
+            checked={allSelected}
+            disabled={eligible.length === 0 || creating}
+            onChange={e => setSelected(e.target.checked ? new Set(eligible.map(keyOf)) : new Set())}
+            className="h-4 w-4 accent-cyan-600 disabled:opacity-40"
+          />
+          Select all photos
+          <span className="ml-auto text-[11px] font-normal text-slate-500">{selectedKeys.length} selected</span>
+        </label>
+
+        <button
+          type="button"
+          onClick={createItems}
+          disabled={creating || selectedKeys.length === 0}
+          className="w-full inline-flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg bg-slate-900 text-white font-semibold text-sm hover:bg-slate-800 disabled:bg-slate-300 disabled:text-slate-500 transition-colors"
+        >
+          {creating ? <Loader2 className="w-4 h-4 animate-spin" /> : <PackageCheck className="w-4 h-4" />}
+          {creating ? 'Adding to inventory…' : `Create inventory items${selectedKeys.length ? ` (${selectedKeys.length})` : ''}`}
+        </button>
+
+        <p className="text-[11px] text-slate-500">
+          Each selected photo becomes one inventory item with its title, description and Listing Price. A photo with no
+          Listing Price is still created and flagged “Needs price”. Photos marked retained/KEEP are left out, photos already
+          in inventory are skipped, and every new item gets a marketplace listing that goes live when the sale publishes.
+        </p>
+
+        {createResult && (
+          <div className={`rounded-lg border p-2 text-[11px] ${
+            createResult.tone === 'error' ? 'border-red-200 bg-red-50 text-red-700'
+              : createResult.tone === 'warn' ? 'border-amber-200 bg-amber-50 text-amber-800'
+              : 'border-green-200 bg-green-50 text-green-800'
+          }`}>
+            <p className="font-semibold">{createResult.message}</p>
+            {createResult.details.length > 0 && (
+              <ul className="mt-1 space-y-0.5">
+                {createResult.details.map((row, i) => (
+                  <li key={`${row.photo_id}-${i}`}>{row.title || 'Photo'}: {row.reason}</li>
+                ))}
+              </ul>
+            )}
+          </div>
+        )}
+      </div>
+
       <div className="grid grid-cols-2 gap-2">
         {filters.map(({ key, label }) => {
           const count = key === 'all' ? total : (counts?.[key] || 0);
@@ -206,6 +325,10 @@ export default function SalePhotoAnalysisPanel({ saleId, analysis, photos = [], 
               index={photos.indexOf(photo)}
               state={stateOf(photo)}
               busy={running}
+              selected={selected.has(keyOf(photo))}
+              canSelect={!promoted[keyOf(photo)] && !photo.excluded_from_public}
+              inventoryItem={promoted[keyOf(photo)] || null}
+              onSelect={on => toggleSelect(photo, on)}
               onRetry={analysis.retry}
               onReanalyze={analysis.reanalyze}
               onResearch={analysis.research}

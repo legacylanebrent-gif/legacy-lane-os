@@ -25,7 +25,7 @@ const LABEL = {
 
 const reasonList = job => (job?.review_flags || []).filter(Boolean);
 
-export default function PhotoAnalysisCard({ photo, index, state, busy, onRetry, onReanalyze, onResearch, onClassify, onRelease, onSaveFields, onDelete }) {
+export default function PhotoAnalysisCard({ photo, index, state, busy, selected, canSelect = true, inventoryItem, onSelect, onRetry, onReanalyze, onResearch, onClassify, onRelease, onSaveFields, onDelete }) {
   const [editing, setEditing] = useState(false);
   const job = photo?.pipeline?.jobs?.analysis;
   const research = job?.research;
@@ -55,14 +55,30 @@ export default function PhotoAnalysisCard({ photo, index, state, busy, onRetry, 
 
         <div className="flex-1 min-w-0 space-y-1">
           <div className="flex items-start justify-between gap-2">
-            <p className="text-[13px] font-semibold text-slate-800 leading-snug line-clamp-2">
-              {photo?.name || <span className="text-slate-400 font-normal">Photo {index + 1} — no title yet</span>}
-            </p>
+            <div className="flex items-start gap-1.5 min-w-0">
+              <input
+                type="checkbox"
+                checked={!!selected}
+                disabled={!canSelect}
+                onChange={e => onSelect?.(e.target.checked)}
+                className="mt-0.5 h-4 w-4 flex-shrink-0 accent-cyan-600 disabled:opacity-40"
+                aria-label={`Select photo ${index + 1} for inventory`}
+              />
+              <p className="text-[13px] font-semibold text-slate-800 leading-snug line-clamp-2">
+                {photo?.name || <span className="text-slate-400 font-normal">Photo {index + 1} — no title yet</span>}
+              </p>
+            </div>
             <span className={`flex-shrink-0 text-[10px] font-semibold border rounded-full px-1.5 py-0.5 ${TONE[state] || TONE.pending}`}>
               {state === 'inflight' && <Loader2 className="w-2.5 h-2.5 inline animate-spin mr-0.5" />}
               {LABEL[state] || LABEL.pending}
             </span>
           </div>
+
+          {inventoryItem && (
+            <p className="text-[10px] font-semibold text-green-700 flex items-center gap-1">
+              <Check className="w-3 h-3" /> In inventory{inventoryItem.item_number ? ` · #${inventoryItem.item_number}` : ''}
+            </p>
+          )}
 
           {photo?.description && <p className="text-[11px] text-slate-600 line-clamp-2">{photo.description}</p>}
 

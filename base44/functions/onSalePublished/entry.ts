@@ -11,6 +11,7 @@
  */
 
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
+import { activateSaleListings } from '../../shared/marketplaceListing.ts';
 
 Deno.serve(async (req) => {
   try {
@@ -29,6 +30,14 @@ Deno.serve(async (req) => {
     // Only process published sales
     if (!['upcoming', 'active'].includes(sale.status)) {
       return Response.json({ skipped: true, reason: `status=${sale.status}` });
+    }
+
+    // Marketplace listings drafted from sale photos go live with the sale itself.
+    try {
+      const activation = await activateSaleListings(base44.asServiceRole, saleId);
+      console.log('Marketplace listing activation:', JSON.stringify(activation));
+    } catch (e) {
+      console.error('Marketplace listing activation failed:', e && e.message);
     }
 
     // Buyout events are operator-only — no SEO, just notify resellers
