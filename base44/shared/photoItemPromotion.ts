@@ -9,6 +9,8 @@
  * The photo itself is never altered here — it stays the sale's photo record.
  */
 
+import { cleanBrandName } from './brandRegistry.ts';
+
 export const PHOTO_SOURCE_KEY = 'photo_source';
 
 /** A photo is addressed by its stable pipeline id (never by array position). */
@@ -100,10 +102,13 @@ export function photoItemTitle(photo: any, index: number): string {
  * NOT added to the published gallery, so the existing screen-and-approve step
  * still decides what becomes public.
  */
-export function buildPhotoItemPayload({ sale, photo, user, index }: any) {
+export function buildPhotoItemPayload({ sale, photo, user, index, brand }: any) {
   const price = photoItemPrice(photo);
   const now = new Date().toISOString();
   const url = typeof (photo && photo.url) === 'string' ? photo.url : '';
+  // The brand the operator or the analysis established for this photo. No brand
+  // on the photo means no brand on the item — never an inferred one.
+  const brandName = cleanBrandName(brand?.name);
 
   const payload: Record<string, any> = {
     title: photoItemTitle(photo, index),
@@ -141,11 +146,15 @@ export function buildPhotoItemPayload({ sale, photo, user, index }: any) {
         photo_url: url,
         promoted_at: now,
       },
+      ...(brand?.brand_id ? { brand_id: brand.brand_id } : {}),
     },
   };
 
   // The opening price is only recorded when there really is one.
   if (price > 0) payload.original_price = price;
+
+  // The item's own Brand field, from the shared brands list.
+  if (brandName) payload.brand = brandName;
 
   return payload;
 }

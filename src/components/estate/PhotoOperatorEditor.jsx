@@ -1,19 +1,37 @@
-import React, { useState } from 'react';
+import React, { useEffect, useId, useState } from 'react';
 import { Loader2, Check, X } from 'lucide-react';
+import { base44 } from '@/api/base44Client';
 
 /**
- * The operator's own title / description / price for one photo.
+ * The operator's own title / description / brand / price for one photo.
  * Nothing here is AI: the values are saved as operator edits through the
  * canonical pipeline, so a later re-analysis never overwrites them.
+ *
+ * Brand is chosen from the shared brands list (or typed as a new one, which is
+ * added to that list) — the same list the analysis run adds to.
  */
-export default function PhotoOperatorEditor({ photo, busy, onSave, onClose }) {
+export default function PhotoOperatorEditor({ photo, brand, busy, onSave, onClose }) {
   const [form, setForm] = useState({
     name: photo?.name || '',
     description: photo?.description || '',
+    brand: brand?.name || '',
     price: photo?.price ?? '',
   });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+  const [brandNames, setBrandNames] = useState([]);
+  const brandListId = useId();
+
+  useEffect(() => {
+    let active = true;
+    base44.entities.Brand.filter({ status: 'active' }, { sort: 'name', limit: 300 })
+      .then(page => {
+        if (!active) return;
+        setBrandNames((page.items || []).map(entry => entry.name).filter(Boolean));
+      })
+      .catch(() => { if (active) setBrandNames([]); });
+    return () => { active = false; };
+  }, []);
 
   const set = key => event => setForm(current => ({ ...current, [key]: event.target.value }));
 
@@ -24,6 +42,7 @@ export default function PhotoOperatorEditor({ photo, busy, onSave, onClose }) {
     const ok = await onSave({
       name: form.name,
       description: form.description,
+      brand: form.brand,
       price: form.price === '' ? null : form.price,
     });
     setSaving(false);
@@ -42,6 +61,22 @@ export default function PhotoOperatorEditor({ photo, busy, onSave, onClose }) {
       <div>
         <label className="block text-[10px] font-semibold uppercase tracking-wide text-slate-500">Description</label>
         <textarea value={form.description} onChange={set('description')} rows={3} placeholder="Item description" className={`${field} mt-0.5 resize-y`} />
+      </div>
+      <div>
+        <label className="block text-[10px] font-semibold uppercase tracking-wide text-slate-500">Brand</label>
+        <input
+          value={form.brand}
+          onChange={set('brand')}
+          list={brandListId}
+          placeholder="Brand or maker — leave blank if unknown"
+          className={`${field} mt-0.5`}
+        />
+        <datalist id={brandListId}>
+          {brandNames.map(name => <option key={name} value={name} />)}
+        </datalist>
+        <p className="mt-0.5 text-[10px] text-slate-500">
+          Pick a brand already on the list, or type a new one to add it. Only enter a brand you can actually support.
+        </p>
       </div>
       <div>
         <label className="block text-[10px] font-semibold uppercase tracking-wide text-slate-500">Price</label>

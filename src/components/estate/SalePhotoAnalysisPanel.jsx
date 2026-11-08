@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Sparkles, Loader2, RotateCcw, AlertTriangle, Wallet, Info, Search, PackageCheck } from 'lucide-react';
 import PhotoAnalysisCard from '@/components/estate/PhotoAnalysisCard';
 import PhotoRunDialog from '@/components/estate/PhotoRunDialog';
@@ -34,6 +34,41 @@ export default function SalePhotoAnalysisPanel({ saleId, analysis, photos = [], 
     if (filter === 'failed') return state === 'failed';
     return state === filter;
   });
+
+  // The brand each photo carries, read from the shared brands list. One read per
+  // sale, refreshed when a run or the operator changes a brand.
+  const [brandByPhoto, setBrandByPhoto] = useState({});
+  const ranRef = useRef(false);
+
+  const loadBrands = async () => {
+    if (!saleId) return;
+    try {
+      const page = await base44.entities.Brand.filter({ sale_ids: saleId }, { limit: 300 });
+      const map = {};
+      for (const brand of page.items || []) {
+        for (const ref of brand.photo_refs || []) {
+          if (ref.sale_id !== saleId) continue;
+          map[ref.photo_id] = { brand_id: brand.id, name: brand.name || '', source: ref.source || null };
+        }
+      }
+      setBrandByPhoto(map);
+    } catch (error) {
+      console.error('Could not load brands:', error.message);
+    }
+  };
+
+  useEffect(() => { loadBrands(); }, [saleId]);
+
+  useEffect(() => {
+    if (running) { ranRef.current = true; return; }
+    if (ranRef.current) { ranRef.current = false; loadBrands(); }
+  }, [running]);
+
+  const saveFieldsAndBrands = (photo, fields) => {
+    const done = analysis.saveFields(photo, fields);
+    if (done && typeof done.then === 'function') done.then(() => loadBrands());
+    return done;
+  };
 
   // Photos already turned into inventory items, so a photo can never create two.
   const [promoted, setPromoted] = useState({});
@@ -328,13 +363,14 @@ export default function SalePhotoAnalysisPanel({ saleId, analysis, photos = [], 
               selected={selected.has(keyOf(photo))}
               canSelect={!promoted[keyOf(photo)] && !photo.excluded_from_public}
               inventoryItem={promoted[keyOf(photo)] || null}
+              brand={brandByPhoto[keyOf(photo)] || null}
               onSelect={on => toggleSelect(photo, on)}
               onRetry={analysis.retry}
               onReanalyze={analysis.reanalyze}
               onResearch={analysis.research}
               onClassify={analysis.classify}
               onRelease={analysis.releaseHold}
-              onSaveFields={analysis.saveFields}
+              onSaveFields={saveFieldsAndBrands}
               onDelete={removePhoto}
             />
           ))}

@@ -1,6 +1,7 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.54';
 import { loadAuthorizedSale } from '../../shared/saleAccess.ts';
 import { buildPhotoItemPayload, photoKey, photoSourceOf } from '../../shared/photoItemPromotion.ts';
+import { brandMapForSale } from '../../shared/brandRegistry.ts';
 import { createDraftListing } from '../../shared/marketplaceListing.ts';
 
 // One request is bounded so the work always finishes well inside the runtime limit.
@@ -36,6 +37,12 @@ export default async function (req: Request): Promise<Response> {
     const auth = await loadAuthorizedSale(service, user, saleId);
     if (auth.error) return auth.error;
     const sale = auth.sale;
+
+    // Brands set on these photos by the analysis or the operator, from the shared list.
+    const brandByPhoto = await brandMapForSale(service, sale.id).catch((error: any) => {
+      console.error('Brand list load failed:', error && error.message);
+      return {};
+    });
 
     const images = Array.isArray(sale.images) ? sale.images : [];
     const existingPage = await service.entities.Item.filter(
@@ -87,7 +94,7 @@ export default async function (req: Request): Promise<Response> {
       }
 
       try {
-        const payload = buildPhotoItemPayload({ sale, photo, user, index });
+        const payload = buildPhotoItemPayload({ sale, photo, user, index, brand: brandByPhoto[photoId] || null });
         const item = await service.entities.Item.create(payload);
 
         // Canonical sale-scoped item number, through the one function that owns it.
@@ -112,6 +119,7 @@ export default async function (req: Request): Promise<Response> {
           item_id: item.id,
           item_number: itemNumber,
           title: payload.title,
+          brand: payload.brand || null,
           price: payload.price,
           needs_price: !(payload.price > 0),
           marketplace_listing_id: listing?.id || null,

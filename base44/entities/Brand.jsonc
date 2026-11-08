@@ -1,0 +1,137 @@
+{
+  "name": "Brand",
+  "type": "object",
+  "description": "Canonical brand / maker registry shared by every sale photo and inventory item \u2014 the list the AI selects from and adds to. One record per brand, matched on a normalized name so \"Wedgwood\", \"wedgwood\" and \"Wedgwood & Co.\" are the same brand. A sale photo keeps its brand as a reference on the brand record (sale_id + photo_id), because the photo's own shape is fixed; when a photo is promoted to inventory the brand name is copied onto the inventory item's own brand field. App users read the catalog (they pick from it); every write happens through the sanctioned server paths \u2014 the photo analysis/operator save and the promotion function \u2014 so the list cannot be forged from a browser.",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Brand or maker name as shown to operators (e.g. Wedgwood, Herman Miller, Le Creuset)."
+    },
+    "normalized_name": {
+      "type": "string",
+      "description": "Comparison key: lowercase, accents removed, punctuation and legal suffixes (Inc, Co, LLC...) stripped. One brand can never be created twice under this key."
+    },
+    "slug": {
+      "type": "string",
+      "description": "URL-safe form of the normalized name."
+    },
+    "aliases": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Other names operators may type for the same brand (e.g. \"Tiffany\", \"Tiffany and Co\" for Tiffany & Co.)."
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "hidden"
+      ],
+      "default": "active",
+      "enumColors": [
+        "green",
+        "gray"
+      ],
+      "description": "Hidden brands stay attached to the photos and items that already use them but are not offered as suggestions."
+    },
+    "source": {
+      "type": "string",
+      "enum": [
+        "ai",
+        "operator",
+        "admin"
+      ],
+      "default": "ai",
+      "enumColors": [
+        "blue",
+        "purple",
+        "gray"
+      ],
+      "description": "How the brand first entered the registry."
+    },
+    "photo_refs": {
+      "type": "array",
+      "default": [],
+      "description": "Sale photos currently carrying this brand. A photo holds at most one brand, so linking a photo here removes it from any other brand.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "sale_id": {
+            "type": "string"
+          },
+          "photo_id": {
+            "type": "string",
+            "description": "The photo's stable pipeline id."
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "ai",
+              "operator"
+            ],
+            "description": "Who set this photo's brand. An operator's choice is never replaced by a later analysis run."
+          },
+          "linked_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "linked_by": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "sale_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Sales this brand appears in \u2014 the query key a sale uses to load its brands in one read."
+    },
+    "last_linked_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "name",
+    "normalized_name"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "user"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

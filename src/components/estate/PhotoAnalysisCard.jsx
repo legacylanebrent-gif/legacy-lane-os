@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Loader2, RotateCcw, Search, RefreshCw, Check, AlertTriangle, ImageOff, ExternalLink, Pencil, Trash2 } from 'lucide-react';
+import { Loader2, RotateCcw, Search, RefreshCw, Check, AlertTriangle, ImageOff, ExternalLink, Pencil, Trash2, Tag } from 'lucide-react';
 import PhotoOperatorEditor from '@/components/estate/PhotoOperatorEditor';
 import PhotoSerpMatches from '@/components/estate/PhotoSerpMatches';
 
@@ -25,7 +25,7 @@ const LABEL = {
 
 const reasonList = job => (job?.review_flags || []).filter(Boolean);
 
-export default function PhotoAnalysisCard({ photo, index, state, busy, selected, canSelect = true, inventoryItem, onSelect, onRetry, onReanalyze, onResearch, onClassify, onRelease, onSaveFields, onDelete }) {
+export default function PhotoAnalysisCard({ photo, index, state, busy, selected, canSelect = true, inventoryItem, brand, onSelect, onRetry, onReanalyze, onResearch, onClassify, onRelease, onSaveFields, onDelete }) {
   const [editing, setEditing] = useState(false);
   const job = photo?.pipeline?.jobs?.analysis;
   const research = job?.research;
@@ -80,6 +80,13 @@ export default function PhotoAnalysisCard({ photo, index, state, busy, selected,
             </p>
           )}
 
+          {brand?.name && (
+            <p className="text-[10px] font-semibold text-cyan-800 flex items-center gap-1">
+              <Tag className="w-3 h-3" /> {brand.name}
+              {brand.source === 'operator' && <span className="font-normal text-slate-400">· set by you</span>}
+            </p>
+          )}
+
           {photo?.description && <p className="text-[11px] text-slate-600 line-clamp-2">{photo.description}</p>}
 
           {suggested != null ? (
@@ -121,6 +128,7 @@ export default function PhotoAnalysisCard({ photo, index, state, busy, selected,
       {editing && (
         <PhotoOperatorEditor
           photo={photo}
+          brand={brand}
           busy={busy}
           onSave={fields => onSaveFields(photo, fields)}
           onClose={() => setEditing(false)}
@@ -154,7 +162,7 @@ export default function PhotoAnalysisCard({ photo, index, state, busy, selected,
             onClick={() => setEditing(value => !value)}
             className={`inline-flex items-center gap-1 px-2 py-1 rounded border text-[11px] font-medium ${editing ? 'border-cyan-600 bg-cyan-50 text-cyan-800' : 'border-slate-300 bg-white text-slate-700'}`}
           >
-            <Pencil className="w-3 h-3" /> {editing ? 'Close editor' : 'Edit title, price'}
+            <Pencil className="w-3 h-3" /> {editing ? 'Close editor' : 'Edit title, brand, price'}
           </button>
         )}
         {held && (
