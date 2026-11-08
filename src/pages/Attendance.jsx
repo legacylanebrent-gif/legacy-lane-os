@@ -13,6 +13,7 @@ import {
 import { PieChart, Pie, Cell, Legend, Tooltip, ResponsiveContainer } from 'recharts';
 import { format } from 'date-fns';
 import QRCode from 'qrcode';
+import PostSaleThankYouForm from '@/components/attendance/PostSaleThankYouForm';
 
 export default function Attendance() {
   const navigate = useNavigate();
@@ -215,6 +216,9 @@ export default function Attendance() {
           <TabsTrigger value="manual">Manual Count</TabsTrigger>
           <TabsTrigger value="qr">QR Code Check-in</TabsTrigger>
           <TabsTrigger value="analytics">Analytics</TabsTrigger>
+          {sale?.status === 'completed' && (
+            <TabsTrigger value="thankyou">Thank You &amp; Next Sale</TabsTrigger>
+          )}
         </TabsList>
 
         <TabsContent value="manual" className="space-y-6">
@@ -552,6 +556,12 @@ export default function Attendance() {
             );
           })()}
         </TabsContent>
+
+        {sale?.status === 'completed' && (
+          <TabsContent value="thankyou" className="space-y-6">
+            <PostSaleThankYouForm sale={sale} checkins={checkins} />
+          </TabsContent>
+        )}
       </Tabs>
     </div>
   );
