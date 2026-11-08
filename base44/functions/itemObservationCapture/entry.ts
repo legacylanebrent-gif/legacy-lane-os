@@ -123,7 +123,9 @@ export default async function (req: Request): Promise<Response> {
     }
 
     if (action === 'queue') {
-      const result = await queueSaleCapture(base44, saleId, { trigger: 'manual', maxUnits: body.max_units });
+      const allowedTriggers = ['publish', 'refresh', 'sold_refresh', 'backfill', 'manual'];
+      const trigger = allowedTriggers.includes(String(body.trigger)) ? String(body.trigger) : 'manual';
+      const result = await queueSaleCapture(base44, saleId, { trigger, maxUnits: body.max_units });
       const status = await saleCaptureStatus(base44, saleId);
       return Response.json({ result, status });
     }

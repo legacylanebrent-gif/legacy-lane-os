@@ -95,7 +95,7 @@ export function buildUnits(sale, items) {
       condition: str(item.condition),
       material: str(item.materials),
       model: str(item.model),
-      dimensions: str(item.dimensions) || str(item.size),
+      dimensions: formatDimensions(item.dimensions) || str(item.size),
       attributes: {
         maker: str(item.maker),
         serial_number: str(item.serial_number),
@@ -107,6 +107,7 @@ export function buildUnits(sale, items) {
         inventory_level: str(item.inventory_level),
         included_items: isLot ? (item.included_items || []).slice(0, 20) : [],
         group_note: str(item.group_note),
+        weight: num(item.shipping_weight),
       },
       price: num(item.price),
       image_url: firstImageUrl(item),
@@ -119,6 +120,20 @@ export function buildUnits(sale, items) {
   }
 
   return units.slice(0, MAX_UNITS_PER_SALE);
+}
+
+/** Item dimensions are stored as an object — kept as a readable fact, never converted into something new. */
+function formatDimensions(value) {
+  if (!value) return '';
+  if (typeof value === 'string') return value.trim();
+  if (typeof value === 'object') {
+    const unit = str(value.unit);
+    const parts = ['length', 'width', 'height', 'depth']
+      .map(key => (num(value[key]) != null ? String(value[key]) : null))
+      .filter(Boolean);
+    return parts.length ? `${parts.join(' x ')}${unit ? ` ${unit}` : ''}` : '';
+  }
+  return '';
 }
 
 function firstImageUrl(item) {
