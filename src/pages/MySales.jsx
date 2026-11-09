@@ -819,6 +819,7 @@ export default function MySales() {
                               </div>
                               <div className="flex flex-wrap gap-1.5 mt-2">
                                 <Button variant="outline" size="sm" asChild className="h-7 text-xs border-purple-400 text-black hover:bg-purple-50 px-2"><Link to={createPageUrl('SaleInventory') + '?saleId=' + sale.id}><Package className="w-3 h-3 mr-1" />Inventory</Link></Button>
+                                <Button variant="outline" size="sm" asChild className="h-7 text-xs border-amber-500 text-black hover:bg-amber-50 px-2"><Link to={createPageUrl('SaleTasks') + '?saleId=' + sale.id}><FileText className="w-3 h-3 mr-1" />Tasks</Link></Button>
                                 <Button variant="outline" size="sm" asChild className="h-7 text-xs border-indigo-400 text-black hover:bg-indigo-50 px-2"><Link to={createPageUrl('SaleStatistics') + '?saleId=' + sale.id}><BarChart3 className="w-3 h-3 mr-1" />Statistics</Link></Button>
                                 <Button variant="outline" size="sm" asChild className="h-7 text-xs border-teal-500 text-black hover:bg-teal-50 px-2"><Link to={createPageUrl('Worksheet') + '?saleId=' + sale.id}><DollarSign className="w-3 h-3 mr-1" />Transactions</Link></Button>
                                 <Button variant="outline" size="sm" asChild className="h-7 text-xs border-cyan-400 text-black hover:bg-cyan-50 px-2"><Link to={createPageUrl('Attendance') + '?saleId=' + sale.id}><TrendingUp className="w-3 h-3 mr-1" />Attendance</Link></Button>
