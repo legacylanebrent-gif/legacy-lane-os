@@ -246,7 +246,7 @@ export default function SaleEditor() {
           title: latest.title,
           description: latest.description,
           sale_type: latest.sale_type,
-          status: latest.status,
+          status: originalStatus || 'draft',
           property_address: {
             ...latest.property_address,
             formatted_address: `${latest.property_address.street}, ${latest.property_address.city}, ${latest.property_address.state} ${latest.property_address.zip}`
@@ -261,8 +261,6 @@ export default function SaleEditor() {
           promoted_to_all_users: latest.sale_type === 'five_and_under_sale',
           sale_team: latest.sale_team,
           site_assessment: latest.site_assessment || {},
-          national_featured: featuredNationally,
-          local_featured: featuredLocally,
         };
         applyDistanceSnapshot(saveData, latest.location, user.operating_base, latest.distance_miles ?? null, originalLocationRef.current);
         const currentSaleId = saleIdRef.current;
@@ -285,7 +283,7 @@ export default function SaleEditor() {
     }, 3000);
 
     return () => clearTimeout(autoSaveTimer.current);
-  }, [formData, featuredNationally, featuredLocally]);
+  }, [formData, originalStatus]);
 
   useEffect(() => {
     const init = async () => {
@@ -466,56 +464,92 @@ export default function SaleEditor() {
       }
     }
 
-    setFormData(prev => ({ ...prev, status: newStatus }));
+    if (!formData.title.trim()) { alert('Please enter a sale title'); return; }
+    if (!formData.property_address.city.trim()) { alert('Please enter a city'); return; }
 
-    // Use a microtask to ensure state is updated before saving
-    setTimeout(async () => {
-      setSaving(true);
-      try {
-        const user = await base44.auth.me();
-        const saveData = {
-          title: formData.title,
-          description: formData.description,
-          sale_type: formData.sale_type,
-          status: newStatus,
-          property_address: {
-            ...formData.property_address,
-            formatted_address: `${formData.property_address.street}, ${formData.property_address.city}, ${formData.property_address.state} ${formData.property_address.zip}`
-          },
-          location: formData.location,
-          sale_dates: formData.sale_dates,
-          commission_rate: formData.commission_rate ? parseFloat(formData.commission_rate) : null,
-          categories: formData.categories,
-          special_notes: formData.special_notes,
-          payment_methods: formData.payment_methods,
-          buyout_config: formData.sale_type === 'buyout_or_cleanout' ? formData.buyout_config : null,
-          promoted_to_all_users: formData.sale_type === 'five_and_under_sale',
-          sale_team: formData.sale_team,
-          site_assessment: formData.site_assessment || {},
-          national_featured: featuredNationally,
-          local_featured: featuredLocally,
-        };
-        applyDistanceSnapshot(saveData, formData.location, user.operating_base, formData.distance_miles ?? null, originalLocationRef.current);
-        if (saleId) {
-          await base44.entities.EstateSale.update(saleId, saveData);
-        } else {
-          const newSale = await base44.entities.EstateSale.create({
-            ...saveData,
-            operator_id: user.id,
-            operator_name: user.full_name,
-            images: formData.images.map(img => ({ ...img })),
-          });
-          setSaleId(newSale.id);
-        }
-        alert(`Sale published as "${newStatus}"`);
-        navigate(createPageUrl('MySales'));
-      } catch (error) {
-        console.error('Error publishing sale:', error);
-        alert('Failed to publish sale: ' + error.message);
-      } finally {
-        setSaving(false);
+    setSaving(true);
+    try {
+      const user = await base44.auth.me();
+
+      // 1) Save the sale CONTENT only. Status is never written here — going live is a
+      // server-verified transition, so this page cannot publish on its own.
+      const saveData = {
+        title: formData.title,
+        description: formData.description,
+        sale_type: formData.sale_type,
+        status: originalStatus || 'draft',
+        property_address: {
+          ...formData.property_address,
+          formatted_address: `${formData.property_address.street}, ${formData.property_address.city}, ${formData.property_address.state} ${formData.property_address.zip}`
+        },
+        location: formData.location,
+        sale_dates: formData.sale_dates,
+        commission_rate: formData.commission_rate ? parseFloat(formData.commission_rate) : null,
+        categories: formData.categories,
+        special_notes: formData.special_notes,
+        payment_methods: formData.payment_methods,
+        buyout_config: formData.sale_type === 'buyout_or_cleanout' ? formData.buyout_config : null,
+        promoted_to_all_users: formData.sale_type === 'five_and_under_sale',
+        sale_team: formData.sale_team,
+        site_assessment: formData.site_assessment || {},
+      };
+      applyDistanceSnapshot(saveData, formData.location, user.operating_base, formData.distance_miles ?? null, originalLocationRef.current);
+
+      let targetSaleId = saleId;
+      if (targetSaleId) {
+        await base44.entities.EstateSale.update(targetSaleId, saveData);
+      } else {
+        const newSale = await base44.entities.EstateSale.create({
+          ...saveData,
+          operator_id: user.id,
+          operator_name: user.full_name,
+          images: formData.images.map(img => ({ ...img })),
+        });
+        targetSaleId = newSale.id;
+        setSaleId(newSale.id);
       }
-    }, 100);
+
+      // 2) Ask the server gate to publish. It verifies the company subscription or a
+      // paid, bound One-Time Estate Sale package, and binds the package to this sale.
+      const res = await base44.functions.invoke('salePublish', {
+        action: 'publish',
+        sale_id: targetSaleId,
+        status: newStatus,
+      });
+      const result = res.data || {};
+
+      if (!result.ok) {
+        setFormData(prev => ({ ...prev, status: originalStatus || 'draft' }));
+        if (result.reason === 'sale_package_required') {
+          const goBuy = window.confirm(
+            'Publishing your sale needs the One-Time Estate Sale package ($147, covers one sale weekend). Open the purchase page now?',
+          );
+          if (goBuy) window.location.href = result.purchase_url || createPageUrl('DIYSaleSignup');
+        } else if (result.reason === 'no_active_subscription') {
+          const goPlans = window.confirm(
+            'Your company subscription is not active. Open your plans to renew and publish?',
+          );
+          if (goPlans) window.location.href = result.purchase_url || createPageUrl('OperatorPackages');
+        } else {
+          alert(result.message || 'This sale could not be published.');
+        }
+        return;
+      }
+
+      setFormData(prev => ({ ...prev, status: result.status }));
+      setOriginalStatus(result.status);
+      alert(
+        result.reused_entitlement
+          ? `Sale republished as "${result.status}" — no new charge.`
+          : `Sale published as "${result.status}"`,
+      );
+      navigate(createPageUrl('MySales'));
+    } catch (error) {
+      console.error('Error publishing sale:', error);
+      alert('Failed to publish sale: ' + error.message);
+    } finally {
+      setSaving(false);
+    }
   };
 
   const handleSave = async (publish = false, skipFeeCheck = false) => {
@@ -1633,21 +1667,20 @@ Return ONLY the description text, no extra commentary.`
                   <h3 className="font-medium text-slate-900 mb-2">Special Instructions</h3>
                   <Textarea placeholder="Parking info, entry requirements, etc..." value={formData.special_notes} onChange={(e) => setFormData({ ...formData, special_notes: e.target.value })} rows={4} />
                 </div>
-                <div className="space-y-4 pt-4 border-t border-slate-200">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h3 className="font-medium text-slate-900">Feature Nationally</h3>
-                      <p className="text-sm text-slate-600">Display prominently on the national homepage</p>
-                    </div>
-                    <Switch checked={featuredNationally} onCheckedChange={setFeaturedNationally} />
+                <div className="space-y-3 pt-4 border-t border-slate-200">
+                  <div>
+                    <h3 className="font-medium text-slate-900">Featured placements</h3>
+                    <p className="text-sm text-slate-600">
+                      National and local featured placement are separate paid products and are not included with a
+                      sale listing. They can only be added after a purchase is confirmed, so there are no switches here.
+                    </p>
                   </div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h3 className="font-medium text-slate-900">Feature Locally</h3>
-                      <p className="text-sm text-slate-600">Display prominently on local/regional pages</p>
+                  {(featuredNationally || featuredLocally) && (
+                    <div className="flex flex-wrap gap-2">
+                      {featuredNationally && <Badge className="bg-purple-100 text-purple-700">National featured</Badge>}
+                      {featuredLocally && <Badge className="bg-emerald-100 text-emerald-700">Local featured</Badge>}
                     </div>
-                    <Switch checked={featuredLocally} onCheckedChange={setFeaturedLocally} />
-                  </div>
+                  )}
                 </div>
               </div>
             </div>

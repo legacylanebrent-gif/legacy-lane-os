@@ -12,6 +12,7 @@ import BuyoutModal from '@/components/estate/BuyoutModal';
 import BuyerMatchModal from '@/components/estate/BuyerMatchModal';
 import SaleIsoMatchModal from '@/components/iso/SaleIsoMatchModal';
 import SaleExpensesModal from '@/components/expenses/SaleExpensesModal';
+import GuestSalePackageCard from '@/components/estate/GuestSalePackageCard';
 import { 
         Plus, Search, Calendar, MapPin, Eye, Heart, DollarSign,
         Package, Edit, TrendingUp, Star, Briefcase, Trash, FileText, BarChart3, Megaphone, Download, Globe, Users, Receipt, Sparkles, ChevronDown, ChevronUp, BookOpen, Pin, UserCheck, Rocket, Building2, ClipboardCheck, ListChecks, CalendarDays, ClipboardList, Wrench, Target
@@ -771,6 +772,9 @@ export default function MySales() {
 
             return (
               <div className="space-y-4">
+                {['diy_seller', 'consumer', 'executor', 'home_seller', 'downsizer', 'consignor'].includes(user?.primary_account_type) && (
+                  <GuestSalePackageCard sales={sales} />
+                )}
                 {/* Active / Draft / Upcoming sales — full cards */}
                 {activeSales.map(sale => renderSaleCard(sale))}
 

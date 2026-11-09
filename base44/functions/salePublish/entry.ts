@@ -25,6 +25,25 @@ export default async function (req) {
 
     const body = await req.json().catch(() => ({}));
     const action = body.action || 'publish';
+
+    // ── Account: what does this buyer hold? (no sale needed) ──
+    if (action === 'account') {
+      const claimable = await claimableEntitlement(base44, user.id);
+      const awaiting = await pendingEntitlement(base44, user.id);
+      const boundRows = await base44.asServiceRole.entities.SaleEntitlement.filter({
+        user_id: user.id,
+        kind: GUEST_SALE_PACKAGE.kind,
+        status: 'bound',
+      });
+      return Response.json({
+        ok: true,
+        package: GUEST_SALE_PACKAGE,
+        claimable: claimable || null,
+        awaiting_payment: awaiting || null,
+        bound: boundRows || [],
+      });
+    }
+
     const saleId = body.sale_id;
     if (!saleId) return Response.json({ error: 'sale_id_required' }, { status: 400 });
 

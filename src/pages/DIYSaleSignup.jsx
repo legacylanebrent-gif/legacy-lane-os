@@ -15,6 +15,28 @@ export default function DIYSaleSignup() {
   const [checkingAuth, setCheckingAuth] = useState(true);
   const [packages, setPackages] = useState([]);
   const [loadingPackages, setLoadingPackages] = useState(true);
+  const [buying, setBuying] = useState(false);
+
+  // Real purchase: the price comes from the server, never from this page.
+  const handlePurchase = async () => {
+    if (!isAuthenticated) {
+      base44.auth.redirectToLogin(window.location.href);
+      return;
+    }
+    setBuying(true);
+    try {
+      const res = await base44.functions.invoke('create-checkout', { product: 'sale_package' });
+      if (res.data?.redirectUrl) {
+        window.location.href = res.data.redirectUrl;
+        return;
+      }
+      throw new Error(res.data?.error || 'Checkout did not return a payment page.');
+    } catch (err) {
+      const msg = err?.response?.data?.error || err?.message || 'Could not start checkout. Please try again.';
+      alert(msg);
+      setBuying(false);
+    }
+  };
 
 
   useEffect(() => {
@@ -134,7 +156,7 @@ export default function DIYSaleSignup() {
           ) : (
             <div className="max-w-md mx-auto">
               {packages.map((pkg, idx) => {
-                const price = pkg.per_item_price || pkg.monthly_price || 47;
+                const price = pkg.per_item_price || pkg.monthly_price || 147;
                 return (
                   <Card key={idx} className={`overflow-hidden ${pkg.featured ? 'border-2 border-purple-500 shadow-xl' : 'border-slate-200'}`}>
                     {pkg.featured && <div className="bg-gradient-to-r from-purple-600 to-purple-700 p-1" />}
@@ -168,8 +190,13 @@ export default function DIYSaleSignup() {
                       )}
 
                       {isAuthenticated ? (
-                        <Button className={`w-full text-base py-6 ${pkg.featured ? 'bg-purple-600 hover:bg-purple-700' : ''}`} size="lg">
-                          Get Started — ${price}
+                        <Button
+                          onClick={handlePurchase}
+                          disabled={buying}
+                          className={`w-full text-base py-6 ${pkg.featured ? 'bg-purple-600 hover:bg-purple-700' : ''}`}
+                          size="lg"
+                        >
+                          {buying ? 'Opening secure checkout…' : `Buy Now — $${price}`}
                         </Button>
                       ) : (
                         <div>
@@ -220,8 +247,8 @@ export default function DIYSaleSignup() {
           <h2 className="text-2xl font-serif font-bold text-slate-900 text-center mb-8">Common Questions</h2>
           <div className="space-y-4">
             {[
-              { q: 'Is this really a one-time payment?', a: 'Yes. $47 covers one sale posting. There are no recurring charges, hidden fees, or subscriptions.' },
-              { q: 'Can I post multiple sales?', a: 'This package covers one sale. For multiple sales, consider our Estate Sale Company plans which include unlimited listings.' },
+              { q: 'Is this really a one-time payment?', a: 'Yes. $147 covers one complete sale weekend. There are no recurring charges, hidden fees, or subscriptions.' },
+              { q: 'Can I post multiple sales?', a: 'One package covers one sale weekend. You can reschedule that same sale at no extra cost, and a second sale needs its own package — or consider our Estate Sale Company plans for unlimited listings.' },
               { q: 'Who can see my sale?', a: 'Your sale will appear on EstateSalen.com and be visible to shoppers searching in your area.' },
               { q: 'Can I edit my sale after posting?', a: 'Yes, you can update photos, prices, dates, and details any time before or during your sale.' },
             ].map((faq, i) => (
