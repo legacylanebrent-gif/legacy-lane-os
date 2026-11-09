@@ -71,7 +71,16 @@ export default async function (req) {
     }
 
     // ── Unpublish: back to draft; nothing is deleted ──
+    // A completed engagement must not slip back to draft, because drafting it
+    // would reopen the publish path that completed-sale refusal exists to close.
     if (action === 'unpublish') {
+      if (sale.status === 'completed') {
+        return Response.json({
+          ok: false,
+          reason: 'completed_sale_cannot_be_reopened',
+          message: 'A completed sale stays on record as history. Create a new sale for a new event.',
+        });
+      }
       await base44.asServiceRole.entities.EstateSale.update(saleId, { status: 'draft' });
       return Response.json({ ok: true, status: 'draft' });
     }
