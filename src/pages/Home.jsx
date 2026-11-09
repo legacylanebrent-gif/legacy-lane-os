@@ -51,7 +51,8 @@ import { useSEO } from '@/hooks/useSEO';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 
-import { estateSaleIcon, communityEventIcon, storeIcon as dealerIcon } from '@/components/maps/mapPins';
+import { communityEventIcon, storeIcon as dealerIcon } from '@/components/maps/mapPins';
+import SaleMapPin from '@/components/maps/SaleMapPin';
 import MapPinLegend from '@/components/maps/MapPinLegend';
 import EmptySalesMap from '@/components/home/EmptySalesMap';
 
@@ -77,6 +78,7 @@ export default function Home() {
   const [nationalFeatured, setNationalFeatured] = useState([]);
   const [localFeatured, setLocalFeatured] = useState([]);
   const [regularSales, setRegularSales] = useState([]);
+  const [guestSaleIds, setGuestSaleIds] = useState(new Set());
   const [searchQuery, setSearchQuery] = useState('');
   const [zipCode, setZipCode] = useState(() => {
     // Load from localStorage on initial render
@@ -213,6 +215,17 @@ export default function Home() {
     setMapZoom(12);
     setMapMinZoom(10);
   };
+
+  // Guest (DIY) sales are individual sellers' sales — the map labels them as sponsored.
+  useEffect(() => {
+    const ids = (sales || []).map(s => s.id).filter(Boolean).slice(0, 500);
+    if (!ids.length) { setGuestSaleIds(new Set()); return; }
+    let active = true;
+    base44.functions.invoke('guestSaleFlags', { sale_ids: ids })
+      .then(res => { if (active) setGuestSaleIds(new Set(res.data?.guest_sale_ids || [])); })
+      .catch(error => console.log('Could not load guest sale flags:', error));
+    return () => { active = false; };
+  }, [sales]);
 
   const loadData = async () => {
     try {
@@ -896,36 +909,12 @@ export default function Home() {
                   attribution='Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
                   url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
                 />
-                {localFeatured.map(sale => 
-                  sale.location && sale.location.lat && sale.location.lng && (
-                    <Marker key={sale.id} position={[sale.location.lat, sale.location.lng]} icon={estateSaleIcon}>
-                      <Popup>
-                        <div className="text-sm">
-                          <Link to={createPageUrl('EstateSaleDetail') + '?id=' + sale.id} className="text-cyan-600 hover:text-cyan-700 hover:underline font-semibold">
-                            {sale.title}
-                          </Link>
-                          <p className="text-xs text-slate-600 mt-1">{sale.property_address?.city}, {sale.property_address?.state}</p>
-                          {sale.distance && <p className="text-xs text-orange-600 font-semibold mt-1">{sale.distance.toFixed(1)} mi away</p>}
-                        </div>
-                      </Popup>
-                    </Marker>
-                  )
-                )}
-                {regularSales.map(sale => 
-                  sale.location && sale.location.lat && sale.location.lng && (
-                    <Marker key={sale.id} position={[sale.location.lat, sale.location.lng]} icon={estateSaleIcon}>
-                      <Popup>
-                        <div className="text-sm">
-                          <Link to={createPageUrl('EstateSaleDetail') + '?id=' + sale.id} className="text-cyan-600 hover:text-cyan-700 hover:underline font-semibold">
-                            {sale.title}
-                          </Link>
-                          <p className="text-xs text-slate-600 mt-1">{sale.property_address?.city}, {sale.property_address?.state}</p>
-                          {sale.distance && <p className="text-xs text-orange-600 font-semibold mt-1">{sale.distance.toFixed(1)} mi away</p>}
-                        </div>
-                      </Popup>
-                    </Marker>
-                  )
-                )}
+                {localFeatured.map(sale => (
+                  <SaleMapPin key={`local-${sale.id}`} sale={sale} isGuest={guestSaleIds.has(sale.id)} />
+                ))}
+                {regularSales.map(sale => (
+                  <SaleMapPin key={`sale-${sale.id}`} sale={sale} isGuest={guestSaleIds.has(sale.id)} />
+                ))}
                 {/* Community events — violet pins (flea markets & antique shows) */}
                 {communityEvents.map(evt =>
                   evt.location && evt.location.lat && evt.location.lng && (

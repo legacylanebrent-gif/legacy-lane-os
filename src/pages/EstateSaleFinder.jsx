@@ -50,6 +50,7 @@ export default function EstateSaleFinder() {
   const [user, setUser] = useState(null);
   const [estates, setEstates] = useState([]);
   const [filteredEstates, setFilteredEstates] = useState([]);
+  const [guestSaleIds, setGuestSaleIds] = useState(new Set());
   const [featuredEstates, setFeaturedEstates] = useState([]);
   const [regularEstates, setRegularEstates] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -86,6 +87,17 @@ export default function EstateSaleFinder() {
   useEffect(() => {
     filterEstates();
   }, [estates, searchQuery]);
+
+  // Guest (DIY) sales are individual sellers' sales — the map labels them as sponsored.
+  useEffect(() => {
+    const ids = (filteredEstates || []).map(e => e.id).filter(Boolean).slice(0, 500);
+    if (!ids.length) { setGuestSaleIds(new Set()); return; }
+    let active = true;
+    base44.functions.invoke('guestSaleFlags', { sale_ids: ids })
+      .then(res => { if (active) setGuestSaleIds(new Set(res.data?.guest_sale_ids || [])); })
+      .catch(error => console.log('Could not load guest sale flags:', error));
+    return () => { active = false; };
+  }, [filteredEstates]);
 
   // When geolocation is unavailable, fall back to the logged-in user's saved location
   useEffect(() => {
@@ -510,6 +522,7 @@ export default function EstateSaleFinder() {
                   
                   {filteredEstates.map((estate) => {
                     if (!estate.location?.lat || !estate.location?.lng) return null;
+                    const isGuestSale = guestSaleIds.has(estate.id);
                     return (
                       <Marker
                         key={estate.id}
@@ -521,6 +534,11 @@ export default function EstateSaleFinder() {
                       >
                         <Popup>
                           <div className="p-2">
+                            {isGuestSale && (
+                              <span className="inline-block text-[10px] font-bold uppercase tracking-wide text-cyan-700 bg-cyan-50 border border-cyan-200 rounded px-1.5 py-0.5 mb-1">
+                                Sponsored by EstateSalen
+                              </span>
+                            )}
                             <h3 className="font-semibold text-navy-900 mb-1">
                               {estate.title}
                             </h3>
@@ -530,6 +548,11 @@ export default function EstateSaleFinder() {
                             {estate.sale_dates?.[0] && (
                               <p className="text-sm text-slate-500">
                                 {new Date(estate.sale_dates[0].date).toLocaleDateString()}
+                              </p>
+                            )}
+                            {isGuestSale && (
+                              <p className="text-sm text-slate-700 mt-1">
+                                <span className="font-semibold">Seller:</span> {estate.operator_name || 'Private seller'}
                               </p>
                             )}
                           </div>
