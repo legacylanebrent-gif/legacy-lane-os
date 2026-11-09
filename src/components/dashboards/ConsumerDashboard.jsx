@@ -96,8 +96,12 @@ export default function ConsumerDashboard({ user }) {
   }
 
   const role = user?.primary_account_type || 'consumer';
-  const isBusinessUser = ['super_admin', 'platform_ops', 'growth_team', 'partnerships', 'education_admin', 'finance_admin', 'estate_sale_operator', 'real_estate_agent', 'investor', 'coach'].includes(role);
-  const isOperator = role === 'estate_sale_operator';
+  // Consumer dashboard must never expose business tools — including when a business user
+  // opens it via ?force=consumer. Business shortcuts render only for a real business account
+  // that is not in the forced consumer view.
+  const isForcedConsumerView = new URLSearchParams(window.location.search).get('force') === 'consumer';
+  const isBusinessUser = !isForcedConsumerView && ['super_admin', 'platform_ops', 'growth_team', 'partnerships', 'education_admin', 'finance_admin', 'estate_sale_operator', 'real_estate_agent', 'investor', 'coach'].includes(role);
+  const isOperator = !isForcedConsumerView && role === 'estate_sale_operator';
   const canSeeBuyouts = ['reseller', 'Estate Sale Company Owner', 'estate_sale_operator', 'admin'].includes(role) || user?.role === 'admin';
 
   const quickActions = [
