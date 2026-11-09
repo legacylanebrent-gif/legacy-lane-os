@@ -242,7 +242,8 @@ export default function SaleCloseout() {
   const completeProject = async () => {
     setClosing(true);
     try {
-      await base44.entities.EstateSale.update(sale.id, { status: 'completed' });
+      const res = await base44.functions.invoke('salePublish', { action: 'complete', sale_id: sale.id });
+      if (res.data?.ok === false) throw new Error(res.data.reason || 'completion_refused');
       setShowCloseConfirm(false);
       alert('Project marked complete. A private recap draft is generated for your review on the closeout page — nothing is published until you approve it.');
       navigate(createPageUrl('MySales'));

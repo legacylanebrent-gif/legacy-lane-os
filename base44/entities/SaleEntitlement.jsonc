@@ -1,7 +1,7 @@
 {
   "name": "SaleEntitlement",
   "type": "object",
-  "description": "The paid right to publish ONE estate sale weekend. Created only by the sanctioned payment path (create-checkout) as 'pending', and activated only by the verified payment webhook (exact amount + currency match on an approved, paid order). A purchase is permanently bound to one sale when that sale is first published; the same sale may be rescheduled and republished while the entitlement stays bound to it. Republishing a completed sale as a new event is refused, and a second sale requires a second purchase. Refund, dispute and revocation never delete history: the entitlement moves to a revoked state, the sale drops out of public listing, and the sale record, photos, transactions and reports stay intact. Clients never set these fields; every write happens through server functions.",
+  "description": "The paid right to publish ONE estate sale weekend, or one paid featured placement for a sale. Created only by the sanctioned payment path (create-checkout) as 'pending', and activated only by the verified payment webhook (exact amount + currency match on an approved, paid order). A sale package is permanently bound to one sale when that sale is first published; the same sale may be rescheduled and republished while the entitlement stays bound to it. Republishing a completed sale as a new event is refused, and a second sale requires a second purchase. Featured placements are separate products (local $19, national $49) bound to one sale, switched on only after verified payment and expired when that sale weekend ends. Refund, dispute and revocation never delete history: the entitlement moves to a retired state, the sale drops out of public listing, and the sale record, photos, transactions, reports and AI usage stay intact. Clients never set these fields; every write happens through server functions.",
   "properties": {
     "user_id": {
       "type": "string",
@@ -76,7 +76,7 @@
         "red",
         "gray"
       ],
-      "description": "pending = awaiting verified payment; active = paid and unused; bound = paid and permanently attached to one sale; refunded/disputed/revoked = no longer usable for publishing; expired = never used and closed."
+      "description": "pending = awaiting verified payment; active = paid and unused; bound = paid and permanently attached to one sale; refunded/disputed/revoked = no longer usable for publishing; expired = never used and closed, or a placement whose sale weekend has ended."
     },
     "granted_at": {
       "type": "string",
@@ -85,7 +85,7 @@
     },
     "bound_sale_id": {
       "type": "string",
-      "description": "The sale this purchase covers. Set once, on first publish, and never moved to another sale."
+      "description": "The sale this purchase covers. For a sale package: set once, on first publish, and never moved to another sale. For a placement: the sale it was bought for."
     },
     "bound_at": {
       "type": "string",
@@ -111,7 +111,29 @@
     },
     "ai_descriptions_used": {
       "type": "integer",
-      "default": 0
+      "default": 0,
+      "description": "Counts only descriptions that were successfully produced AND persisted on a photo. Failed calls and retries that produce nothing never increment this."
+    },
+    "ai_usage": {
+      "type": "object",
+      "default": {},
+      "description": "Internal usage and cost tracking for future pricing decisions. Never shown as a customer charge. Deep Scan spend is billed separately through search credits, not here.",
+      "properties": {
+        "descriptions": {
+          "type": "integer",
+          "default": 0
+        },
+        "estimated_cost_usd": {
+          "type": "number"
+        },
+        "cost_basis": {
+          "type": "string"
+        },
+        "last_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
     },
     "deep_scan_credits_included": {
       "type": "integer",
@@ -135,7 +157,7 @@
     "audit": {
       "type": "array",
       "default": [],
-      "description": "Append-only history of this entitlement: created, granted, bound, republished, unbind attempt refused, refunded, disputed, revoked. Never rewritten.",
+      "description": "Append-only history of this entitlement: created, granted, bound, republished, unbind attempt refused, refunded, disputed, revoked, placement activated, placement expired. Never rewritten.",
       "items": {
         "type": "object",
         "properties": {

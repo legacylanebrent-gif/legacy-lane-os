@@ -41,6 +41,17 @@ export default function useSalePhotoAnalysis({ saleId, onPhoto, onRunComplete })
 
   const settle = result => {
     if (result.photo) onPhoto?.(result.photo);
+    // A paid guest package includes a fixed number of AI descriptions. When they
+    // run out the run stops cleanly and says so — manual entry stays available.
+    if (result.allowance_exhausted) {
+      setState(s => ({
+        ...s,
+        counts: result.counts || s.counts,
+        credits: result.credits ?? s.credits,
+        error: result.message || 'All included AI descriptions for this sale have been used. You can still add and price items by hand.',
+      }));
+      return;
+    }
     if (result.counts || result.photo) setState(s => ({
       ...s,
       counts: result.counts || s.counts,

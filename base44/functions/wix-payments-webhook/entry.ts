@@ -6,6 +6,8 @@ import {
   nowIso,
   GUEST_ACCOUNT_TYPE,
   PROFESSIONAL_ACCOUNT_TYPES,
+  placementByKind,
+  placementEndsAt,
 } from '../../shared/saleEntitlement.ts';
 
 // ─────────────────────────────────────────────
@@ -105,17 +107,48 @@ Deno.serve(async (req) => {
           return new Response('OK', { status: 200 });
         }
 
-        // Grant runs BEFORE the record is marked paid. Canonical identity first.
-        try {
-          const buyers = await base44.asServiceRole.entities.User.filter({ id: entitlement.user_id });
-          const buyer = buyers[0];
-          if (buyer && !PROFESSIONAL_ACCOUNT_TYPES.includes(buyer.primary_account_type)) {
-            await base44.asServiceRole.entities.User.update(buyer.id, {
-              primary_account_type: GUEST_ACCOUNT_TYPE,
+        const placement = placementByKind(entitlement.kind);
+
+        // A placement on a weekend that has already ended is paid for but cannot be
+        // advertised. Record it as expired instead of switching anything on.
+        if (placement) {
+          const saleRows = await base44.asServiceRole.entities.EstateSale.filter({ id: entitlement.bound_sale_id });
+          const paidSale = saleRows[0];
+          const end = placementEndsAt(paidSale);
+          if (!paidSale || (end && Date.now() > end.getTime())) {
+            console.error(`[webhook] ${entitlement.kind} ${entitlement.id} paid after the sale weekend ended — expired, no placement`);
+            await base44.asServiceRole.entities.SaleEntitlement.update(entitlement.id, {
+              status: 'expired',
+              granted_at: nowIso(),
+              provider_order_id: order.id || null,
+              audit: appendAudit(entitlement, {
+                action: 'placement_expired_before_grant',
+                status_from: 'pending',
+                status_to: 'expired',
+                amount: total,
+                actor_name: 'Base44 Payments',
+                sale_id: entitlement.bound_sale_id || '',
+                note: `Paid ${total} ${currency} after the sale weekend ended; placement not activated.`,
+              }),
             });
+            return new Response('OK', { status: 200 });
           }
-        } catch (identityErr) {
-          console.error('[webhook] sale package identity update failed:', identityErr.message);
+        }
+
+        // Grant runs BEFORE the record is marked paid. Canonical identity first,
+        // and only the sale package changes identity — a placement never does.
+        if (!placement) {
+          try {
+            const buyers = await base44.asServiceRole.entities.User.filter({ id: entitlement.user_id });
+            const buyer = buyers[0];
+            if (buyer && !PROFESSIONAL_ACCOUNT_TYPES.includes(buyer.primary_account_type)) {
+              await base44.asServiceRole.entities.User.update(buyer.id, {
+                primary_account_type: GUEST_ACCOUNT_TYPE,
+              });
+            }
+          } catch (identityErr) {
+            console.error('[webhook] sale package identity update failed:', identityErr.message);
+          }
         }
 
         const audit = appendAudit(entitlement, {
@@ -134,6 +167,20 @@ Deno.serve(async (req) => {
           audit,
         });
         console.log(`[webhook] SaleEntitlement ${entitlement.id} granted ($${total} ${currency})`);
+
+        // Placement switches on ONLY here, after the verified payment, and only for
+        // the sale the placement was bought for.
+        if (placement && entitlement.bound_sale_id) {
+          try {
+            await base44.asServiceRole.entities.EstateSale.update(entitlement.bound_sale_id, {
+              [placement.flag]: true,
+              [`${placement.flag}_price`]: Number(placement.amount),
+            });
+            console.log(`[webhook] ${placement.kind} activated on sale ${entitlement.bound_sale_id}`);
+          } catch (flagErr) {
+            console.error('[webhook] placement activation failed:', flagErr.message);
+          }
+        }
 
         return new Response('OK', { status: 200 });
       }

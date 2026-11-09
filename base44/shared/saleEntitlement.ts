@@ -34,12 +34,46 @@ export const PROFESSIONAL_ACCOUNT_TYPES = [
   'vendor',
 ];
 
+// Paid featured placements. Each is its own product, priced and bound to one sale,
+// and only granted after a verified payment. Nothing is bundled with the sale package.
+export const FEATURED_PLACEMENTS = {
+  local: {
+    placement: 'local',
+    kind: 'local_featured',
+    name: 'Local Featured Placement',
+    amount: '19.00',
+    flag: 'local_featured',
+  },
+  national: {
+    placement: 'national',
+    kind: 'national_featured',
+    name: 'National Featured Placement',
+    amount: '49.00',
+    flag: 'national_featured',
+  },
+};
+
+export function placementByKind(kind) {
+  return Object.values(FEATURED_PLACEMENTS).find((p) => p.kind === kind) || null;
+}
+
+// Internal unit-cost estimate used only for reporting actual AI usage per guest
+// sale. It is never charged to the customer and never shown as a price.
+export const AI_DESCRIPTION_UNIT_COST_USD = 0.02;
+
 export const PUBLISHED_SALE_STATUSES = ['upcoming', 'active'];
 export const ENTITLED_SUBSCRIPTION_STATUSES = ['active', 'pending', 'trialing'];
 const USABLE_ENTITLEMENT_STATUSES = ['active', 'bound'];
 
 export function nowIso() {
   return new Date().toISOString();
+}
+
+// Accepts either a full client or an already-elevated service client so shared
+// modules can be used by functions and by other shared modules (the photo
+// pipeline passes its service client).
+function entityService(client) {
+  return client?.asServiceRole || client;
 }
 
 export function money2(value) {
@@ -100,7 +134,7 @@ export function canActForSale(user, sale) {
 
 // The entitlement permanently bound to this sale, if any.
 export async function boundEntitlementForSale(base44, saleId) {
-  const rows = await base44.asServiceRole.entities.SaleEntitlement.filter({
+  const rows = await entityService(base44).entities.SaleEntitlement.filter({
     bound_sale_id: saleId,
     kind: GUEST_SALE_PACKAGE.kind,
   });
@@ -154,6 +188,128 @@ export async function hasPaidFeaturedPlacement(base44, saleId, kind) {
   });
   const usable = (rows || []).filter((r) => USABLE_ENTITLEMENT_STATUSES.includes(r.status));
   return usable.length > 0;
+}
+
+/* ───────────────────────── AI description allowance ───────────────────────── */
+
+/**
+ * The standard AI description allowance on the package bound to this sale.
+ * Returns { limited: false } for anything not covered by a paid guest package
+ * (company subscriptions keep their existing uncapped workflow).
+ */
+export async function saleAiAllowance(base44, sale) {
+  if (!sale?.id) return { limited: false, reason: 'no_sale' };
+  const bound = await boundEntitlementForSale(base44, sale.id);
+  if (!bound || !USABLE_ENTITLEMENT_STATUSES.includes(bound.status)) {
+    return { limited: false, reason: 'no_guest_package' };
+  }
+  const allowance = Number(bound.ai_description_allowance || 0);
+  const used = Number(bound.ai_descriptions_used || 0);
+  return {
+    limited: true,
+    entitlement_id: bound.id,
+    allowance,
+    used,
+    remaining: Math.max(0, allowance - used),
+    deep_scan_credits_included: Number(bound.deep_scan_credits_included || 0),
+  };
+}
+
+/**
+ * Counts ONE successfully persisted standard description against the package.
+ * Called only after the description has actually been written to the photo, so a
+ * failed operation or a retry that produces nothing never consumes allowance.
+ * Deep Scan / external lookups are metered separately and never counted here.
+ */
+export async function consumeDescriptionAllowance(base44, entitlementId) {
+  const service = entityService(base44);
+  const record = await service.entities.SaleEntitlement.get(entitlementId);
+  const used = Number(record.ai_descriptions_used || 0) + 1;
+  const usage = record.ai_usage && typeof record.ai_usage === 'object' ? record.ai_usage : {};
+  const descriptions = Number(usage.descriptions || 0) + 1;
+  const estimated = Number((descriptions * AI_DESCRIPTION_UNIT_COST_USD).toFixed(4));
+  return await service.entities.SaleEntitlement.update(entitlementId, {
+    ai_descriptions_used: used,
+    ai_usage: {
+      ...usage,
+      descriptions,
+      estimated_cost_usd: estimated,
+      cost_basis: `internal estimate at $${AI_DESCRIPTION_UNIT_COST_USD.toFixed(2)} per standard description; Deep Scan billed separately through search credits`,
+      last_at: nowIso(),
+    },
+  });
+}
+
+/* ───────────────────────── featured placements ───────────────────────── */
+
+/** Local end of the last sale day; a placement never outlives its sale weekend. */
+export function placementEndsAt(sale) {
+  const dates = Array.isArray(sale?.sale_dates) ? sale.sale_dates : [];
+  const last = dates
+    .map((d) => (d?.date ? String(d.date) : null))
+    .filter(Boolean)
+    .sort()
+    .pop();
+  if (!last) return null;
+  const end = new Date(`${last}T23:59:59`);
+  return isFinite(end.getTime()) ? end : null;
+}
+
+export function placementIsLive(entitlement, sale) {
+  if (!USABLE_ENTITLEMENT_STATUSES.includes(entitlement.status)) return false;
+  const end = placementEndsAt(sale);
+  if (!end) return true;
+  return Date.now() <= end.getTime();
+}
+
+/** Which paid placements are currently live for this sale. */
+export async function activePlacements(base44, sale) {
+  if (!sale?.id) return { local: false, national: false };
+  const out = { local: false, national: false };
+  for (const p of Object.values(FEATURED_PLACEMENTS)) {
+    const rows = await entityService(base44).entities.SaleEntitlement.filter({
+      bound_sale_id: sale.id,
+      kind: p.kind,
+    });
+    out[p.placement] = (rows || []).some((r) => placementIsLive(r, sale));
+  }
+  return out;
+}
+
+/**
+ * Ends placement privileges when the authorized sale weekend is over: the paid
+ * record is marked expired (history kept) and the sale's placement flags are
+ * cleared so nothing advertises a finished weekend.
+ */
+export async function expirePlacements(base44, sale) {
+  if (!sale?.id) return { expired: 0 };
+  const end = placementEndsAt(sale);
+  if (!end || Date.now() <= end.getTime()) return { expired: 0 };
+  const service = entityService(base44);
+  const rows = await service.entities.SaleEntitlement.filter({ bound_sale_id: sale.id });
+  let expired = 0;
+  for (const row of rows || []) {
+    if (!placementByKind(row.kind)) continue;
+    if (!USABLE_ENTITLEMENT_STATUSES.includes(row.status)) continue;
+    await service.entities.SaleEntitlement.update(row.id, {
+      status: 'expired',
+      audit: appendAudit(row, {
+        action: 'placement_expired',
+        status_from: row.status,
+        status_to: 'expired',
+        sale_id: sale.id,
+        note: 'Placement ended when the authorized sale weekend ended.',
+      }),
+    });
+    expired += 1;
+  }
+  if (sale.local_featured || sale.national_featured) {
+    await service.entities.EstateSale.update(sale.id, {
+      local_featured: false,
+      national_featured: false,
+    });
+  }
+  return { expired };
 }
 
 /**

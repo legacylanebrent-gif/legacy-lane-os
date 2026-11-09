@@ -2,9 +2,13 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
 import {
   GUEST_SALE_PACKAGE,
   GUEST_ACCOUNT_TYPE,
+  FEATURED_PLACEMENTS,
   claimableEntitlement,
   pendingEntitlement,
   nowIso,
+  loadSale,
+  canActForSale,
+  activePlacements,
 } from '../../shared/saleEntitlement.ts';
 
 // ─────────────────────────────────────────────
@@ -27,7 +31,11 @@ Deno.serve(async (req) => {
     const { product } = body; // 'additional_profiles' | 'subscription_upgrade'
 
     const origin = req.headers.get('Origin') || req.headers.get('origin') || '';
-    if (!origin) return Response.json({ error: 'Missing Origin header' }, { status: 400 });
+    // Return-link base: the app that started the checkout, never the caller-supplied
+    // Origin alone (wrong in PWAs and the builder preview).
+    const appUrlBase =
+      req.headers.get('X-Base44-App-Url') || Deno.env.get('WIX_CHECKOUT_APP_URL') || origin;
+    if (!appUrlBase) return Response.json({ error: 'Missing app URL for checkout return' }, { status: 400 });
 
     const apiKey = Deno.env.get('WIX_PAYMENTS_API_KEY');
     const siteId = Deno.env.get('WIX_PAYMENTS_SITE_ID');
@@ -494,10 +502,7 @@ Deno.serve(async (req) => {
       }
 
       // Return URLs must be real routes on the app that started the checkout.
-      const appUrl = req.headers.get('X-Base44-App-Url') || origin;
-      if (!appUrl) {
-        return Response.json({ error: 'Unable to resolve app URL for checkout return' }, { status: 500 });
-      }
+      const appUrl = appUrlBase;
 
       const checkoutResponse = await fetch(
         'https://www.wixapis.com/payments/platform/v1/checkout-sessions/construct',
@@ -581,6 +586,124 @@ Deno.serve(async (req) => {
         checkoutId,
         entitlement_id: entitlement.id,
         amount: GUEST_SALE_PACKAGE.amount,
+        currency: GUEST_SALE_PACKAGE.currency,
+      });
+    }
+
+    // ── Product: Featured placement ($19 local / $49 national — one sale weekend) ──
+    // A placement is its own purchase, never bundled. It is only ever switched on
+    // by the verified-payment webhook, and it ends when the sale weekend ends.
+    if (product === 'featured_placement') {
+      const placement = FEATURED_PLACEMENTS[String(body.placement || '')];
+      if (!placement) return Response.json({ error: 'placement must be local or national' }, { status: 400 });
+
+      const sale = await loadSale(base44, body.sale_id);
+      if (!sale) return Response.json({ error: 'Sale not found' }, { status: 404 });
+      if (!canActForSale(user, sale)) return Response.json({ error: 'Not your sale' }, { status: 403 });
+      if (['completed', 'archived'].includes(sale.status)) {
+        return Response.json({ error: 'A finished sale cannot be featured' }, { status: 409 });
+      }
+
+      const live = await activePlacements(base44, sale);
+      if (live[placement.placement]) {
+        return Response.json(
+          { error: `This sale already has a paid ${placement.placement} featured placement.`, code: 'already_featured' },
+          { status: 409 },
+        );
+      }
+
+      const awaiting = await base44.asServiceRole.entities.SaleEntitlement.filter({
+        bound_sale_id: sale.id,
+        kind: placement.kind,
+        status: 'pending',
+      });
+      if ((awaiting || []).length > 0) {
+        return Response.json(
+          { error: 'A placement payment for this sale is already in progress. Finish that checkout first.', code: 'payment_pending' },
+          { status: 409 },
+        );
+      }
+
+      const appUrl = appUrlBase;
+
+      const checkoutResponse = await fetch(
+        'https://www.wixapis.com/payments/platform/v1/checkout-sessions/construct',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': apiKey,
+            'wix-site-id': siteId,
+          },
+          body: JSON.stringify({
+            cart: {
+              items: [
+                {
+                  name: `${placement.name} — ${sale.title || 'sale weekend'}`,
+                  quantity: 1,
+                  price: placement.amount,
+                },
+              ],
+              customerInfo: {
+                email: user.email,
+                firstName: user.full_name?.split(' ')[0] || '',
+                lastName: user.full_name?.split(' ').slice(1).join(' ') || '',
+              },
+            },
+            callbackUrls: {
+              postFlowUrl: `${appUrl}/MySales`,
+              thankYouPageUrl: `${appUrl}/ThankYou?type=placement`,
+            },
+          }),
+        },
+      );
+
+      const data = await checkoutResponse.json();
+      if (!checkoutResponse.ok) {
+        console.error('Wix checkout error (featured placement):', JSON.stringify(data));
+        return Response.json({ error: data.message || 'Failed to create checkout session' }, { status: 400 });
+      }
+
+      const checkoutId = data.checkoutSession?.id;
+      const redirectUrl = data.checkoutSession?.redirectUrl;
+      if (!checkoutId || !redirectUrl) {
+        return Response.json({ error: 'Invalid checkout response' }, { status: 500 });
+      }
+
+      const entitlement = await base44.asServiceRole.entities.SaleEntitlement.create({
+        user_id: user.id,
+        user_email: user.email,
+        user_name: user.full_name || '',
+        kind: placement.kind,
+        package_key: `featured_${placement.placement}`,
+        package_name: placement.name,
+        expected_amount: placement.amount,
+        currency: GUEST_SALE_PACKAGE.currency,
+        provider: 'base44_payments',
+        checkout_session_id: checkoutId,
+        status: 'pending',
+        bound_sale_id: sale.id,
+        audit: [
+          {
+            at: nowIso(),
+            action: 'placement_checkout_started',
+            status_to: 'pending',
+            actor_id: user.id,
+            actor_name: user.full_name || user.email,
+            sale_id: sale.id,
+            amount: placement.amount,
+            note: `Checkout session ${checkoutId} created for the ${placement.placement} featured placement.`,
+          },
+        ],
+      });
+
+      console.log(`[create-checkout] ${placement.kind} ${entitlement.id} pending for sale ${sale.id} (${checkoutId})`);
+      return Response.json({
+        success: true,
+        redirectUrl,
+        checkoutId,
+        entitlement_id: entitlement.id,
+        amount: placement.amount,
         currency: GUEST_SALE_PACKAGE.currency,
       });
     }

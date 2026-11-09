@@ -7,6 +7,7 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.52';
 import {
   verifySalePublishing,
   hasPaidFeaturedPlacement,
+  expirePlacements,
   loadSale,
   PUBLISHED_SALE_STATUSES,
   nowIso,
@@ -14,6 +15,16 @@ import {
 
 async function enforceOne(base44, sale) {
   const result = { sale_id: sale.id, reverted: false, featured_cleared: [], reasons: [] };
+
+  // A placement never outlives its authorized weekend: once the sale's last day
+  // has passed, the paid record is closed and nothing stays advertised.
+  const expired = await expirePlacements(base44, sale);
+  if (expired.expired > 0) {
+    result.reasons.push('placement_expired');
+    result.featured_cleared.push('expired_placements');
+    sale.local_featured = false;
+    sale.national_featured = false;
+  }
 
   // Featured placement never comes from a client toggle.
   const flags = [];

@@ -140,34 +140,24 @@ export default function MySales() {
     navigate(createPageUrl('SaleEditor') + '?saleId=' + sale.id);
   };
 
-  const handleToggleLocalFeatured = async (sale) => {
-    const newVal = !sale.local_featured;
-
-    // Enforce 4-sale cap when featuring
-    if (newVal) {
-      const currentlyFeatured = sales.filter(s => s.local_featured && s.id !== sale.id);
-      if (currentlyFeatured.length >= 4) {
-        alert('You can only have 4 locally featured sales at a time. Please un-feature one first.');
-        return;
-      }
-    }
-
+  // A featured placement is a paid product, never a free switch. It is switched on
+  // by the payment webhook after the charge is verified, and it ends with the sale
+  // weekend. Nothing here writes the placement flags itself.
+  const handleBuyPlacement = async (sale, placement) => {
     setFeaturingId(sale.id);
     try {
-      const updateData = { local_featured: newVal };
-      if (newVal) {
-        // Set expiry 30 days from now
-        const expiry = new Date();
-        expiry.setDate(expiry.getDate() + 30);
-        updateData.local_featured_until = expiry.toISOString();
-      } else {
-        updateData.local_featured_until = null;
+      const res = await base44.functions.invoke('create-checkout', {
+        product: 'featured_placement',
+        sale_id: sale.id,
+        placement,
+      });
+      if (res.data?.redirectUrl) {
+        window.location.href = res.data.redirectUrl;
+        return;
       }
-      await base44.entities.EstateSale.update(sale.id, updateData);
-      setSales(prev => prev.map(s => s.id === sale.id ? { ...s, ...updateData } : s));
+      throw new Error(res.data?.error || 'Checkout did not return a payment page.');
     } catch (e) {
-      alert('Failed to update featured status');
-    } finally {
+      alert(e?.response?.data?.error || e?.message || 'Could not start the placement checkout.');
       setFeaturingId(null);
     }
   };
@@ -723,10 +713,25 @@ export default function MySales() {
                            <StageSection label="3. Promote &amp; Presale">
                              {!isCompleted && (<Button variant="outline" size="sm" asChild className={`${btnClass} border-pink-500 hover:bg-pink-50`}><Link to={createPageUrl('SaleMarketingCampaigns') + '?saleId=' + sale.id}><Megaphone className="w-3 h-3 mr-1 flex-shrink-0" />Marketing</Link></Button>)}
                              {!isCompleted && (<Button variant="outline" size="sm" onClick={() => { setSocialSale(sale); setShowSocialModal(true); }} className={`${btnClass} border-purple-500 hover:bg-purple-50`}><Sparkles className="w-3 h-3 mr-1 flex-shrink-0" />Social Posts</Button>)}
-                             {!isCompleted && isElite && (
-                               <Button variant="outline" size="sm" onClick={() => handleToggleLocalFeatured(sale)} disabled={featuringId === sale.id}
-                                 className={`${btnClass} ${sale.local_featured ? 'border-amber-500 bg-amber-50' : 'border-amber-400 hover:bg-amber-50'}`}
-                               ><Pin className="w-3 h-3 mr-1 flex-shrink-0" />{featuringId === sale.id ? '...' : sale.local_featured ? 'Local Featured ★' : 'Feature Locally'}</Button>
+                             {!isCompleted && !sale.local_featured && (
+                               <Button variant="outline" size="sm" onClick={() => handleBuyPlacement(sale, 'local')} disabled={featuringId === sale.id}
+                                 className={`${btnClass} border-amber-400 hover:bg-amber-50`}
+                               ><Pin className="w-3 h-3 mr-1 flex-shrink-0" />{featuringId === sale.id ? '...' : 'Feature Locally · $19'}</Button>
+                             )}
+                             {!isCompleted && sale.local_featured && (
+                               <Button variant="outline" size="sm" disabled className={`${btnClass} border-amber-500 bg-amber-50`}>
+                                 <Pin className="w-3 h-3 mr-1 flex-shrink-0" />Local Featured ★
+                               </Button>
+                             )}
+                             {!isCompleted && !sale.national_featured && (
+                               <Button variant="outline" size="sm" onClick={() => handleBuyPlacement(sale, 'national')} disabled={featuringId === sale.id}
+                                 className={`${btnClass} border-amber-600 hover:bg-amber-50`}
+                               ><Pin className="w-3 h-3 mr-1 flex-shrink-0" />{featuringId === sale.id ? '...' : 'Feature Nationally · $49'}</Button>
+                             )}
+                             {!isCompleted && sale.national_featured && (
+                               <Button variant="outline" size="sm" disabled className={`${btnClass} border-amber-600 bg-amber-50`}>
+                                 <Pin className="w-3 h-3 mr-1 flex-shrink-0" />National Featured ★
+                               </Button>
                              )}
                              {!isCompleted && (<Button variant="outline" size="sm" onClick={async () => { const events = await base44.entities.VIPEvent.filter({ sale_id: sale.id }); if (events.length > 0) { window.location.href = createPageUrl('VIPEvent') + '?eventId=' + events[0].id; } else { setSelectedSale(sale); setShowVIPModal(true); }}} className={`${btnClass} border-yellow-500 hover:bg-yellow-50`}><Star className="w-3 h-3 mr-1 flex-shrink-0" />VIP Event</Button>)}
                            </StageSection>

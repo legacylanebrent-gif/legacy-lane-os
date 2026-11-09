@@ -99,13 +99,25 @@ export default function GuestSalePackageCard({ sales = [] }) {
                 {inUse.map((s) => s.title).join(', ')} — rescheduling or republishing this same sale costs nothing.
                 A brand-new sale needs its own package.
               </p>
+              {inUse.map((s) => {
+                const ent = bound.find((b) => b.bound_sale_id === s.id);
+                if (!ent || !Number(ent.ai_description_allowance || 0)) return null;
+                return (
+                  <p key={s.id} className="text-xs text-slate-600 mt-1">
+                    {s.title}: {Number(ent.ai_descriptions_used || 0)} of {Number(ent.ai_description_allowance)} included
+                    AI descriptions used. Deep Scan searches are purchased separately; adding and pricing items by hand
+                    is always unlimited.
+                  </p>
+                );
+              })}
             </>
           ) : (
             <>
               <p className="font-medium text-slate-900">No sale package on this account</p>
               <p className="text-sm text-slate-600">
-                One payment of ${pkg.amount} covers one complete sale weekend, including photos, AI item descriptions,
-                signage, checkout and post-sale reports. Your finished sales stay in your account forever.
+                One payment of ${pkg.amount} covers one complete sale weekend, including photos, {pkg.ai_description_allowance} AI
+                item descriptions, signage, checkout and post-sale reports. Deep Scan searches are purchased separately, and
+                your finished sales stay in your account forever.
               </p>
             </>
           )}

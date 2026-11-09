@@ -18,6 +18,7 @@
  */
 import { mutateSalePhotos, locatePhoto, authorizePhotoSale, photoError } from './photoStore.ts';
 import { cleanBrandName, linkPhotoBrand } from './brandRegistry.ts';
+import { saleAiAllowance, consumeDescriptionAllowance } from './saleEntitlement.ts';
 
 export const JOB_KEY = 'analysis';
 export const LEASE_MS = 4 * 60 * 1000;
@@ -422,6 +423,10 @@ async function processClaimed(ctx) {
       job.classification = basic.photo_type === SINGLE ? SINGLE : GROUP;
       job.classification_source = 'ai';
       await settle(j => ({ ...j, stage: 'described', basic, classification: basic.photo_type === SINGLE ? SINGLE : GROUP, classification_source: 'ai' }));
+      // The description is now persisted on this photo. This is the only place a
+      // standard description is counted against a paid guest allowance — never a
+      // failed call, and never a retry of a photo that already reached this stage.
+      await ctx.onDescriptionPersisted?.();
     }
 
     if (job.classification === SINGLE && !job.research) {
@@ -525,12 +530,35 @@ export async function runPhotoAnalysis(ctx) {
   }
 
   if (action === 'next') {
+    // Paid guest packages include a fixed number of standard descriptions. The
+    // allowance is checked BEFORE any model call, so an exhausted package stops
+    // cleanly instead of spending money the customer never bought. Manual item
+    // entry and pricing stay unlimited and unaffected.
+    const gate = await saleAiAllowance(service, await loadSale());
+    if (gate.limited && gate.remaining <= 0) {
+      return {
+        done: true,
+        allowance_exhausted: true,
+        allowance: gate,
+        counts: await snapshot(),
+        credits: await safeCredits(),
+        message: `This sale has used all ${gate.allowance} included AI descriptions. You can still add and price items manually.`,
+      };
+    }
+    const onDescriptionPersisted = async () => {
+      if (!gate.limited) return;
+      try {
+        await consumeDescriptionAllowance(service, gate.entitlement_id);
+      } catch (error) {
+        console.error('Allowance consumption failed:', error?.message || error);
+      }
+    };
     const claim = await mutateSalePhotos(service, saleId, user, images => claimNext(images, Date.now(), body.scope || null));
     const claimed = claim.value.claimed;
     if (!claimed) {
-      return { done: true, counts: summarize(claim.images, Date.now()), credits: await safeCredits() };
+      return { done: true, counts: summarize(claim.images, Date.now()), credits: await safeCredits(), allowance: await saleAiAllowance(service, await loadSale()) };
     }
-    const outcome = await processClaimed({ ...ctx, saleId, target: claimed, describe, research, shopping, creditsExhausted: body.credits_exhausted === true });
+    const outcome = await processClaimed({ ...ctx, saleId, target: claimed, describe, research, shopping, onDescriptionPersisted, creditsExhausted: body.credits_exhausted === true });
     return {
       done: false,
       photo: outcome.photo || null,
@@ -540,6 +568,7 @@ export async function runPhotoAnalysis(ctx) {
       error: outcome.error || null,
       counts: await snapshot(),
       credits: await safeCredits(),
+      allowance: await saleAiAllowance(service, await loadSale()),
     };
   }
 

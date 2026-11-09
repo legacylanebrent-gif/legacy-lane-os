@@ -1645,69 +1645,9 @@ export default function CreateEstateSaleModal({ open, onClose, onSuccess, sale }
                 </div>
               </div>
 
-              <div className="space-y-4 border-t pt-4">
-                <Label className="text-base font-semibold">Featured Listing Add-Ons (One-Time)</Label>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="border rounded-lg p-4 space-y-3">
-                    <div className="flex items-center gap-2">
-                      <input
-                        type="checkbox"
-                        id="national_featured"
-                        checked={formData.national_featured}
-                        onChange={(e) => setFormData({...formData, national_featured: e.target.checked})}
-                        className="rounded"
-                      />
-                      <Label htmlFor="national_featured" className="cursor-pointer font-medium">
-                        National Featured
-                      </Label>
-                    </div>
-                    <p className="text-xs text-slate-600">Featured placement nationwide</p>
-                    {formData.national_featured && (
-                      <div>
-                        <Label htmlFor="national_price" className="text-xs">Add-on Price ($)</Label>
-                        <Input
-                          id="national_price"
-                          type="number"
-                          step="0.01"
-                          placeholder="299.00"
-                          value={formData.national_featured_price}
-                          onChange={(e) => setFormData({...formData, national_featured_price: e.target.value})}
-                        />
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="border rounded-lg p-4 space-y-3">
-                    <div className="flex items-center gap-2">
-                      <input
-                        type="checkbox"
-                        id="local_featured"
-                        checked={formData.local_featured}
-                        onChange={(e) => setFormData({...formData, local_featured: e.target.checked})}
-                        className="rounded"
-                      />
-                      <Label htmlFor="local_featured" className="cursor-pointer font-medium">
-                        Local Featured
-                      </Label>
-                    </div>
-                    <p className="text-xs text-slate-600">Featured placement in local area</p>
-                    {formData.local_featured && (
-                      <div>
-                        <Label htmlFor="local_price" className="text-xs">Add-on Price ($)</Label>
-                        <Input
-                          id="local_price"
-                          type="number"
-                          step="0.01"
-                          placeholder="99.00"
-                          value={formData.local_featured_price}
-                          onChange={(e) => setFormData({...formData, local_featured_price: e.target.value})}
-                        />
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
+              {/* Featured placement is a paid add-on bought from My Sales ($19 local /
+                  $49 national) and switched on only by the verified payment webhook,
+                  so there is deliberately no free toggle here. */}
 
               <div className="flex flex-col gap-2 sm:flex-row sm:gap-3 pt-2 border-t">
                 <Button 

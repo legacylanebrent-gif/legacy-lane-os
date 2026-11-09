@@ -14,6 +14,7 @@ import {
   claimableEntitlement,
   pendingEntitlement,
   GUEST_SALE_PACKAGE,
+  expirePlacements,
   nowIso,
 } from '../../shared/saleEntitlement.ts';
 
@@ -73,6 +74,20 @@ export default async function (req) {
     if (action === 'unpublish') {
       await base44.asServiceRole.entities.EstateSale.update(saleId, { status: 'draft' });
       return Response.json({ ok: true, status: 'draft' });
+    }
+
+    // ── Complete: the canonical operator closeout transition ──
+    // Finishing an engagement is a deliberate server transition, not a browser
+    // write, so the sale's public state can never be moved by a client hack.
+    if (action === 'complete') {
+      if (sale.status === 'archived') {
+        return Response.json({ ok: false, reason: 'archived_sale_cannot_complete' });
+      }
+      await base44.asServiceRole.entities.EstateSale.update(saleId, { status: 'completed' });
+      // Closing the engagement closes any paid placement that ran with it.
+      await expirePlacements(base44, { ...sale, status: 'completed' });
+      console.log(`[salePublish] sale ${saleId} -> completed by ${user.email} at ${nowIso()}`);
+      return Response.json({ ok: true, status: 'completed' });
     }
 
     // ── Publish ──
