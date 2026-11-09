@@ -142,6 +142,11 @@ export default function UniversalHeader({ user: userProp, isAuthenticated: isAut
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
+                      <Link to={createPageUrl('FavoriteCompanies')} className="cursor-pointer">
+                        <Building2 className="w-4 h-4 mr-2" /> My Favorite Companies
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
                       <Link to={createPageUrl('MyCalendar')} className="cursor-pointer">
                         <CalendarDays className="w-4 h-4 mr-2" /> My Sale Calendar
                       </Link>

@@ -62,6 +62,15 @@ Deno.serve(async (req) => {
       console.error('ISO re-match failed:', e && e.message);
     }
 
+    // Followers of this company hear about the sale once, wherever they live.
+    // Idempotent per follower and sale, so re-saves never re-alert the same person.
+    try {
+      const followed = await base44.asServiceRole.functions.invoke('notifyCompanyFollowers', { sale_id: saleId });
+      console.log('Company follower alerts:', JSON.stringify(followed?.data));
+    } catch (e) {
+      console.error('notifyCompanyFollowers failed:', e && e.message);
+    }
+
     // Buyout events are operator-only — no SEO, just notify resellers
     if (sale.sale_type === 'buyout_or_cleanout') {
       try {

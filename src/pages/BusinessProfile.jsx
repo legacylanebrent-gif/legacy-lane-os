@@ -9,7 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
   MapPin, Phone, Mail, Globe, Star, Calendar, Building2, 
   ArrowLeft, CheckCircle, TrendingUp, Home as HomeIcon, MessageSquare,
-  BookOpen, ChevronRight
+  BookOpen, ChevronRight, Clock
 } from 'lucide-react';
 import { format } from 'date-fns';
 import MessageModal from '@/components/messaging/MessageModal';
@@ -17,11 +17,14 @@ import ContactFormModal from '@/components/company/ContactFormModal';
 import UniversalHeader from '@/components/layout/UniversalHeader';
 import { getImageSrc } from '@/utils/imageOptimizer';
 import { formatPhone } from '@/utils/formatPhone';
+import ProfileSaleCard from '@/components/company/ProfileSaleCard';
+import FollowCompanyButton from '@/components/company/FollowCompanyButton';
 
 export default function BusinessProfile() {
   const [business, setBusiness] = useState(null);
   const [currentSales, setCurrentSales] = useState([]);
   const [pastSales, setPastSales] = useState([]);
+  const [recentSales, setRecentSales] = useState([]);
   const [loading, setLoading] = useState(true);
   const [currentUser, setCurrentUser] = useState(null);
   const [messageModalOpen, setMessageModalOpen] = useState(false);
@@ -87,6 +90,21 @@ export default function BusinessProfile() {
       setCurrentSales(current);
       setPastSales(past);
 
+      // Sales that actually happened in the last 30 days, newest first.
+      const now = Date.now();
+      const thirtyDaysAgo = now - 30 * 24 * 60 * 60 * 1000;
+      const saleTime = (s) => Math.max(0, ...(s.sale_dates || []).map(d => {
+        const t = d?.date ? new Date(d.date).getTime() : NaN;
+        return isNaN(t) ? 0 : t;
+      }));
+      const recent = operatorSales
+        .filter(s => (s.sale_dates || []).some(d => {
+          const t = d?.date ? new Date(d.date).getTime() : NaN;
+          return !isNaN(t) && t <= now && t >= thirtyDaysAgo;
+        }))
+        .sort((a, b) => saleTime(b) - saleTime(a));
+      setRecentSales(recent);
+
       // Load blog posts linked to this operator's sales
       const saleIds = operatorSales.map(s => s.id);
       if (saleIds.length > 0) {
@@ -108,17 +126,6 @@ export default function BusinessProfile() {
     } finally {
       setLoading(false);
     }
-  };
-
-  const formatTimeDisplay = (timeStr) => {
-    if (!timeStr) return null;
-    // If already in 12-hour format like "9:00 AM", return as-is
-    if (/am|pm/i.test(timeStr)) return timeStr;
-    // Convert 24-hour "HH:MM" or "HH:MM:SS" to 12-hour
-    const [h, m] = timeStr.split(':').map(Number);
-    const ampm = h >= 12 ? 'PM' : 'AM';
-    const hour = h % 12 || 12;
-    return `${hour}:${String(m).padStart(2, '0')} ${ampm}`;
   };
 
   const getAccountTypeLabel = (type) => {
@@ -179,7 +186,7 @@ export default function BusinessProfile() {
 
               {/* Business Info */}
               <div className="flex-1">
-                <div className="flex items-start justify-between mb-4">
+                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 mb-4">
                   <div>
                     <h2 className="text-3xl font-serif font-bold text-slate-900 mb-2">
                       {business.company_name || business.full_name}
@@ -188,12 +195,21 @@ export default function BusinessProfile() {
                       {getAccountTypeLabel(business.primary_account_type)}
                     </Badge>
                   </div>
-                  {business.verified && (
-                    <Badge className="bg-green-600 text-white gap-1">
-                      <CheckCircle className="w-3 h-3" />
-                      Verified
-                    </Badge>
-                  )}
+                  <div className="flex items-center gap-3 flex-wrap">
+                    {business.verified && (
+                      <Badge className="bg-green-600 text-white gap-1">
+                        <CheckCircle className="w-3 h-3" />
+                        Verified
+                      </Badge>
+                    )}
+                    <FollowCompanyButton
+                      operatorId={business.id}
+                      operatorName={business.company_name || business.full_name}
+                      operatorCity={business.city || business.address_city || ''}
+                      operatorState={business.state || business.address_state || ''}
+                      currentUser={currentUser}
+                    />
+                  </div>
                 </div>
 
                 {business.company_description && (
@@ -278,6 +294,28 @@ export default function BusinessProfile() {
           </CardContent>
         </Card>
 
+        {/* Recent Sales — last 30 days */}
+        {recentSales.length > 0 && (
+          <div className="mb-8">
+            <div className="flex items-center gap-2 mb-1">
+              <Clock className="w-5 h-5 text-orange-600" />
+              <h3 className="text-xl font-serif font-bold text-slate-900">Recent Sales (Last 30 Days)</h3>
+            </div>
+            <p className="text-sm text-slate-500 mb-4">What this company has been selling lately.</p>
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {recentSales.map(sale => (
+                <ProfileSaleCard
+                  key={sale.id}
+                  sale={sale}
+                  badgeLabel={sale.status === 'active' ? 'Active Now' : sale.status === 'completed' ? 'Completed' : 'Upcoming'}
+                  badgeClassName={sale.status === 'completed' ? 'bg-cyan-600 text-white' : 'bg-green-600 text-white'}
+                  muted
+                />
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Tabs Section */}
         <Tabs defaultValue="current" className="space-y-6">
           <TabsList className="grid w-full grid-cols-5 max-w-3xl">
@@ -298,54 +336,12 @@ export default function BusinessProfile() {
             ) : (
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {currentSales.map(sale => (
-                  <Link
+                  <ProfileSaleCard
                     key={sale.id}
-                    to={createPageUrl('EstateSaleDetail') + '?id=' + sale.id}
-                    className="block group"
-                  >
-                    <Card className="overflow-hidden hover:shadow-xl transition-shadow">
-                       {sale.images && sale.images.length > 0 && (
-                         <div className="relative h-48 overflow-hidden">
-                           <img
-                             src={getImageSrc(sale.images[0], 400)}
-                             alt={sale.title}
-                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                             loading="lazy"
-                             decoding="async"
-                           />
-                          <Badge className={`absolute top-3 right-3 ${sale.status === 'active' ? 'bg-green-600' : 'bg-blue-600'} text-white`}>
-                            {sale.status === 'active' ? 'Active Now' : 'Upcoming'}
-                          </Badge>
-                        </div>
-                      )}
-                      <CardContent className="p-5">
-                        <h4 className="text-lg font-semibold text-slate-900 mb-2 group-hover:text-orange-600 transition-colors">
-                          {sale.title}
-                        </h4>
-                        <div className="space-y-2 text-sm">
-                          <div className="flex items-center gap-2 text-slate-600">
-                            <MapPin className="w-4 h-4 text-cyan-600" />
-                            <span>{sale.property_address?.city}, {sale.property_address?.state}</span>
-                          </div>
-                          {sale.sale_dates && sale.sale_dates.length > 0 && (
-                            <div className="flex items-start gap-2 text-slate-600">
-                              <Calendar className="w-4 h-4 text-orange-600 flex-shrink-0 mt-0.5" />
-                              <div>
-                                {sale.sale_dates.map((sd, i) => (
-                                  <span key={i} className="block">
-                                    {format(new Date(sd.date), 'MMM d, yyyy')}
-                                    {sd.start_time && formatTimeDisplay(sd.start_time) && (
-                                      <> — {formatTimeDisplay(sd.start_time)}{sd.end_time && formatTimeDisplay(sd.end_time) ? ` - ${formatTimeDisplay(sd.end_time)}` : ''}</>
-                                    )}
-                                  </span>
-                                ))}
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </Link>
+                    sale={sale}
+                    badgeLabel={sale.status === 'active' ? 'Active Now' : 'Upcoming'}
+                    badgeClassName={sale.status === 'active' ? 'bg-green-600 text-white' : 'bg-blue-600 text-white'}
+                  />
                 ))}
               </div>
             )}
@@ -361,52 +357,13 @@ export default function BusinessProfile() {
             ) : (
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {pastSales.map(sale => (
-                  <Link
+                  <ProfileSaleCard
                     key={sale.id}
-                    to={createPageUrl('EstateSaleDetail') + '?id=' + sale.id}
-                    className="block group"
-                  >
-                    <Card className="overflow-hidden hover:shadow-xl transition-shadow opacity-90">
-                       {sale.images && sale.images.length > 0 && (
-                         <div className="relative h-48 overflow-hidden">
-                           <img
-                             src={typeof sale.images[0] === 'string' ? sale.images[0] : sale.images[0]?.url}
-                             alt={sale.title}
-                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 grayscale-[30%]"
-                           />
-                          <Badge className="absolute top-3 right-3 bg-slate-600 text-white">
-                            {sale.status === 'completed' ? 'Completed' : 'Cancelled'}
-                          </Badge>
-                        </div>
-                      )}
-                      <CardContent className="p-5">
-                        <h4 className="text-lg font-semibold text-slate-900 mb-2 group-hover:text-orange-600 transition-colors">
-                          {sale.title}
-                        </h4>
-                        <div className="space-y-2 text-sm">
-                          <div className="flex items-center gap-2 text-slate-600">
-                            <MapPin className="w-4 h-4 text-cyan-600" />
-                            <span>{sale.property_address?.city}, {sale.property_address?.state}</span>
-                          </div>
-                          {sale.sale_dates && sale.sale_dates.length > 0 && (
-                            <div className="flex items-start gap-2 text-slate-600">
-                              <Calendar className="w-4 h-4 text-orange-600 flex-shrink-0 mt-0.5" />
-                              <div>
-                                {sale.sale_dates.map((sd, i) => (
-                                  <span key={i} className="block">
-                                    {format(new Date(sd.date), 'MMM d, yyyy')}
-                                    {sd.start_time && formatTimeDisplay(sd.start_time) && (
-                                      <> — {formatTimeDisplay(sd.start_time)}{sd.end_time && formatTimeDisplay(sd.end_time) ? ` - ${formatTimeDisplay(sd.end_time)}` : ''}</>
-                                    )}
-                                  </span>
-                                ))}
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </Link>
+                    sale={sale}
+                    badgeLabel={sale.status === 'completed' ? 'Completed' : 'Cancelled'}
+                    badgeClassName="bg-slate-600 text-white"
+                    muted
+                  />
                 ))}
               </div>
             )}
