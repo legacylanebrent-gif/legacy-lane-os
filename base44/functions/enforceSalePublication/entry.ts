@@ -69,9 +69,10 @@ export default async function (req) {
 
     const rows = await base44.asServiceRole.entities.EstateSale.filter(
       { status: { $in: PUBLISHED_SALE_STATUSES } },
-      { limit: 200 },
+      { limit: 100 },
     );
     const sales = Array.isArray(rows) ? rows : rows?.items || [];
+    console.log(`[enforceSalePublication] sweep loaded ${sales.length} published sales`);
     const results = [];
     for (const sale of sales) {
       results.push(await enforceOne(base44, sale));

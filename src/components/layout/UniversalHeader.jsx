@@ -114,6 +114,13 @@ export default function UniversalHeader({ user: userProp, isAuthenticated: isAut
                         <UserCircle className="w-4 h-4 mr-2 text-orange-500" /> My Profile
                       </Link>
                     </DropdownMenuItem>
+                    {['diy_seller', 'consumer', 'executor', 'home_seller', 'downsizer', 'consignor'].includes(user?.primary_account_type) && (
+                      <DropdownMenuItem asChild>
+                        <Link to={createPageUrl('MySales')} className="cursor-pointer font-medium">
+                          <ShoppingBag className="w-4 h-4 mr-2 text-orange-500" /> My Estates Sales
+                        </Link>
+                      </DropdownMenuItem>
+                    )}
                     <DropdownMenuItem asChild>
                       <Link to={createPageUrl('MyProfile') + '?tab=buyer_prefs'} className="cursor-pointer font-medium">
                         <Target className="w-4 h-4 mr-2 text-orange-500" /> ISO Wanted Items 🔥

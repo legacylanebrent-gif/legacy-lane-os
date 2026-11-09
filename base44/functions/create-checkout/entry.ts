@@ -493,10 +493,8 @@ Deno.serve(async (req) => {
         );
       }
 
-      const appUrl =
-        req.headers.get('X-Base44-App-Url') ||
-        Deno.env.get('WIX_CHECKOUT_APP_URL') ||
-        origin;
+      // Return URLs must be real routes on the app that started the checkout.
+      const appUrl = req.headers.get('X-Base44-App-Url') || origin;
       if (!appUrl) {
         return Response.json({ error: 'Unable to resolve app URL for checkout return' }, { status: 500 });
       }
