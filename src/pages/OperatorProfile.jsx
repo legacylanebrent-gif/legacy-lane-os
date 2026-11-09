@@ -10,7 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
   Building2, Upload, Save, MapPin, Phone, Globe, Mail,
-  Image as ImageIcon, CreditCard, Shield, Star, X, Plus, Users
+  Image as ImageIcon, CreditCard, Shield, Star, X, Plus, Users, Bell
 } from 'lucide-react';
 
 const US_STATES = [
@@ -96,6 +96,8 @@ export default function OperatorProfile() {
     logo_light: '',
     profile_image_url: '',
     venmo_qr_code: '',
+    follower_alert_mode: 'instant',
+    follower_alert_time: '09:00',
   });
 
   useEffect(() => {
@@ -143,6 +145,8 @@ export default function OperatorProfile() {
         logo_light: userData.logo_light || '',
         profile_image_url: userData.profile_image_url || '',
         venmo_qr_code: userData.venmo_qr_code || '',
+        follower_alert_mode: userData.follower_alert_mode || 'instant',
+        follower_alert_time: userData.follower_alert_time || '09:00',
       }));
     } catch (err) {
       console.error(err);
@@ -416,6 +420,40 @@ export default function OperatorProfile() {
                   <span className="text-sm font-medium">Bonded</span>
                 </label>
               </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2"><Bell className="w-5 h-5" /> Follower Sale Alerts</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <p className="text-sm text-slate-500">
+                When you publish a sale, everyone who follows your company hears about it through an
+                on-site notification inside EstateSalen. Choose when that official alert goes out.
+              </p>
+              <div className="grid md:grid-cols-2 gap-4">
+                <div>
+                  <Label>Send the alert</Label>
+                  <select value={form.follower_alert_mode} onChange={e => setForm({ ...form, follower_alert_mode: e.target.value })}
+                    className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm">
+                    <option value="instant">Instantly when the sale publishes</option>
+                    <option value="scheduled">Once a day at a set time</option>
+                  </select>
+                </div>
+                {form.follower_alert_mode === 'scheduled' && (
+                  <div>
+                    <Label>Release time (Eastern Time)</Label>
+                    <Input type="time" value={form.follower_alert_time} onChange={e => setForm({ ...form, follower_alert_time: e.target.value })} />
+                  </div>
+                )}
+              </div>
+              {form.follower_alert_mode === 'scheduled' && (
+                <p className="text-xs text-slate-500">
+                  Every sale you publish before {form.follower_alert_time} ET is announced to all of your
+                  followers together at that time. A sale that ends before then is never announced.
+                </p>
+              )}
             </CardContent>
           </Card>
         </TabsContent>

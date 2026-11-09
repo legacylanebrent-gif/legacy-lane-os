@@ -166,6 +166,21 @@
       "type": "string",
       "format": "date-time",
       "description": "Timestamp of last alert email sent"
+    },
+    "company_sale_alerts_instant": {
+      "type": "boolean",
+      "default": true,
+      "description": "Customer choice: be alerted the moment a company they follow publishes a sale (on-site notification). When off, that company's new sales reach them only in EstateSalen's daily roundup."
+    },
+    "daily_sale_roundup": {
+      "type": "boolean",
+      "default": true,
+      "description": "Customer choice: EstateSalen's once-a-day roundup of newly published estate sales, delivered as an on-site notification."
+    },
+    "roundup_hour": {
+      "type": "number",
+      "default": 9,
+      "description": "Hour of day (Eastern Time, 0-23) the daily roundup is delivered to this customer."
     }
   },
   "required": [

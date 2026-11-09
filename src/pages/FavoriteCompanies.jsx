@@ -9,7 +9,7 @@ import { Switch } from '@/components/ui/switch';
 import LocationSetter from '@/components/location/LocationSetter';
 import { Link } from 'react-router-dom';
 import {
-  Building2, Search, Trash2, Bell, Mail, MessageSquare, Star, Plus, MapPin, SlidersHorizontal, ChevronDown, ChevronUp, ExternalLink, ShoppingBag
+  Building2, Search, Trash2, Bell, Star, Plus, MapPin, SlidersHorizontal, ChevronDown, ChevronUp, ExternalLink, ShoppingBag
 } from 'lucide-react';
 
 // Haversine distance in miles
@@ -435,8 +435,6 @@ export default function FavoriteCompanies() {
                   {/* Badge summary when collapsed */}
                   {!isExpanded && (
                     <div className="flex gap-1 flex-shrink-0">
-                      {follow.notify_email && <span className="text-xs bg-blue-100 text-blue-600 rounded px-1.5 py-0.5">📧</span>}
-                      {follow.notify_sms && <span className="text-xs bg-green-100 text-green-600 rounded px-1.5 py-0.5">💬</span>}
                       {follow.notify_inapp && <span className="text-xs bg-orange-100 text-orange-600 rounded px-1.5 py-0.5">🔔</span>}
                       {follow.auto_favorite && <span className="text-xs bg-yellow-100 text-yellow-600 rounded px-1.5 py-0.5">⭐</span>}
                     </div>
@@ -453,32 +451,11 @@ export default function FavoriteCompanies() {
 
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
-                          <Mail className="w-4 h-4 text-blue-500" />
-                          <span className="text-sm text-slate-700">Email Notifications</span>
-                        </div>
-                        <Switch
-                          checked={!!follow.notify_email}
-                          onCheckedChange={(val) => handleToggle(follow.id, 'notify_email', val)}
-                          disabled={saving[follow.id]}
-                        />
-                      </div>
-
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <MessageSquare className="w-4 h-4 text-green-500" />
-                          <span className="text-sm text-slate-700">SMS Notifications</span>
-                        </div>
-                        <Switch
-                          checked={!!follow.notify_sms}
-                          onCheckedChange={(val) => handleToggle(follow.id, 'notify_sms', val)}
-                          disabled={saving[follow.id]}
-                        />
-                      </div>
-
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
                           <Bell className="w-4 h-4 text-orange-500" />
-                          <span className="text-sm text-slate-700">In-App Notifications</span>
+                          <div>
+                            <span className="text-sm text-slate-700">New Sale Alerts</span>
+                            <p className="text-xs text-slate-400">On-site notification when this company publishes a sale</p>
+                          </div>
                         </div>
                         <Switch
                           checked={!!follow.notify_inapp}

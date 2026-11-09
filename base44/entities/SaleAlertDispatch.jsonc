@@ -1,0 +1,88 @@
+{
+  "name": "SaleAlertDispatch",
+  "type": "object",
+  "description": "One queued official new-sale alert for a company's followers. Created by notifyCompanyFollowers when the company chose to release its follower alerts at a set time instead of instantly, and completed by the dispatchSaleAlerts run. A dispatch is a delivery schedule, never proof a follower read anything: it records when the alert is due, whether it went out, and how many followers received it. The sale remains the source of truth for the listing itself, and the Notification records remain the per-follower receipts that prevent duplicate alerts.",
+  "properties": {
+    "sale_id": {
+      "type": "string",
+      "description": "EstateSale this alert announces."
+    },
+    "operator_id": {
+      "type": "string",
+      "description": "Company/operator whose followers receive the alert."
+    },
+    "company_name": {
+      "type": "string",
+      "description": "Company name snapshot for the notification text."
+    },
+    "sale_title": {
+      "type": "string"
+    },
+    "city": {
+      "type": "string"
+    },
+    "state": {
+      "type": "string"
+    },
+    "scheduled_for": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the company's official alert becomes due (the next occurrence of the company's chosen send time, Eastern Time)."
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "sent",
+        "cancelled"
+      ],
+      "default": "pending",
+      "enumColors": [
+        "yellow",
+        "green",
+        "gray"
+      ],
+      "description": "pending = waiting for its delivery time; sent = followers were notified; cancelled = the sale was no longer live when its time came, so no alert was sent."
+    },
+    "sent_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "recipient_count": {
+      "type": "integer",
+      "default": 0,
+      "description": "Followers who received an on-site notification from this dispatch."
+    },
+    "note": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "sale_id",
+    "operator_id",
+    "scheduled_for",
+    "status"
+  ],
+  "rls": {
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

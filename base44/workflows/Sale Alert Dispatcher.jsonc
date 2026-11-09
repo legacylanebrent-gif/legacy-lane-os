@@ -1,0 +1,45 @@
+{
+  "name": "Sale Alert Dispatcher",
+  "description": "Every 15 minutes, releases company-scheduled follower sale alerts that are due and sends EstateSalen's daily on-site sale roundup at each customer's chosen hour.",
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "scheduled",
+      "events": [],
+      "schedule_mode": "recurring",
+      "cron_expression": "*/15 * * * *",
+      "one_time_date": null,
+      "timezone": "America/New_York",
+      "interval_value": null,
+      "interval_unit": null,
+      "interval_anchor": null,
+      "ends_type": "never",
+      "ends_on_date": null,
+      "ends_after_count": null
+    }
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "sale_alert_dispatcher",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "dispatch_sale_alerts": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "dispatchSaleAlerts",
+            "args": {}
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Release due alerts and daily roundup",
+            "description": "On-site notifications only"
+          }
+        }
+      }
+    ]
+  }
+}

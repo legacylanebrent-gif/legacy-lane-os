@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Bell, Mail, MessageSquare, Save, AlertCircle, MapPin } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 import SaleAlertSettings from '@/components/notifications/SaleAlertSettings';
+import CompanySaleAlertPreferences from '@/components/notifications/CompanySaleAlertPreferences';
 import EmailPreferencesTab from '@/components/profile/EmailPreferencesTab.jsx';
 
 const NOTIFICATION_CATEGORIES = [
@@ -119,7 +120,10 @@ export default function NotificationSettings() {
           reward_sms: false,
           checkin_in_app: true,
           checkin_email: false,
-          checkin_sms: false
+          checkin_sms: false,
+          company_sale_alerts_instant: true,
+          daily_sale_roundup: true,
+          roundup_hour: 9
         };
         const created = await base44.entities.NotificationPreference.create(defaultPrefs);
         setPreferences(created);
@@ -272,6 +276,15 @@ export default function NotificationSettings() {
 
       {/* Email Preferences — EstateSalen marketing, local sale alerts, company direct emails */}
       <EmailPreferencesTab user={user} />
+
+      {/* Company sale alerts — on-site only, instant or daily roundup */}
+      <CompanySaleAlertPreferences
+        pref={preferences}
+        onSave={async (updates) => {
+          await base44.entities.NotificationPreference.update(preferences.id, updates);
+          setPreferences(prev => ({ ...prev, ...updates }));
+        }}
+      />
 
       {/* Sale Alert Settings */}
       <SaleAlertSettings
