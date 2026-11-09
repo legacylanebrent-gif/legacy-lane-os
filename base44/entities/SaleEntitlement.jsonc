@@ -1,0 +1,211 @@
+{
+  "name": "SaleEntitlement",
+  "type": "object",
+  "description": "The paid right to publish ONE estate sale weekend. Created only by the sanctioned payment path (create-checkout) as 'pending', and activated only by the verified payment webhook (exact amount + currency match on an approved, paid order). A purchase is permanently bound to one sale when that sale is first published; the same sale may be rescheduled and republished while the entitlement stays bound to it. Republishing a completed sale as a new event is refused, and a second sale requires a second purchase. Refund, dispute and revocation never delete history: the entitlement moves to a revoked state, the sale drops out of public listing, and the sale record, photos, transactions and reports stay intact. Clients never set these fields; every write happens through server functions.",
+  "properties": {
+    "user_id": {
+      "type": "string",
+      "description": "Buyer who owns this entitlement (access anchor)."
+    },
+    "user_email": {
+      "type": "string"
+    },
+    "user_name": {
+      "type": "string"
+    },
+    "kind": {
+      "type": "string",
+      "enum": [
+        "sale_package",
+        "national_featured",
+        "local_featured"
+      ],
+      "default": "sale_package",
+      "enumColors": [
+        "blue",
+        "purple",
+        "green"
+      ],
+      "description": "What was bought. sale_package = the right to publish one sale weekend; the featured kinds are separate paid placements and are never included with the sale package."
+    },
+    "package_key": {
+      "type": "string",
+      "default": "one_time_estate_sale"
+    },
+    "package_name": {
+      "type": "string",
+      "description": "Customer-facing product name snapshot."
+    },
+    "expected_amount": {
+      "type": "string",
+      "description": "Server-stored expected charge, 2-decimal string. The webhook must match the provider order total exactly against this value before granting."
+    },
+    "currency": {
+      "type": "string",
+      "default": "USD"
+    },
+    "provider": {
+      "type": "string",
+      "default": "base44_payments"
+    },
+    "checkout_session_id": {
+      "type": "string",
+      "description": "Provider checkout session id \u2014 the ONLY link from a payment back to this record. Never correlate on an email typed at checkout."
+    },
+    "provider_order_id": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "active",
+        "bound",
+        "refunded",
+        "disputed",
+        "revoked",
+        "expired"
+      ],
+      "default": "pending",
+      "enumColors": [
+        "gray",
+        "green",
+        "blue",
+        "yellow",
+        "red",
+        "red",
+        "gray"
+      ],
+      "description": "pending = awaiting verified payment; active = paid and unused; bound = paid and permanently attached to one sale; refunded/disputed/revoked = no longer usable for publishing; expired = never used and closed."
+    },
+    "granted_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the verified payment activated this entitlement."
+    },
+    "bound_sale_id": {
+      "type": "string",
+      "description": "The sale this purchase covers. Set once, on first publish, and never moved to another sale."
+    },
+    "bound_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "first_published_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "last_published_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "publish_count": {
+      "type": "integer",
+      "default": 0,
+      "description": "How many times the bound sale has been (re)published \u2014 reschedules count, and each one is audited."
+    },
+    "ai_description_allowance": {
+      "type": "integer",
+      "default": 0,
+      "description": "Included ordinary AI item descriptions for this sale. Deep Scan / external provider lookups are NOT included."
+    },
+    "ai_descriptions_used": {
+      "type": "integer",
+      "default": 0
+    },
+    "deep_scan_credits_included": {
+      "type": "integer",
+      "default": 0,
+      "description": "Paid external Deep Scan operations included. Zero by default: they cost real provider money and are sold separately."
+    },
+    "refunded_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "revoked_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "revoke_reason": {
+      "type": "string"
+    },
+    "revoked_by_name": {
+      "type": "string"
+    },
+    "audit": {
+      "type": "array",
+      "default": [],
+      "description": "Append-only history of this entitlement: created, granted, bound, republished, unbind attempt refused, refunded, disputed, revoked. Never rewritten.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "action": {
+            "type": "string"
+          },
+          "status_from": {
+            "type": "string"
+          },
+          "status_to": {
+            "type": "string"
+          },
+          "actor_id": {
+            "type": "string"
+          },
+          "actor_name": {
+            "type": "string"
+          },
+          "sale_id": {
+            "type": "string"
+          },
+          "amount": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "user_id",
+    "kind",
+    "status"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

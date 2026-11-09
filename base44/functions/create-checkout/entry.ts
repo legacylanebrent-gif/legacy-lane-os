@@ -1,4 +1,11 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
+import {
+  GUEST_SALE_PACKAGE,
+  GUEST_ACCOUNT_TYPE,
+  claimableEntitlement,
+  pendingEntitlement,
+  nowIso,
+} from '../../shared/saleEntitlement.ts';
 
 // ─────────────────────────────────────────────
 // create-checkout
@@ -457,6 +464,127 @@ Deno.serve(async (req) => {
       });
 
       return Response.json({ success: true, redirectUrl, checkoutId });
+    }
+
+    // ── Product: One-Time Estate Sale package ($147 — one sale weekend) ──
+    if (product === 'sale_package') {
+      // One unused package at a time: a second sale needs its own purchase, but a
+      // buyer must never be charged twice for a weekend they already paid for.
+      const already = await claimableEntitlement(base44, user.id);
+      if (already) {
+        return Response.json(
+          {
+            error: 'You already have an unused One-Time Estate Sale package. Publish your sale to use it.',
+            code: 'already_have_package',
+            entitlement_id: already.id,
+          },
+          { status: 409 },
+        );
+      }
+      const awaiting = await pendingEntitlement(base44, user.id);
+      if (awaiting) {
+        return Response.json(
+          {
+            error: 'A sale package payment is already in progress. Finish that checkout first.',
+            code: 'payment_pending',
+            entitlement_id: awaiting.id,
+          },
+          { status: 409 },
+        );
+      }
+
+      const appUrl =
+        req.headers.get('X-Base44-App-Url') ||
+        Deno.env.get('WIX_CHECKOUT_APP_URL') ||
+        origin;
+      if (!appUrl) {
+        return Response.json({ error: 'Unable to resolve app URL for checkout return' }, { status: 500 });
+      }
+
+      const checkoutResponse = await fetch(
+        'https://www.wixapis.com/payments/platform/v1/checkout-sessions/construct',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': apiKey,
+            'wix-site-id': siteId,
+          },
+          body: JSON.stringify({
+            cart: {
+              items: [
+                {
+                  name: `${GUEST_SALE_PACKAGE.name} — one sale weekend`,
+                  quantity: 1,
+                  price: GUEST_SALE_PACKAGE.amount,
+                },
+              ],
+              customerInfo: {
+                email: user.email,
+                firstName: user.full_name?.split(' ')[0] || '',
+                lastName: user.full_name?.split(' ').slice(1).join(' ') || '',
+              },
+            },
+            callbackUrls: {
+              postFlowUrl: `${appUrl}/MySales`,
+              thankYouPageUrl: `${appUrl}/ThankYou?type=sale`,
+            },
+          }),
+        },
+      );
+
+      const data = await checkoutResponse.json();
+      if (!checkoutResponse.ok) {
+        console.error('Wix checkout error (sale package):', JSON.stringify(data));
+        return Response.json({ error: data.message || 'Failed to create checkout session' }, { status: 400 });
+      }
+
+      const checkoutId = data.checkoutSession?.id;
+      const redirectUrl = data.checkoutSession?.redirectUrl;
+      if (!checkoutId || !redirectUrl) {
+        return Response.json({ error: 'Invalid checkout response' }, { status: 500 });
+      }
+
+      // Server-owned price and expected total: the webhook compares the provider's
+      // order total and currency to THIS record before granting anything.
+      const entitlement = await base44.asServiceRole.entities.SaleEntitlement.create({
+        user_id: user.id,
+        user_email: user.email,
+        user_name: user.full_name || '',
+        kind: GUEST_SALE_PACKAGE.kind,
+        package_key: GUEST_SALE_PACKAGE.key,
+        package_name: `${GUEST_SALE_PACKAGE.name} — one sale weekend`,
+        expected_amount: GUEST_SALE_PACKAGE.amount,
+        currency: GUEST_SALE_PACKAGE.currency,
+        provider: 'base44_payments',
+        checkout_session_id: checkoutId,
+        status: 'pending',
+        ai_description_allowance: GUEST_SALE_PACKAGE.ai_description_allowance,
+        ai_descriptions_used: 0,
+        deep_scan_credits_included: GUEST_SALE_PACKAGE.deep_scan_credits_included,
+        audit: [
+          {
+            at: nowIso(),
+            action: 'checkout_started',
+            status_to: 'pending',
+            actor_id: user.id,
+            actor_name: user.full_name || user.email,
+            amount: GUEST_SALE_PACKAGE.amount,
+            note: `Checkout session ${checkoutId} created for target account type ${GUEST_ACCOUNT_TYPE}.`,
+          },
+        ],
+      });
+
+      console.log(`[create-checkout] SaleEntitlement ${entitlement.id} pending for ${user.email} (${checkoutId})`);
+
+      return Response.json({
+        success: true,
+        redirectUrl,
+        checkoutId,
+        entitlement_id: entitlement.id,
+        amount: GUEST_SALE_PACKAGE.amount,
+        currency: GUEST_SALE_PACKAGE.currency,
+      });
     }
 
     return Response.json({ error: 'Unknown product' }, { status: 400 });

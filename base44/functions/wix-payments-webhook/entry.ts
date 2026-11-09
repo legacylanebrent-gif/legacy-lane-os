@@ -1,6 +1,12 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
 import jwt from 'npm:jsonwebtoken@9.0.2';
 import { completeApprovedPosAttempt } from '../../shared/posPayment.ts';
+import {
+  appendAudit,
+  nowIso,
+  GUEST_ACCOUNT_TYPE,
+  PROFESSIONAL_ACCOUNT_TYPES,
+} from '../../shared/saleEntitlement.ts';
 
 // ─────────────────────────────────────────────
 // wix-payments-webhook
@@ -57,6 +63,79 @@ Deno.serve(async (req) => {
         if (lineItem.subscriptionInfo?.id) {
           subscriptionIds.push(lineItem.subscriptionInfo.id);
         }
+      }
+
+      // ── Try 0: One-Time Estate Sale package ──
+      // An approved event alone is not proof of payment: require a paid order and
+      // an exact match of the provider's total and currency to the amount this
+      // server recorded when the checkout was created. Any mismatch leaves the
+      // entitlement pending and retriable — never granted.
+      const entitlementRows = await base44.asServiceRole.entities.SaleEntitlement.filter({
+        checkout_session_id: checkoutId,
+      });
+      if (entitlementRows.length > 0) {
+        const entitlement = entitlementRows[0];
+
+        // Idempotency: the checkout id is kept forever and the status is the lock,
+        // so concurrent or repeated deliveries grant exactly once.
+        if (entitlement.status !== 'pending') {
+          console.log(`[webhook] SaleEntitlement ${entitlement.id} already ${entitlement.status} — no-op`);
+          return new Response('OK', { status: 200 });
+        }
+
+        const isApproved = order.status === 'APPROVED';
+        const isPaid = order.paymentStatus === 'PAID';
+        const totalRaw =
+          order.priceSummary?.total?.amount ??
+          order.priceSummary?.total?.price ??
+          order.priceSummary?.total ??
+          null;
+        const currencyRaw = order.currency || order.priceSummary?.total?.currency || null;
+        const total = totalRaw === null ? null : Number(totalRaw).toFixed(2);
+        const currency = currencyRaw ? String(currencyRaw).toUpperCase() : null;
+
+        const amountOk = total !== null && total === String(entitlement.expected_amount);
+        const currencyOk =
+          currency !== null && currency === String(entitlement.currency || 'USD').toUpperCase();
+
+        if (!isApproved || !isPaid || !amountOk || !currencyOk) {
+          console.error(
+            `[webhook] Sale package NOT granted for ${entitlement.id}: approved=${isApproved} paid=${isPaid} total=${total} expected=${entitlement.expected_amount} currency=${currency}/${entitlement.currency}`,
+          );
+          return new Response('OK', { status: 200 });
+        }
+
+        // Grant runs BEFORE the record is marked paid. Canonical identity first.
+        try {
+          const buyers = await base44.asServiceRole.entities.User.filter({ id: entitlement.user_id });
+          const buyer = buyers[0];
+          if (buyer && !PROFESSIONAL_ACCOUNT_TYPES.includes(buyer.primary_account_type)) {
+            await base44.asServiceRole.entities.User.update(buyer.id, {
+              primary_account_type: GUEST_ACCOUNT_TYPE,
+            });
+          }
+        } catch (identityErr) {
+          console.error('[webhook] sale package identity update failed:', identityErr.message);
+        }
+
+        const audit = appendAudit(entitlement, {
+          action: 'payment_verified',
+          status_from: 'pending',
+          status_to: 'active',
+          amount: total,
+          actor_name: 'Base44 Payments',
+          note: `Order ${order.id} approved and paid in ${currency}.`,
+        });
+
+        await base44.asServiceRole.entities.SaleEntitlement.update(entitlement.id, {
+          status: 'active',
+          granted_at: nowIso(),
+          provider_order_id: order.id || null,
+          audit,
+        });
+        console.log(`[webhook] SaleEntitlement ${entitlement.id} granted ($${total} ${currency})`);
+
+        return new Response('OK', { status: 200 });
       }
 
       // ── Try 1: Additional email profiles purchase ──
