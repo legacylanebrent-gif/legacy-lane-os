@@ -10,7 +10,6 @@ import {
   recordRepublication,
   loadSale,
   canActForSale,
-  bindEntitlement as _bind,
   boundEntitlementForSale,
   claimableEntitlement,
   pendingEntitlement,

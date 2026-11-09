@@ -27,7 +27,7 @@ import BatchPhotoGeneratorModal from '@/components/estate/BatchPhotoGeneratorMod
 import BatchPricingModal from '@/components/estate/BatchPricingModal';
 import SaleClientPermissionsModal from '@/components/estate/SaleClientPermissionsModal';
 import DeepSearchPricingModal from '@/components/estate/DeepSearchPricingModal';
-import StarterPublishFeeModal from '@/components/estate/StarterPublishFeeModal';
+
 import ZipAddressEntry from '@/components/estate/ZipAddressEntry';
 import { isProfileComplete } from '@/components/profile/ProfileCompletionGate';
 import GoogleLensCreditDisplay from '@/components/pricing/GoogleLensCreditDisplay';
@@ -77,8 +77,6 @@ export default function SaleEditor() {
   const [featuredLocally, setFeaturedLocally] = useState(false);
   const [autoSaving, setAutoSaving] = useState(false);
   const [selectedPricingImage, setSelectedPricingImage] = useState(null);
-  const [showPublishFeeModal, setShowPublishFeeModal] = useState(false);
-  const [pendingPublish, setPendingPublish] = useState(false);
   const [originalStatus, setOriginalStatus] = useState('draft');
   const [serpBatchRunning, setSerpBatchRunning] = useState(false);
   const [serpBatchProgress, setSerpBatchProgress] = useState({ current: 0, total: 0, stoppedAt: null });
@@ -525,32 +523,9 @@ export default function SaleEditor() {
     if (!formData.title.trim()) { alert('Please enter a sale title'); return; }
     if (!formData.property_address.city.trim()) { alert('Please enter a city'); return; }
 
-    // Check if Starter user is trying to publish (draft → active/upcoming)
-    const isPublishing = ['upcoming', 'active'].includes(formData.status) && originalStatus === 'draft';
-    if (isPublishing && !skipFeeCheck) {
-      try {
-        const user = await base44.auth.me();
-        const packages = await base44.entities.SubscriptionPackage.filter({
-          account_type: 'estate_sale_operator',
-          tier_level: 'basic',
-          is_active: true
-        });
-        const starterPkg = packages[0];
-        if (starterPkg && user.subscription_package_id === starterPkg.id) {
-          setPendingPublish(publish);
-          setShowPublishFeeModal(true);
-          return;
-        }
-        // Also check by subscription_tier field if it exists
-        if (user.subscription_tier === 'basic' || user.subscription_tier === 'starter') {
-          setPendingPublish(publish);
-          setShowPublishFeeModal(true);
-          return;
-        }
-      } catch (e) {
-        // If check fails, proceed normally
-      }
-    }
+    // Saving never changes publication state. Going live is a separate, server-verified
+    // transition (salePublish) so nothing on this page can publish without the
+    // company subscription or a paid One-Time Estate Sale package.
 
     setSaving(true);
     try {
@@ -559,7 +534,7 @@ export default function SaleEditor() {
         title: formData.title,
         description: formData.description,
         sale_type: formData.sale_type,
-        status: formData.status,
+        status: originalStatus || 'draft',
         property_address: {
           ...formData.property_address,
           formatted_address: `${formData.property_address.street}, ${formData.property_address.city}, ${formData.property_address.state} ${formData.property_address.zip}`
@@ -576,8 +551,6 @@ export default function SaleEditor() {
           payment_methods: formData.payment_methods,
           buyout_config: formData.sale_type === 'buyout_or_cleanout' ? formData.buyout_config : null,
           promoted_to_all_users: formData.sale_type === 'five_and_under_sale',
-          national_featured: featuredNationally,
-          local_featured: featuredLocally,
           operator_id: saleId ? undefined : user.id,
           operator_name: saleId ? undefined : user.full_name,
       };
@@ -1295,16 +1268,6 @@ Be practical and realistic for an estate sale context.`,
           status={pdfStatus}
           progress={pdfProgress}
           onCancel={() => { pdfCancelRef.current = true; }}
-        />
-
-        <StarterPublishFeeModal
-          open={showPublishFeeModal}
-          onClose={() => setShowPublishFeeModal(false)}
-          saleName={formData.title}
-          onFeePaid={() => {
-            setShowPublishFeeModal(false);
-            handleSave(pendingPublish, true);
-          }}
         />
 
         {/* Step 2 Quick AI Scan Guide Modal */}

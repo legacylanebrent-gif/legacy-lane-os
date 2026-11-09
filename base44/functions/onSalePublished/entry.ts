@@ -34,6 +34,18 @@ Deno.serve(async (req) => {
       return Response.json({ skipped: true, reason: `status=${sale.status}` });
     }
 
+    // PUBLISHING GATE — server truth only. A sale reaches a public status only
+    // through salePublish, which verifies a company subscription or a paid, bound
+    // One-Time Estate Sale entitlement. If neither exists, the listing is taken
+    // back before any SEO, feed or alert work runs.
+    const { verifySalePublishing } = await import('../../shared/saleEntitlement.ts');
+    const publishing = await verifySalePublishing(base44, sale);
+    if (!publishing.ok) {
+      await base44.asServiceRole.entities.EstateSale.update(sale.id, { status: 'draft' });
+      console.warn(`[onSalePublished] refused unverified publication of sale ${sale.id}: ${publishing.reason}`);
+      return Response.json({ ok: false, reverted: true, reason: publishing.reason });
+    }
+
     // Marketplace listings drafted from sale photos go live with the sale itself.
     try {
       const activation = await activateSaleListings(base44.asServiceRole, saleId);

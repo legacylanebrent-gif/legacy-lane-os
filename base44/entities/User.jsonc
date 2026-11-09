@@ -92,7 +92,8 @@
         "active",
         "cancelled",
         "expired",
-        "none"
+        "none",
+        "trial"
       ],
       "default": "none",
       "description": "Current subscription status"
@@ -136,6 +137,23 @@
     "centralIdentityVersion": {
       "type": "string",
       "description": "Version of the central identity schema this record was synced against"
+    },
+    "primary_account_type": {
+      "type": "string",
+      "default": "consumer",
+      "description": "Canonical account identity: consumer, diy_seller (guest seller), estate_sale_operator, team_admin/team_member/team_marketer, real_estate_agent, collector_dealer, reseller, consignor, investor, vendor, executor, home_seller, buyer, downsizer, coach. 'diy_seller' is the guest seller who bought a One-Time Estate Sale and replaces the retired 'consumer_plus_sale' label."
+    },
+    "selected_package": {
+      "type": "string",
+      "description": "SubscriptionPackage id the user selected. Read by server functions to derive plan limits; never treated as proof of payment."
+    },
+    "subscription_package_id": {
+      "type": "string",
+      "description": "Active subscription package id, written by the verified payment path."
+    },
+    "operator_id": {
+      "type": "string",
+      "description": "For team roles: the estate sale company owner this user works under. Used to resolve the company whose subscription carries publishing rights."
     }
   }
 }

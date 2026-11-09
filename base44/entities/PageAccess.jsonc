@@ -17,9 +17,11 @@
         "vendor",
         "consignor",
         "consumer",
+        "diy_seller",
+        "reseller",
         "collector_dealer"
       ],
-      "description": "Account type this configuration applies to"
+      "description": "Account type this configuration applies to. 'diy_seller' is the canonical guest seller identity (replaces the retired 'consumer_plus_sale' label)."
     },
     "allowed_pages": {
       "type": "array",
