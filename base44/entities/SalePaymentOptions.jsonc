@@ -1,0 +1,106 @@
+{
+  "name": "SalePaymentOptions",
+  "type": "object",
+  "description": "The payment options a DIY/guest seller offers shoppers at ONE sale: which of the four allowed offline methods are accepted (cash, check, Zelle, Venmo) and the Zelle/Venmo handles and scannable QR images customers use to pay. Card payments are deliberately NOT representable here: guest sellers have no card processing, so a card method can never be offered at their sale. One record per sale. The QR images are the seller's own payment codes meant to be shown to shoppers, so staff and signed-in customers can read them; only the seller and admins can change them.",
+  "properties": {
+    "sale_id": {
+      "type": "string",
+      "description": "EstateSale these payment options belong to (one record per sale)."
+    },
+    "owner_id": {
+      "type": "string",
+      "description": "Seller (sale owner) who owns these options \u2014 access anchor for writes."
+    },
+    "owner_name": {
+      "type": "string"
+    },
+    "methods": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "cash",
+          "check",
+          "zelle",
+          "venmo"
+        ]
+      },
+      "default": [
+        "cash"
+      ],
+      "description": "Offline payment methods accepted at the sale. Card is intentionally absent from this list."
+    },
+    "zelle_handle": {
+      "type": "string",
+      "description": "Zelle phone number or email customers pay to."
+    },
+    "zelle_qr_url": {
+      "type": "string",
+      "description": "Uploaded Zelle QR image shown to customers at checkout."
+    },
+    "venmo_handle": {
+      "type": "string",
+      "description": "Venmo username customers pay to."
+    },
+    "venmo_qr_url": {
+      "type": "string",
+      "description": "Uploaded Venmo QR image shown to customers at checkout."
+    }
+  },
+  "required": [
+    "sale_id",
+    "owner_id"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "user"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "$or": [
+        {
+          "data.owner_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.owner_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.owner_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

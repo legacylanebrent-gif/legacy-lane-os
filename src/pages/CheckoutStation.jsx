@@ -6,6 +6,21 @@ import { Html5QrcodeScanner } from 'html5-qrcode';
 import SaleReceipt from '@/components/checkout/SaleReceipt';
 import AskForHelpDialog from '@/components/staffing/AskForHelpDialog';
 import { currentDiscountStage } from '@/components/livesale/liveSaleModel';
+import { GUEST_PAYMENT_METHODS, labelForMethod } from '@/lib/salePaymentMethods';
+
+// Guest-seller sales offer offline methods only — never card.
+const offlineOptionsFor = (options) => {
+  if (!options) return STAFF_PAYMENT_OPTIONS;
+  const allowed = GUEST_PAYMENT_METHODS.filter((m) => (options.methods || []).includes(m.value));
+  return allowed.length ? allowed : [GUEST_PAYMENT_METHODS[0]];
+};
+
+const STAFF_PAYMENT_OPTIONS = [
+  { value: 'cash', label: 'Cash' },
+  { value: 'card', label: 'Credit/Debit Card (manual)' },
+  { value: 'venmo', label: 'Venmo' },
+  { value: 'check', label: 'Check' },
+];
 
 export default function CheckoutStation() {
   const [staff, setStaff] = useState(null);
@@ -22,6 +37,8 @@ export default function CheckoutStation() {
   const [lastReceipt, setLastReceipt] = useState(null);
   const [guidance, setGuidance] = useState(null);
   const [liveSale, setLiveSale] = useState(null);
+  // Present only for guest-seller sales: their offline-only options + Zelle/Venmo QR codes.
+  const [paymentOptions, setPaymentOptions] = useState(null);
   const [helpOpen, setHelpOpen] = useState(false);
   const [unresolved, setUnresolved] = useState(null);
   const [resolveNote, setResolveNote] = useState('');
@@ -115,6 +132,7 @@ export default function CheckoutStation() {
   const loadGuidance = async (cartData) => {
     setGuidance(null);
     setLiveSale(null);
+    setPaymentOptions(null);
     try {
       const ids = [...new Set(cartData.items.map((ci) => ci.item_id))];
       const fresh = await Promise.all(ids.map((id) => base44.entities.Item.get(id).catch(() => null)));
@@ -136,6 +154,12 @@ export default function CheckoutStation() {
           : 'Employee authority limit — see the posted policy';
       } catch (e) { /* policy is optional guidance */ }
       setLiveSale(sale);
+      try {
+        const opts = await base44.entities.SalePaymentOptions.filter({ sale_id: sale.id });
+        const record = opts[0] || null;
+        setPaymentOptions(record);
+        if (record) setPaymentMethod('cash');
+      } catch (e) { /* guest payment options are optional */ }
       setGuidance({ excluded, stage: currentDiscountStage(sale), policyNote });
     } catch (e) {
       console.error('guidance load failed:', e);
@@ -299,6 +323,7 @@ export default function CheckoutStation() {
     setMessage(null);
     setGuidance(null);
     setLiveSale(null);
+    setPaymentOptions(null);
     setHelpOpen(false);
     setUnresolved(null);
     setResolveNote('');
@@ -511,23 +536,42 @@ export default function CheckoutStation() {
                     onChange={e => setPaymentMethod(e.target.value)}
                     className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm"
                   >
-                    <option value="cash">Cash</option>
-                    <option value="card">Credit/Debit Card (manual)</option>
-                    <option value="venmo">Venmo</option>
-                    <option value="check">Check</option>
+                    {offlineOptionsFor(paymentOptions).map(opt => (
+                      <option key={opt.value} value={opt.value}>{opt.label}</option>
+                    ))}
                   </select>
+                  {paymentOptions && (paymentMethod === 'zelle' || paymentMethod === 'venmo') && paymentOptions[`${paymentMethod}_qr_url`] && (
+                    <div className="border border-slate-200 rounded-lg p-3 flex items-center gap-3 bg-white">
+                      <img
+                        src={paymentOptions[`${paymentMethod}_qr_url`]}
+                        alt={`${labelForMethod(paymentMethod)} QR code`}
+                        className="w-28 h-28 object-contain"
+                      />
+                      <div className="text-xs text-slate-600 space-y-1">
+                        <p className="font-semibold text-slate-900">Customer scans to pay with {labelForMethod(paymentMethod)}</p>
+                        {paymentOptions[`${paymentMethod}_handle`] && (
+                          <p>Handle: <span className="font-medium text-slate-900">{paymentOptions[`${paymentMethod}_handle`]}</span></p>
+                        )}
+                        <p>Confirm the money landed in the seller's account before releasing merchandise.</p>
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 {/* Actions */}
                 <div className="space-y-2">
-                  <Button
-                    onClick={handleOnlinePayment}
-                    disabled={processingOnline}
-                    className="w-full bg-orange-600 hover:bg-orange-700 text-white font-bold py-4 flex items-center justify-center gap-2"
-                  >
-                    {processingOnline ? 'Redirecting...' : 'Pay Online (Base44 Payments)'}
-                  </Button>
-                  <div className="text-center text-xs text-slate-500">— or —</div>
+                  {!paymentOptions && (
+                    <>
+                      <Button
+                        onClick={handleOnlinePayment}
+                        disabled={processingOnline}
+                        className="w-full bg-orange-600 hover:bg-orange-700 text-white font-bold py-4 flex items-center justify-center gap-2"
+                      >
+                        {processingOnline ? 'Redirecting...' : 'Pay Online (Base44 Payments)'}
+                      </Button>
+                      <div className="text-center text-xs text-slate-500">— or —</div>
+                    </>
+                  )}
                   <Button
                     onClick={completeCheckout}
                     disabled={completing}

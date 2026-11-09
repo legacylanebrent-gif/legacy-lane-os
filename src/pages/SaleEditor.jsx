@@ -18,6 +18,8 @@ import SaleNotesPanel from '@/components/saleops/SaleNotesPanel';
 import ReferralSourceCard from '@/components/saleops/ReferralSourceCard';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
+import GuestPaymentSettingsCard from '@/components/estate/GuestPaymentSettingsCard';
+import { isGuestSeller, guestPaymentMethods } from '@/lib/salePaymentMethods';
 
 import { ArrowLeft, Plus, X, Camera, Sparkles, Brain, Wand2, FileDown, Printer, ChevronsDownUp, ChevronsUpDown, Rocket, RotateCw, RotateCcw } from 'lucide-react';
 import jsPDF from 'jspdf';
@@ -56,6 +58,8 @@ export default function SaleEditor() {
   const [tourOpen, setTourOpen] = useState(false);
   const [tourStep, setTourStep] = useState(0);
   const [user, setUser] = useState(null);
+  // Guest sellers take payment offline only — card is never an option for them.
+  const guestSeller = isGuestSeller(user);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [showImageImportModal, setShowImageImportModal] = useState(false);
@@ -256,7 +260,7 @@ export default function SaleEditor() {
           commission_rate: latest.commission_rate ? parseFloat(latest.commission_rate) : null,
           categories: latest.categories,
           special_notes: latest.special_notes,
-          payment_methods: latest.payment_methods,
+          payment_methods: guestSeller ? guestPaymentMethods(latest.payment_methods) : latest.payment_methods,
           buyout_config: latest.sale_type === 'buyout_or_cleanout' ? latest.buyout_config : null,
           promoted_to_all_users: latest.sale_type === 'five_and_under_sale',
           sale_team: latest.sale_team,
@@ -487,7 +491,7 @@ export default function SaleEditor() {
         commission_rate: formData.commission_rate ? parseFloat(formData.commission_rate) : null,
         categories: formData.categories,
         special_notes: formData.special_notes,
-        payment_methods: formData.payment_methods,
+        payment_methods: guestSeller ? guestPaymentMethods(formData.payment_methods) : formData.payment_methods,
         buyout_config: formData.sale_type === 'buyout_or_cleanout' ? formData.buyout_config : null,
         promoted_to_all_users: formData.sale_type === 'five_and_under_sale',
         sale_team: formData.sale_team,
@@ -582,7 +586,7 @@ export default function SaleEditor() {
         commission_rate: formData.commission_rate ? parseFloat(formData.commission_rate) : null,
           categories: formData.categories,
           special_notes: formData.special_notes,
-          payment_methods: formData.payment_methods,
+          payment_methods: guestSeller ? guestPaymentMethods(formData.payment_methods) : formData.payment_methods,
           buyout_config: formData.sale_type === 'buyout_or_cleanout' ? formData.buyout_config : null,
           promoted_to_all_users: formData.sale_type === 'five_and_under_sale',
           operator_id: saleId ? undefined : user.id,
@@ -1639,30 +1643,39 @@ Return ONLY the description text, no extra commentary.`
             <div>
               <h2 className="text-lg font-semibold text-slate-900 mb-4">Payment & Special Instructions</h2>
               <div className="space-y-4">
-                <div>
-                  <h3 className="font-medium text-slate-900 mb-2">Accepted Payment Methods</h3>
-                  <div className="flex gap-2 mb-3">
-                    <Input placeholder="e.g., Cash, Credit Card, Venmo..." value={paymentMethodInput} onChange={(e) => setPaymentMethodInput(e.target.value)} />
-                    <Button variant="outline" size="icon" onClick={() => {
-                      if (paymentMethodInput.trim()) {
-                        setFormData(prev => ({ ...prev, payment_methods: [...(prev.payment_methods || []), paymentMethodInput.trim()] }));
-                        setPaymentMethodInput('');
-                      }
-                    }}>
-                      <Plus className="w-4 h-4" />
-                    </Button>
-                  </div>
-                  {formData.payment_methods && formData.payment_methods.length > 0 && (
-                    <div className="flex flex-wrap gap-2">
-                      {formData.payment_methods.map((method, index) => (
-                        <Badge key={index} variant="outline" className="px-3 py-1">
-                          {method}
-                          <button onClick={() => setFormData({ ...formData, payment_methods: formData.payment_methods.filter((_, i) => i !== index) })} className="ml-2 text-slate-500 hover:text-slate-700">×</button>
-                        </Badge>
-                      ))}
+                {guestSeller ? (
+                  <GuestPaymentSettingsCard
+                    saleId={saleId}
+                    user={user}
+                    methods={guestPaymentMethods(formData.payment_methods)}
+                    onChangeMethods={(methods) => setFormData((prev) => ({ ...prev, payment_methods: methods }))}
+                  />
+                ) : (
+                  <div>
+                    <h3 className="font-medium text-slate-900 mb-2">Accepted Payment Methods</h3>
+                    <div className="flex gap-2 mb-3">
+                      <Input placeholder="e.g., Cash, Credit Card, Venmo..." value={paymentMethodInput} onChange={(e) => setPaymentMethodInput(e.target.value)} />
+                      <Button variant="outline" size="icon" onClick={() => {
+                        if (paymentMethodInput.trim()) {
+                          setFormData(prev => ({ ...prev, payment_methods: [...(prev.payment_methods || []), paymentMethodInput.trim()] }));
+                          setPaymentMethodInput('');
+                        }
+                      }}>
+                        <Plus className="w-4 h-4" />
+                      </Button>
                     </div>
-                  )}
-                </div>
+                    {formData.payment_methods && formData.payment_methods.length > 0 && (
+                      <div className="flex flex-wrap gap-2">
+                        {formData.payment_methods.map((method, index) => (
+                          <Badge key={index} variant="outline" className="px-3 py-1">
+                            {method}
+                            <button onClick={() => setFormData({ ...formData, payment_methods: formData.payment_methods.filter((_, i) => i !== index) })} className="ml-2 text-slate-500 hover:text-slate-700">×</button>
+                          </Badge>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
                 <div>
                   <h3 className="font-medium text-slate-900 mb-2">Special Instructions</h3>
                   <Textarea placeholder="Parking info, entry requirements, etc..." value={formData.special_notes} onChange={(e) => setFormData({ ...formData, special_notes: e.target.value })} rows={4} />

@@ -22,6 +22,7 @@ import { format } from 'date-fns';
 import { Calendar as CalendarIcon, Upload, X, MapPin, DollarSign, Image as ImageIcon, Plus, RotateCw, Edit2, Sparkles, GripVertical, Trash2, Camera } from 'lucide-react';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import { STATE_REGIONS } from '@/components/data/StateRegions';
+import { isGuestSeller, guestPaymentMethods } from '@/lib/salePaymentMethods';
 
 const CATEGORIES = [
   'Furniture', 'Art & Collectibles', 'Jewelry', 'Antiques', 
@@ -35,6 +36,8 @@ export default function CreateEstateSaleModal({ open, onClose, onSuccess, sale }
   const [uploadingImages, setUploadingImages] = useState(false);
   const [showSignTemplate, setShowSignTemplate] = useState(false);
   const [operator, setOperator] = useState(null);
+  // Guest sellers take payment offline only — cash, check, Zelle or Venmo.
+  const guestSeller = isGuestSeller(operator);
   const addressInputRef = useRef(null);
   const autocompleteRef = useRef(null);
 
@@ -92,6 +95,13 @@ export default function CreateEstateSaleModal({ open, onClose, onSuccess, sale }
     try {
       const userData = await base44.auth.me();
       setOperator(userData);
+      // A guest seller can never offer card payment at a sale.
+      if (isGuestSeller(userData)) {
+        setFormData(prev => ({
+          ...prev,
+          payment_methods: guestPaymentMethods(prev.payment_methods),
+        }));
+      }
       // Apply Estate Sale Company Owner's default early sign-in setting to new sales
       if (!sale) {
         setFormData(prev => ({
@@ -651,6 +661,7 @@ export default function CreateEstateSaleModal({ open, onClose, onSuccess, sale }
         operator_id: sale?.operator_id || user.id,
         operator_name: sale?.operator_name || user.full_name,
         status: sale?.status || 'draft',
+        payment_methods: guestSeller ? guestPaymentMethods(formData.payment_methods) : formData.payment_methods,
         estimated_value: formData.estimated_value ? parseFloat(formData.estimated_value) : null,
         commission_rate: formData.commission_rate ? parseFloat(formData.commission_rate) : null,
         national_featured_price: formData.national_featured_price ? parseFloat(formData.national_featured_price) : null,
@@ -690,6 +701,7 @@ export default function CreateEstateSaleModal({ open, onClose, onSuccess, sale }
         operator_id: sale?.operator_id || user.id,
         operator_name: sale?.operator_name || user.full_name,
         status: publishNow ? 'upcoming' : (sale?.status || 'draft'),
+        payment_methods: guestSeller ? guestPaymentMethods(formData.payment_methods) : formData.payment_methods,
         estimated_value: formData.estimated_value ? parseFloat(formData.estimated_value) : null,
         commission_rate: formData.commission_rate ? parseFloat(formData.commission_rate) : null,
         national_featured_price: formData.national_featured_price ? parseFloat(formData.national_featured_price) : null,
@@ -1549,8 +1561,13 @@ export default function CreateEstateSaleModal({ open, onClose, onSuccess, sale }
 
               <div>
                 <Label>Payment Methods</Label>
+                {guestSeller && (
+                  <p className="text-xs text-slate-500 mt-1">
+                    Cash, check, Zelle or Venmo. Card payments are not available for this account type.
+                  </p>
+                )}
                 <div className="flex flex-wrap gap-2 mt-2">
-                  {['cash', 'credit_card', 'venmo', 'paypal', 'zelle', 'check'].map(method => (
+                  {(guestSeller ? ['cash', 'check', 'zelle', 'venmo'] : ['cash', 'credit_card', 'venmo', 'paypal', 'zelle', 'check']).map(method => (
                     <Badge
                       key={method}
                       variant={formData.payment_methods.includes(method) ? 'default' : 'outline'}
