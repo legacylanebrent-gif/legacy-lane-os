@@ -6,6 +6,8 @@ import SignTemplateModal from './SignTemplateModal';
 import PhotoLabelingModal from './PhotoLabelingModal';
 import BulkEditPhotosModal from './BulkEditPhotosModal';
 import BatchLabelModal from './BatchLabelModal';
+import StageInfoButton from './StageInfoButton';
+import SaleWalkthroughDialog from './SaleWalkthroughDialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -74,6 +76,7 @@ export default function CreateEstateSaleModal({ open, onClose, onSuccess, sale }
   const [generatingDescription, setGeneratingDescription] = useState(false);
   const [selectedImages, setSelectedImages] = useState([]);
   const [showCameraPrompt, setShowCameraPrompt] = useState(false);
+  const [showWalkthrough, setShowWalkthrough] = useState(false);
 
   const [newDate, setNewDate] = useState({
     date: null,
@@ -813,15 +816,26 @@ export default function CreateEstateSaleModal({ open, onClose, onSuccess, sale }
         <DialogHeader>
           <DialogTitle className="text-2xl flex items-center justify-between">
             <span>{sale?.id ? 'Edit Estate Sale' : 'Create Estate Sale'}</span>
-            {sale?.id && (
+            <div className="flex items-center gap-2">
               <Button
-                variant="outline"
+                variant="ghost"
                 size="sm"
-                onClick={() => setShowSignTemplate(true)}
+                onClick={() => setShowWalkthrough(true)}
+                className="gap-1.5 text-orange-700 hover:text-orange-800 hover:bg-orange-50"
               >
-                Sign Templates
+                <Sparkles className="w-4 h-4" />
+                AI Walkthrough
               </Button>
-            )}
+              {sale?.id && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowSignTemplate(true)}
+                >
+                  Sign Templates
+                </Button>
+              )}
+            </div>
           </DialogTitle>
         </DialogHeader>
 
@@ -887,14 +901,30 @@ export default function CreateEstateSaleModal({ open, onClose, onSuccess, sale }
           </DialogContent>
         </Dialog>
 
-        <Tabs value={step.toString()} className="w-full">
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="1" onClick={() => setStep(1)}>Basic Info</TabsTrigger>
-            <TabsTrigger value="2" disabled={!sale && !canProceedToStep2} onClick={() => setStep(2)}>Schedule</TabsTrigger>
-            <TabsTrigger value="3" disabled={!sale && !canProceedToStep3} onClick={() => setStep(3)}>Media</TabsTrigger>
-            <TabsTrigger value="4" disabled={!sale && !canProceedToStep3} onClick={() => setStep(4)}>Details</TabsTrigger>
-          </TabsList>
-        </Tabs>
+        <SaleWalkthroughDialog
+          open={showWalkthrough}
+          onOpenChange={setShowWalkthrough}
+          onGoToStage={(stage) => {
+            const unlocked = sale || stage === 1
+              || (stage === 2 && canProceedToStep2)
+              || ((stage === 3 || stage === 4) && canProceedToStep3);
+            if (!unlocked) return false;
+            setStep(stage);
+            return true;
+          }}
+        />
+
+        <div className="flex items-center gap-2">
+          <Tabs value={step.toString()} className="flex-1">
+            <TabsList className="grid w-full grid-cols-4">
+              <TabsTrigger value="1" onClick={() => setStep(1)}>Basic Info</TabsTrigger>
+              <TabsTrigger value="2" disabled={!sale && !canProceedToStep2} onClick={() => setStep(2)}>Schedule</TabsTrigger>
+              <TabsTrigger value="3" disabled={!sale && !canProceedToStep3} onClick={() => setStep(3)}>Media</TabsTrigger>
+              <TabsTrigger value="4" disabled={!sale && !canProceedToStep3} onClick={() => setStep(4)}>Details</TabsTrigger>
+            </TabsList>
+          </Tabs>
+          <StageInfoButton step={step} />
+        </div>
 
         <div className="py-6 space-y-6">
           {step === 1 && (
