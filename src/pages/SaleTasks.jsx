@@ -16,6 +16,8 @@ import {
 } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { isOverdue, isDueSoon } from '@/components/saleops/saleDecisionModel';
+import { getSaleDisplayStatus } from '@/components/estate/getSaleDisplayStatus';
+import { shouldFlagStale, STALE_REASON } from '@/components/saleops/taskStaleness';
 
 // Chapter 1 P1 — the canonical SaleTasks surface, now PERSISTED (SaleTask entity) with
 // accountability: assignee, due date, blocked state, priority, attention flag and
@@ -86,6 +88,23 @@ export default function SaleTasks() {
       records = Array.isArray(seeded) ? seeded : (seeded.records || []);
     }
     records.sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0));
+
+    // Completed sale: still-open pre-sale work no longer pertains — flag it (never delete,
+    // never complete). A human can clear the flag on any task.
+    const saleCompleted = getSaleDisplayStatus(sale) === 'completed';
+    const toFlag = records.filter(t => shouldFlagStale(t, saleCompleted) && !t.stale);
+    if (toFlag.length > 0) {
+      const ids = toFlag.map(t => t.id);
+      try {
+        await base44.entities.SaleTask.bulkUpdate(
+          toFlag.map(t => ({ id: t.id, stale: true, stale_reason: STALE_REASON }))
+        );
+        records = records.map(t => (ids.includes(t.id) ? { ...t, stale: true, stale_reason: STALE_REASON } : t));
+      } catch (e) {
+        console.error('Could not flag completed-sale tasks:', e);
+      }
+    }
+
     setTasks(records);
   };
 
@@ -238,6 +257,12 @@ export default function SaleTasks() {
     await patchTask(task.id, { attention: !task.attention });
   };
 
+  // The operator states this work still matters: remove the flag, task stays editable.
+  const clearStaleFlag = async (task) => {
+    await patchTask(task.id, { stale: false, stale_cleared: true, stale_reason: '' });
+    setNotice(`“${task.name}” is editable again — the no-longer-needed flag was removed.`);
+  };
+
   const generateCustomTasks = async () => {
     setGeneratingTasks(true);
     try {
@@ -325,10 +350,13 @@ Return as a JSON array.`,
     completed: tasks.filter(t => t.status === 'completed').length,
     inProgress: tasks.filter(t => t.status === 'in_progress').length,
     notStarted: tasks.filter(t => t.status === 'not_started').length,
-    overdue: tasks.filter(t => isOverdue(t.due_date, t.status)).length,
-    blocked: tasks.filter(t => t.blocked && t.status !== 'completed').length,
-    unassigned: tasks.filter(t => !t.assignee_user_id && t.status !== 'completed').length,
-    attention: tasks.filter(t => t.attention && t.status !== 'completed').length,
+    // Flagged no-longer-needed work is greyed history on a completed sale, so it never
+    // adds overdue / blocked / unassigned / attention noise.
+    overdue: tasks.filter(t => !t.stale && isOverdue(t.due_date, t.status)).length,
+    blocked: tasks.filter(t => !t.stale && t.blocked && t.status !== 'completed').length,
+    unassigned: tasks.filter(t => !t.stale && !t.assignee_user_id && t.status !== 'completed').length,
+    attention: tasks.filter(t => !t.stale && t.attention && t.status !== 'completed').length,
+    noLongerNeeded: tasks.filter(t => t.stale).length,
   };
   stats.completion = stats.total > 0 ? Math.round((stats.completed / stats.total) * 100) : 0;
 
@@ -377,8 +405,9 @@ Return as a JSON array.`,
       )}
 
       {/* Attention strip */}
-      {(stats.overdue > 0 || stats.blocked > 0 || stats.unassigned > 0 || stats.attention > 0) && (
+      {(stats.overdue > 0 || stats.blocked > 0 || stats.unassigned > 0 || stats.attention > 0 || stats.noLongerNeeded > 0) && (
         <div className="flex flex-wrap gap-2">
+          {stats.noLongerNeeded > 0 && <Badge className="bg-slate-100 text-slate-600 border border-slate-300"><AlertTriangle className="w-3 h-3 mr-1" />{stats.noLongerNeeded} no longer needed</Badge>}
           {stats.overdue > 0 && <Badge className="bg-red-100 text-red-700 border border-red-300"><AlertTriangle className="w-3 h-3 mr-1" />{stats.overdue} overdue</Badge>}
           {stats.blocked > 0 && <Badge className="bg-red-100 text-red-700 border border-red-300"><AlertOctagon className="w-3 h-3 mr-1" />{stats.blocked} blocked</Badge>}
           {stats.unassigned > 0 && <Badge className="bg-slate-100 text-slate-600 border border-slate-300"><HelpCircle className="w-3 h-3 mr-1" />{stats.unassigned} unassigned</Badge>}
@@ -411,13 +440,24 @@ Return as a JSON array.`,
             <CardHeader><CardTitle>{category}</CardTitle></CardHeader>
             <CardContent className="space-y-3">
               {tasks.filter(t => t.category === category).map(task => (
-                <div key={task.id} className="p-4 border rounded-lg space-y-3">
+                <div key={task.id} className={`p-4 border rounded-lg space-y-3 ${task.stale ? 'bg-slate-50 border-slate-200 opacity-70' : ''}`}>
+                  {task.stale && (
+                    <div className="flex flex-wrap items-center justify-between gap-2 bg-slate-100 border border-slate-300 rounded-md px-3 py-2">
+                      <span className="text-xs text-slate-600 flex items-center gap-1.5">
+                        <AlertTriangle className="w-3.5 h-3.5 text-slate-500 flex-shrink-0" />
+                        <span><span className="font-semibold">No longer needed</span> — {task.stale_reason || STALE_REASON}. Still matters? Remove the flag to edit it.</span>
+                      </span>
+                      <Button variant="outline" size="sm" className="h-7 text-xs border-slate-400" onClick={() => clearStaleFlag(task)}>
+                        Remove flag
+                      </Button>
+                    </div>
+                  )}
                   <div className="flex flex-col sm:flex-row sm:items-start gap-3 sm:gap-4">
                     <div className="flex items-start gap-3 flex-1 min-w-0">
                     <div className="pt-0.5 flex-shrink-0">{getStatusIcon(task)}</div>
                     <div className="flex-1 min-w-0">
                       <div className="flex flex-wrap items-center gap-2">
-                        <h4 className={`font-semibold ${task.status === 'completed' ? 'text-slate-400 line-through' : 'text-slate-900'}`}>{task.name}</h4>
+                        <h4 className={`font-semibold ${task.status === 'completed' || task.stale ? 'text-slate-400' : 'text-slate-900'} ${task.status === 'completed' ? 'line-through' : ''}`}>{task.name}</h4>
                         {task.priority === 'high' && <Badge className="bg-red-100 text-red-700">HIGH</Badge>}
                         {isOverdue(task.due_date, task.status) && <Badge className="bg-red-100 text-red-700">OVERDUE</Badge>}
                         {isDueSoon(task.due_date, task.status) && <Badge className="bg-amber-100 text-amber-700">DUE SOON</Badge>}
@@ -439,16 +479,16 @@ Return as a JSON array.`,
                     </div>
                     </div>
                     <div className="grid grid-cols-3 gap-2 sm:flex sm:gap-2">
-                      <Button variant="outline" size="sm" onClick={() => setStatus(task, 'not_started')} className={task.status === 'not_started' ? 'border-slate-400' : ''}>Not Started</Button>
-                      <Button variant="outline" size="sm" onClick={() => setStatus(task, 'in_progress')} className={task.status === 'in_progress' ? 'border-orange-400 bg-orange-50' : ''}>In Progress</Button>
-                      <Button variant="outline" size="sm" onClick={() => setStatus(task, 'completed')} className={task.status === 'completed' ? 'border-green-400 bg-green-50' : ''}>Completed</Button>
+                      <Button variant="outline" size="sm" disabled={task.stale} onClick={() => setStatus(task, 'not_started')} className={task.status === 'not_started' ? 'border-slate-400' : ''}>Not Started</Button>
+                      <Button variant="outline" size="sm" disabled={task.stale} onClick={() => setStatus(task, 'in_progress')} className={task.status === 'in_progress' ? 'border-orange-400 bg-orange-50' : ''}>In Progress</Button>
+                      <Button variant="outline" size="sm" disabled={task.stale} onClick={() => setStatus(task, 'completed')} className={task.status === 'completed' ? 'border-green-400 bg-green-50' : ''}>Completed</Button>
                     </div>
                   </div>
                   {/* Accountability row */}
                   <div className="flex flex-col gap-2 sm:pl-9 lg:flex-row lg:items-center border-t border-slate-100 pt-3">
                     <div className="flex items-center gap-2 min-w-0 flex-1">
                       <span className="text-xs text-slate-500 flex-shrink-0">Owner</span>
-                      <Select value={task.assignee_user_id || 'unassigned'} onValueChange={v => assignTask(task, v)}>
+                      <Select value={task.assignee_user_id || 'unassigned'} onValueChange={v => assignTask(task, v)} disabled={task.stale}>
                         <SelectTrigger className="h-8 text-xs w-full lg:w-56"><SelectValue /></SelectTrigger>
                         <SelectContent>
                           {teamOptions.map(o => <SelectItem key={o.id} value={o.id}>{o.label}</SelectItem>)}
@@ -458,12 +498,12 @@ Return as a JSON array.`,
                     <div className="flex flex-wrap items-center gap-2 sm:gap-3">
                     <div className="flex items-center gap-2">
                       <span className="text-xs text-slate-500 flex-shrink-0">Due</span>
-                      <Input type="date" value={task.due_date || ''} onChange={e => patchTask(task.id, { due_date: e.target.value })}
+                      <Input type="date" value={task.due_date || ''} disabled={task.stale} onChange={e => patchTask(task.id, { due_date: e.target.value })}
                         className="h-8 text-xs w-36" />
                     </div>
                     <div className="flex items-center gap-2">
                       <span className="text-xs text-slate-500 flex-shrink-0">Priority</span>
-                      <Select value={task.priority || 'medium'} onValueChange={v => patchTask(task.id, { priority: v })}>
+                      <Select value={task.priority || 'medium'} onValueChange={v => patchTask(task.id, { priority: v })} disabled={task.stale}>
                         <SelectTrigger className="h-8 text-xs w-28"><SelectValue /></SelectTrigger>
                         <SelectContent>
                           <SelectItem value="low">Low</SelectItem>
@@ -473,13 +513,13 @@ Return as a JSON array.`,
                       </Select>
                     </div>
                     <div className="flex gap-2 flex-shrink-0">
-                      <Button variant="outline" size="sm" className="h-8 text-xs" onClick={() => openDepDialog(task)}>
+                      <Button variant="outline" size="sm" disabled={task.stale} className="h-8 text-xs" onClick={() => openDepDialog(task)}>
                         <Link2 className="w-3 h-3 mr-1" />Deps
                       </Button>
-                      <Button variant="outline" size="sm" className={`h-8 text-xs ${task.blocked ? 'border-red-400 bg-red-50 text-red-700' : ''}`} onClick={() => toggleBlocked(task)}>
+                      <Button variant="outline" size="sm" disabled={task.stale} className={`h-8 text-xs ${task.blocked ? 'border-red-400 bg-red-50 text-red-700' : ''}`} onClick={() => toggleBlocked(task)}>
                         {task.blocked ? 'Unblock' : 'Block'}
                       </Button>
-                      <Button variant="outline" size="sm" className={`h-8 text-xs ${task.attention ? 'border-purple-400 bg-purple-50 text-purple-700' : ''}`} onClick={() => toggleAttention(task)}>
+                      <Button variant="outline" size="sm" disabled={task.stale} className={`h-8 text-xs ${task.attention ? 'border-purple-400 bg-purple-50 text-purple-700' : ''}`} onClick={() => toggleAttention(task)}>
                         <Flag className="w-3 h-3 mr-1" />{task.attention ? 'Unflag' : 'Flag'}
                       </Button>
                     </div>
