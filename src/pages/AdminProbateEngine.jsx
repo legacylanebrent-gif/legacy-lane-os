@@ -170,9 +170,9 @@ export default function AdminProbateEngine() {
                   <Badge className={statusColor[s.status]}>{s.status}</Badge>
                 </div>
                 <div className="flex gap-2">
-                  <a href={`/probate/${s.slug}`} target="_blank" rel="noopener noreferrer">
-                    <Button variant="outline" size="sm"><Eye className="w-3 h-3" /></Button>
-                  </a>
+                  <Button variant="outline" size="sm" asChild>
+                    <a href={`/probate/${s.slug}`} target="_blank" rel="noopener noreferrer"><Eye className="w-3 h-3" /></a>
+                  </Button>
                   {s.status !== 'published' && (
                     <Button size="sm" onClick={() => publishState(s.id)} className="bg-green-600 hover:bg-green-700 text-white gap-1">
                       <CheckCircle2 className="w-3 h-3" /> Publish

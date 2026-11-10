@@ -97,9 +97,9 @@ export default function SEAdminUniversity({ articles, onRefresh }) {
                     <p className="text-xs text-slate-500 mt-0.5">/learn/{a.slug} · "{a.target_keyword}"</p>
                   </div>
                   <div className="flex gap-2 shrink-0">
-                    <a href={`/learn/${a.slug}`} target="_blank" rel="noopener noreferrer">
-                      <Button variant="outline" size="sm"><Eye className="w-3 h-3"/></Button>
-                    </a>
+                    <Button variant="outline" size="sm" asChild>
+                      <a href={`/learn/${a.slug}`} target="_blank" rel="noopener noreferrer"><Eye className="w-3 h-3"/></a>
+                    </Button>
                     <Button variant="outline" size="sm" onClick={()=>{setEditingId(a.id);setEditForm({title:a.title,seo_title:a.seo_title,seo_description:a.seo_description});}}>
                       <Edit className="w-3 h-3"/>
                     </Button>

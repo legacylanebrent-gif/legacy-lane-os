@@ -28,12 +28,12 @@ export default function MyDayTasksCard({ tasks }) {
                 <span><span className="font-semibold">Done means:</span> {t.definition_of_done}</span>
               </p>
             )}
-            <p className="text-xs text-slate-400 mt-1 flex flex-wrap gap-x-3">
+            <div className="text-xs text-slate-400 mt-1 flex flex-wrap gap-x-3">
               <span className="capitalize">{t.status?.replace(/_/g, ' ')}</span>
               {t.due_date && <span>Due {t.due_date}</span>}
               {t.priority === 'high' && <Badge className="bg-red-100 text-red-700 border-red-300">HIGH</Badge>}
               {t.blocked && <span className="text-amber-700">Blocked: {t.blocked_reason || 'waiting on something'}</span>}
-            </p>
+            </div>
           </div>
         ))}
         {done.length > 0 && (

@@ -109,11 +109,11 @@ export default function RouteMapWidget() {
       <div className="text-center py-8 text-slate-400">
         <Route className="w-10 h-10 mx-auto mb-2 opacity-40" />
         <p className="font-medium text-slate-500 text-sm">No route stops for today</p>
-        <Link to="/RoutePlanner">
-          <Button size="sm" variant="outline" className="mt-3 gap-1 text-xs">
+        <Button size="sm" variant="outline" className="mt-3 gap-1 text-xs" asChild>
+          <Link to="/RoutePlanner">
             <Route className="w-3 h-3" /> Plan Your Route
-          </Button>
-        </Link>
+          </Link>
+        </Button>
       </div>
     );
   }
@@ -178,11 +178,11 @@ export default function RouteMapWidget() {
         })}
       </div>
 
-      <Link to="/RoutePlanner">
-        <Button size="sm" variant="outline" className="w-full gap-1 text-xs">
+      <Button size="sm" variant="outline" className="w-full gap-1 text-xs" asChild>
+        <Link to="/RoutePlanner">
           <ExternalLink className="w-3 h-3" /> Open Full Route Planner
-        </Button>
-      </Link>
+        </Link>
+      </Button>
     </div>
   );
 }

@@ -394,9 +394,17 @@ export default function FavoriteCompanies() {
             return (
               <Card key={follow.id} className="border border-slate-200 overflow-hidden">
                 {/* Collapsed header — always visible */}
-                <button
+                <div
+                  role="button"
+                  tabIndex={0}
                   onClick={() => toggleExpanded(follow.id)}
-                  className="w-full flex items-center gap-3 p-4 hover:bg-slate-50 transition-colors text-left"
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      toggleExpanded(follow.id);
+                    }
+                  }}
+                  className="w-full flex items-center gap-3 p-4 hover:bg-slate-50 transition-colors text-left cursor-pointer"
                 >
                   <div className="w-10 h-10 rounded-xl bg-orange-100 flex items-center justify-center flex-shrink-0">
                     <Building2 className="w-5 h-5 text-orange-600" />
@@ -440,7 +448,7 @@ export default function FavoriteCompanies() {
                     </div>
                   )}
                   <ChevronDown className={`w-4 h-4 text-slate-400 flex-shrink-0 transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
-                </button>
+                </div>
 
                 {/* Expanded content */}
                 {isExpanded && (

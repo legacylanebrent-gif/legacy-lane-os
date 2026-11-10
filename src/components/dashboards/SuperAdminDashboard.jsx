@@ -372,42 +372,42 @@ export default function SuperAdminDashboard({ user }) {
           </CardHeader>
           <CardContent className="p-6">
             <div className="grid gap-3">
-              <Link to={createPageUrl('AdminUsers')}>
-                <Button className="w-full justify-start bg-slate-700 hover:bg-slate-800 text-white">
+              <Button className="w-full justify-start bg-slate-700 hover:bg-slate-800 text-white" asChild>
+                <Link to={createPageUrl('AdminUsers')}>
                   <Users className="h-5 w-5 mr-3" />
                   Manage Users
-                </Button>
-              </Link>
-              <Link to={createPageUrl('AdminEstateSales')}>
-                <Button className="w-full justify-start bg-indigo-600 hover:bg-indigo-700 text-white">
+                </Link>
+              </Button>
+              <Button className="w-full justify-start bg-indigo-600 hover:bg-indigo-700 text-white" asChild>
+                <Link to={createPageUrl('AdminEstateSales')}>
                   <Home className="h-5 w-5 mr-3" />
                   View Estate Sales
-                </Button>
-              </Link>
-              <Link to={createPageUrl('AdminTickets')}>
-                <Button className="w-full justify-start bg-orange-600 hover:bg-orange-700 text-white">
+                </Link>
+              </Button>
+              <Button className="w-full justify-start bg-orange-600 hover:bg-orange-700 text-white" asChild>
+                <Link to={createPageUrl('AdminTickets')}>
                   <MessageSquare className="h-5 w-5 mr-3" />
                   Support Tickets
-                </Button>
-              </Link>
-              <Link to={createPageUrl('PlatformAnalytics')}>
-                <Button className="w-full justify-start bg-cyan-600 hover:bg-cyan-700 text-white">
+                </Link>
+              </Button>
+              <Button className="w-full justify-start bg-cyan-600 hover:bg-cyan-700 text-white" asChild>
+                <Link to={createPageUrl('PlatformAnalytics')}>
                   <TrendingUp className="h-5 w-5 mr-3" />
                   View Analytics
-                </Button>
-              </Link>
-              <Link to={createPageUrl('ComprehensiveRevenue')}>
-                <Button className="w-full justify-start bg-emerald-600 hover:bg-emerald-700 text-white">
+                </Link>
+              </Button>
+              <Button className="w-full justify-start bg-emerald-600 hover:bg-emerald-700 text-white" asChild>
+                <Link to={createPageUrl('ComprehensiveRevenue')}>
                   <DollarSign className="h-5 w-5 mr-3" />
                   Revenue Reports
-                </Button>
-              </Link>
-              <Link to={createPageUrl('AdminRewards')}>
-                <Button className="w-full justify-start bg-rose-600 hover:bg-rose-700 text-white">
+                </Link>
+              </Button>
+              <Button className="w-full justify-start bg-rose-600 hover:bg-rose-700 text-white" asChild>
+                <Link to={createPageUrl('AdminRewards')}>
                   <Gift className="h-5 w-5 mr-3" />
                   Rewards & Draws
-                </Button>
-              </Link>
+                </Link>
+              </Button>
             </div>
           </CardContent>
         </Card>

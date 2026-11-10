@@ -27,11 +27,11 @@ export default function CheckoutCard({ sale, ordersToday }) {
       <CardContent className="space-y-3">
         <div className="grid grid-cols-2 gap-2">
           <div className="border border-slate-200 rounded p-2">
-            <p className="text-[10px] text-slate-500">GROSS SALES (paid) <Badge variant="outline" className="ml-1 text-[9px]">EXACT</Badge></p>
+            <div className="text-[10px] text-slate-500">GROSS SALES (paid) <Badge variant="outline" className="ml-1 text-[9px]">EXACT</Badge></div>
             <p className="text-xl font-bold text-slate-900">${gross.toLocaleString()}</p>
           </div>
           <div className="border border-slate-200 rounded p-2">
-            <p className="text-[10px] text-slate-500">TRANSACTIONS (paid) <Badge variant="outline" className="ml-1 text-[9px]">EXACT</Badge></p>
+            <div className="text-[10px] text-slate-500">TRANSACTIONS (paid) <Badge variant="outline" className="ml-1 text-[9px]">EXACT</Badge></div>
             <p className="text-xl font-bold text-slate-900">{paid.length}</p>
             <p className="text-[10px] text-slate-400">{Object.entries(byMethod).map(([m, n]) => `${m}: ${n}`).join(' · ') || '—'}</p>
           </div>

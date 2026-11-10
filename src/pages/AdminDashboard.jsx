@@ -323,11 +323,11 @@ export default function AdminDashboard() {
                 </div>
               ))}
             </div>
-            <Link to="/AutonomousRunsDashboard">
-              <Button variant="outline" size="sm" className="w-full text-xs border-blue-200 text-blue-600 hover:bg-blue-50 gap-1.5">
+            <Button variant="outline" size="sm" className="w-full text-xs border-blue-200 text-blue-600 hover:bg-blue-50 gap-1.5" asChild>
+              <Link to="/AutonomousRunsDashboard">
                 <Megaphone className="w-3.5 h-3.5" />Open Campaigns Dashboard <ArrowUpRight className="w-3.5 h-3.5" />
-              </Button>
-            </Link>
+              </Link>
+            </Button>
           </div>
 
           {/* Agent Runs */}
@@ -345,11 +345,11 @@ export default function AdminDashboard() {
                 </div>
               ))}
             </div>
-            <Link to="/AdminAIOperator">
-              <Button variant="outline" size="sm" className="w-full text-xs border-amber-200 text-amber-600 hover:bg-amber-50 gap-1.5">
+            <Button variant="outline" size="sm" className="w-full text-xs border-amber-200 text-amber-600 hover:bg-amber-50 gap-1.5" asChild>
+              <Link to="/AdminAIOperator">
                 <Brain className="w-3.5 h-3.5" />Open AI Estate Sale Company Owner <ArrowUpRight className="w-3.5 h-3.5" />
-              </Button>
-            </Link>
+              </Link>
+            </Button>
           </div>
         </div>
 
@@ -416,11 +416,11 @@ export default function AdminDashboard() {
                 <div className="text-4xl font-black text-white">{fmt((stats.leadsWithEmail || 0) - (stats.outreachTotal || 0))}</div>
                 <div className="text-xs text-orange-100 uppercase tracking-wider font-semibold">Untapped Leads</div>
               </div>
-              <Link to="/FutOperLeads" className="w-full">
-                <Button className="w-full bg-white text-orange-600 hover:bg-orange-50 font-bold text-sm gap-2">
+              <Button className="w-full bg-white text-orange-600 hover:bg-orange-50 font-bold text-sm gap-2" asChild>
+                <Link to="/FutOperLeads" className="w-full">
                   Start Outreach <ArrowUpRight className="w-4 h-4" />
-                </Button>
-              </Link>
+                </Link>
+              </Button>
             </div>
           </div>
         </div>

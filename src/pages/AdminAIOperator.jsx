@@ -253,10 +253,8 @@ export default function AdminAIOperator() {
             </div>
           </div>
           <div className="flex items-center gap-3 flex-wrap">
-            <Link to="/AutonomousRunsDashboard">
-              <button className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border border-blue-200 bg-blue-50 text-blue-600 hover:bg-blue-100 transition-all">
-                <Cpu className="w-3.5 h-3.5" />Runs Dashboard<ExternalLink className="w-3 h-3" />
-              </button>
+            <Link to="/AutonomousRunsDashboard" className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border border-blue-200 bg-blue-50 text-blue-600 hover:bg-blue-100 transition-all">
+              <Cpu className="w-3.5 h-3.5" />Runs Dashboard<ExternalLink className="w-3 h-3" />
             </Link>
             <div className="flex items-center gap-2 text-xs text-slate-500">
               <Shield className="w-3.5 h-3.5 text-amber-500" />

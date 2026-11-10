@@ -95,9 +95,9 @@ export default function SEAdminStateGuides({ guides, onRefresh }) {
               <p className="text-xs text-slate-500 mt-0.5">{g.state_name} · /{g.state_slug}/{g.guide_type}</p>
             </div>
             <div className="flex gap-2 shrink-0">
-              <a href={`/${g.guide_type}/${g.state_slug}`} target="_blank" rel="noopener noreferrer">
-                <Button variant="outline" size="sm"><Eye className="w-3 h-3" /></Button>
-              </a>
+              <Button variant="outline" size="sm" asChild>
+                <a href={`/${g.guide_type}/${g.state_slug}`} target="_blank" rel="noopener noreferrer"><Eye className="w-3 h-3" /></a>
+              </Button>
               <Button size="sm" onClick={() => togglePublish(g)}
                 className={g.status === 'published' ? 'bg-slate-500 hover:bg-slate-600 text-white' : 'bg-green-600 hover:bg-green-700 text-white'}>
                 {g.status === 'published' ? <XCircle className="w-3 h-3" /> : <CheckCircle2 className="w-3 h-3" />}

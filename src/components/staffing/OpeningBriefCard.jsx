@@ -145,10 +145,10 @@ export default function OpeningBriefCard({ sale, askForHelp }) {
               <>
                 <p className="text-xs font-semibold text-slate-600 uppercase tracking-wide">Controlling client decisions</p>
                 {b.controlling_decisions.map((d) => (
-                  <p key={d.id} className="text-xs text-slate-700">
+                  <div key={d.id} className="text-xs text-slate-700">
                     <span className="font-medium">{d.subject}</span>: {d.current_decision}
                     {d.request_pending && <Badge className="ml-1 bg-amber-100 text-amber-800 border-amber-300">REQUEST PENDING — NOT APPROVED</Badge>}
-                  </p>
+                  </div>
                 ))}
               </>
             )}
@@ -157,10 +157,10 @@ export default function OpeningBriefCard({ sale, askForHelp }) {
               <>
                 <p className="text-xs font-semibold text-slate-600 uppercase tracking-wide">Open issues</p>
                 {b.open_issues.map((i) => (
-                  <p key={i.id} className="text-xs text-slate-700 flex items-center gap-1.5 flex-wrap">
+                  <div key={i.id} className="text-xs text-slate-700 flex items-center gap-1.5 flex-wrap">
                     <Badge variant="outline" className={URGENCY_BADGE[i.urgency]}>{i.urgency}</Badge>
                     {i.title}{i.owner_name ? ` — ${i.owner_name}` : ''}
-                  </p>
+                  </div>
                 ))}
               </>
             )}

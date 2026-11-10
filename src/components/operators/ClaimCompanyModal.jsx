@@ -165,9 +165,9 @@ export default function ClaimCompanyModal({ operator, open, onClose }) {
               <CheckCircle className="w-9 h-9 text-green-600" />
             </div>
             <h3 className="text-xl font-semibold text-slate-900">Claim Submitted!</h3>
-            <p className="text-slate-600 text-sm">
+            <div className="text-slate-600 text-sm">
               Your claim for <strong>{operator.company_name}</strong> has been received. Your account is now set to <Badge className="bg-yellow-100 text-yellow-700 border-yellow-300">Pending Verification</Badge>
-            </p>
+            </div>
             <p className="text-slate-500 text-xs">
               Our team will verify your ownership and approve your full access within 1–2 business days.
             </p>

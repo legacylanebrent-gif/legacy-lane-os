@@ -37,7 +37,7 @@ export default function ResearchHandlingSection({ deal, linkedSaleId, consult, r
           <div className="pt-1">
             <p className="text-xs font-medium text-slate-600">Inventoried items flagged for research</p>
             {researchItems.slice(0, 8).map(i => (
-              <p key={i.id} className="text-xs text-slate-600">• {i.title}{i.research_reason ? ` — ${i.research_reason}` : ''} <Badge variant="outline" className="text-[9px] ml-1">{i.research_status}</Badge></p>
+              <div key={i.id} className="text-xs text-slate-600">• {i.title}{i.research_reason ? ` — ${i.research_reason}` : ''} <Badge variant="outline" className="text-[9px] ml-1">{i.research_status}</Badge></div>
             ))}
             {researchItems.length > 8 && <p className="text-[10px] text-slate-400">+{researchItems.length - 8} more</p>}
             {linkedSaleId && <Link to={`/SaleInventory?saleId=${linkedSaleId}`} className="text-xs text-cyan-600 hover:underline">Open the existing research workflow →</Link>}

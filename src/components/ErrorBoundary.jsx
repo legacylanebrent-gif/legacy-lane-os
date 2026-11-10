@@ -107,12 +107,12 @@ export default class ErrorBoundary extends React.Component {
                 <Home className="w-4 h-4" />
                 Go Home
               </Button>
-              <Link to="/MyTickets">
-                <Button variant="ghost" className="gap-2">
+              <Button variant="ghost" className="gap-2" asChild>
+                <Link to="/MyTickets">
                   <MessageSquare className="w-4 h-4" />
                   Support
-                </Button>
-              </Link>
+                </Link>
+              </Button>
             </div>
           </div>
         </div>

@@ -74,11 +74,11 @@ export default function CoolFindsBlog() {
           <p className="text-lg text-purple-100 max-w-2xl mx-auto mb-8">
             Real discoveries from estate sale companies and users across the country — from rare antiques to unbelievable stories behind the items. We're building great stories here ... submit yours today!
           </p>
-          <Link to="/CoolFindsSubmit">
-            <Button size="lg" className="bg-orange-500 hover:bg-orange-600 text-white font-semibold text-lg px-8 py-6 shadow-lg hover:shadow-xl transition-all">
+          <Button size="lg" className="bg-orange-500 hover:bg-orange-600 text-white font-semibold text-lg px-8 py-6 shadow-lg hover:shadow-xl transition-all" asChild>
+            <Link to="/CoolFindsSubmit">
               <Sparkles className="w-5 h-5 mr-2" /> Share Your Discovery — Submit Your Story
-            </Button>
-          </Link>
+            </Link>
+          </Button>
         </div>
       </div>
 
@@ -131,11 +131,11 @@ export default function CoolFindsBlog() {
             <Sparkles className="w-16 h-16 mx-auto text-slate-300 mb-4" />
             <h3 className="text-xl font-semibold text-slate-700 mb-2">No stories yet in this category</h3>
             <p className="text-slate-500 mb-6">Be the first to share a cool find or crazy story!</p>
-            <Link to="/CoolFindsSubmit">
-              <Button className="bg-purple-600 hover:bg-purple-700 text-white">
+            <Button className="bg-purple-600 hover:bg-purple-700 text-white" asChild>
+              <Link to="/CoolFindsSubmit">
                 <PenSquare className="w-4 h-4 mr-2" /> Submit Your Story
-              </Button>
-            </Link>
+              </Link>
+            </Button>
           </div>
         ) : (
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">

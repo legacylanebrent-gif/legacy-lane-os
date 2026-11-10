@@ -117,9 +117,9 @@ export default function CoolFindsDetail() {
           <Sparkles className="w-16 h-16 mx-auto text-slate-300 mb-4" />
           <h2 className="text-2xl font-serif font-bold text-slate-700 mb-2">Story Not Found</h2>
           <p className="text-slate-500 mb-6">This story may have been removed or is not yet published.</p>
-          <Link to="/CoolFindsBlog">
-            <Button className="bg-purple-600 hover:bg-purple-700 text-white">Back to Blog</Button>
-          </Link>
+          <Button className="bg-purple-600 hover:bg-purple-700 text-white" asChild>
+            <Link to="/CoolFindsBlog">Back to Blog</Link>
+          </Button>
         </div>
       </div>
     );
@@ -255,11 +255,11 @@ export default function CoolFindsDetail() {
                 <h3 className="text-lg font-serif font-bold text-slate-900">{story.author_company_name}</h3>
                 <p className="text-sm text-slate-600">This story was shared by {story.author_company_name}. Visit their company profile to see upcoming sales and more.</p>
               </div>
-              <Link to={`/companies?slug=${companySlug}`}>
-                <Button className="bg-orange-600 hover:bg-orange-700 text-white whitespace-nowrap">
+              <Button className="bg-orange-600 hover:bg-orange-700 text-white whitespace-nowrap" asChild>
+                <Link to={`/companies?slug=${companySlug}`}>
                   <Building2 className="w-4 h-4 mr-2" /> View Company Profile
-                </Button>
-              </Link>
+                </Link>
+              </Button>
             </div>
           </div>
         )}
@@ -298,11 +298,11 @@ export default function CoolFindsDetail() {
         <div className="mt-12 p-6 bg-gradient-to-br from-purple-50 to-orange-50 rounded-xl text-center">
           <h3 className="text-xl font-serif font-bold text-slate-900 mb-2">Have a Story to Share?</h3>
           <p className="text-slate-600 mb-4">Submit your own cool finds, crazy stories, or hidden treasures!</p>
-          <Link to="/CoolFindsSubmit">
-            <Button className="bg-purple-600 hover:bg-purple-700 text-white">
+          <Button className="bg-purple-600 hover:bg-purple-700 text-white" asChild>
+            <Link to="/CoolFindsSubmit">
               <Sparkles className="w-4 h-4 mr-2" /> Submit Your Story
-            </Button>
-          </Link>
+            </Link>
+          </Button>
         </div>
 
         {/* Comments section — registered users only */}

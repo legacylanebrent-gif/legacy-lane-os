@@ -106,18 +106,18 @@ export default function RealEstateAgentDashboard({ user }) {
             <CardTitle className="text-xl font-serif text-navy-900">Quick Actions</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
-            <Link to={createPageUrl('CRM')}>
-              <Button variant="outline" className="w-full justify-start">
+            <Button variant="outline" className="w-full justify-start" asChild>
+              <Link to={createPageUrl('CRM')}>
                 <Users className="w-4 h-4 mr-2" />
                 Manage CRM
-              </Button>
-            </Link>
-            <Link to={createPageUrl('Properties')}>
-              <Button variant="outline" className="w-full justify-start">
+              </Link>
+            </Button>
+            <Button variant="outline" className="w-full justify-start" asChild>
+              <Link to={createPageUrl('Properties')}>
                 <Building2 className="w-4 h-4 mr-2" />
                 View Properties
-              </Button>
-            </Link>
+              </Link>
+            </Button>
           </CardContent>
         </Card>
       </div>

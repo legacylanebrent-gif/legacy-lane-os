@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { resolveCurrentLocation } from '@/lib/browserLocation';
 import { Button } from '@/components/ui/button';
@@ -74,6 +74,7 @@ function ChangeMapView({ center, zoom }) {
   };
 
 export default function Home() {
+  const navigate = useNavigate();
   const [sales, setSales] = useState([]);
   const [nationalFeatured, setNationalFeatured] = useState([]);
   const [localFeatured, setLocalFeatured] = useState([]);
@@ -990,12 +991,15 @@ export default function Home() {
                         <Badge className="absolute top-3 right-3 bg-orange-600 text-white">
                           National Featured
                         </Badge>
-                        <button 
+                        <span
+                          role="button"
+                          tabIndex={0}
                           onClick={(e) => handleSaveSale(e, sale.id)}
-                          className="absolute top-3 left-3 bg-white/90 rounded-full p-2 shadow-lg hover:bg-white transition-colors"
+                          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') handleSaveSale(e, sale.id); }}
+                          className="absolute top-3 left-3 bg-white/90 rounded-full p-2 shadow-lg hover:bg-white transition-colors cursor-pointer"
                         >
                           <Heart className={`w-4 h-4 ${savedSales.includes(sale.id) ? 'fill-red-600 text-red-600' : 'text-slate-600'}`} />
-                        </button>
+                        </span>
                         </div>
                     )}
                     <CardContent className="p-5">
@@ -1004,13 +1008,12 @@ export default function Home() {
                       </h4>
                       
                       {sale.operator_id && (sale.operator_name || operators[sale.operator_id]) && (
-                       <Link 
-                         to={createPageUrl('BusinessProfile') + '?id=' + sale.operator_id}
-                         onClick={(e) => e.stopPropagation()}
-                         className="text-sm text-cyan-600 hover:text-cyan-700 font-medium block mb-3"
+                       <span
+                         onClick={(e) => { e.stopPropagation(); navigate(createPageUrl('BusinessProfile') + '?id=' + sale.operator_id); }}
+                         className="text-sm text-cyan-600 hover:text-cyan-700 font-medium block mb-3 cursor-pointer"
                        >
                          by {sale.operator_name || operators[sale.operator_id]}
-                       </Link>
+                       </span>
                       )}
 
                       <div className="space-y-2 text-sm">
@@ -1045,24 +1048,26 @@ export default function Home() {
 
                       <div className="mt-4 pt-4 border-t">
                        <div className="flex gap-2">
-                         <Button
+                         <span
+                           role="button"
+                           tabIndex={0}
                            onClick={(e) => handleAddToRoute(e, sale.id)}
-                           variant="outline"
-                           size="sm"
-                           className={`flex-1 ${routeSales.includes(sale.id) ? 'bg-cyan-100 border-cyan-600 text-cyan-700' : ''}`}
+                           onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') handleAddToRoute(e, sale.id); }}
+                           className={`inline-flex items-center justify-center gap-2 rounded-md border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground h-8 px-3 text-xs font-medium flex-1 cursor-pointer ${routeSales.includes(sale.id) ? 'bg-cyan-100 border-cyan-600 text-cyan-700' : ''}`}
                          >
                            <Bookmark className={`w-4 h-4 mr-1 ${routeSales.includes(sale.id) ? 'fill-current' : ''}`} />
                            {routeSales.includes(sale.id) ? 'In Route' : 'Add to Route'}
-                         </Button>
-                         <Button
+                         </span>
+                         <span
+                           role="button"
+                           tabIndex={0}
                            onClick={(e) => handleAddToCalendar(e, sale)}
-                           variant="outline"
-                           size="sm"
-                           className="flex-1"
+                           onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') handleAddToCalendar(e, sale); }}
+                           className="inline-flex items-center justify-center gap-2 rounded-md border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground h-8 px-3 text-xs font-medium flex-1 cursor-pointer"
                          >
                            <Calendar className="w-4 h-4 mr-1" />
                            Calendar
-                         </Button>
+                         </span>
                        </div>
                       </div>
                       </CardContent>

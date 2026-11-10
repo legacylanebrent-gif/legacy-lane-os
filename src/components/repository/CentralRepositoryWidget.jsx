@@ -112,11 +112,11 @@ export default function CentralRepositoryWidget() {
         </>
       )}
 
-      <Link to="/AdminCentralRepository">
-        <Button variant="outline" size="sm" className="w-full text-xs border-violet-200 text-violet-600 hover:bg-violet-50 gap-1.5">
+      <Button variant="outline" size="sm" className="w-full text-xs border-violet-200 text-violet-600 hover:bg-violet-50 gap-1.5" asChild>
+        <Link to="/AdminCentralRepository">
           <Database className="w-3.5 h-3.5" />View Repository <ArrowUpRight className="w-3.5 h-3.5" />
-        </Button>
-      </Link>
+        </Link>
+      </Button>
     </div>
   );
 }

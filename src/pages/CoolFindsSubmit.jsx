@@ -452,9 +452,9 @@ Return JSON with:
               {submitting ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Wand2 className="w-4 h-4 mr-2" />}
               {submitting ? 'Submitting...' : 'Submit AI Version'}
             </Button>
-            <Link to="/CoolFindsBlog">
-              <Button type="button" variant="outline" size="lg">Cancel</Button>
-            </Link>
+            <Button type="button" variant="outline" size="lg" asChild>
+              <Link to="/CoolFindsBlog">Cancel</Link>
+            </Button>
           </div>
           <p className="text-xs text-slate-400 text-center">
             "Submit My Version" uses your exact text. "Submit AI Version" lets AI rewrite your story first, then submits the enhanced version.

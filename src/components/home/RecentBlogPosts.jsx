@@ -63,11 +63,11 @@ export default function RecentBlogPosts() {
             <h2 className="text-3xl font-serif font-bold text-slate-900">Latest from Our Blog</h2>
             <p className="text-slate-600 mt-1">Expert guides, collector tips, and estate sale insights</p>
           </div>
-          <Link to="/blog">
-            <Button variant="outline" className="gap-2">
+          <Button variant="outline" className="gap-2" asChild>
+            <Link to="/blog">
               View All Posts <ArrowRight className="w-4 h-4" />
-            </Button>
-          </Link>
+            </Link>
+          </Button>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

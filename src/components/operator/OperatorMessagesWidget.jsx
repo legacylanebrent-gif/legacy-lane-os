@@ -115,12 +115,12 @@ export default function OperatorMessagesWidget({ user }) {
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
           <CardTitle className="text-xl font-semibold">Recent Messages</CardTitle>
-          <Link to={createPageUrl('Messages')}>
-            <Button variant="ghost" size="sm" className="gap-2">
+          <Button variant="ghost" size="sm" className="gap-2" asChild>
+            <Link to={createPageUrl('Messages')}>
               View All
               <ExternalLink className="w-4 h-4" />
-            </Button>
-          </Link>
+            </Link>
+          </Button>
         </CardHeader>
         <CardContent>
           {conversations.length === 0 ? (

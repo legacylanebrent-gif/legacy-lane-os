@@ -138,9 +138,9 @@ export default function ItemCustodyDialog({ open, item, sale, onClose, onSaved }
           </div>
 
           {item.controlled_location && (
-            <p className="text-xs text-slate-500">
+            <div className="text-xs text-slate-500">
               Current controlled location: <Badge variant="secondary">{item.controlled_location}</Badge>
-            </p>
+            </div>
           )}
           {item.offsite_research?.status === 'OFFSITE' && (
             <p className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded px-2 py-1">

@@ -110,19 +110,20 @@ function NavItem({ item, currentPageName }) {
   const Icon = item.icon;
   const active = currentPageName === item.page;
   return (
-    <Link to={createPageUrl(item.page)}>
-      <Button
-        variant="ghost"
-        className={`w-full justify-start rounded-none px-4 h-9 text-sm ${
-          active
-            ? 'bg-orange-600 text-white hover:bg-orange-700'
-            : 'text-slate-300 hover:bg-slate-700 hover:text-white'
-        }`}
-      >
+    <Button
+      variant="ghost"
+      className={`w-full justify-start rounded-none px-4 h-9 text-sm ${
+        active
+          ? 'bg-orange-600 text-white hover:bg-orange-700'
+          : 'text-slate-300 hover:bg-slate-700 hover:text-white'
+      }`}
+      asChild
+    >
+      <Link to={createPageUrl(item.page)}>
         <Icon className="w-4 h-4 mr-3 flex-shrink-0" />
         <span className="truncate">{item.label}</span>
-      </Button>
-    </Link>
+      </Link>
+    </Button>
   );
 }
 

@@ -10,7 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
-import { Search, UserCircle, Mail, Phone, Building2, Calendar, Plus, X, SlidersHorizontal, Edit, Trash2, Check, XCircle, Power, ArrowLeft, ClipboardList, Store, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Search, UserCircle, Mail, Phone, Building2, Calendar, Plus, X, SlidersHorizontal, Edit, Trash2, Check, XCircle, Power, KeyRound, ArrowLeft, ClipboardList, Store, ChevronLeft, ChevronRight } from 'lucide-react';
 import AddUserModal from '@/components/admin/AddUserModal';
 import {
   Table,
@@ -235,6 +235,26 @@ export default function AdminUsers() {
     } catch (error) {
       console.error('Error toggling status:', error);
       alert('Failed to update user status');
+    }
+  };
+
+  const handleToggleTestPass = async (user) => {
+    const onPass = user.subscription_status === 'trial';
+    if (!onPass && !confirm(`Give ${user.full_name || user.email} full access for 7 days, no card required?`)) return;
+    try {
+      const res = await base44.functions.invoke('adminGrantTestPass', {
+        action: onPass ? 'end' : 'grant',
+        user_id: user.id,
+        days: 7,
+      });
+      if (res.data?.error) throw new Error(res.data.error);
+      alert(onPass
+        ? 'Test pass ended.'
+        : `Full access granted until ${new Date(res.data.expires_at).toLocaleDateString()}.`);
+      loadUsers();
+    } catch (error) {
+      console.error('Error updating test pass:', error);
+      alert('Failed to update the test pass');
     }
   };
 
@@ -619,6 +639,16 @@ export default function AdminUsers() {
                               </>
                             )}
                             
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleToggleTestPass(user)}
+                              title={user.subscription_status === 'trial' ? 'End 7-day test pass' : 'Grant 7-day full access (no card)'}
+                              className={user.subscription_status === 'trial' ? 'text-purple-600 hover:text-purple-700 hover:bg-purple-50' : 'text-slate-500 hover:text-slate-700 hover:bg-slate-100'}
+                            >
+                              <KeyRound className="w-4 h-4" />
+                            </Button>
+
                             <Button
                               variant="ghost"
                               size="sm"

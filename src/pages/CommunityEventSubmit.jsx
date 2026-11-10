@@ -416,9 +416,9 @@ export default function CommunityEventSubmit() {
               {submitting ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <MapPin className="w-4 h-4 mr-2" />}
               {submitting ? 'Submitting...' : 'Submit Event for Review'}
             </Button>
-            <Link to="/CommunityEvents">
-              <Button type="button" variant="outline" size="lg">Cancel</Button>
-            </Link>
+            <Button type="button" variant="outline" size="lg" asChild>
+              <Link to="/CommunityEvents">Cancel</Link>
+            </Button>
           </div>
         </form>
       </div>

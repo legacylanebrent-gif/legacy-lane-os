@@ -478,10 +478,10 @@ We're excited to have you on board!
                     <CheckCircle2 className="w-4 h-4 mt-0.5 flex-shrink-0 text-blue-600" />
                     <div>
                       <p className="font-medium">Existing user found: {result.user.full_name}</p>
-                      <p className="text-xs mt-0.5">
+                      <div className="text-xs mt-0.5">
                         Currently registered as <Badge className="text-xs bg-slate-100 text-slate-700">{result.user.primary_account_type?.replace(/_/g, ' ')}</Badge>.
                         Their role will be updated to <Badge className="text-xs bg-purple-100 text-purple-700">{role.replace(/_/g, ' ')}</Badge> and linked to your company.
-                      </p>
+                      </div>
                     </div>
                   </>
                 ) : (

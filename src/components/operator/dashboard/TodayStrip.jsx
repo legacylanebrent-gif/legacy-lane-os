@@ -72,12 +72,12 @@ export default function TodayStrip({ sale }) {
               : 'Sale ended'}
           </p>
         </div>
-        <Link to="/MySaleDay">
-          <Button size="sm" className="bg-slate-900 hover:bg-slate-800 text-white">
+        <Button size="sm" className="bg-slate-900 hover:bg-slate-800 text-white" asChild>
+          <Link to="/MySaleDay">
             {live ? 'Open My Sale Day' : 'Prep this sale'}
             <ArrowRight className="w-3.5 h-3.5 ml-1.5" />
-          </Button>
-        </Link>
+          </Link>
+        </Button>
       </div>
 
       <div className="mt-3 grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3">

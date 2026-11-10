@@ -143,11 +143,11 @@ export default function CommunityEvents() {
               </p>
             </div>
             <div className="flex gap-2">
-              <Link to="/CommunityEventSubmit">
-                <Button className="bg-teal-600 hover:bg-teal-700 text-white">
+              <Button className="bg-teal-600 hover:bg-teal-700 text-white" asChild>
+                <Link to="/CommunityEventSubmit">
                   <Plus className="w-4 h-4 mr-1" /> Submit Event
-                </Button>
-              </Link>
+                </Link>
+              </Button>
               <Button
                 onClick={() => setViewMode('grid')}
                 variant={viewMode === 'grid' ? 'default' : 'outline'}
@@ -279,11 +279,11 @@ export default function CommunityEvents() {
             <MapPin className="w-16 h-16 mx-auto text-slate-300 mb-4" />
             <h3 className="text-xl font-semibold text-slate-700 mb-2">No upcoming events found</h3>
             <p className="text-slate-500 mb-6">Be the first to promote your flea market or antique show!</p>
-            <Link to="/CommunityEventSubmit">
-              <Button className="bg-teal-600 hover:bg-teal-700 text-white">
+            <Button className="bg-teal-600 hover:bg-teal-700 text-white" asChild>
+              <Link to="/CommunityEventSubmit">
                 <Plus className="w-4 h-4 mr-1" /> Submit an Event
-              </Button>
-            </Link>
+              </Link>
+            </Button>
           </div>
         ) : (
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">

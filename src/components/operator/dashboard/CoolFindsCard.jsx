@@ -51,12 +51,12 @@ export default function CoolFindsCard({ user }) {
             mystery piece, the attic discovery.
           </p>
         </div>
-        <Link to="/CoolFindsSubmit" className="w-full sm:w-auto">
-          <Button className="w-full sm:w-auto bg-orange-600 hover:bg-orange-700 text-white shadow-sm">
+        <Button className="w-full sm:w-auto bg-orange-600 hover:bg-orange-700 text-white shadow-sm" asChild>
+          <Link to="/CoolFindsSubmit" className="w-full sm:w-auto">
             <Plus className="w-4 h-4 mr-2" />
             Add Cool Find
-          </Button>
-        </Link>
+          </Link>
+        </Button>
       </div>
 
       <div className="relative mt-3">

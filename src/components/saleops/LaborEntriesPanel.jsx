@@ -310,11 +310,11 @@ export default function LaborEntriesPanel({ saleId }) {
           {entries.map(e => (
             <div key={e.id} className={`flex items-center gap-3 p-3 rounded-lg border ${e.is_owner_time ? 'bg-orange-50 border-orange-100' : 'bg-white border-slate-200'}`}>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-slate-800 truncate">
+                <div className="text-sm font-medium text-slate-800 truncate">
                   {e.member_name || 'Team member'} · {laborCategoryLabel(e.work_category)} · {(Number(e.hours) || 0).toFixed(1)} hrs
                   {e.prep_zone_name && <Badge className="ml-2 bg-cyan-50 text-cyan-700 border border-cyan-200">{e.prep_zone_name}</Badge>}
                   {e.is_owner_time && <Badge className="ml-2 bg-orange-100 text-orange-700">OWNER TIME</Badge>}
-                </p>
+                </div>
                 <p className="text-xs text-slate-500">
                   {(e.entry_date || '').slice(0, 10)}
                   {e.hourly_rate != null && !e.is_owner_time && ` · ${money(e.hourly_rate)}/hr = ${money((Number(e.hours) || 0) * (Number(e.hourly_rate) || 0))} cash`}

@@ -346,7 +346,7 @@ export default function AdminBlogSelector() {
                   </div>
                   <div>
                     <span className="font-medium text-slate-500">Target Keyword</span>
-                    <p><Badge variant="outline" className="text-xs">{preview.target_keyword}</Badge></p>
+                    <div><Badge variant="outline" className="text-xs">{preview.target_keyword}</Badge></div>
                   </div>
                   <div>
                     <span className="font-medium text-slate-500">Confidence Score</span>

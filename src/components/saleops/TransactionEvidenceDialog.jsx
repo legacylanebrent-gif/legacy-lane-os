@@ -160,14 +160,14 @@ export default function TransactionEvidenceDialog({ sale, order, open, onClose, 
               <p className="font-semibold text-slate-700 mb-1">Payment attempts</p>
               {attempts.length === 0 && <p className="text-slate-400">No online attempts — offline tender (cashier-recorded).</p>}
               {attempts.map((a) => (
-                <p key={a.id} className="text-slate-600">
+                <div key={a.id} className="text-slate-600">
                   {a.provider} · ${Number(a.amount).toFixed(2)} · <Badge variant="outline" className="text-[9px]">{a.status}</Badge>
                   {a.provider_session_id ? ` · session ${a.provider_session_id}` : ''}
                   {a.provider_order_id ? ` · provider order ${a.provider_order_id}` : ''}
                   {a.provider_payment_ref ? ` · payment ref ${a.provider_payment_ref}` : ''}
                   {` · fee ${a.fee_amount == null ? 'UNKNOWN (provider does not return one)' : money(a.fee_amount)}`}
                   {a.resolved_via ? ` · resolved via ${a.resolved_via}${a.resolved_by_name ? ` by ${a.resolved_by_name}` : ''}` : ''}
-                </p>
+                </div>
               ))}
             </div>
 

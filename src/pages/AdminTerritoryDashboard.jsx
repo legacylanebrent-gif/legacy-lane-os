@@ -134,11 +134,11 @@ export default function AdminTerritoryDashboard() {
             </div>
           </div>
           <div className="flex gap-2">
-            <Link to="/AdminHousioSync">
-              <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" asChild>
+              <Link to="/AdminHousioSync">
                 <Database className="w-4 h-4 mr-1" /> Sync Housio
-              </Button>
-            </Link>
+              </Link>
+            </Button>
             <Button onClick={() => refetch()} variant="outline" size="sm">
               <RefreshCw className="w-4 h-4 mr-1" /> Refresh
             </Button>
@@ -338,11 +338,11 @@ export default function AdminTerritoryDashboard() {
                             ) : cities.length === 0 ? (
                                <div className="space-y-2">
                                  <p className="text-sm text-purple-400">No micro-territories found</p>
-                                 <Link to="/AdminHousioSync">
-                                   <Button variant="ghost" size="sm" className="text-purple-600 hover:text-purple-700">
+                                 <Button variant="ghost" size="sm" className="text-purple-600 hover:text-purple-700" asChild>
+                                   <Link to="/AdminHousioSync">
                                      <RefreshCw className="w-3 h-3 mr-1" /> Sync Housio Data
-                                   </Button>
-                                 </Link>
+                                   </Link>
+                                 </Button>
                                </div>
                             ) : (
                               <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-2 max-h-64 overflow-y-auto pr-2">

@@ -140,19 +140,19 @@ export default function ConsumerDashboard({ user }) {
       {/* Business role shortcuts */}
       {isBusinessUser && (
         <div className="flex flex-wrap gap-2">
-          <Link to="/Dashboard">
-            <Button variant="outline" className="border-slate-300 text-slate-700 hover:bg-slate-100 text-xs gap-1.5">
+          <Button variant="outline" className="border-slate-300 text-slate-700 hover:bg-slate-100 text-xs gap-1.5" asChild>
+            <Link to="/Dashboard">
               <Briefcase className="w-3.5 h-3.5" />
               My Biz Dashboard
-            </Button>
-          </Link>
+            </Link>
+          </Button>
           {isOperator && (
-            <Link to={createPageUrl('MySales')}>
-              <Button variant="outline" className="border-orange-300 text-orange-700 hover:bg-orange-50 text-xs gap-1.5">
+            <Button variant="outline" className="border-orange-300 text-orange-700 hover:bg-orange-50 text-xs gap-1.5" asChild>
+              <Link to={createPageUrl('MySales')}>
                 <ClipboardList className="w-3.5 h-3.5" />
                 Manage My Sales
-              </Button>
-            </Link>
+              </Link>
+            </Button>
           )}
         </div>
       )}
@@ -230,11 +230,11 @@ export default function ConsumerDashboard({ user }) {
                 <div className="text-center py-6">
                   <Heart className="w-8 h-8 mx-auto text-slate-200 mb-2" />
                   <p className="text-xs text-slate-400">Heart sales while browsing to save them here</p>
-                  <Link to={createPageUrl('Home')}>
-                    <Button size="sm" variant="outline" className="mt-3 text-xs gap-1">
+                  <Button size="sm" variant="outline" className="mt-3 text-xs gap-1" asChild>
+                    <Link to={createPageUrl('Home')}>
                       <MapPin className="w-3 h-3" /> Browse Sales
-                    </Button>
-                  </Link>
+                    </Link>
+                  </Button>
                 </div>
               ) : (
                 <div className="space-y-2">
@@ -262,11 +262,11 @@ export default function ConsumerDashboard({ user }) {
                     </Link>
                   ))}
                   {savedSales.length > 5 && (
-                    <Link to={createPageUrl('Favorites')}>
-                      <Button size="sm" variant="ghost" className="w-full text-xs text-slate-500 mt-1">
+                    <Button size="sm" variant="ghost" className="w-full text-xs text-slate-500 mt-1" asChild>
+                      <Link to={createPageUrl('Favorites')}>
                         +{savedSales.length - 5} more →
-                      </Button>
-                    </Link>
+                      </Link>
+                    </Button>
                   )}
                 </div>
               )}
@@ -282,11 +282,11 @@ export default function ConsumerDashboard({ user }) {
                 <p className="text-xs text-orange-600 mb-3">
                   Follow your favorite estate sale companies to get a personalized timeline of their upcoming sales.
                 </p>
-                <Link to={createPageUrl('FavoriteCompanies')}>
-                  <Button size="sm" className="bg-orange-500 hover:bg-orange-600 text-white text-xs gap-1">
+                <Button size="sm" className="bg-orange-500 hover:bg-orange-600 text-white text-xs gap-1" asChild>
+                  <Link to={createPageUrl('FavoriteCompanies')}>
                     <Users className="w-3 h-3" /> Explore Companies
-                  </Button>
-                </Link>
+                  </Link>
+                </Button>
               </CardContent>
             </Card>
           )}

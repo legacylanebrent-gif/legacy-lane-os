@@ -55,12 +55,12 @@ export default function Campaigns() {
             </h1>
             <p className="text-slate-600">Create and manage automated marketing campaigns</p>
           </div>
-          <Link to={createPageUrl('CampaignBuilder')} className="w-full md:w-auto">
-            <Button className="bg-orange-600 hover:bg-orange-700 w-full">
+          <Button className="bg-orange-600 hover:bg-orange-700 w-full" asChild>
+            <Link to={createPageUrl('CampaignBuilder')} className="w-full md:w-auto">
               <Plus className="w-4 h-4 mr-2" />
               New Campaign
-            </Button>
-          </Link>
+            </Link>
+          </Button>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-6 md:mb-8">
@@ -124,11 +124,11 @@ export default function Campaigns() {
                 <p className="text-slate-500 mb-6">
                   Create your first marketing campaign to get started
                 </p>
-                <Link to={createPageUrl('CampaignBuilder')}>
-                  <Button className="bg-orange-600 hover:bg-orange-700">
+                <Button className="bg-orange-600 hover:bg-orange-700" asChild>
+                  <Link to={createPageUrl('CampaignBuilder')}>
                     Create Campaign
-                  </Button>
-                </Link>
+                  </Link>
+                </Button>
               </Card>
             ) : (
               <div className="grid gap-6">

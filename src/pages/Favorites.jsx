@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -244,9 +244,9 @@ export default function Favorites() {
               : "Sales you've favorited that have ended will appear here."}
           </p>
           {activeTab === 'active' && (
-            <Link to={createPageUrl('Home')}>
-              <Button className="bg-orange-600 hover:bg-orange-700">Browse Estate Sales</Button>
-            </Link>
+            <Button className="bg-orange-600 hover:bg-orange-700" asChild>
+              <Link to={createPageUrl('Home')}>Browse Estate Sales</Link>
+            </Button>
           )}
         </Card>
       ) : (
@@ -335,42 +335,51 @@ export default function Favorites() {
                       {/* Action buttons — only show route/directions for active sales */}
                       {!isPast && (
                         <div className="flex gap-2">
-                          <Button
+                          <span
+                            role="button"
+                            tabIndex={0}
                             onClick={(e) => handleAddToRoute(e, sale.id)}
-                            variant="outline"
-                            size="sm"
-                            className={`flex-1 ${routeSales.includes(sale.id) ? 'bg-cyan-100 border-cyan-600 text-cyan-700' : ''}`}
+                            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') handleAddToRoute(e, sale.id); }}
+                            className={`inline-flex items-center justify-center gap-2 rounded-md border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground h-8 px-3 text-xs font-medium flex-1 cursor-pointer ${routeSales.includes(sale.id) ? 'bg-cyan-100 border-cyan-600 text-cyan-700' : ''}`}
                           >
                             <Bookmark className={`w-4 h-4 mr-1 ${routeSales.includes(sale.id) ? 'fill-current' : ''}`} />
                             {routeSales.includes(sale.id) ? 'In Route' : 'Add to Route'}
-                          </Button>
+                          </span>
                           {isSaleAddressVisible(sale) && (
-                            <Button
+                            <span
+                              role="button"
+                              tabIndex={0}
                               onClick={(e) => handleGetDirections(e, sale)}
-                              variant="outline"
-                              size="sm"
-                              className="flex-1"
+                              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') handleGetDirections(e, sale); }}
+                              className="inline-flex items-center justify-center gap-2 rounded-md border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground h-8 px-3 text-xs font-medium flex-1 cursor-pointer"
                             >
                               <Navigation className="w-4 h-4 mr-1" />
                               Directions
-                            </Button>
+                            </span>
                           )}
                         </div>
                       )}
 
-                      <Button
+                      <span
+                        role="button"
+                        tabIndex={0}
                         onClick={(e) => {
                           e.preventDefault();
                           e.stopPropagation();
                           handleRemoveFavorite(favorite.id);
                         }}
-                        variant="ghost"
-                        size="sm"
-                        className="w-full text-red-600 hover:text-red-700 hover:bg-red-50"
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            handleRemoveFavorite(favorite.id);
+                          }
+                        }}
+                        className="inline-flex items-center justify-center gap-2 rounded-md h-8 px-3 text-xs font-medium w-full text-red-600 hover:text-red-700 hover:bg-red-50 cursor-pointer"
                       >
                         <Trash2 className="w-4 h-4 mr-2" />
                         Remove from Favorites
-                      </Button>
+                      </span>
                     </div>
                   </CardContent>
                 </Link>

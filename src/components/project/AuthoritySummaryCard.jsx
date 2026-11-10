@@ -41,11 +41,11 @@ export default function AuthoritySummaryCard({ authorities, sale }) {
         {active.map((a) => (
           <div key={a.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-2 last:border-0 last:pb-0">
             <div className="min-w-0">
-              <p className="text-sm font-medium text-slate-900">
+              <div className="text-sm font-medium text-slate-900">
                 {a.full_name}
                 {a.is_primary && <Badge className="ml-2 bg-indigo-100 text-indigo-700">PRIMARY</Badge>}
                 {a.authority_role ? <span className="text-slate-500 text-xs ml-1.5">— {a.authority_role}</span> : null}
-              </p>
+              </div>
               <p className="text-xs text-slate-500">{(a.authority_scopes || []).map(scopeLabel).join(' · ') || 'general project'}</p>
             </div>
             <Badge className={`${VERIFIED_BADGE[a.verification_status || 'UNRESOLVED']} flex-shrink-0 w-fit`}>

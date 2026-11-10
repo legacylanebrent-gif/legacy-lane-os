@@ -50,12 +50,12 @@ export default function CoachDashboard({ user }) {
           </h1>
           <p className="text-slate-600">Manage your courses and students</p>
         </div>
-        <Link to={createPageUrl('Courses')}>
-          <Button className="bg-gold-600 hover:bg-gold-700">
+        <Button className="bg-gold-600 hover:bg-gold-700" asChild>
+          <Link to={createPageUrl('Courses')}>
             <Plus className="w-4 h-4 mr-2" />
             Create Course
-          </Button>
-        </Link>
+          </Link>
+        </Button>
       </div>
 
       <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">

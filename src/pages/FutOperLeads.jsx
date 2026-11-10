@@ -716,11 +716,11 @@ export default function FutOperLeads() {
                             <Trash2 className="w-3 h-3" />
                           </Button>
                           {op.source_url && (
-                            <a href={op.source_url} target="_blank" rel="noopener noreferrer">
-                              <Button size="sm" variant="outline" className="h-6 text-xs px-2">
+                            <Button size="sm" variant="outline" className="h-6 text-xs px-2" asChild>
+                              <a href={op.source_url} target="_blank" rel="noopener noreferrer">
                                 <ExternalLink className="w-3 h-3" />
-                              </Button>
-                            </a>
+                              </a>
+                            </Button>
                           )}
                         </div>
                       </td>

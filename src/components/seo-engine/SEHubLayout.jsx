@@ -53,8 +53,8 @@ export default function SEHubLayout({
           {subtitle && <p className={`text-lg font-medium mb-4 ${heroAccent}`}>{subtitle}</p>}
           <p className="text-slate-300 max-w-2xl mx-auto text-base leading-relaxed">{intro}</p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center mt-8">
-            <a href="#get-help"><Button className="bg-orange-500 hover:bg-orange-600 text-white font-semibold px-8">Get Free Help</Button></a>
-            {stateRouteSlug && <a href="#find-your-state"><Button className="border border-white/40 bg-white/10 text-white hover:bg-white/20 hover:text-white px-8">Find Your State Guide</Button></a>}
+            <Button asChild className="bg-orange-500 hover:bg-orange-600 text-white font-semibold px-8"><a href="#get-help">Get Free Help</a></Button>
+            {stateRouteSlug && <Button asChild className="border border-white/40 bg-white/10 text-white hover:bg-white/20 hover:text-white px-8"><a href="#find-your-state">Find Your State Guide</a></Button>}
           </div>
         </div>
       </section>

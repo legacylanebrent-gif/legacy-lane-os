@@ -15,9 +15,9 @@ import { OBSERVATION_KINDS } from './liveSaleModel';
 
 const Tile = ({ label, value, sub, quality }) => (
   <div className="border border-slate-200 rounded p-2">
-    <p className="text-[10px] text-slate-500">
+    <div className="text-[10px] text-slate-500">
       {label} {quality && <Badge variant="outline" className="ml-1 text-[9px] py-0">{quality}</Badge>}
-    </p>
+    </div>
     <p className="text-lg font-bold text-slate-900 leading-tight">{value}</p>
     {sub && <p className="text-[10px] text-slate-400">{sub}</p>}
   </div>

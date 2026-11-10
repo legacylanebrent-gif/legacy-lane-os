@@ -278,11 +278,11 @@ export default function LaunchFbAdModal({ campaign, open, onClose }) {
             )}
             <div className="flex gap-2">
               {result?.ads_manager_url && (
-                <a href={result.ads_manager_url} target="_blank" rel="noopener noreferrer">
-                  <Button size="sm" className="bg-[#1877F2] hover:bg-[#1565d8] text-white text-xs">
+                <Button size="sm" className="bg-[#1877F2] hover:bg-[#1565d8] text-white text-xs" asChild>
+                  <a href={result.ads_manager_url} target="_blank" rel="noopener noreferrer">
                     <ExternalLink className="w-3.5 h-3.5 mr-1.5" />Open in Ads Manager
-                  </Button>
-                </a>
+                  </a>
+                </Button>
               )}
               <Button size="sm" variant="outline" onClick={handleClose}>Close</Button>
             </div>

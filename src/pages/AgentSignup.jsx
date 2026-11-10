@@ -437,11 +437,11 @@ export default function AgentSignup() {
               <p className="text-slate-400 leading-relaxed mb-8">
               If EstateSalen helps you access estate-sale-driven opportunities, Houszu helps you convert, market, and scale them.
               </p>
-              <a href="https://houszu.com" target="_blank" rel="noopener noreferrer">
-                <Button className="bg-blue-500 hover:bg-blue-600 text-white font-bold px-8 py-4 text-lg rounded-xl flex items-center gap-2">
+              <Button asChild className="bg-blue-500 hover:bg-blue-600 text-white font-bold px-8 py-4 text-lg rounded-xl flex items-center gap-2">
+                <a href="https://houszu.com" target="_blank" rel="noopener noreferrer">
                   Explore Houszu for Agents <ChevronRight className="w-5 h-5" />
-                </Button>
-              </a>
+                </a>
+              </Button>
             </div>
             <div className="space-y-4">
               {[

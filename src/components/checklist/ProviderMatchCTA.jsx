@@ -31,11 +31,11 @@ export default function ProviderMatchCTA({ headline, body, state, county }) {
             </div>
           ))}
         </div>
-        <a href={`/estate-settlement-planner${state ? `?state=${encodeURIComponent(state)}` : ''}`}>
-          <Button className="w-full bg-amber-500 hover:bg-amber-600 text-white font-semibold text-base py-3">
+        <Button asChild className="w-full bg-amber-500 hover:bg-amber-600 text-white font-semibold text-base py-3">
+          <a href={`/estate-settlement-planner${state ? `?state=${encodeURIComponent(state)}` : ''}`}>
             Get Matched With Local Providers →
-          </Button>
-        </a>
+          </a>
+        </Button>
         <p className="text-xs text-center text-slate-400 mt-2">Free matching · No obligation · Available in most states</p>
       </CardContent>
     </Card>

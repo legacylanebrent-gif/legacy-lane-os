@@ -88,9 +88,9 @@ export default function SEAdminItemKnowledge({ items, onRefresh }) {
                   </div>
                   <div className="flex gap-2 shrink-0">
                     {item.item_slug && (
-                      <a href={`/items/${item.item_slug}`} target="_blank" rel="noopener noreferrer">
-                        <Button variant="outline" size="sm"><Eye className="w-3 h-3"/></Button>
-                      </a>
+                      <Button variant="outline" size="sm" asChild>
+                        <a href={`/items/${item.item_slug}`} target="_blank" rel="noopener noreferrer"><Eye className="w-3 h-3"/></a>
+                      </Button>
                     )}
                     <Button variant="outline" size="sm" onClick={()=>{setEditingId(item.id);setEditForm({item_name:item.item_name,seo_title:item.seo_title,seo_description:item.seo_description,pricing_notes:item.pricing_notes});}}>
                       <Edit className="w-3 h-3"/>

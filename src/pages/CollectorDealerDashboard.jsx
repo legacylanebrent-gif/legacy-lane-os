@@ -130,16 +130,16 @@ export default function CollectorDealerDashboard() {
           </p>
         </div>
         <div className="flex gap-2">
-          <Link to={createPageUrl('MyProfile')}>
-            <Button variant="outline" className="gap-2">
+          <Button variant="outline" className="gap-2" asChild>
+            <Link to={createPageUrl('MyProfile')}>
               <Building2 className="w-4 h-4" /> Store Profile
-            </Button>
-          </Link>
-          <Link to="/">
-            <Button className="bg-orange-600 hover:bg-orange-700 gap-2">
+            </Link>
+          </Button>
+          <Button className="bg-orange-600 hover:bg-orange-700 gap-2" asChild>
+            <Link to="/">
               <Search className="w-4 h-4" /> Browse Estate Sales
-            </Button>
-          </Link>
+            </Link>
+          </Button>
         </div>
       </div>
 
@@ -185,9 +185,9 @@ export default function CollectorDealerDashboard() {
             <div className="text-center py-4">
               <MapPin className="w-10 h-10 text-slate-300 mx-auto mb-2" />
               <p className="text-slate-500 text-sm mb-3">No business address set</p>
-              <Link to={createPageUrl('MyProfile')}>
-                <Button size="sm" variant="outline">Set Address in My Profile</Button>
-              </Link>
+              <Button size="sm" variant="outline" asChild>
+                <Link to={createPageUrl('MyProfile')}>Set Address in My Profile</Link>
+              </Button>
             </div>
           )}
         </CardContent>
@@ -313,11 +313,11 @@ export default function CollectorDealerDashboard() {
             </div>
           )}
 
-          <Link to={createPageUrl('MyProfile', { tab: 'buyer_prefs' })}>
-            <Button className="bg-orange-600 hover:bg-orange-700 gap-2 w-full sm:w-auto">
+          <Button className="bg-orange-600 hover:bg-orange-700 gap-2 w-full sm:w-auto" asChild>
+            <Link to={createPageUrl('MyProfile', { tab: 'buyer_prefs' })}>
               <Target className="w-4 h-4" /> Manage ISO Wanted Items
-            </Button>
-          </Link>
+            </Link>
+          </Button>
         </CardContent>
       </Card>
 
@@ -340,11 +340,11 @@ export default function CollectorDealerDashboard() {
                     <p className="text-xs text-slate-400 mt-1">{new Date(n.created_date).toLocaleDateString()}</p>
                   </div>
                   {n.link_to_page && (
-                    <Link to={`/${n.link_to_page}?${n.link_params || ''}`}>
-                      <Button size="sm" variant="ghost" className="text-orange-600">
+                    <Button size="sm" variant="ghost" className="text-orange-600" asChild>
+                      <Link to={`/${n.link_to_page}?${n.link_params || ''}`}>
                         <ArrowRight className="w-4 h-4" />
-                      </Button>
-                    </Link>
+                      </Link>
+                    </Button>
                   )}
                 </div>
               ))}

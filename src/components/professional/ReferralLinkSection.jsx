@@ -64,9 +64,9 @@ export default function ReferralLinkSection({ contact, onSaved }) {
                 {copied ? "Copied" : "Copy Link"}
               </Button>
               {qrUrl && (
-                <a href={qrUrl} download={`referral-qr-${contact.last_name || "partner"}.png`}>
-                  <Button size="sm" variant="outline"><Download className="w-4 h-4 mr-1" /> Download QR</Button>
-                </a>
+                <Button size="sm" variant="outline" asChild>
+                  <a href={qrUrl} download={`referral-qr-${contact.last_name || "partner"}.png`}><Download className="w-4 h-4 mr-1" /> Download QR</a>
+                </Button>
               )}
               <Button size="sm" variant="outline" onClick={generate} disabled={busy}>Regenerate</Button>
             </div>

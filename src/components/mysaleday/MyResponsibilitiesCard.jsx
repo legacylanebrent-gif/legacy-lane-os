@@ -24,11 +24,11 @@ export default function MyResponsibilitiesCard({ responsibilities, zones }) {
             <p className="text-sm font-medium text-slate-800">
               {TYPE_LABELS[r.responsibility_type] || r.responsibility_type}{r.zone_name ? ` — ${r.zone_name}` : ''}
             </p>
-            <p className="text-xs text-slate-500 flex flex-wrap gap-x-3">
+            <div className="text-xs text-slate-500 flex flex-wrap gap-x-3">
               {r.is_backup && <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-300">Backup / second</Badge>}
               {r.planned_hours != null && <span>{r.planned_hours} planned hrs</span>}
               {r.notes && <span>{r.notes}</span>}
-            </p>
+            </div>
           </div>
         ))}
         {zones && zones.length > 0 && (

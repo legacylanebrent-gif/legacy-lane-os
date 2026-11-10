@@ -92,9 +92,9 @@ export default function SEAdminContentHubs({ hubs, onRefresh }) {
                   </div>
                   <div className="flex gap-2 shrink-0">
                     {hub.slug && (
-                      <a href={`/${hub.slug}`} target="_blank" rel="noopener noreferrer">
-                        <Button variant="outline" size="sm"><Eye className="w-3 h-3" /></Button>
-                      </a>
+                      <Button variant="outline" size="sm" asChild>
+                        <a href={`/${hub.slug}`} target="_blank" rel="noopener noreferrer"><Eye className="w-3 h-3" /></a>
+                      </Button>
                     )}
                     <Button variant="outline" size="sm" onClick={() => { setEditingId(hub.id); setEditForm({ title: hub.title, seo_title: hub.seo_title, seo_description: hub.seo_description, intro_content: hub.intro_content }); }}>
                       Edit

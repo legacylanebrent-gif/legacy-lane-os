@@ -27,11 +27,11 @@ export default function MyIssuesCard({ issues }) {
         {(!issues || issues.length === 0) && <p className="text-sm text-slate-400">You have not raised anything for this sale.</p>}
         {issues?.map((i) => (
           <div key={i.id} className="p-2.5 rounded-lg bg-slate-50 border border-slate-100">
-            <p className="text-sm font-medium text-slate-800 flex flex-wrap items-center gap-1.5">
+            <div className="text-sm font-medium text-slate-800 flex flex-wrap items-center gap-1.5">
               {i.title}
               <Badge variant="outline" className={URGENCY_BADGE[i.urgency]}>{i.urgency}</Badge>
               <Badge variant="outline" className={STATUS_BADGE[i.status]}>{i.status}</Badge>
-            </p>
+            </div>
             {(i.status === 'RESOLVED' || i.status === 'CANCELLED') ? (
               i.resolution && (
                 <p className="text-xs text-slate-600 mt-1 bg-green-50 border border-green-200 rounded-md px-2 py-1.5">

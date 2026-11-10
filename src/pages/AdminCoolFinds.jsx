@@ -148,11 +148,11 @@ export default function AdminCoolFinds() {
 
                           {/* Actions */}
                           <div className="flex gap-2">
-                            <Link to={`/cool-finds/${story.slug || story.id}`} target="_blank">
-                              <Button variant="outline" size="sm">
+                            <Button variant="outline" size="sm" asChild>
+                              <Link to={`/cool-finds/${story.slug || story.id}`} target="_blank">
                                 <Eye className="w-3.5 h-3.5 mr-1" /> Preview
-                              </Button>
-                            </Link>
+                              </Link>
+                            </Button>
                             {activeTab === 'draft' && (
                               <>
                                 <Button size="sm" className="bg-green-600 hover:bg-green-700 text-white" onClick={() => handleApprove(story)}>

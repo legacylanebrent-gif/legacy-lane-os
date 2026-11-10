@@ -308,7 +308,7 @@ export default function CampaignBuilder({ adsCredentials, user }) {
                 {result.campaign_id && <p>📁 <strong>Campaign ID:</strong> {result.campaign_id}</p>}
                 {result.ad_set_id && <p>🎯 <strong>Ad Set ID:</strong> {result.ad_set_id}</p>}
                 {result.ad_id && <p>🖼 <strong>Ad ID:</strong> {result.ad_id}</p>}
-                {result.status && <p>📊 <strong>Status:</strong> <Badge className="bg-yellow-100 text-yellow-700 ml-1">{result.status}</Badge></p>}
+                {result.status && <div>📊 <strong>Status:</strong> <Badge className="bg-yellow-100 text-yellow-700 ml-1">{result.status}</Badge></div>}
               </div>
             )}
             <p className="text-slate-600 mt-4 text-sm">Your campaign is now in review by Facebook. It typically goes live within a few hours.</p>

@@ -144,10 +144,10 @@ export default function PricingWorkspace({ open, item: initialItem, onClose, onS
           <p className="text-xs font-semibold text-slate-700 mb-1">Buyer response — offers ({offers.length})</p>
           {offers.length === 0 && <p className="text-xs text-slate-400 italic">No offers recorded.</p>}
           {offers.slice(0, 5).map(o => (
-            <p key={o.id} className="text-xs text-slate-600">
+            <div key={o.id} className="text-xs text-slate-600">
               <span className="font-medium">${Number(o.offer_amount).toLocaleString()}</span> — {o.full_name}
               <Badge variant="secondary" className="ml-1.5 text-[9px]">{o.status}</Badge>
-            </p>
+            </div>
           ))}
         </div>
 

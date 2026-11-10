@@ -104,18 +104,18 @@ export default function SaleSpotlight({ sale, onCreateSale }) {
           </div>
 
           <div className="mt-4 flex flex-wrap gap-2">
-            <Link to={`/PrepareSale?saleId=${sale.id}`}>
-              <Button className="bg-orange-600 hover:bg-orange-700">
+            <Button className="bg-orange-600 hover:bg-orange-700" asChild>
+              <Link to={`/PrepareSale?saleId=${sale.id}`}>
                 Prepare This Sale
                 <ArrowRight className="w-4 h-4 ml-2" />
-              </Button>
-            </Link>
-            <Link to="/MySaleDay">
-              <Button variant="outline">My Sale Day</Button>
-            </Link>
-            <Link to={`/SaleEditor?saleId=${sale.id}`}>
-              <Button variant="ghost" className="text-slate-600">Edit details</Button>
-            </Link>
+              </Link>
+            </Button>
+            <Button variant="outline" asChild>
+              <Link to="/MySaleDay">My Sale Day</Link>
+            </Button>
+            <Button variant="ghost" className="text-slate-600" asChild>
+              <Link to={`/SaleEditor?saleId=${sale.id}`}>Edit details</Link>
+            </Button>
           </div>
         </div>
       </div>
