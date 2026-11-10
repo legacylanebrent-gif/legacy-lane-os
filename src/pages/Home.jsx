@@ -1388,9 +1388,9 @@ export default function Home() {
                                     <CardContent className="p-5">
                                       <h4 className="text-xl font-semibold text-slate-900 mb-2 group-hover:text-orange-600 transition-colors">{sale.title}</h4>
                                       {sale.operator_id && (sale.operator_name || operators[sale.operator_id]) && (
-                                        <Link to={createPageUrl('BusinessProfile') + '?id=' + sale.operator_id} onClick={(e) => e.stopPropagation()} className="text-sm text-cyan-600 hover:text-cyan-700 font-medium block mb-3">
+                                        <span onClick={(e) => { e.stopPropagation(); navigate(createPageUrl('BusinessProfile') + '?id=' + sale.operator_id); }} className="text-sm text-cyan-600 hover:text-cyan-700 font-medium block mb-3 cursor-pointer">
                                           by {sale.operator_name || operators[sale.operator_id]}
-                                        </Link>
+                                        </span>
                                       )}
                                       <div className="space-y-2 text-sm">
                                         <div className="flex items-start gap-2 text-slate-600">
@@ -1417,7 +1417,7 @@ export default function Home() {
                                         )}
                                       </div>
                                       <div className="mt-4 pt-4 border-t">
-                                        <Button className="w-full bg-orange-600 hover:bg-orange-700 text-white">View Buyout Details</Button>
+                                        <span className="inline-flex h-9 w-full items-center justify-center rounded-md bg-orange-600 px-4 py-2 text-sm font-medium text-white">View Buyout Details</span>
                                       </div>
                                     </CardContent>
                                   </Card>

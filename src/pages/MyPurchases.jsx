@@ -65,12 +65,7 @@ export default function MyPurchases() {
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-8">
-          <Link to={createPageUrl('Dashboard')}>
-            <Button variant="ghost" className="mb-4">
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Back to Dashboard
-            </Button>
-          </Link>
+          <Button variant="ghost" className="mb-4" asChild><Link to={createPageUrl('Dashboard')}><ArrowLeft className="w-4 h-4 mr-2" />Back to Dashboard</Link></Button>
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-4xl font-serif font-bold text-slate-900 mb-2">
@@ -80,12 +75,7 @@ export default function MyPurchases() {
                 Track all your estate sale and marketplace purchases
               </p>
             </div>
-            <Link to={createPageUrl('RecordPurchase')}>
-              <Button className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700">
-                <ShoppingBag className="w-4 h-4 mr-2" />
-                Record Purchase
-              </Button>
-            </Link>
+            <Button className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700" asChild><Link to={createPageUrl('RecordPurchase')}><ShoppingBag className="w-4 h-4 mr-2" />Record Purchase</Link></Button>
           </div>
         </div>
 
@@ -163,12 +153,7 @@ export default function MyPurchases() {
                   : 'Start recording your estate sale purchases to track your collection'}
               </p>
               {!searchQuery && (
-                <Link to={createPageUrl('RecordPurchase')}>
-                  <Button className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700">
-                    <ShoppingBag className="w-4 h-4 mr-2" />
-                    Record Your First Purchase
-                  </Button>
-                </Link>
+                <Button className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700" asChild><Link to={createPageUrl('RecordPurchase')}><ShoppingBag className="w-4 h-4 mr-2" />Record Your First Purchase</Link></Button>
               )}
             </CardContent>
           </Card>

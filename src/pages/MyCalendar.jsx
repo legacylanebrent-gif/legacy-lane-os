@@ -104,11 +104,7 @@ export default function MyCalendar() {
             <h1 className="text-xl font-serif font-bold text-slate-800">My Calendar</h1>
             <p className="text-xs text-slate-500 mt-0.5">Plan your estate sale visits</p>
           </div>
-          <Link to="/">
-            <Button variant="ghost" size="sm" className="text-slate-600">
-              <Home className="w-4 h-4 mr-1" /> Home
-            </Button>
-          </Link>
+          <Button variant="ghost" size="sm" className="text-slate-600" asChild><Link to="/"><Home className="w-4 h-4 mr-1" /> Home</Link></Button>
         </div>
 
         {/* Month Navigation */}
@@ -248,11 +244,7 @@ export default function MyCalendar() {
               <CalendarIcon className="w-10 h-10 text-slate-300 mx-auto mb-2" />
               <p className="text-sm text-slate-400">No upcoming sales in your calendar</p>
               <p className="text-xs text-slate-400 mt-1">Browse estate sales and tap "Add to Calendar"</p>
-              <Link to="/">
-                <Button variant="outline" size="sm" className="mt-3">
-                  Browse Sales <ArrowRight className="w-3 h-3 ml-1" />
-                </Button>
-              </Link>
+              <Button variant="outline" size="sm" className="mt-3" asChild><Link to="/">Browse Sales <ArrowRight className="w-3 h-3 ml-1" /></Link></Button>
             </div>
           ) : (
             <div className="space-y-2 max-h-96 overflow-y-auto">

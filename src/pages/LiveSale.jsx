@@ -161,9 +161,7 @@ export default function LiveSale() {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <Link to={`/ManualFallbackKit?saleId=${sale.id}`}>
-            <Button size="sm" variant="outline"><LifeBuoy className="w-3.5 h-3.5 mr-1" />Continuity kit</Button>
-          </Link>
+          <Button size="sm" variant="outline" asChild><Link to={`/ManualFallbackKit?saleId=${sale.id}`}><LifeBuoy className="w-3.5 h-3.5 mr-1" />Continuity kit</Link></Button>
           <Button size="sm" variant="outline" onClick={() => load(sale.id)}>
             <RefreshCw className="w-3.5 h-3.5 mr-1" />Refresh
           </Button>

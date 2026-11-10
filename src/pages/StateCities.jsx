@@ -58,9 +58,7 @@ export default function StateCities() {
         <div className="flex items-center justify-center flex-1 py-32">
           <div className="text-center">
             <h1 className="text-2xl font-bold text-slate-900 mb-4">State not found</h1>
-            <Link to={createPageUrl('SearchByState')}>
-              <Button>Back to States</Button>
-            </Link>
+            <Button asChild><Link to={createPageUrl('SearchByState')}>Back to States</Link></Button>
           </div>
         </div>
       </div>
@@ -72,12 +70,7 @@ export default function StateCities() {
       <UniversalHeader user={currentUser} isAuthenticated={isAuthenticated} />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
-        <Link to={createPageUrl('SearchByState')}>
-          <Button variant="ghost" className="gap-2 mb-4">
-            <ArrowLeft className="w-4 h-4" />
-            Back to States
-          </Button>
-        </Link>
+        <Button variant="ghost" className="gap-2 mb-4" asChild><Link to={createPageUrl('SearchByState')}><ArrowLeft className="w-4 h-4" />Back to States</Link></Button>
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">

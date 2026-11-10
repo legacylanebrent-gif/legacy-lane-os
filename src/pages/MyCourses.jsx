@@ -121,11 +121,7 @@ export default function MyCourses() {
             <p className="text-slate-500 mb-6">
               Start learning by enrolling in a course
             </p>
-            <Link to={createPageUrl('Courses')}>
-              <Button className="bg-orange-600 hover:bg-orange-700">
-                Browse Courses
-              </Button>
-            </Link>
+            <Button className="bg-orange-600 hover:bg-orange-700" asChild><Link to={createPageUrl('Courses')}>Browse Courses</Link></Button>
           </Card>
         ) : (
           <div className="space-y-4">
@@ -175,12 +171,7 @@ export default function MyCourses() {
                         </div>
 
                         <div className="mt-4 flex gap-3">
-                          <Link to={createPageUrl(`CourseLearning?id=${course.id}`)}>
-                            <Button className="bg-orange-600 hover:bg-orange-700">
-                              {enrollment?.progress > 0 ? 'Continue Learning' : 'Start Course'}
-                              <ChevronRight className="w-4 h-4 ml-1" />
-                            </Button>
-                          </Link>
+                          <Button className="bg-orange-600 hover:bg-orange-700" asChild><Link to={createPageUrl(`CourseLearning?id=${course.id}`)}>{enrollment?.progress > 0 ? 'Continue Learning' : 'Start Course'}<ChevronRight className="w-4 h-4 ml-1" /></Link></Button>
                           
                           {enrollment?.certificate_issued && (
                             <Button variant="outline">

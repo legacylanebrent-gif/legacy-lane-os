@@ -124,7 +124,7 @@ export default function MySaleDay() {
       )}
 
       <div className="flex flex-wrap gap-2 pt-1">
-        <Link to="/PosPractice"><Button variant="outline" size="sm"><GraduationCap className="w-4 h-4 mr-1" />Practice checkout & payment</Button></Link>
+        <Button variant="outline" size="sm" asChild><Link to="/PosPractice"><GraduationCap className="w-4 h-4 mr-1" />Practice checkout & payment</Link></Button>
       </div>
       {!view && !loading && <p className="text-sm text-slate-500">Pick a sale above to see your day.</p>}
     </div>

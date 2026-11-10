@@ -246,9 +246,7 @@ export default function MyListings() {
                         <span>{item.category?.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}</span>
                       </div>
                       <div className="mt-4 grid grid-cols-2 gap-2">
-                        <Link to={createPageUrl(`ItemDetail?id=${item.id}`)}>
-                          <Button variant="outline" className="w-full">View</Button>
-                        </Link>
+                        <Button variant="outline" className="w-full" asChild><Link to={createPageUrl(`ItemDetail?id=${item.id}`)}>View</Link></Button>
                         <Button variant="outline" onClick={() => { setEditingItem(item); setShowCreateModal(true); }}>Edit</Button>
                         <Button
                           variant="outline"
@@ -323,9 +321,7 @@ export default function MyListings() {
                         </td>
                         <td className="px-4 py-3 text-center">
                           <div className="flex gap-2 justify-center">
-                            <Link to={createPageUrl(`ItemDetail?id=${item.id}`)}>
-                              <Button variant="outline" size="sm">View</Button>
-                            </Link>
+                            <Button variant="outline" size="sm" asChild><Link to={createPageUrl(`ItemDetail?id=${item.id}`)}>View</Link></Button>
                             <Button variant="outline" size="sm" onClick={() => { setEditingItem(item); setShowCreateModal(true); }}>Edit</Button>
                             <Button
                               variant="outline"

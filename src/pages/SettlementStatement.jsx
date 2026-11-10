@@ -290,9 +290,7 @@ export default function SettlementStatement() {
       <div className="bg-white border-b border-slate-200 px-4 sm:px-8 py-4 sticky top-0 z-10 print:hidden">
         <div className="max-w-6xl mx-auto flex items-center justify-between gap-4 flex-wrap">
           <div className="flex items-center gap-3">
-            <Link to="/SaleConversionPipeline">
-              <Button variant="ghost" size="icon"><ArrowLeft className="w-5 h-5" /></Button>
-            </Link>
+            <Button variant="ghost" size="icon" asChild><Link to="/SaleConversionPipeline"><ArrowLeft className="w-5 h-5" /></Link></Button>
             <div>
               <h1 className="text-2xl font-serif font-bold text-slate-900 flex items-center gap-2">
                 <FileText className="w-6 h-6 text-orange-600" /> Settlement Statement

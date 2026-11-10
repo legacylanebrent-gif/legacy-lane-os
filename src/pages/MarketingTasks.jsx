@@ -105,12 +105,9 @@ export default function MarketingTasks() {
           <p className="text-slate-600 mt-1">Manage estate sale and business marketing activities</p>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 w-full md:w-auto md:flex md:gap-3">
-          <Link to={createPageUrl('CampaignBuilder')} className="w-full md:w-auto">
-            <Button variant="outline" className="border-cyan-600 text-cyan-700 hover:bg-cyan-50 w-full md:w-auto">
-              <Megaphone className="w-4 h-4 mr-2" />
-              Create Campaign
-            </Button>
-          </Link>
+          <Button variant="outline" className="border-cyan-600 text-cyan-700 hover:bg-cyan-50 w-full md:w-auto" asChild>
+            <Link to={createPageUrl('CampaignBuilder')} className="w-full md:w-auto"><Megaphone className="w-4 h-4 mr-2" />Create Campaign</Link>
+          </Button>
           <Dialog open={showTaskForm} onOpenChange={setShowTaskForm}>
             <DialogTrigger asChild>
               <Button className="bg-orange-600 hover:bg-orange-700 w-full md:w-auto" onClick={() => setEditingTask(null)}>
@@ -181,11 +178,7 @@ export default function MarketingTasks() {
                         <Badge className="bg-orange-100 text-orange-700">
                           {completedCount}/{totalCount} Complete
                         </Badge>
-                        <Link to={createPageUrl('EstateSaleDetail') + '?id=' + sale.id}>
-                          <Button size="sm" variant="outline">
-                            View Sale <ArrowRight className="w-4 h-4 ml-2" />
-                          </Button>
-                        </Link>
+                        <Button size="sm" variant="outline" asChild><Link to={createPageUrl('EstateSaleDetail') + '?id=' + sale.id}>View Sale <ArrowRight className="w-4 h-4 ml-2" /></Link></Button>
                       </div>
                     </div>
                   </CardHeader>

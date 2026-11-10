@@ -176,11 +176,7 @@ export default function PropstreamREListings() {
           <p className="text-slate-500 text-sm">Import daily PropStream MLS listings, score estate sale opportunities, prep agent outreach, and distribute leads to operators.</p>
         </div>
         <div className="flex flex-wrap gap-2 shrink-0">
-          <Link to="/PropstreamREListingImporter">
-            <Button className="bg-orange-600 hover:bg-orange-700 text-white font-semibold shadow-md">
-              <FileSpreadsheet className="w-4 h-4 mr-1" /> Full Import
-            </Button>
-          </Link>
+          <Button className="bg-orange-600 hover:bg-orange-700 text-white font-semibold shadow-md" asChild><Link to="/PropstreamREListingImporter"><FileSpreadsheet className="w-4 h-4 mr-1" /> Full Import</Link></Button>
           <Button onClick={() => setShowScoring(true)} variant="outline" className="gap-2">
             <Info className="w-4 h-4" /> How Scoring Works
           </Button>
@@ -193,11 +189,7 @@ export default function PropstreamREListings() {
           <Button onClick={handleExtractAgents} disabled={extractingAgents} variant="outline" className="text-blue-600 hover:text-blue-700">
             {extractingAgents ? <Loader className="w-4 h-4 animate-spin mr-1" /> : <Users className="w-4 h-4 mr-1" />} Extract Agents
           </Button>
-          <Link to="/PropstreamAgentLeads">
-            <Button variant="outline" className="text-blue-600 hover:text-blue-700">
-              <Users className="w-4 h-4 mr-1" /> View Agent Leads
-            </Button>
-          </Link>
+          <Button variant="outline" className="text-blue-600 hover:text-blue-700" asChild><Link to="/PropstreamAgentLeads"><Users className="w-4 h-4 mr-1" /> View Agent Leads</Link></Button>
           <Button onClick={() => exportREListingsToFacebookAudienceCSV(listings)} variant="outline" className="gap-2 text-blue-600 hover:text-blue-700">
             <Share2 className="w-4 h-4" />Export FB Audience
           </Button>

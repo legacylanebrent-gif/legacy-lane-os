@@ -142,11 +142,9 @@ export default function HowToUse() {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <p className="text-slate-600">{feature.description}</p>
-                  <Link to={feature.link} className="block pt-3">
-                    <Button className="w-full bg-orange-600 hover:bg-orange-700 text-white">
-                      {feature.cta}
-                    </Button>
-                  </Link>
+                  <Button className="w-full bg-orange-600 hover:bg-orange-700 text-white" asChild>
+                    <Link to={feature.link} className="block pt-3">{feature.cta}</Link>
+                  </Button>
                 </CardContent>
               </Card>
             ))}

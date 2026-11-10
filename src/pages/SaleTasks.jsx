@@ -387,9 +387,7 @@ Return as a JSON array.`,
           </div>
         </div>
         <div className="flex flex-wrap gap-2">
-          <Link to={`/ProjectDashboard?saleId=${sale?.id}`}>
-            <Button variant="outline">Project Dashboard</Button>
-          </Link>
+          <Button variant="outline" asChild><Link to={`/ProjectDashboard?saleId=${sale?.id}`}>Project Dashboard</Link></Button>
           <Button onClick={generateCustomTasks} disabled={generatingTasks} className="bg-purple-600 hover:bg-purple-700">
             {generatingTasks ? (<><Loader2 className="w-4 h-4 mr-2 animate-spin" />Generating...</>) : (<><Sparkles className="w-4 h-4 mr-2" />AI Generate Tasks</>)}
           </Button>

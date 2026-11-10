@@ -532,9 +532,7 @@ export default function SaleCloseout() {
             </p>
           </div>
           <div className="flex flex-col sm:flex-row gap-2">
-            <Link to={'/TransitionCompletion?saleId=' + sale.id}>
-              <Button variant="outline"><ListChecks className="w-4 h-4 mr-2" />Transition Completion</Button>
-            </Link>
+            <Button variant="outline" asChild><Link to={'/TransitionCompletion?saleId=' + sale.id}><ListChecks className="w-4 h-4 mr-2" />Transition Completion</Link></Button>
             <Button
               disabled={blockers.length > 0 || sale.status === 'completed'}
               onClick={() => setShowCloseConfirm(true)}

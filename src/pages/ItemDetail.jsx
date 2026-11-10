@@ -209,11 +209,9 @@ export default function ItemDetail() {
       <div className="min-h-screen bg-gradient-to-br from-slate-50 to-orange-50 flex items-center justify-center p-8">
         <Card className="p-12 text-center">
           <p className="text-slate-600 text-lg mb-4">Item not found</p>
-          <Link to={createPageUrl('Home')}>
-            <Button className="bg-orange-600 hover:bg-orange-700">
-              Browse All Sales
-            </Button>
-          </Link>
+          <Button className="bg-orange-600 hover:bg-orange-700" asChild>
+            <Link to={createPageUrl('Home')}>Browse All Sales</Link>
+          </Button>
         </Card>
       </div>
     );

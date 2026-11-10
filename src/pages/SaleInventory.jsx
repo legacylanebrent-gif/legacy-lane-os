@@ -293,18 +293,10 @@ export default function SaleInventory() {
             </div>
             <div className="flex gap-2">
               {saleId && (
-                <Link to={`/SettlementStatement?saleId=${saleId}`}>
-                  <Button variant="outline" className="gap-2 text-orange-600 border-orange-300">
-                    <FileText className="w-4 h-4" /> Settlement
-                  </Button>
-                </Link>
+                <Button variant="outline" className="gap-2 text-orange-600 border-orange-300" asChild><Link to={`/SettlementStatement?saleId=${saleId}`}><FileText className="w-4 h-4" /> Settlement</Link></Button>
               )}
               {saleId && (
-                <Link to={`/ItemLabels?saleId=${saleId}`}>
-                  <Button variant="outline" className="gap-2">
-                    <Tag className="w-4 h-4" /> QR Labels
-                  </Button>
-                </Link>
+                <Button variant="outline" className="gap-2" asChild><Link to={`/ItemLabels?saleId=${saleId}`}><Tag className="w-4 h-4" /> QR Labels</Link></Button>
               )}
               <Button variant="outline" className="gap-2" onClick={printBackup} title="Printable inventory backup (connectivity backup — not offline sync)">
                 <Printer className="w-4 h-4" /> Backup List

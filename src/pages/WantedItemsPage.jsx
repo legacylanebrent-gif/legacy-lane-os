@@ -70,11 +70,7 @@ export default function WantedItemsPage() {
             </div>
           </div>
           {user && (
-            <Link to="/Dashboard">
-              <Button className="bg-orange-600 hover:bg-orange-700 gap-2">
-                <Plus className="w-4 h-4" /> Post Wanted Listing
-              </Button>
-            </Link>
+            <Button className="bg-orange-600 hover:bg-orange-700 gap-2" asChild><Link to="/Dashboard"><Plus className="w-4 h-4" /> Post Wanted Listing</Link></Button>
           )}
         </div>
 
