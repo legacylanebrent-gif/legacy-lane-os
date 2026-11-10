@@ -1449,9 +1449,7 @@ export default function MyProfile() {
             <CardHeader>
               <CardTitle className="flex items-center justify-between">
                 <div className="flex items-center gap-2"><ShoppingBag className="w-5 h-5" />My Estate Sale Purchases</div>
-                <Link to={createPageUrl('MyPurchases')}>
-                  <Button variant="ghost" size="sm" className="text-orange-600">View All <ArrowRight className="w-4 h-4 ml-1" /></Button>
-                </Link>
+                <Button variant="ghost" size="sm" className="text-orange-600" asChild><Link to={createPageUrl('MyPurchases')}>View All <ArrowRight className="w-4 h-4 ml-1" /></Link></Button>
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -1475,7 +1473,7 @@ export default function MyProfile() {
                 <div className="text-center py-6">
                   <ShoppingBag className="w-10 h-10 text-slate-300 mx-auto mb-2" />
                   <p className="text-slate-500 text-sm mb-3">No purchases recorded yet</p>
-                  <Link to={createPageUrl('RecordPurchase')}><Button size="sm" className="bg-orange-600 hover:bg-orange-700">Record First Purchase</Button></Link>
+                  <Button size="sm" className="bg-orange-600 hover:bg-orange-700" asChild><Link to={createPageUrl('RecordPurchase')}>Record First Purchase</Link></Button>
                 </div>
               )}
             </CardContent>

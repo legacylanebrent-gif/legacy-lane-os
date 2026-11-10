@@ -440,11 +440,7 @@ export default function WhyIEstateSalen() {
 
           {/* CTA Button */}
           <div className="text-center mb-16">
-            <Link to="/subscriptions">
-              <Button className="bg-orange-600 hover:bg-orange-700 text-white px-8 py-6 text-lg font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all">
-                🚀 View Subscription Plans
-              </Button>
-            </Link>
+            <Button className="bg-orange-600 hover:bg-orange-700 text-white px-8 py-6 text-lg font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all" asChild><Link to="/subscriptions">🚀 View Subscription Plans</Link></Button>
           </div>
         </div>
 
@@ -634,11 +630,7 @@ export default function WhyIEstateSalen() {
 
         {/* CTA Button */}
         <div className="text-center mb-16">
-          <Link to="/subscriptions">
-            <Button className="bg-orange-600 hover:bg-orange-700 text-white px-8 py-6 text-lg font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all">
-              📈 Compare Subscription Plans
-            </Button>
-          </Link>
+          <Button className="bg-orange-600 hover:bg-orange-700 text-white px-8 py-6 text-lg font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all" asChild><Link to="/subscriptions">📈 Compare Subscription Plans</Link></Button>
         </div>
 
         {/* Post-Sale Section */}
@@ -867,11 +859,7 @@ export default function WhyIEstateSalen() {
             ))}
           </div>
 
-          <Link to="/subscriptions">
-            <Button className="bg-white text-orange-600 hover:bg-slate-100 px-8 py-6 text-lg font-bold rounded-lg shadow-lg hover:shadow-xl transition-all">
-              🚀 Start Your Free Trial
-            </Button>
-          </Link>
+          <Button className="bg-white text-orange-600 hover:bg-slate-100 px-8 py-6 text-lg font-bold rounded-lg shadow-lg hover:shadow-xl transition-all" asChild><Link to="/subscriptions">🚀 Start Your Free Trial</Link></Button>
         </div>
 
         {/* Demo CTA */}
@@ -880,11 +868,7 @@ export default function WhyIEstateSalen() {
           <p className="text-slate-700 mb-6 max-w-2xl mx-auto">
             Schedule a Demo and see exactly how EstateSalen can help you save time, grow revenue, and create a more efficient estate sale business.
           </p>
-          <Link to="/subscriptions">
-            <Button variant="outline" className="border-2 border-navy-600 text-navy-600 hover:bg-navy-50 px-8 py-6 text-lg font-semibold">
-              📅 Book A Demo
-            </Button>
-          </Link>
+          <Button variant="outline" className="border-2 border-navy-600 text-navy-600 hover:bg-navy-50 px-8 py-6 text-lg font-semibold" asChild><Link to="/subscriptions">📅 Book A Demo</Link></Button>
         </div>
       </div>
     </div>

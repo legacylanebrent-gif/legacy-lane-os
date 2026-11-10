@@ -113,12 +113,7 @@ export default function StartYourCompany() {
                 <p className="text-xs text-orange-400">Business Opportunity</p>
               </div>
             </Link>
-            <Link to={createPageUrl('Home')}>
-              <Button variant="ghost" className="text-white hover:bg-slate-800">
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                Back to Home
-              </Button>
-            </Link>
+            <Button variant="ghost" className="text-white hover:bg-slate-800" asChild><Link to={createPageUrl('Home')}><ArrowLeft className="w-4 h-4 mr-2" />Back to Home</Link></Button>
           </div>
         </div>
       </header>

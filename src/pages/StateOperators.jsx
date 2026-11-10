@@ -504,9 +504,7 @@ export default function StateOperators() {
       <section className="py-12 px-4 bg-slate-800 text-center">
         <h3 className="text-2xl font-serif font-bold text-white mb-3">Want to list your company?</h3>
         <p className="text-slate-400 mb-6">Join thousands of estate sale professionals on EstateSalen.com</p>
-        <Link to="/OperatorPackages">
-          <Button className="bg-orange-500 hover:bg-orange-600 text-white px-8 h-11 text-base">Get Started</Button>
-        </Link>
+        <Button className="bg-orange-500 hover:bg-orange-600 text-white px-8 h-11 text-base" asChild><Link to="/OperatorPackages">Get Started</Link></Button>
       </section>
 
       <SharedFooter />

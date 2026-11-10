@@ -2048,13 +2048,13 @@ Return ONLY the description text, no extra commentary.`
                                       const displayPrice = typeof rawPrice === 'object' ? (rawPrice?.extracted_value ? `$${rawPrice.extracted_value}` : JSON.stringify(rawPrice)) : rawPrice;
                                       const isSelected = image.price === numericPrice;
                                       return (
-                                        <button key={mi} type="button"
+                                        <div key={mi} role="button" tabIndex={0}
                                           onClick={() => { if (!numericPrice) return; const updated = [...formData.images]; updated[index] = { ...updated[index], price: numericPrice }; setFormData(prev => ({ ...prev, images: updated })); }}
-                                          className={`flex items-center gap-1 px-2 py-1 rounded text-[11px] transition-colors ${isSelected ? 'bg-green-200 border border-green-500 text-green-900' : 'hover:bg-purple-100 border border-transparent'}`}
+                                          className={`flex items-center gap-1 px-2 py-1 rounded text-[11px] transition-colors cursor-pointer ${isSelected ? 'bg-green-200 border border-green-500 text-green-900' : 'hover:bg-purple-100 border border-transparent'}`}
                                         >
                                           <a href={match.link} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()} className="text-purple-700 hover:underline max-w-[100px] truncate">{match.source || match.title}</a>
                                           <span className={`font-bold ${isSelected ? 'text-green-800' : 'text-green-700'}`}>{isSelected ? '✓' : ''}{displayPrice}</span>
-                                        </button>
+                                        </div>
                                       );
                                     })}
                                   </div>

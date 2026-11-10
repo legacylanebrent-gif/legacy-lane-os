@@ -273,16 +273,7 @@ export default function Notifications() {
                           </Button>
                         )}
                         {notification.link && (
-                          <Link to={notification.link}>
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              className="h-7 text-xs text-slate-600 hover:text-slate-700"
-                              onClick={() => !notification.read && handleMarkAsRead(notification.id)}
-                            >
-                              View →
-                            </Button>
-                          </Link>
+                          <Button size="sm" variant="ghost" className="h-7 text-xs text-slate-600 hover:text-slate-700" onClick={() => !notification.read && handleMarkAsRead(notification.id)} asChild><Link to={notification.link}>View →</Link></Button>
                         )}
                         <Button
                           onClick={() => handleDelete(notification.id)}

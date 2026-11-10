@@ -60,16 +60,8 @@ export default function ProbateHub() {
           Free educational guides on probate, estate sales, cleanouts, and inherited home sales. Find state-specific resources, understand the process, and connect with local experts.
         </p>
         <div className="flex flex-col sm:flex-row gap-3 justify-center">
-          <a href="#find-your-state">
-            <Button className="bg-orange-500 hover:bg-orange-600 text-white font-semibold px-8">
-              Find Your State Guide
-            </Button>
-          </a>
-          <a href="#get-help">
-            <Button className="border border-white/40 bg-white/10 text-white hover:bg-white/20 hover:text-white px-8">
-              Get Free Help
-            </Button>
-          </a>
+          <Button className="bg-orange-500 hover:bg-orange-600 text-white font-semibold px-8" asChild><a href="#find-your-state">Find Your State Guide</a></Button>
+          <Button className="border border-white/40 bg-white/10 text-white hover:bg-white/20 hover:text-white px-8" asChild><a href="#get-help">Get Free Help</a></Button>
         </div>
       </section>
 
@@ -135,11 +127,7 @@ export default function ProbateHub() {
         <div className="max-w-2xl mx-auto">
           <h2 className="text-3xl font-serif font-bold mb-3">Free Probate & Estate Checklist</h2>
           <p className="text-slate-300 mb-6">Download our 12-step checklist covering everything from death certificates to closing the estate.</p>
-          <Link to="/probate-checklist">
-            <Button className="bg-orange-500 hover:bg-orange-600 text-white font-semibold px-10">
-              Get the Free Checklist
-            </Button>
-          </Link>
+          <Button className="bg-orange-500 hover:bg-orange-600 text-white font-semibold px-10" asChild><Link to="/probate-checklist">Get the Free Checklist</Link></Button>
         </div>
       </section>
 

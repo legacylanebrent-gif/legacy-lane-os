@@ -311,14 +311,7 @@ export default function RewardsCheckins() {
                         </p>
                         {checkIn.location_name && checkIn.check_in_type === 'sale_visit' && (
                           <div className="mt-3">
-                            <Link
-                              to={`${createPageUrl('RecordPurchase')}?saleLocation=${encodeURIComponent(checkIn.location_name)}`}
-                            >
-                              <Button size="sm" variant="outline" className="text-xs border-orange-300 text-orange-700 hover:bg-orange-50">
-                                <ShoppingBag className="w-3 h-3 mr-1.5" />
-                                Record a Purchase
-                              </Button>
-                            </Link>
+                            <Button size="sm" variant="outline" className="text-xs border-orange-300 text-orange-700 hover:bg-orange-50" asChild><Link to={`${createPageUrl('RecordPurchase')}?saleLocation=${encodeURIComponent(checkIn.location_name)}`}><ShoppingBag className="w-3 h-3 mr-1.5" />Record a Purchase</Link></Button>
                           </div>
                         )}
                       </div>

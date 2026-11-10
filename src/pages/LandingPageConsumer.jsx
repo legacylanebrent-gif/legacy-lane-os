@@ -94,11 +94,7 @@ export default function LandingPageConsumer() {
         </Link>
         <div className="flex items-center gap-4">
           <Link to="/EstateSaleFinder" className="text-slate-300 hover:text-white text-sm font-medium transition-colors">Browse Sales</Link>
-          <Link to="/OnboardingChat">
-            <Button size="sm" className="bg-orange-500 hover:bg-orange-600 text-white text-sm font-semibold px-4 py-2 rounded-lg">
-              Get Started Free
-            </Button>
-          </Link>
+          <Button size="sm" className="bg-orange-500 hover:bg-orange-600 text-white text-sm font-semibold px-4 py-2 rounded-lg" asChild><Link to="/OnboardingChat">Get Started Free</Link></Button>
         </div>
       </div>
 
@@ -115,16 +111,8 @@ export default function LandingPageConsumer() {
             Tell us what you're hunting for. We'll scan thousands of estate sales and notify you the moment it appears. Find treasures, save time, and beat the crowds.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
-            <Link to="/OnboardingChat">
-              <Button className="bg-purple-600 hover:bg-purple-700 text-white text-lg font-bold px-10 py-6 rounded-xl shadow-lg shadow-purple-500/30">
-                <Heart className="w-5 h-5 mr-2" /> Start Your Hunt List
-              </Button>
-            </Link>
-            <Link to="/EstateSaleFinder">
-              <Button variant="outline" className="border-white/40 text-white bg-white/10 hover:bg-white/20 text-lg font-semibold px-10 py-6 rounded-xl">
-                <MapPin className="w-5 h-5 mr-2" /> Browse Sales Near You
-              </Button>
-            </Link>
+            <Button className="bg-purple-600 hover:bg-purple-700 text-white text-lg font-bold px-10 py-6 rounded-xl shadow-lg shadow-purple-500/30" asChild><Link to="/OnboardingChat"><Heart className="w-5 h-5 mr-2" /> Start Your Hunt List</Link></Button>
+            <Button variant="outline" className="border-white/40 text-white bg-white/10 hover:bg-white/20 text-lg font-semibold px-10 py-6 rounded-xl" asChild><Link to="/EstateSaleFinder"><MapPin className="w-5 h-5 mr-2" /> Browse Sales Near You</Link></Button>
           </div>
         </div>
       </section>
@@ -212,11 +200,7 @@ export default function LandingPageConsumer() {
           <p className="text-slate-300 text-lg max-w-2xl mx-auto">
             We have a dedicated network of antique dealers, art collectors, furniture buyers, and vintage resellers actively looking for inventory. When you create your hunt list, you can choose to let dealers contact you with items that match your criteria.
           </p>
-          <Link to="/OnboardingChat">
-            <Button className="bg-purple-600 hover:bg-purple-700 text-white text-lg font-bold px-10 py-6 rounded-xl mt-4">
-              Set Up Your Collector Profile
-            </Button>
-          </Link>
+          <Button className="bg-purple-600 hover:bg-purple-700 text-white text-lg font-bold px-10 py-6 rounded-xl mt-4" asChild><Link to="/OnboardingChat">Set Up Your Collector Profile</Link></Button>
         </div>
       </section>
 
@@ -228,16 +212,8 @@ export default function LandingPageConsumer() {
             Create your free account, build your ISO Wanted Items list, and let our system do the hunting for you.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link to="/OnboardingChat">
-              <Button className="bg-white hover:bg-purple-50 text-purple-700 text-xl font-bold px-12 py-7 rounded-xl shadow-xl">
-                Get Started Free
-              </Button>
-            </Link>
-            <Link to="/EstateSaleFinder">
-              <Button variant="outline" className="border-purple-300 text-white hover:bg-purple-500 text-lg font-semibold px-10 py-6 rounded-xl">
-                Browse Sales Now
-              </Button>
-            </Link>
+            <Button className="bg-white hover:bg-purple-50 text-purple-700 text-xl font-bold px-12 py-7 rounded-xl shadow-xl" asChild><Link to="/OnboardingChat">Get Started Free</Link></Button>
+            <Button variant="outline" className="border-purple-300 text-white hover:bg-purple-500 text-lg font-semibold px-10 py-6 rounded-xl" asChild><Link to="/EstateSaleFinder">Browse Sales Now</Link></Button>
           </div>
         </div>
       </section>

@@ -239,36 +239,9 @@ export default function MobileHome() {
                     )}
                   </div>
                   <div className="flex gap-1.5 mt-2.5">
-                    <Button
-                      onClick={e => { e.preventDefault(); e.stopPropagation(); toggleRoute(sale.id); }}
-                      variant="outline"
-                      size="sm"
-                      className={`flex-1 h-8 text-xs ${routeSales.includes(sale.id) ? 'bg-cyan-50 border-cyan-500 text-cyan-700' : ''}`}
-                    >
-                      <Bookmark className={`w-3 h-3 mr-1 ${routeSales.includes(sale.id) ? 'fill-current' : ''}`} />
-                      {routeSales.includes(sale.id) ? 'In Route' : 'Add'}
-                    </Button>
-                    <Button
-                      onClick={e => { e.preventDefault(); e.stopPropagation(); toggleSave(sale.id); }}
-                      variant="outline"
-                      size="sm"
-                      className="flex-1 h-8 text-xs"
-                    >
-                      <Heart className={`w-3 h-3 mr-1 ${savedSales.includes(sale.id) ? 'fill-red-500 text-red-500' : ''}`} />
-                      {savedSales.includes(sale.id) ? 'Saved' : 'Save'}
-                    </Button>
-                    <Button
-                      onClick={e => {
-                        e.preventDefault(); e.stopPropagation();
-                        const addr = sale.property_address;
-                        if (addr) window.open(`https://maps.google.com/maps?daddr=${encodeURIComponent(`${addr.street}, ${addr.city}, ${addr.state} ${addr.zip}`)}`, '_blank');
-                      }}
-                      variant="outline"
-                      size="sm"
-                      className="h-8 w-8 p-0"
-                    >
-                      <Navigation className="w-3 h-3" />
-                    </Button>
+                    <span role="button" tabIndex={0} onClick={e => { e.preventDefault(); e.stopPropagation(); toggleRoute(sale.id); }} className={`inline-flex items-center justify-center flex-1 h-8 text-xs rounded-md border border-input bg-background cursor-pointer ${routeSales.includes(sale.id) ? 'bg-cyan-50 border-cyan-500 text-cyan-700' : ''}`}><Bookmark className={`w-3 h-3 mr-1 ${routeSales.includes(sale.id) ? 'fill-current' : ''}`} />{routeSales.includes(sale.id) ? 'In Route' : 'Add'}</span>
+                    <span role="button" tabIndex={0} onClick={e => { e.preventDefault(); e.stopPropagation(); toggleSave(sale.id); }} className="inline-flex items-center justify-center flex-1 h-8 text-xs rounded-md border border-input bg-background cursor-pointer"><Heart className={`w-3 h-3 mr-1 ${savedSales.includes(sale.id) ? 'fill-red-500 text-red-500' : ''}`} />{savedSales.includes(sale.id) ? 'Saved' : 'Save'}</span>
+                    <span role="button" tabIndex={0} onClick={e => { e.preventDefault(); e.stopPropagation(); const addr = sale.property_address; if (addr) window.open(`https://maps.google.com/maps?daddr=${encodeURIComponent(`${addr.street}, ${addr.city}, ${addr.state} ${addr.zip}`)}`, '_blank'); }} className="inline-flex items-center justify-center h-8 w-8 rounded-md border border-input bg-background cursor-pointer"><Navigation className="w-3 h-3" /></span>
                   </div>
                 </CardContent>
               </Card>

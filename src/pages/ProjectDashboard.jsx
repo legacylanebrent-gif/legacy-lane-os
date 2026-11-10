@@ -154,11 +154,11 @@ export default function ProjectDashboard() {
           <Button size="sm" variant="outline" onClick={refresh} disabled={refreshing}>
             {refreshing ? <Loader2 className="w-3.5 h-3.5 mr-1 animate-spin" /> : <RefreshCw className="w-3.5 h-3.5 mr-1" />}Refresh
           </Button>
-          <Link to={`/SaleEditor?saleId=${sale.id}`}><Button size="sm" variant="outline"><ExternalLink className="w-3.5 h-3.5 mr-1" />Sale Editor</Button></Link>
-          <Link to={`/PrepareSale?saleId=${sale.id}`}><Button size="sm" variant="outline"><Wrench className="w-3.5 h-3.5 mr-1" />Prepare</Button></Link>
-          <Link to={`/LiveSale?saleId=${sale.id}`}><Button size="sm" className="bg-orange-600 hover:bg-orange-700"><RadioTower className="w-3.5 h-3.5 mr-1" />LIVE SALE</Button></Link>
-          <Link to={`/SellerOnboarding?saleId=${sale.id}`}><Button size="sm" variant="outline">Seller Onboarding</Button></Link>
-          <Link to={`/OperatorWorkload`}><Button size="sm" variant="outline"><Users className="w-3.5 h-3.5 mr-1" />Workload</Button></Link>
+          <Button size="sm" variant="outline" asChild><Link to={`/SaleEditor?saleId=${sale.id}`}><ExternalLink className="w-3.5 h-3.5 mr-1" />Sale Editor</Link></Button>
+          <Button size="sm" variant="outline" asChild><Link to={`/PrepareSale?saleId=${sale.id}`}><Wrench className="w-3.5 h-3.5 mr-1" />Prepare</Link></Button>
+          <Button size="sm" className="bg-orange-600 hover:bg-orange-700" asChild><Link to={`/LiveSale?saleId=${sale.id}`}><RadioTower className="w-3.5 h-3.5 mr-1" />LIVE SALE</Link></Button>
+          <Button size="sm" variant="outline" asChild><Link to={`/SellerOnboarding?saleId=${sale.id}`}>Seller Onboarding</Link></Button>
+          <Button size="sm" variant="outline" asChild><Link to={`/OperatorWorkload`}><Users className="w-3.5 h-3.5 mr-1" />Workload</Link></Button>
         </div>
       </div>
 
@@ -193,7 +193,7 @@ export default function ProjectDashboard() {
           {openTasks.filter((t) => t.blocked).slice(0, 4).map((t) => (
             <p key={t.id} className="text-xs text-red-700">Blocked: {t.name}{t.blocked_reason ? ` — ${t.blocked_reason}` : ''}</p>
           ))}
-          <Link to={`/SaleTasks?saleId=${sale.id}`}><Button size="sm" variant="outline">View All Tasks</Button></Link>
+          <Button size="sm" variant="outline" asChild><Link to={`/SaleTasks?saleId=${sale.id}`}>View All Tasks</Link></Button>
         </CardContent>
       </Card>
 
@@ -290,7 +290,7 @@ export default function ProjectDashboard() {
             ) : (
               <p className="text-xs text-slate-400">No project-level pickup plan recorded.</p>
             )}
-            <Link to={`/PrepareSale?saleId=${sale.id}`}><Button size="sm" variant="outline">Open Prepare This Sale</Button></Link>
+            <Button size="sm" variant="outline" asChild><Link to={`/PrepareSale?saleId=${sale.id}`}>Open Prepare This Sale</Link></Button>
           </CardContent>
         </Card>
       </div>

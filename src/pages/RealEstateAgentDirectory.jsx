@@ -220,11 +220,7 @@ export default function RealEstateAgentDirectory() {
             ✓ EstateSalen Member
           </Badge>
         ) : currentUser?.primary_account_type === 'real_estate_agent' ? (
-          <Link to="/AgentSignup">
-            <Button size="sm" className="mt-3 w-full text-xs bg-emerald-600 hover:bg-emerald-700 text-white h-7">
-              Claim My Profile
-            </Button>
-          </Link>
+          <Button size="sm" className="mt-3 w-full text-xs bg-emerald-600 hover:bg-emerald-700 text-white h-7" asChild><Link to="/AgentSignup">Claim My Profile</Link></Button>
         ) : null}
       </CardContent>
     </Card>
@@ -251,11 +247,7 @@ export default function RealEstateAgentDirectory() {
                   {loading ? 'Loading...' : `${displayedAgents.length.toLocaleString()} agents in directory`}
                 </p>
               </div>
-              <Link to="/AgentSignup">
-                <Button className="bg-emerald-600 hover:bg-emerald-700 text-white px-6 h-11 text-base whitespace-nowrap">
-                  + Add My Profile
-                </Button>
-              </Link>
+              <Button className="bg-emerald-600 hover:bg-emerald-700 text-white px-6 h-11 text-base whitespace-nowrap" asChild><Link to="/AgentSignup">+ Add My Profile</Link></Button>
             </div>
           </div>
         </section>
@@ -356,9 +348,7 @@ export default function RealEstateAgentDirectory() {
         <section className="py-12 px-4 bg-slate-800 text-center">
           <h3 className="text-2xl font-serif font-bold text-white mb-3">Are you a real estate agent?</h3>
           <p className="text-slate-400 mb-6">Claim your profile and start receiving motivated seller leads</p>
-          <Link to="/AgentSignup">
-            <Button className="bg-emerald-600 hover:bg-emerald-700 text-white px-8 h-11 text-base">Get Started</Button>
-          </Link>
+          <Button className="bg-emerald-600 hover:bg-emerald-700 text-white px-8 h-11 text-base" asChild><Link to="/AgentSignup">Get Started</Link></Button>
         </section>
 
         <SharedFooter />
@@ -434,9 +424,7 @@ export default function RealEstateAgentDirectory() {
       <section className="py-12 px-4 bg-slate-800 text-center">
         <h3 className="text-2xl font-serif font-bold text-white mb-3">Want to list your profile?</h3>
         <p className="text-slate-400 mb-6">Join EstateSalen.com and start receiving motivated seller leads</p>
-        <Link to="/AgentSignup">
-          <Button className="bg-emerald-600 hover:bg-emerald-700 text-white px-8 h-11 text-base">Get Started</Button>
-        </Link>
+        <Button className="bg-emerald-600 hover:bg-emerald-700 text-white px-8 h-11 text-base" asChild><Link to="/AgentSignup">Get Started</Link></Button>
       </section>
 
       <SharedFooter />

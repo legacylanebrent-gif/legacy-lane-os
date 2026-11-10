@@ -997,11 +997,7 @@ export default function OnboardingChat() {
                 ))}
               </div>
               <div className="flex gap-3">
-                <Link to="/BrowseOperators" className="flex-1">
-                  <Button className="w-full bg-orange-600 hover:bg-orange-700 h-12 text-base">
-                    Browse Companies
-                  </Button>
-                </Link>
+                <Button className="w-full bg-orange-600 hover:bg-orange-700 h-12 text-base" asChild><Link to="/BrowseOperators" className="flex-1">Browse Companies</Link></Button>
                 <Button variant="outline" onClick={handleFavoritesContinue} className="h-12">
                   Next <ArrowRight className="w-4 h-4 ml-1" />
                 </Button>

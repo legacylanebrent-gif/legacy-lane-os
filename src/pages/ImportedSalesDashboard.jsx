@@ -249,11 +249,7 @@ export default function ImportedSalesDashboard() {
                           <Button size="sm" variant="outline" onClick={() => setSelectedSale(sale)}>
                             <Eye className="w-3 h-3 mr-1" /> View
                           </Button>
-                          <a href={sale.source_url} target="_blank" rel="noopener noreferrer">
-                            <Button size="sm" variant="ghost">
-                              <ExternalLink className="w-3 h-3" />
-                            </Button>
-                          </a>
+                          <Button size="sm" variant="ghost" asChild><a href={sale.source_url} target="_blank" rel="noopener noreferrer"><ExternalLink className="w-3 h-3" /></a></Button>
                         </div>
                       </div>
                     </CardContent>
@@ -332,9 +328,7 @@ export default function ImportedSalesDashboard() {
                     </div>
                     <div className="flex gap-2">
                       {op.source_profile_url && (
-                        <a href={op.source_profile_url} target="_blank" rel="noopener noreferrer">
-                          <Button size="sm" variant="outline"><ExternalLink className="w-3 h-3 mr-1" /> Profile</Button>
-                        </a>
+                        <Button size="sm" variant="outline" asChild><a href={op.source_profile_url} target="_blank" rel="noopener noreferrer"><ExternalLink className="w-3 h-3 mr-1" /> Profile</a></Button>
                       )}
                     </div>
                   </CardContent>

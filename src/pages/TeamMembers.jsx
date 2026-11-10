@@ -114,10 +114,10 @@ export default function TeamMembers() {
             <div key={m.id} className={`p-4 rounded-xl border bg-white ${m.status === 'INACTIVE' ? 'border-slate-200 opacity-70' : 'border-slate-200'}`}>
               <div className="flex items-start justify-between gap-2">
                 <div className="min-w-0">
-                  <p className="font-semibold text-slate-900 truncate">
+                  <div className="font-semibold text-slate-900 truncate">
                     {m.name}
                     {m.user_id && <Badge className="ml-2 bg-cyan-100 text-cyan-700">Account linked</Badge>}
-                  </p>
+                  </div>
                   <p className="text-xs text-slate-500 truncate">{m.role || 'No role set'}</p>
                 </div>
                 <Badge variant={m.status === 'ACTIVE' ? 'default' : 'secondary'} className={m.status === 'ACTIVE' ? 'bg-green-600' : ''}>

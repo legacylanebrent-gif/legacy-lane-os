@@ -94,18 +94,10 @@ export default function ProbateStatePage() {
               )}
               <div className="flex flex-wrap gap-3 mt-3">
                 {stateData.official_court_url && (
-                  <a href={stateData.official_court_url} target="_blank" rel="noopener noreferrer">
-                    <Button variant="outline" size="sm" className="gap-2">
-                      <ExternalLink className="w-4 h-4" /> Official Court Website
-                    </Button>
-                  </a>
+                  <Button variant="outline" size="sm" className="gap-2" asChild><a href={stateData.official_court_url} target="_blank" rel="noopener noreferrer"><ExternalLink className="w-4 h-4" /> Official Court Website</a></Button>
                 )}
                 {stateData.official_forms_url && (
-                  <a href={stateData.official_forms_url} target="_blank" rel="noopener noreferrer">
-                    <Button variant="outline" size="sm" className="gap-2">
-                      <FileText className="w-4 h-4" /> Probate Forms
-                    </Button>
-                  </a>
+                  <Button variant="outline" size="sm" className="gap-2" asChild><a href={stateData.official_forms_url} target="_blank" rel="noopener noreferrer"><FileText className="w-4 h-4" /> Probate Forms</a></Button>
                 )}
               </div>
               <p className="text-xs text-slate-500 mt-3">Always confirm current forms and filing fees with the court directly. Requirements change.</p>
@@ -136,9 +128,7 @@ export default function ProbateStatePage() {
                 During or after probate in {stateName}, many families choose to liquidate the personal property of an estate through an estate sale. A licensed estate sale company can appraise items, organize the sale, and handle pricing — helping the estate settle faster. EstateSalen can connect you with estate sale companies in {stateName} that have experience with probate estates.
               </p>
             )}
-            <Link to="/probate#get-help">
-              <Button className="mt-4 bg-orange-600 hover:bg-orange-700 text-white">Find an Estate Sale Company in {stateName}</Button>
-            </Link>
+            <Button className="mt-4 bg-orange-600 hover:bg-orange-700 text-white" asChild><Link to="/probate#get-help">Find an Estate Sale Company in {stateName}</Link></Button>
           </CardContent>
         </Card>
 

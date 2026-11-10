@@ -209,7 +209,7 @@ export default function MarketingKit() {
                 <div className="font-medium text-slate-800">{s.title}</div>
                 <div className="text-xs text-slate-500">{s.status} · updated {new Date(s.updated_date).toLocaleDateString()}</div>
               </div>
-              <Button size="sm">Build Kit</Button>
+              <span className="inline-flex h-8 items-center justify-center rounded-md bg-primary px-3 text-xs font-medium text-primary-foreground">Build Kit</span>
             </Link>
           ))}
           {(sales || []).length === 0 && <div className="p-6 text-slate-500 text-sm">No active or upcoming sales to market yet.</div>}
@@ -283,7 +283,7 @@ export default function MarketingKit() {
                   <div className="space-y-3">
                     <img src={qrDataUrl} alt="Sale QR code" className="w-40 h-40 rounded-lg border border-slate-100" />
                     <p className="text-xs text-slate-500 break-all">Points to your public sale page: {kit.qr_url}</p>
-                    <a href={qrDataUrl} download={`sale-${saleId}-qr.png`}><Button variant="outline" size="sm"><Download className="w-4 h-4 mr-1.5" /> Download</Button></a>
+                    <Button variant="outline" size="sm" asChild><a href={qrDataUrl} download={`sale-${saleId}-qr.png`}><Download className="w-4 h-4 mr-1.5" /> Download</a></Button>
                   </div>
                 ) : <p className="text-sm text-slate-400">Build the kit to generate the QR code.</p>}
               </div>
@@ -291,13 +291,13 @@ export default function MarketingKit() {
               <div className="bg-white border border-slate-200 rounded-lg p-5">
                 <div className="font-semibold text-slate-900 mb-2 flex items-center gap-2"><Signpost className="w-4 h-4 text-cyan-700" /> Printable signs</div>
                 <p className="text-sm text-slate-500 mb-3">Directional, parking, checkout, sold and pickup signs derive from this sale's details.</p>
-                <Link to={`/PrintSigns?saleId=${saleId}`}><Button variant="outline" size="sm">Open Print Signs</Button></Link>
+                <Button variant="outline" size="sm" asChild><Link to={`/PrintSigns?saleId=${saleId}`}>Open Print Signs</Link></Button>
               </div>
 
               <div className="bg-white border border-slate-200 rounded-lg p-5">
                 <div className="font-semibold text-slate-900 mb-2 flex items-center gap-2"><Megaphone className="w-4 h-4 text-cyan-700" /> Public sale page</div>
                 <p className="text-sm text-slate-500 mb-3">The kit's destination — publish or update the sale listing itself.</p>
-                <Link to={`/SalePublication?saleId=${saleId}`}><Button variant="outline" size="sm">Open Sale Publication</Button></Link>
+                <Button variant="outline" size="sm" asChild><Link to={`/SalePublication?saleId=${saleId}`}>Open Sale Publication</Link></Button>
               </div>
 
               <FeaturedItemsCard

@@ -92,12 +92,7 @@ export default function PlatformAds() {
             <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
             Refresh
           </Button>
-          <a href="https://adsmanager.facebook.com" target="_blank" rel="noopener noreferrer">
-            <Button variant="outline" size="sm" className="gap-2 text-blue-700 border-blue-300 hover:bg-blue-50">
-              <ExternalLink className="w-4 h-4" />
-              Open Ads Manager
-            </Button>
-          </a>
+          <Button variant="outline" size="sm" className="gap-2 text-blue-700 border-blue-300 hover:bg-blue-50" asChild><a href="https://adsmanager.facebook.com" target="_blank" rel="noopener noreferrer"><ExternalLink className="w-4 h-4" />Open Ads Manager</a></Button>
         </div>
       </div>
 

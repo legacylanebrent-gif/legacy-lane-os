@@ -962,9 +962,9 @@ function DealDetail({ deal, setDeal, onSave, saving, onStageChange, onGenerateTi
               <div className="flex items-center justify-between bg-white border border-orange-200 rounded-lg p-3">
                 <div>
                   <p className="text-sm font-semibold text-slate-900">{linkedSale.title}</p>
-                  <p className="text-xs text-slate-500">
+                  <div className="text-xs text-slate-500">
                     {linkedSale.property_address?.city}, {linkedSale.property_address?.state} · Status: <Badge className="ml-1 text-xs">{linkedSale.status}</Badge>
-                  </p>
+                  </div>
                   {linkedSale.sale_dates?.[0]?.date && (
                     <p className="text-xs text-slate-400 mt-0.5">
                       Sale: {format(parseISO(linkedSale.sale_dates[0].date), 'MMM d, yyyy')}
@@ -1054,9 +1054,7 @@ function DealDetail({ deal, setDeal, onSave, saving, onStageChange, onGenerateTi
               <p className="text-sm font-semibold text-green-800">Settlement Statement</p>
               <p className="text-xs text-slate-500">View financial reconciliation, payout history, and generate a PDF</p>
             </div>
-            <Link to={`/SettlementStatement?dealId=${deal.id}`}>
-              <button className="text-xs bg-green-600 text-white px-3 py-1.5 rounded-lg hover:bg-green-700 transition-colors">Open</button>
-            </Link>
+            <Link to={`/SettlementStatement?dealId=${deal.id}`} className="text-xs bg-green-600 text-white px-3 py-1.5 rounded-lg hover:bg-green-700 transition-colors">Open</Link>
           </div>
 
           <Button onClick={onSave} disabled={saving} className="bg-orange-600 hover:bg-orange-700 gap-2">

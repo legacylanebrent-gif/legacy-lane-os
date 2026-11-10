@@ -43,11 +43,7 @@ export default function LandingPageAgent() {
         <Link to="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
           <span className="text-orange-400 font-serif font-bold text-2xl tracking-tight">Estate<span className="text-white">Salen</span></span>
         </Link>
-        <Link to="/AgentOperatorPortal">
-          <Button size="sm" className="bg-orange-500 hover:bg-orange-600 text-white text-sm font-semibold px-4 py-2 rounded-lg">
-            Join the Network
-          </Button>
-        </Link>
+        <Button size="sm" className="bg-orange-500 hover:bg-orange-600 text-white text-sm font-semibold px-4 py-2 rounded-lg" asChild><Link to="/AgentOperatorPortal">Join the Network</Link></Button>
       </div>
 
       {/* Hero */}
@@ -63,16 +59,8 @@ export default function LandingPageAgent() {
             Probates, downsizing, divorce, foreclosure — these life transitions create both estate sale AND real estate needs. Partner with our nationwide network of estate sale operators and capture the listing while they handle the contents.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
-            <Link to="/AgentOperatorPortal">
-              <Button className="bg-cyan-600 hover:bg-cyan-700 text-white text-lg font-bold px-10 py-6 rounded-xl shadow-lg shadow-cyan-500/30">
-                <Users className="w-5 h-5 mr-2" /> Join the Referral Network
-              </Button>
-            </Link>
-            <Link to="/JoinReferralExchange">
-              <Button variant="outline" className="border-white/40 text-white bg-white/10 hover:bg-white/20 text-lg font-semibold px-10 py-6 rounded-xl">
-                Learn About the Exchange
-              </Button>
-            </Link>
+            <Button className="bg-cyan-600 hover:bg-cyan-700 text-white text-lg font-bold px-10 py-6 rounded-xl shadow-lg shadow-cyan-500/30" asChild><Link to="/AgentOperatorPortal"><Users className="w-5 h-5 mr-2" /> Join the Referral Network</Link></Button>
+            <Button variant="outline" className="border-white/40 text-white bg-white/10 hover:bg-white/20 text-lg font-semibold px-10 py-6 rounded-xl" asChild><Link to="/JoinReferralExchange">Learn About the Exchange</Link></Button>
           </div>
         </div>
       </section>
@@ -161,16 +149,8 @@ export default function LandingPageAgent() {
             Every probate, downsizing, and divorce situation is a listing waiting to happen. Partner with EstateSalen and capture the opportunity.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center mt-4">
-            <Link to="/AgentOperatorPortal">
-              <Button className="bg-white hover:bg-cyan-50 text-cyan-700 text-xl font-bold px-12 py-7 rounded-xl shadow-xl">
-                Join the Referral Network
-              </Button>
-            </Link>
-            <Link to="/JoinReferralExchange">
-              <Button variant="outline" className="border-cyan-300 text-white hover:bg-cyan-500 text-lg font-semibold px-10 py-6 rounded-xl">
-                Learn More
-              </Button>
-            </Link>
+            <Button className="bg-white hover:bg-cyan-50 text-cyan-700 text-xl font-bold px-12 py-7 rounded-xl shadow-xl" asChild><Link to="/AgentOperatorPortal">Join the Referral Network</Link></Button>
+            <Button variant="outline" className="border-cyan-300 text-white hover:bg-cyan-500 text-lg font-semibold px-10 py-6 rounded-xl" asChild><Link to="/JoinReferralExchange">Learn More</Link></Button>
           </div>
         </div>
       </section>

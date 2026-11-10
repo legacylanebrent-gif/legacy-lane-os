@@ -126,7 +126,7 @@ export default function PartnerReferral() {
             <p className="text-sm text-slate-500 mt-1">
               Please contact the professional who shared it with you, or visit our home page to find help directly.
             </p>
-            <a href="/" className="inline-block mt-3"><Button size="sm">Go to EstateSalen</Button></a>
+            <Button size="sm" className="mt-3" asChild><a href="/">Go to EstateSalen</a></Button>
           </div>
         ) : done ? (
           <div className="mt-6 border rounded-lg p-5 bg-emerald-50 border-emerald-200 text-center">

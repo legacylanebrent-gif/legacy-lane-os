@@ -54,12 +54,8 @@ export default function Operators() {
             </Link>
 
             <div className="flex items-center gap-4">
-              <Link to={createPageUrl('Home')}>
-                <Button variant="ghost" className="text-white hover:text-orange-400">Find Sales</Button>
-              </Link>
-              <Link to={createPageUrl('BrowseItems')}>
-                <Button variant="ghost" className="text-white hover:text-orange-400">Shop Items</Button>
-              </Link>
+              <Button variant="ghost" className="text-white hover:text-orange-400" asChild><Link to={createPageUrl('Home')}>Find Sales</Link></Button>
+              <Button variant="ghost" className="text-white hover:text-orange-400" asChild><Link to={createPageUrl('BrowseItems')}>Shop Items</Link></Button>
             </div>
           </div>
         </div>
@@ -74,15 +70,7 @@ export default function Operators() {
           
           <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-8 border border-white/20">
             <div className="flex flex-col md:flex-row items-center justify-center gap-4 mb-4">
-              <Link to={createPageUrl('SearchByState')} className="flex-1 w-full md:w-auto">
-                <Button 
-                  size="lg" 
-                  className="w-full bg-cyan-600 hover:bg-cyan-700 text-white h-14 text-lg"
-                >
-                  <MapPin className="w-5 h-5 mr-2" />
-                  Search by State
-                </Button>
-              </Link>
+              <Button size="lg" className="w-full bg-cyan-600 hover:bg-cyan-700 text-white h-14 text-lg" asChild><Link to={createPageUrl('SearchByState')} className="flex-1 w-full md:w-auto"><MapPin className="w-5 h-5 mr-2" />Search by State</Link></Button>
               
               <span className="text-white font-semibold">Or</span>
               
@@ -124,11 +112,7 @@ export default function Operators() {
           <p className="text-xl text-slate-600 mb-6">
             We'll contact the companies for you!
           </p>
-          <Link to={createPageUrl('Messages')}>
-            <Button size="lg" className="bg-orange-600 hover:bg-orange-700 text-lg px-8">
-              Submit a Sale Request
-            </Button>
-          </Link>
+          <Button size="lg" className="bg-orange-600 hover:bg-orange-700 text-lg px-8" asChild><Link to={createPageUrl('Messages')}>Submit a Sale Request</Link></Button>
         </div>
       </section>
 
@@ -166,11 +150,7 @@ export default function Operators() {
                 <p className="text-slate-600 mb-6">
                   Legacy Lane has provided a way for estate sale companies nationwide to grow beyond their expectations. List your company today!
                 </p>
-                <Link to={createPageUrl('Onboarding')}>
-                  <Button className="bg-orange-600 hover:bg-orange-700">
-                    List Your Company
-                  </Button>
-                </Link>
+                <Button className="bg-orange-600 hover:bg-orange-700" asChild><Link to={createPageUrl('Onboarding')}>List Your Company</Link></Button>
               </CardContent>
             </Card>
           </div>
