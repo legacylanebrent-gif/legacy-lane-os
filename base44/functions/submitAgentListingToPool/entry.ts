@@ -1,4 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
+import { enqueuePersonSync } from '../../shared/houszuPersonSync.ts';
 
 // Simple submission rate limit by email
 const submitLog = new Map();
@@ -57,6 +58,38 @@ Deno.serve(async (req) => {
       notes_for_operator: timeline_info.notes || '',
       matched_operator_ids: matchedOps,
       submission_status: matchedOps.length > 0 ? 'matched_to_operators' : 'submitted'
+    });
+
+    // One-way person sync to Houszu: who they are AND what they told us.
+    await enqueuePersonSync(base44, {
+      businessAction: 'estate_sale_service_request',
+      email: agent_info.email,
+      firstName: agent_info.first_name,
+      lastName: agent_info.last_name,
+      phone: agent_info.phone,
+      company: agent_info.brokerage,
+      contactType: 'agent',
+      relationshipType: 'lead',
+      propertyAddress: [listing.property_address, listing.city, listing.state, listing.zip]
+        .filter(Boolean).join(', ') || null,
+      notes: timeline_info.notes || null,
+      submissionId: submission.id,
+      sourceFunction: 'submitAgentListingToPool',
+      answers: {
+        listing_id,
+        preferred_contact_method: agent_info.preferred_contact_method,
+        best_contact_time: agent_info.best_contact_time,
+        permission_to_share: !!agent_info.permission_to_share,
+        requested_timeline: timeline_info.timeline,
+        requested_help_type: timeline_info.help_type,
+        home_contents_level: timeline_info.contents_level,
+        seller_situation: timeline_info.seller_situation,
+        target_closing_date: timeline_info.target_closing_date,
+        notes_for_operator: timeline_info.notes,
+        property_city: listing.city,
+        property_state: listing.state,
+        property_zip: listing.zip,
+      },
     });
 
     const now = new Date().toISOString();

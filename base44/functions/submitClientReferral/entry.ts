@@ -1,6 +1,7 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.54';
 import { buildAgentReferralEmail } from '../../shared/agentReferralEmail.ts';
 import { estimatePropertyValue } from '../../shared/referralValueEstimate.ts';
+import { enqueuePersonSync } from '../../shared/houszuPersonSync.ts';
 
 const MAX_AGENTS = 20;
 const SEND_BATCH = 5;
@@ -353,6 +354,33 @@ export default async function(req: Request): Promise<Response> {
       agent_notify_status: notifyStatus,
       agent_notify_note: note,
       notified_agent_emails: notifiedEmails,
+    });
+
+    // One-way person sync to Houszu for the referred client.
+    const clientNameParts = clientName.split(/\s+/).filter(Boolean);
+    await enqueuePersonSync(base44, {
+      businessAction: 'client_referral_submitted',
+      email: clientEmail,
+      firstName: clientNameParts[0] || null,
+      lastName: clientNameParts.slice(1).join(' ') || null,
+      phone: clientPhone,
+      contactType: 'seller',
+      relationshipType: 'lead',
+      propertyAddress: propertyAddress || null,
+      notes: needNotes,
+      submissionId: lead.id,
+      submittedAt: now,
+      sourceFunction: 'submitClientReferral',
+      answers: {
+        property_address: propertyAddress,
+        property_city: propertyCity,
+        property_state: propertyState,
+        property_zip: propertyZip,
+        county,
+        timeline,
+        share_consent: shareConsent,
+        referred_by: operatorName,
+      },
     });
 
     return Response.json({

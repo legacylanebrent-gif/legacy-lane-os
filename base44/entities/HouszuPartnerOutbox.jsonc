@@ -1,0 +1,156 @@
+{
+  "name": "HouszuPartnerOutbox",
+  "type": "object",
+  "description": "Durable outbox for the ONE-WAY EstateSalen -> Houszu partner sync. One record per person submission (registration, form, lead, signup) carrying the exact request that will be (or was) POSTed to the Houszu partner API ingest_consumer_activity operation. Written only by the sanctioned server paths (base44/shared/houszuPersonSync.ts and the houszuPartnerSync function); the browser never writes here and never sees a partner credential. request_id is the idempotency key and is reused ONLY for an identical payload; a changed payload gets a new request_id. Records keep the outcome Houszu returned (canonical_person_id, contact_id, contact_status, contact_fields_updated) so a reconciled submission is never re-sent blindly. This is an operational delivery ledger, not a CRM: it holds a copy of the submitted details, so it is admin-only.",
+  "properties": {
+    "request_id": {
+      "type": "string",
+      "description": "UUID v4 idempotency key sent to Houszu. Unique per submission; reused only for the identical payload."
+    },
+    "business_action": {
+      "type": "string",
+      "description": "Lowercase snake_case action describing what the person did (registration, seller_inquiry, buyer_alert_signup...)."
+    },
+    "contact_email": {
+      "type": "string",
+      "description": "Normalized email of the person this submission is about (lookup/dedupe key)."
+    },
+    "source_function": {
+      "type": "string",
+      "description": "Server function that captured the submission."
+    },
+    "submission_id": {
+      "type": "string",
+      "description": "Id of the local record (user id, lead id, profile id) that triggered this sync."
+    },
+    "payload": {
+      "type": "object",
+      "default": {},
+      "additionalProperties": true,
+      "description": "Exact JSON body sent to Houszu. Stored so a retry always sends the identical request."
+    },
+    "payload_hash": {
+      "type": "string",
+      "description": "SHA-256 of the stored payload; a different hash requires a new request_id."
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "processing",
+        "sent",
+        "failed",
+        "permanent",
+        "parked",
+        "auth_failed"
+      ],
+      "default": "pending",
+      "enumColors": [
+        "gray",
+        "blue",
+        "green",
+        "yellow",
+        "red",
+        "red",
+        "red"
+      ],
+      "description": "pending = queued; processing = claimed by a flush; sent = accepted by Houszu (including idempotent replay); failed = retryable failure with backoff; permanent = refused (4xx, never retry); parked = retries exhausted, needs a human; auth_failed = partner credential rejected, nothing else is sent until it is fixed."
+    },
+    "http_status": {
+      "type": "number"
+    },
+    "error_code": {
+      "type": "string",
+      "description": "Houszu error code (INVALID_AUTH, INVALID_REQUEST, RATE_LIMITED...). Never contains a credential."
+    },
+    "error_message": {
+      "type": "string"
+    },
+    "canonical_person_id": {
+      "type": "string",
+      "description": "Person id Houszu issued for this human, recorded after a successful ingest."
+    },
+    "contact_id": {
+      "type": "string",
+      "description": "Houszu CRM contact id recorded after a successful ingest."
+    },
+    "contact_status": {
+      "type": "string",
+      "description": "created | updated | unchanged, as reported by Houszu."
+    },
+    "contact_fields_updated": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    },
+    "idempotent_replay": {
+      "type": "boolean",
+      "default": false
+    },
+    "attempts": {
+      "type": "integer",
+      "default": 0
+    },
+    "next_attempt_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "last_attempt_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "sent_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "claim_token": {
+      "type": "string"
+    },
+    "claimed_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "response_warnings": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    },
+    "last_response": {
+      "type": "object",
+      "default": {},
+      "additionalProperties": true,
+      "description": "Last response body Houszu returned for this request (never a credential). Kept so a delivery can be audited and reconciled without re-sending."
+    }
+  },
+  "required": [
+    "request_id",
+    "business_action",
+    "status"
+  ],
+  "rls": {
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

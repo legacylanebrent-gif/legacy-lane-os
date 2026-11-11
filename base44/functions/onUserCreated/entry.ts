@@ -1,5 +1,6 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
 import { enqueueActivity } from '../../shared/identityActivityOutbox.ts';
+import { enqueuePersonSync } from '../../shared/houszuPersonSync.ts';
 
 // ─────────────────────────────────────────────
 // onUserCreated
@@ -114,6 +115,35 @@ Deno.serve(async (req) => {
     } catch (e) {
       console.error("[onUserCreated] outbox enqueue failed:", e.message);
     }
+
+    // ── Step 4: one-way person sync to Houszu (durable outbox) ──
+    const nameParts = String(userData.full_name || "").trim().split(/\s+/).filter(Boolean);
+    const accountType = userData.primary_account_type || "consumer";
+    const houszuContactType =
+      accountType === "estate_sale_operator" ? "estate_sale_company" :
+      accountType === "real_estate_agent" ? "agent" :
+      accountType === "investor" ? "investor" :
+      accountType === "vendor" ? "vendor" :
+      accountType === "diy_seller" ? "seller" : "other";
+    await enqueuePersonSync(base44, {
+      businessAction: "registration",
+      email: normalizedEmail,
+      firstName: nameParts[0] || null,
+      lastName: nameParts.slice(1).join(" ") || null,
+      phone: userData.business_phone || userData.phone || null,
+      contactType: houszuContactType,
+      relationshipType: "registered_user",
+      registrationMethod: "sign_up",
+      address: { city: userData.city, state: userData.state, zip: userData.zip_code },
+      submissionId: userData.id,
+      sourceFunction: "onUserCreated",
+      answers: {
+        full_name: userData.full_name,
+        account_type: accountType,
+        signup_source: "website",
+        email_verified: true,
+      },
+    });
 
     return Response.json({
       success: true,

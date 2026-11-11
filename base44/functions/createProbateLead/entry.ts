@@ -1,4 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
+import { enqueuePersonSync } from '../../shared/houszuPersonSync.ts';
 
 Deno.serve(async (req) => {
   try {
@@ -53,6 +54,40 @@ Deno.serve(async (req) => {
         routed_at: new Date().toISOString()
       });
     }
+
+    // One-way person sync to Houszu: who they are AND what they told us.
+    await enqueuePersonSync(base44, {
+      businessAction: 'probate_lead_submitted',
+      email,
+      firstName: first_name,
+      lastName: last_name,
+      phone,
+      contactType: 'life_transition_lead',
+      relationshipType: 'lead',
+      address: { city, state, zip: zip_code },
+      propertyAddress: property_address || null,
+      notes,
+      submissionId: lead.id,
+      sourceFunction: 'createProbateLead',
+      answers: {
+        relationship_to_deceased,
+        stage_of_process,
+        has_will,
+        has_real_estate,
+        needs_estate_sale,
+        needs_cleanout,
+        needs_realtor,
+        wants_cash_offer,
+        needs_attorney,
+        urgency_level,
+        county,
+        zip_code,
+        lead_score,
+        source_page,
+        source_state,
+        source_county,
+      },
+    });
 
     return Response.json({ success: true, lead_id: lead.id, lead_score });
 

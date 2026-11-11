@@ -25,6 +25,7 @@ import { bridgeSellerInquiry } from '../../shared/sellerInquiryBridge.ts';
 import { getSellerConsentConfig } from '../../shared/sellerConsentControl.ts';
 import { runConsentIntake } from '../../shared/consentIntakeEngine.ts';
 import { consentProductionStorage } from '../../shared/consentProductionStorage.ts';
+import { enqueuePersonSync } from '../../shared/houszuPersonSync.ts';
 
 export default async function(req: Request): Promise<Response> {
   try {
@@ -105,6 +106,30 @@ export default async function(req: Request): Promise<Response> {
         notify_user_ids: [operatorId],
       }),
     });
+    // One-way person sync to Houszu for the referred seller.
+    await enqueuePersonSync(base44, {
+      businessAction: 'partner_referred_inquiry',
+      email,
+      firstName,
+      lastName: input.last_name,
+      phone: input.phone,
+      contactType: 'seller',
+      relationshipType: 'lead',
+      address: { city: input.city, state, zip: input.zip_code },
+      notes: input.need_notes,
+      submissionId: submissionId || result?.lead?.id || null,
+      sourceFunction: 'submitPartnerReferredInquiry',
+      answers: {
+        city: input.city,
+        county: input.county,
+        state,
+        zip_code: input.zip_code,
+        need_notes: input.need_notes,
+        consent_accepted: input.consent_accepted,
+        referred_by: referrerName,
+      },
+    });
+
     return Response.json(result, { status: result.ok ? 200 : 503 });
   } catch (error) {
     console.error('submitPartnerReferredInquiry error:', (error as Error).message);

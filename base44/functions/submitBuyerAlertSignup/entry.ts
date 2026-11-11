@@ -15,6 +15,7 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.52';
 import { resolveWebsiteTenant } from '../../shared/websiteRuntimeService.ts';
 import { emitLeadFunnelEvent } from '../../shared/websiteEventEmit.ts';
 import { enqueueActivity, resolveMasterUserID } from '../../shared/identityActivityOutbox.ts';
+import { enqueuePersonSync } from '../../shared/houszuPersonSync.ts';
 
 const INTERESTS = ['furniture', 'jewelry', 'vintage', 'coins', 'tools', 'vehicles', 'art', 'collectibles', 'designer', 'electronics', 'household', 'other'];
 
@@ -164,6 +165,30 @@ export default async function(req) {
     });
 
     // Phase 4E (Parts 32/35) — canonical signup ⇄ analytics linkage.
+    // One-way person sync to Houszu: who they are AND what they told us.
+    await enqueuePersonSync(base44, {
+      businessAction: 'buyer_alert_signup',
+      email,
+      firstName: body.first_name || profile.first_name,
+      phone: profile.phone,
+      contactType: 'buyer',
+      relationshipType: 'subscriber',
+      address: { zip: profile.zip_code },
+      submissionId: created.id,
+      submittedAt: now,
+      sourceFunction: 'submitBuyerAlertSignup',
+      answers: {
+        interest_categories: interests,
+        preferred_radius_miles: profile.preferred_radius_miles,
+        zip_code: profile.zip_code,
+        first_name: body.first_name || null,
+        alerts_opt_in: alerts,
+        marketing_opt_in: marketing,
+        sms_opt_in: sms,
+        source_url: created.source_url,
+      },
+    });
+
     await emitLeadFunnelEvent(service, ctx, 'buyer_signup', {});
     return Response.json({ ok: true, lead_id: created.id });
   } catch (error) {

@@ -8,6 +8,7 @@ import { resolveWebsiteTenant, getPublishedSales } from '../../shared/websiteRun
 import { enqueueActivity, resolveMasterUserID } from '../../shared/identityActivityOutbox.ts';
 import { emitLeadFunnelEvent } from '../../shared/websiteEventEmit.ts';
 import { bridgeSellerInquiry, websiteLeadToBridgeInput, resolveCompanyOperator } from '../../shared/sellerInquiryBridge.ts';
+import { enqueuePersonSync } from '../../shared/houszuPersonSync.ts';
 
 const MVP_LEAD_TYPES = ['seller_inquiry', 'contact', 'sale_question'];
 const SERVICES = ['estate_sale', 'downsizing', 'cleanout', 'probate_estate', 'moving', 'consignment', 'real_estate', 'valuation', 'not_sure', 'other'];
@@ -186,6 +187,41 @@ export default async function(req) {
         source_url: created.source_url,
         lead_record_id: created.id
       }
+    });
+
+    // One-way person sync to Houszu: who they are AND what they told us.
+    const info = created.property_info || {};
+    await enqueuePersonSync(base44, {
+      businessAction: leadType,
+      email,
+      firstName: created.contact_first_name,
+      lastName: created.contact_last_name,
+      phone: created.contact_phone,
+      contactType: leadType === 'seller_inquiry' ? 'seller'
+        : leadType === 'sale_question' ? 'buyer' : 'other',
+      relationshipType: 'lead',
+      propertyAddress: [info.city, info.state, info.zip].filter(Boolean).join(', ') || null,
+      notes: created.message,
+      submissionId: created.id,
+      submittedAt: created.created_date || new Date().toISOString(),
+      sourceFunction: 'submitPublicWebsiteLead',
+      answers: {
+        lead_type: leadType,
+        service_requested: serviceRequested,
+        timeline,
+        preferred_contact_method: contactMethod,
+        property_city: info.city,
+        property_state: info.state,
+        property_zip: info.zip,
+        property_type: info.property_type,
+        approx_size: info.approx_size,
+        occupancy: info.occupancy,
+        situation: info.situation,
+        marketing_opt_in: marketing,
+        sms_opt_in: sms,
+        source_url: created.source_url,
+        company_id: ctx.company.id,
+      },
     });
 
     // Phase 4E (Parts 32/35) — canonical lead ⇄ analytics linkage.

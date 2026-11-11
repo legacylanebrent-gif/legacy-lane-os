@@ -1,0 +1,48 @@
+{
+  "description": "Drains the durable EstateSalen -> Houszu person outbox every five minutes so every registration and form submission reaches Houszu, with backoff and parking on failure.",
+  "name": "Houszu Partner Person Sync",
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "houszu_partner_person_sync",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "flush_outbox": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "houszuPartnerSync",
+            "args": {
+              "action": "flush",
+              "limit": 10
+            }
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Deliver queued people to Houszu",
+            "description": "Up to 10 submissions per run"
+          }
+        }
+      }
+    ]
+  },
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "scheduled",
+      "events": [],
+      "schedule_mode": "recurring",
+      "cron_expression": "*/5 * * * *",
+      "one_time_date": null,
+      "timezone": "America/New_York",
+      "interval_value": null,
+      "interval_unit": null,
+      "interval_anchor": null,
+      "ends_type": "never",
+      "ends_on_date": null,
+      "ends_after_count": null
+    }
+  }
+}

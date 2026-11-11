@@ -8,6 +8,7 @@
 // Company; consent is explicit-only (never inferred from submission).
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.52';
 import { bridgeSellerInquiry, websiteLeadToBridgeInput, resolveCompanyOperator } from '../../shared/sellerInquiryBridge.ts';
+import { enqueuePersonSync } from '../../shared/houszuPersonSync.ts';
 
 const LEAD_TYPES = ['seller_inquiry', 'contact', 'vip_signup', 'sale_question', 'consultation_request'];
 
@@ -106,6 +107,30 @@ export default async function(req) {
         console.error('[submitWebsiteLead] Chapter 10 bridge failed:', e && e.message);
       }
     }
+
+    // One-way person sync to Houszu: who they are AND what they told us.
+    await enqueuePersonSync(base44, {
+      businessAction: leadType,
+      email,
+      firstName: created.contact_first_name,
+      lastName: created.contact_last_name,
+      phone: created.contact_phone,
+      contactType: leadType === 'seller_inquiry' || leadType === 'consultation_request' ? 'seller' : 'other',
+      relationshipType: 'lead',
+      notes: created.message,
+      submissionId: created.id,
+      submittedAt: created.created_date || new Date().toISOString(),
+      sourceFunction: 'submitWebsiteLead',
+      answers: {
+        lead_type: leadType,
+        sale_id: body.sale_id || null,
+        marketing_opt_in: marketing,
+        vip_opt_in: vip,
+        sms_opt_in: sms,
+        source_url: created.source_url,
+        company_id: companyId,
+      },
+    });
 
     return Response.json({ ok: true, lead: created, event_attribution: outboxAttribution, bridge });
   } catch (error) {

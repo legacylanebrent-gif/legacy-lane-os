@@ -1,4 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
+import { enqueuePersonSync } from '../../shared/houszuPersonSync.ts';
 
 const joinLog = new Map();
 function isRateLimited(email) {
@@ -88,6 +89,32 @@ Deno.serve(async (req) => {
         body: `Name: ${contact_name}\nBusiness: ${business_name}\nEmail: ${email}\nPhone: ${phone || 'N/A'}\nLocation: ${city}, ${state} ${zip}\nGeocode: ${geocode_status} (${lat}, ${lng})\nPlan: ${plan}\nLead Types: ${(lead_types || []).join(', ')}`
       });
     } catch { /* non-blocking */ }
+
+    // One-way person sync to Houszu: who they are AND what they told us.
+    const contactParts = String(contact_name || '').split(/\s+/).filter(Boolean);
+    await enqueuePersonSync(base44, {
+      businessAction: 'reseller_signup',
+      email,
+      firstName: contactParts[0] || null,
+      lastName: contactParts.slice(1).join(' ') || null,
+      phone,
+      company: business_name,
+      contactType: 'vendor',
+      relationshipType: 'vendor',
+      address: { city, state, zip },
+      submissionId: profile.id,
+      sourceFunction: 'joinResellerNetwork',
+      answers: {
+        business_name,
+        contact_name,
+        website,
+        business_type,
+        lead_types,
+        service_states,
+        plan,
+        geocode_status,
+      },
+    });
 
     return Response.json({
       success: true,
