@@ -2,31 +2,32 @@ export const OPERATOR_PATHS = [
   {
     key: 'full_buy_in',
     name: 'Full Buy-In Operator',
-    headline: '$4,997 one-time',
+    headline: '$4,997 paid in full',
     blurb:
-      'Make the full investment upfront and receive the complete Legacy Lane Local operator package at the start. This path includes limited assistance and is designed for operators ready to lead their own setup and team build.',
+      'Pay the full $4,997 investment upfront and receive the complete Legacy Lane Local operator package at the start. This path includes limited assistance, and because the investment is paid in full there is no 25% profit share — your only ongoing cost is the $197 monthly subscription.',
     cta: 'Apply as an Operator',
     points: [
       'Complete operator package at the start',
       'Limited assistance — you lead your setup and team build',
-      '$4,997 one-time, complete at purchase',
-      'No build-phase fee and no profit share',
+      '$4,997 paid in full upfront',
+      '$197 per month — $147 EstateSalen + $50 website hosting and operator support',
+      'No 25% profit share, ever',
     ],
     featured: false,
   },
   {
     key: 'joint_build',
     name: 'Joint Build Partner',
-    headline: 'None to start',
+    headline: '$497 per month',
     blurb:
-      'Receive the complete Legacy Lane Local operator package and work more closely with Legacy Lane during the six-month build phase. This path includes more hands-on help as you build your team and set up operations in your market. You pay a monthly fee during the build phase, with a buyout within six months.',
+      'Receive the complete Legacy Lane Local operator package and pay the $4,997 down in monthly installments, with more hands-on help as you build your team. The $197 monthly subscription is billed alongside each payment, and Legacy Lane receives 25% of total profit until the full $4,997 is paid.',
     cta: 'Apply as a Joint Build Partner',
     points: [
       'Complete operator package — start date confirmed in your agreement',
-      'More hands-on help through the six-month build phase',
-      '$497 per month during the build phase',
-      '25% of total profit until your buyout is completed',
-      'Buyout due within 6 months — about $2,015 after 6 build payments',
+      'More hands-on help as you build your team and set up operations',
+      '$497 per month toward the $4,997 investment',
+      '$197 per month subscription billed alongside it — $147 EstateSalen + $50 hosting and operator support',
+      '25% of total profit until the full $4,997 is paid',
     ],
     featured: true,
   },
@@ -44,24 +45,24 @@ export const COMPARE_ROWS = [
     joint: 'More hands-on help as you build your team and set up operations during the build phase.',
   },
   {
-    label: 'Upfront investment',
-    full: '$4,997 one-time.',
-    joint: 'None to start — paid as monthly build-phase payments.',
+    label: 'Investment',
+    full: '$4,997 paid in full upfront.',
+    joint: '$4,997 paid down at $497 per month. Nothing due upfront.',
   },
   {
-    label: 'Build-phase monthly fee',
-    full: 'None.',
-    joint: '$497 per month. The fee and the profit share are separate — one is not paid instead of the other.',
+    label: 'Monthly subscription',
+    full: '$197 per month — $147 EstateSalen + $50 website hosting and operator support.',
+    joint: '$197 per month — $147 EstateSalen + $50 website hosting and operator support, billed alongside the $497 payment.',
   },
   {
     label: 'Profit share',
-    full: '—',
-    joint: '25% of total profit until your buyout is completed, including if it is completed early. The share is based on the profit of each estate sale, taken sale by sale, until the full $4,997 buyout is paid.',
+    full: 'None. Paying in full removes the 25% profit share entirely.',
+    joint: '25% of total profit until the full $4,997 is paid — on top of the $497 monthly payment and the $197 subscription. Paying the monthly amounts does not reduce it.',
   },
   {
-    label: 'Buyout timing',
-    full: 'Complete at purchase — no buyout.',
-    joint: 'Due within 6 months of signing — about $2,015 after 6 build payments. The monthly fee stops when the buyout completes.',
+    label: 'When payments end',
+    full: 'No installments and no buyout — complete at purchase.',
+    joint: 'The $497 payments and the 25% profit share both end when the full $4,997 is paid.',
   },
 ];
 
@@ -136,8 +137,12 @@ export const PROGRAM_FAQS = [
     a: 'Territories are built around defined service areas, sized so one operator can serve them well. Exact geography is agreed during enrollment, before you sign anything.',
   },
   {
-    q: 'How is the Joint Build profit share different from the monthly fee?',
-    a: 'They are separate. The Joint Build Partner pays a monthly build-phase fee, and Legacy Lane also receives 25% of total profit until the buyout is completed — including if it is completed early. Paying the monthly fee does not reduce the profit share, and the profit share ends when the buyout completes. How total profit is defined, reported, and paid is confirmed in your agreement.',
+    q: 'What is the $197 monthly subscription?',
+    a: 'It is the ongoing operator subscription, billed on both paths: $147 for EstateSalen Elite access and $50 for website hosting and operator support. It is separate from the $4,997 investment.',
+  },
+  {
+    q: 'How do the $497 payments and the 25% profit share work together?',
+    a: 'Both apply on the installment path. A Joint Build Partner pays $497 per month toward the $4,997 plus the $197 monthly subscription, and Legacy Lane also receives 25% of total profit until the full $4,997 is paid — paying the monthly amounts does not reduce the profit share. Operators who pay the $4,997 in full upfront pay no profit share at all, only the $197 subscription. How total profit is defined, reported, and paid is confirmed in your agreement.',
   },
   {
     q: 'Can I do this part-time?',

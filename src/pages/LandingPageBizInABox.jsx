@@ -85,7 +85,7 @@ export default function LandingPageBizInABox() {
       {/* TWO PATHS */}
       <Section
         title="Two ways to get started"
-        subtitle="Both paths receive the complete Legacy Lane Local operator package. What differs is how much you put in upfront, how much hands-on help comes with it, and — on the Joint Build path — the build-phase fee, the profit share, and the buyout."
+        subtitle="Both paths receive the complete Legacy Lane Local operator package and the same $197 monthly operator subscription. What differs is how you pay the $4,997: in full upfront with no profit share, or $497 a month with 25% of profit shared until it is fully paid."
       >
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           {OPERATOR_PATHS.map((path) => (
@@ -94,15 +94,16 @@ export default function LandingPageBizInABox() {
         </div>
         <div className="mt-6 rounded-xl border border-amber-200 bg-amber-50 p-5">
           <h3 className="font-black text-slate-900 text-sm uppercase tracking-wider mb-2">
-            25% of total profit until buyout
+            The 25% profit share, plainly
           </h3>
           <p className="text-sm text-slate-700 leading-relaxed">
-            Legacy Lane receives 25% of total profit until your buyout is completed. The profit share ends when the
-            buyout is completed, including if it is completed early. The share is based on the profit of each estate
-            sale, taken sale by sale, until the full $4,997 buyout is paid.
+            <span className="font-bold">Pay the $4,997 in full:</span> no profit share at all. Your only ongoing cost is
+            the $197 monthly subscription.
           </p>
           <p className="text-sm text-slate-700 leading-relaxed mt-2">
-            The profit share is separate from the monthly build-phase fee — one is not paid instead of the other.
+            <span className="font-bold">Pay $497 a month:</span> the $4,997 is paid down in installments, the $197
+            monthly subscription is billed alongside each payment, and Legacy Lane receives 25% of total profit until
+            the full $4,997 is paid — on top of both. Paying the monthly amounts does not reduce the profit share.
           </p>
         </div>
       </Section>
@@ -114,10 +115,9 @@ export default function LandingPageBizInABox() {
           <OwnershipCompare />
           <div className="mt-8 space-y-3 text-sm text-slate-600 leading-relaxed">
             <p>
-              How total profit is defined, reported, and paid is confirmed in your agreement. Your initial monthly
-              payments already include the EstateSalen subscription. Once your buyout is complete, no Legacy Lane
-              monthly fee remains and EstateSalen continues as its own mandatory $197/month subscription — the $147
-              Elite plan plus $50 for website hosting and access to the support community.
+              How total profit is defined, reported, and paid is confirmed in your agreement. The $197 monthly
+              operator subscription applies on both paths — $147 for EstateSalen Elite plus $50 for website hosting
+              and operator support — and continues for as long as you operate your business.
             </p>
             <p className="font-semibold text-slate-800">
               Applying records your interest. It does not start billing, activate an operator, or start the

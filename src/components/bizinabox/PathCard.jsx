@@ -6,7 +6,7 @@ export default function PathCard({ path, onApply }) {
   return (
     <div className={`rounded-2xl border-2 p-6 flex flex-col ${featured ? 'border-amber-500 bg-amber-50' : 'border-slate-200 bg-white'}`}>
       {featured && (
-        <div className="text-xs font-black text-amber-700 uppercase tracking-widest mb-2">Profit share until buyout</div>
+        <div className="text-xs font-black text-amber-700 uppercase tracking-widest mb-2">Profit share until the $4,997 is paid</div>
       )}
       <h3 className="text-xl font-black text-slate-900 uppercase tracking-tight">{name}</h3>
       <div className="text-2xl font-black text-slate-900 mt-2">{headline}</div>
