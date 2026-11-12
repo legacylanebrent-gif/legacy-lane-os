@@ -5,7 +5,8 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.52';
 import {
   publishSaleToDestination,
   unpublishSaleFromDestination,
-  authorizeSaleActor
+  authorizeSaleActor,
+  resolveOperatorCompanyIds
 } from '../../shared/publicationService.ts';
 
 async function loadSale(base44, saleId) {
@@ -53,7 +54,14 @@ export default async function(req) {
       }
       const destById = Object.fromEntries(destinations.map(d => [d.id, d]));
       // Non-secret destinations available to this sale's company (for first-time publish).
-      const availRaw = await base44.asServiceRole.entities.Destination.filter({ company_id: sale.company_id || '__none__' }, { limit: 50 });
+      // A sale with no company link resolves through its operator's company membership,
+      // so an operator never has to link a sale before pushing it to their site.
+      const companyIds = sale.company_id
+        ? [sale.company_id]
+        : await resolveOperatorCompanyIds(base44.asServiceRole, sale.operator_id);
+      const availRaw = companyIds.length > 0
+        ? await base44.asServiceRole.entities.Destination.filter({ company_id: { $in: companyIds } }, { limit: 50 })
+        : { items: [] };
       const availableDestinations = ((availRaw && availRaw.items) ? availRaw.items : (availRaw || [])).map(d => ({
         id: d.id, name: d.name, destination_type: d.destination_type, status: d.status
       }));

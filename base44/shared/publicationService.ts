@@ -42,6 +42,17 @@ export async function authorizeSaleActor(base44, user, sale) {
   return { allowed: false, reason: 'not_authorized_for_company' };
 }
 
+// A sale does not need a separate "linking" step: when it carries no company_id
+// (e.g. created by a path that never set it), ownership is resolved from the
+// operator's own Company membership. Returns every company the operator belongs to.
+export async function resolveOperatorCompanyIds(base44Client, operatorId) {
+  if (!operatorId) return [];
+  const base44 = srOf(base44Client);
+  const byPrimary = page(await base44.entities.Company.filter({ primary_contact_user_id: operatorId }, { limit: 50 }));
+  const byMember = page(await base44.entities.Company.filter({ member_user_ids: operatorId }, { limit: 50 }));
+  return [...new Set([...byPrimary, ...byMember].map(c => c && c.id).filter(Boolean))];
+}
+
 async function resolvePublication(base44Client, saleId, destinationId, companyId) {
   const base44 = srOf(base44Client);
   const existing = page(await base44.entities.Publication.filter({ sale_id: saleId, destination_id: destinationId }, { limit: 50, sort: 'created_date' }));
@@ -91,10 +102,21 @@ export async function publishSaleToDestination(base44Client, saleId, destination
     return { ok: false, error: 'destination_not_active', http: 403 };
   }
 
-  // Fail closed: strict company ownership — Sale.company_id must equal Destination.company_id.
-  const saleCompanyId = sale.company_id || null;
-  if (!saleCompanyId || saleCompanyId !== destination.company_id) {
-    return { ok: false, error: 'company_mismatch', http: 403 };
+  // Fail closed on company ownership. A sale that carries company_id must match the
+  // destination's company exactly. A sale without one (never linked at creation) is
+  // authorized through its operator's membership of the destination's company, so
+  // publishing never requires a separate linking phase.
+  let saleCompanyId = sale.company_id || null;
+  if (saleCompanyId) {
+    if (saleCompanyId !== destination.company_id) {
+      return { ok: false, error: 'company_mismatch', http: 403 };
+    }
+  } else {
+    const operatorCompanies = await resolveOperatorCompanyIds(base44, sale.operator_id);
+    if (!operatorCompanies.includes(destination.company_id)) {
+      return { ok: false, error: 'company_mismatch', http: 403 };
+    }
+    saleCompanyId = destination.company_id;
   }
 
   const company = await getOrThrow(base44, 'Company', saleCompanyId);
@@ -162,7 +184,7 @@ export async function unpublishSaleFromDestination(base44Client, saleId, destina
   let publication = existing[0];
 
   const items = page(await base44.entities.Item.filter({ estate_sale_id: saleId }, { limit: 2000, fields: ['id', 'title', 'description', 'category', 'subcategory', 'brand', 'condition', 'price', 'sold_price', 'status', 'featured', 'images', 'updated_date'] }));
-  const company = await getOrThrow(base44, 'Company', sale.company_id);
+  const company = await getOrThrow(base44, 'Company', sale.company_id || publication.company_id);
 
   // Best-effort notification of unpublish to the destination.
   const adapter = getDestinationAdapter(destination.destination_type);
