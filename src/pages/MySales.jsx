@@ -13,6 +13,7 @@ import BuyerMatchModal from '@/components/estate/BuyerMatchModal';
 import SaleIsoMatchModal from '@/components/iso/SaleIsoMatchModal';
 import SaleExpensesModal from '@/components/expenses/SaleExpensesModal';
 import GuestSalePackageCard from '@/components/estate/GuestSalePackageCard';
+import PushToWebsiteButton from '@/components/sales/PushToWebsiteButton';
 import { 
         Plus, Search, Calendar, MapPin, Eye, Heart, DollarSign,
         Package, Edit, TrendingUp, Star, Briefcase, Trash, FileText, BarChart3, Megaphone, Download, Globe, Users, Receipt, Sparkles, ChevronDown, ChevronUp, BookOpen, Pin, UserCheck, Rocket, Building2, ClipboardCheck, ListChecks, CalendarDays, ClipboardList, Wrench, Target
@@ -713,6 +714,7 @@ export default function MySales() {
                            <StageSection label="3. Promote &amp; Presale">
                              {!isCompleted && (<Button variant="outline" size="sm" asChild className={`${btnClass} border-pink-500 hover:bg-pink-50`}><Link to={createPageUrl('SaleMarketingCampaigns') + '?saleId=' + sale.id}><Megaphone className="w-3 h-3 mr-1 flex-shrink-0" />Marketing</Link></Button>)}
                              {!isCompleted && (<Button variant="outline" size="sm" onClick={() => { setSocialSale(sale); setShowSocialModal(true); }} className={`${btnClass} border-purple-500 hover:bg-purple-50`}><Sparkles className="w-3 h-3 mr-1 flex-shrink-0" />Social Posts</Button>)}
+                             <PushToWebsiteButton sale={sale} className={`${btnClass} border-cyan-600 hover:bg-cyan-50`} />
                              {!isCompleted && !sale.local_featured && (
                                <Button variant="outline" size="sm" onClick={() => handleBuyPlacement(sale, 'local')} disabled={featuringId === sale.id}
                                  className={`${btnClass} border-amber-400 hover:bg-amber-50`}
