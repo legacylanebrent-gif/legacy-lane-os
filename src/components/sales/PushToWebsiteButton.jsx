@@ -22,7 +22,7 @@ export default function PushToWebsiteButton({ sale, className = '' }) {
         candidates.find(d => d.destination_type === 'operator_website') ||
         candidates[0];
 
-      if (!destination) throw new Error('No website destination is connected for this sale');
+      if (!destination) throw new Error("This sale isn't linked to your sale company yet, so it can't be pushed to the website");
 
       const res = await base44.functions.invoke('publishSale', {
         action: 'publish',
