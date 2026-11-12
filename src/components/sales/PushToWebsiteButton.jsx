@@ -1,75 +1,21 @@
-import React, { useState } from 'react';
-import { base44 } from '@/api/base44Client';
-import { Button } from '@/components/ui/button';
+import React from 'react';
 import { Globe } from 'lucide-react';
-import { useToast } from '@/components/ui/use-toast';
 
-// Pushes ONE sale to the sale company's website destination (e.g. legacylanesales.com).
-// All state lives in the certified publication service behind the publishSale function.
+// Status note only. The operator website refuses to create a listing for a sale it
+// has never seen ("unknown sale, no auto-create"), so a first-time push can never
+// succeed — the sale has to be pulled once from the website's own admin first.
 export default function PushToWebsiteButton({ sale, className = '' }) {
-  const { toast } = useToast();
-  const [busy, setBusy] = useState(false);
-
-  async function push() {
-    setBusy(true);
-    try {
-      const statusRes = await base44.functions.invoke('publishSale', { action: 'status', sale_id: sale.id });
-      const data = statusRes?.data || {};
-      const existing = (data.publications || [])[0];
-      const candidates = (data.available_destinations || []).filter(d => d.status === 'active');
-      const destination =
-        candidates.find(d => existing && d.id === existing.destination?.id) ||
-        candidates.find(d => d.destination_type === 'operator_website') ||
-        candidates[0];
-
-      if (!destination) throw new Error("This sale isn't linked to your sale company yet, so it can't be pushed to the website");
-
-      const res = await base44.functions.invoke('publishSale', {
-        action: 'publish',
-        sale_id: sale.id,
-        destination_id: destination.id
-      });
-      const out = res?.data || {};
-      if (out.error) throw new Error(out.error);
-
-      // The function reports the destination's answer, so a refused delivery must
-      // never be shown as a success.
-      const publication = out.publication || {};
-      if (publication.status !== 'published') {
-        const detail = String(publication.last_error || out.delivery?.detail || '');
-        throw new Error(
-          /unknown_sale_no_auto_create/.test(detail)
-            ? "The website doesn't have this sale yet. Run Pull once in the website admin, then push again."
-            : (detail || 'The website did not accept this sale')
-        );
-      }
-
-      toast({ title: 'Pushed to your website', description: `${sale.title} → ${destination.name}` });
-    } catch (error) {
-      toast({
-        title: 'Could not push this sale',
-        description: error?.response?.data?.error || error?.message || 'Try again',
-        variant: 'destructive'
-      });
-    } finally {
-      setBusy(false);
-    }
-  }
-
-  // Draft and archived sales are never published to a website.
-  const blocked = ['draft', 'archived'].includes(sale.status);
+  // Draft and archived sales are never on a public website.
+  const blocked = ['draft', 'archived'].includes(sale?.status);
 
   return (
-    <Button
-      variant="outline"
-      size="sm"
-      onClick={push}
-      disabled={busy || blocked}
-      title={blocked ? 'Publish the sale (upcoming or active) before pushing it to your website' : undefined}
-      className={className}
-    >
-      <Globe className="w-3 h-3 mr-1 flex-shrink-0" />
-      {busy ? 'Pushing...' : 'Push to Website'}
-    </Button>
+    <p className={`flex items-start gap-1 text-xs text-slate-500 ${className}`}>
+      <Globe className="w-3 h-3 mt-0.5 flex-shrink-0" />
+      <span>
+        {blocked
+          ? 'Publish this sale (upcoming or active) before it can appear on your website.'
+          : 'To put this sale on your website, go to your website admin and pull it there first.'}
+      </span>
+    </p>
   );
 }
