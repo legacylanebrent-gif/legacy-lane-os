@@ -32,6 +32,18 @@ export default function PushToWebsiteButton({ sale, className = '' }) {
       const out = res?.data || {};
       if (out.error) throw new Error(out.error);
 
+      // The function reports the destination's answer, so a refused delivery must
+      // never be shown as a success.
+      const publication = out.publication || {};
+      if (publication.status !== 'published') {
+        const detail = String(publication.last_error || out.delivery?.detail || '');
+        throw new Error(
+          /unknown_sale_no_auto_create/.test(detail)
+            ? "The website doesn't have this sale yet. Run Pull once in the website admin, then push again."
+            : (detail || 'The website did not accept this sale')
+        );
+      }
+
       toast({ title: 'Pushed to your website', description: `${sale.title} → ${destination.name}` });
     } catch (error) {
       toast({
