@@ -13,7 +13,6 @@ import BuyerMatchModal from '@/components/estate/BuyerMatchModal';
 import SaleIsoMatchModal from '@/components/iso/SaleIsoMatchModal';
 import SaleExpensesModal from '@/components/expenses/SaleExpensesModal';
 import GuestSalePackageCard from '@/components/estate/GuestSalePackageCard';
-import PushToWebsiteButton from '@/components/sales/PushToWebsiteButton';
 import { 
         Plus, Search, Calendar, MapPin, Eye, Heart, DollarSign,
         Package, Edit, TrendingUp, Star, Briefcase, Trash, FileText, BarChart3, Megaphone, Download, Globe, Users, Receipt, Sparkles, ChevronDown, ChevronUp, BookOpen, Pin, UserCheck, Rocket, Building2, ClipboardCheck, ListChecks, CalendarDays, ClipboardList, Wrench, Target
@@ -714,7 +713,6 @@ export default function MySales() {
                            <StageSection label="3. Promote &amp; Presale">
                              {!isCompleted && (<Button variant="outline" size="sm" asChild className={`${btnClass} border-pink-500 hover:bg-pink-50`}><Link to={createPageUrl('SaleMarketingCampaigns') + '?saleId=' + sale.id}><Megaphone className="w-3 h-3 mr-1 flex-shrink-0" />Marketing</Link></Button>)}
                              {!isCompleted && (<Button variant="outline" size="sm" onClick={() => { setSocialSale(sale); setShowSocialModal(true); }} className={`${btnClass} border-purple-500 hover:bg-purple-50`}><Sparkles className="w-3 h-3 mr-1 flex-shrink-0" />Social Posts</Button>)}
-                             <PushToWebsiteButton sale={sale} className={`${btnClass} border-cyan-600 hover:bg-cyan-50`} />
                              {!isCompleted && !sale.local_featured && (
                                <Button variant="outline" size="sm" onClick={() => handleBuyPlacement(sale, 'local')} disabled={featuringId === sale.id}
                                  className={`${btnClass} border-amber-400 hover:bg-amber-50`}
@@ -835,7 +833,6 @@ export default function MySales() {
                                 <Button variant="outline" size="sm" asChild className="h-7 text-xs border-teal-500 text-black hover:bg-teal-50 px-2"><Link to={createPageUrl('Worksheet') + '?saleId=' + sale.id}><DollarSign className="w-3 h-3 mr-1" />Transactions</Link></Button>
                                 <Button variant="outline" size="sm" asChild className="h-7 text-xs border-cyan-400 text-black hover:bg-cyan-50 px-2"><Link to={createPageUrl('Attendance') + '?saleId=' + sale.id}><TrendingUp className="w-3 h-3 mr-1" />Attendance</Link></Button>
                                 <Button variant="outline" size="sm" asChild className="h-7 text-xs border-slate-400 text-black hover:bg-slate-50 px-2"><Link to={createPageUrl('SaleExport') + '?saleId=' + sale.id}><Download className="w-3 h-3 mr-1" />Export</Link></Button>
-                                <PushToWebsiteButton sale={sale} className="h-7 text-xs border-cyan-600 text-black hover:bg-cyan-50 px-2" />
                                 <Button variant="outline" size="sm" onClick={() => { setExpensesSale(sale); setShowExpensesModal(true); }} className="h-7 text-xs border-emerald-500 text-black hover:bg-emerald-50 px-2"><Receipt className="w-3 h-3 mr-1" />Expenses</Button>
                                 <Button variant="outline" size="sm" asChild className="h-7 text-xs border-blue-500 text-black hover:bg-blue-50 px-2"><Link to={createPageUrl('SaleContracts') + '?saleId=' + sale.id}><FileText className="w-3 h-3 mr-1" />Contracts</Link></Button>
                                 <Button variant="outline" size="sm" asChild className="h-7 text-xs border-violet-600 text-black hover:bg-violet-50 px-2"><Link to={'/SaleClientDecisions?saleId=' + sale.id}><ClipboardCheck className="w-3 h-3 mr-1" />Decisions</Link></Button>
