@@ -20,6 +20,7 @@ import {
   BookOpen
 } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
+import { isAdminUser } from '@/lib/isAdminUser';
 
 export default function UniversalHeader({ user: userProp, isAuthenticated: isAuthProp }) {
   // Self-fetch auth state when props aren't passed (e.g. on public SEO/guide pages)
@@ -133,7 +134,7 @@ export default function UniversalHeader({ user: userProp, isAuthenticated: isAut
                     </DropdownMenuItem>
                     {(['estate_sale_operator', 'real_estate_agent', 'vendor', 'reseller', 'consignor', 'diy_seller', 'collector_dealer', 'investor'].includes(user?.primary_account_type) || user?.role === 'admin') && (
                       <DropdownMenuItem asChild>
-                        <Link to="/AdminDashboard" className="cursor-pointer font-medium text-orange-600">
+                        <Link to={isAdminUser(user) ? '/AdminDashboard' : createPageUrl('Dashboard')} className="cursor-pointer font-medium text-orange-600">
                           <LayoutDashboard className="w-4 h-4 mr-2" /> Business Dashboard
                         </Link>
                       </DropdownMenuItem>
