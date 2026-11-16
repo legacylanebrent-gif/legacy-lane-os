@@ -231,7 +231,10 @@ export default function OperatorPackages() {
               primary_account_type: accountType,
               selected_package: pkg.id,
               subscription_tier: pkgData.tier_level,
-              subscription_status: 'trial'
+              subscription_status: 'trial',
+              // A plan choice closes out onboarding; without this the account
+              // bounces back to step 1 of onboarding instead of the dashboard.
+              onboarding_completed: true
             });
 
             // Create the 14-day trial subscription record for paid subscription packages
@@ -299,7 +302,8 @@ export default function OperatorPackages() {
         selected_package: pkg.id,
         subscription_tier: pkgData?.tier_level || 'starter',
         nonprofit_doc_url: docUrl,
-        nonprofit_doc_uploaded_at: new Date().toISOString()
+        nonprofit_doc_uploaded_at: new Date().toISOString(),
+        onboarding_completed: true
       });
 
       // Create referral if ref exists

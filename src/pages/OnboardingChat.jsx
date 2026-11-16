@@ -316,6 +316,14 @@ export default function OnboardingChat() {
 
   // ── Operator: Platform Intro → Packages ──
   const handleOperatorToPackages = async () => {
+    // The guided operator setup is finished once they reach plan selection.
+    // Record that here, so going to the pricing page and then the dashboard
+    // doesn't send them back to the start of onboarding.
+    try {
+      await base44.auth.updateMe({ onboarding_completed: true });
+    } catch (e) {
+      console.error('Failed to mark operator onboarding complete:', e);
+    }
     navigate(createPageUrl('OperatorPackages'));
   };
 
