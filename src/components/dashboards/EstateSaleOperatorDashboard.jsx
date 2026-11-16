@@ -22,6 +22,8 @@ import { Home, Eye, Heart, MessageSquare, Plus } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import ProfileCompletionGate, { isProfileComplete } from '@/components/profile/ProfileCompletionGate';
+import UsageTourDialog from '@/components/operator/tour/UsageTourDialog';
+import { useUsageTour } from '@/components/operator/tour/useUsageTour';
 
 export default function EstateSaleOperatorDashboard({ user }) {
   const navigate = useNavigate();
@@ -40,6 +42,7 @@ export default function EstateSaleOperatorDashboard({ user }) {
   const [editingSale, setEditingSale] = useState(null);
   const [refreshKey, setRefreshKey] = useState(0);
   const [money, setMoney] = useState({ thisMonth: 0, lastMonth: 0, txCount: 0 });
+  const tour = useUsageTour(user);
 
   useEffect(() => {
     loadDashboardData();
@@ -145,6 +148,14 @@ export default function EstateSaleOperatorDashboard({ user }) {
         onRefresh={() => setRefreshKey((k) => k + 1)}
         onCreateSale={openCreateModal}
         onOpenSales={() => navigate(createPageUrl('MySales'))}
+        onOpenTour={tour.open}
+      />
+
+      <UsageTourDialog
+        open={tour.show}
+        onClose={tour.close}
+        onDismissAuto={tour.dismissAuto}
+        user={user}
       />
 
       <SaleSpotlight sale={nextSale} onCreateSale={openCreateModal} />

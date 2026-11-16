@@ -5,6 +5,7 @@ import { createPageUrl } from '@/utils';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Building2, Users, TrendingUp, DollarSign } from 'lucide-react';
+import PlanStatusStrip from '@/components/operator/tour/PlanStatusStrip';
 
 export default function RealEstateAgentDashboard({ user }) {
   const [stats, setStats] = useState({
@@ -45,6 +46,9 @@ export default function RealEstateAgentDashboard({ user }) {
           Real Estate Dashboard
         </h1>
         <p className="text-slate-600">Manage your properties and leads</p>
+        <div className="mt-3">
+          <PlanStatusStrip user={user} />
+        </div>
       </div>
 
       <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">

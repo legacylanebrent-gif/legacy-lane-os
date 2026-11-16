@@ -1,6 +1,8 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Plus, RefreshCw, Settings, Radio } from 'lucide-react';
+import PlanStatusStrip from '@/components/operator/tour/PlanStatusStrip';
+import UsageTourButton from '@/components/operator/tour/UsageTourButton';
 
 const money = (value) => `$${Math.round(Number(value) || 0).toLocaleString()}`;
 
@@ -13,7 +15,7 @@ function Stat({ label, value, accent }) {
   );
 }
 
-export default function OperatorHero({ user, stats, onRefresh, onCreateSale, onOpenSales, loading }) {
+export default function OperatorHero({ user, stats, onRefresh, onCreateSale, onOpenSales, onOpenTour, loading }) {
   const firstName = String(user?.full_name || '').trim().split(/\s+/)[0] || 'there';
   const today = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
   const live = (stats?.activeSales || 0) > 0;
@@ -29,6 +31,10 @@ export default function OperatorHero({ user, stats, onRefresh, onCreateSale, onO
           <span>Operator command center</span>
           <span className="text-slate-600">·</span>
           <span className="text-slate-400 normal-case tracking-normal">{today}</span>
+        </div>
+
+        <div className="mt-3">
+          <PlanStatusStrip user={user} tone="dark" />
         </div>
 
         <div className="mt-2 flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
@@ -73,6 +79,7 @@ export default function OperatorHero({ user, stats, onRefresh, onCreateSale, onO
               <Settings className="w-4 h-4 mr-2" />
               My Sales
             </Button>
+            <UsageTourButton onClick={onOpenTour} tone="hero" />
             <Button
               onClick={onRefresh}
               disabled={loading}
