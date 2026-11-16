@@ -1,6 +1,6 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { Plus, RefreshCw, Settings, Radio } from 'lucide-react';
+import { Plus, RefreshCw, Settings, Radio, Users } from 'lucide-react';
 import PlanStatusStrip from '@/components/operator/tour/PlanStatusStrip';
 import UsageTourButton from '@/components/operator/tour/UsageTourButton';
 
@@ -15,7 +15,7 @@ function Stat({ label, value, accent }) {
   );
 }
 
-export default function OperatorHero({ user, stats, onRefresh, onCreateSale, onOpenSales, onOpenTour, loading }) {
+export default function OperatorHero({ user, stats, onRefresh, onCreateSale, onOpenSales, onOpenLeads, onOpenTour, loading }) {
   const firstName = String(user?.full_name || '').trim().split(/\s+/)[0] || 'there';
   const today = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
   const live = (stats?.activeSales || 0) > 0;
@@ -78,6 +78,14 @@ export default function OperatorHero({ user, stats, onRefresh, onCreateSale, onO
             >
               <Settings className="w-4 h-4 mr-2" />
               My Sales
+            </Button>
+            <Button
+              onClick={onOpenLeads}
+              variant="outline"
+              className="w-full sm:w-auto border-white/25 bg-white/10 text-white hover:bg-white/20 hover:text-white"
+            >
+              <Users className="w-4 h-4 mr-2" />
+              Leads &amp; CRM
             </Button>
             <UsageTourButton onClick={onOpenTour} tone="hero" />
             <Button

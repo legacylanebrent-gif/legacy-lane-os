@@ -149,6 +149,7 @@ export default function EstateSaleOperatorDashboard({ user }) {
         onRefresh={() => setRefreshKey((k) => k + 1)}
         onCreateSale={openCreateModal}
         onOpenSales={() => navigate(createPageUrl('MySales'))}
+        onOpenLeads={() => navigate(createPageUrl('CRM'))}
         onOpenTour={tour.open}
       />
 

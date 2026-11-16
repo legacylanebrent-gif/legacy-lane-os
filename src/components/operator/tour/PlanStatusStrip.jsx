@@ -1,7 +1,8 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { BadgeCheck, ArrowUpRight, Sparkles } from 'lucide-react';
+import { BadgeCheck, ArrowUpRight, Sparkles, CalendarClock } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import useTrialStatus from '@/components/operator/tour/useTrialStatus';
 
 const TIER_LABELS = {
   starter: 'Starter',
@@ -32,6 +33,7 @@ export default function PlanStatusStrip({ user, tone = 'light', className }) {
   const isTrial = status === 'trial';
   const isActive = status === 'active';
   const dark = tone === 'dark';
+  const daysLeft = useTrialStatus(user);
 
   const statusText = isTrial ? 'Trial' : isActive ? 'Active' : label ? cap(status || 'inactive') : 'No plan';
 
@@ -67,6 +69,22 @@ export default function PlanStatusStrip({ user, tone = 'light', className }) {
         {statusText}
       </span>
 
+      {isTrial && daysLeft !== null && (
+        <span
+          className={cn(
+            'inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide',
+            daysLeft > 3
+              ? 'bg-cyan-100 text-cyan-800'
+              : 'bg-red-100 text-red-700'
+          )}
+        >
+          <CalendarClock className="w-3 h-3" />
+          {daysLeft > 0
+            ? `${daysLeft} day${daysLeft === 1 ? '' : 's'} left`
+            : 'Trial ended'}
+        </span>
+      )}
+
       <Link
         to="/OperatorPackages"
         className={cn(
@@ -74,7 +92,7 @@ export default function PlanStatusStrip({ user, tone = 'light', className }) {
           dark ? 'text-cyan-300 hover:text-cyan-200' : 'text-cyan-700 hover:text-cyan-900'
         )}
       >
-        {label ? 'View / upgrade' : 'Choose a plan'}
+        {isTrial ? 'End trial & pay' : label ? 'View / upgrade' : 'Choose a plan'}
         <ArrowUpRight className="w-3.5 h-3.5" />
       </Link>
     </div>

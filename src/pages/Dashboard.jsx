@@ -10,6 +10,7 @@ import InvestorDashboard from '@/components/dashboards/InvestorDashboard';
 import ConsumerDashboard from '@/components/dashboards/ConsumerDashboard';
 import CoachDashboard from '@/components/dashboards/CoachDashboard';
 import SharedFooter from '@/components/layout/SharedFooter';
+import { applyDefaultEliteTrial, needsDefaultPlan } from '@/lib/defaultTrialPlan';
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -22,10 +23,19 @@ export default function Dashboard() {
 
   const loadUser = async () => {
     try {
-      const userData = await base44.auth.me();
+      let userData = await base44.auth.me();
       // Ensure primary_account_type defaults to 'consumer' if not set
       if (userData && (!userData.primary_account_type || userData.primary_account_type === '')) {
         userData.primary_account_type = 'consumer';
+      }
+      // Failsafe: an operator who never got a package (the plan step can fail)
+      // still starts on the standard 14-day trial, defaulted to Elite.
+      if (userData && needsDefaultPlan(userData)) {
+        try {
+          userData = await applyDefaultEliteTrial(userData);
+        } catch (planError) {
+          console.error('Default trial plan could not be applied:', planError);
+        }
       }
       setUser(userData);
     } catch (error) {
