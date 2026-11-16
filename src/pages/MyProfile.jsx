@@ -122,7 +122,7 @@ export default function MyProfile() {
 
   const [form, setForm] = useState({
     // personal
-    full_name: '', email: '', phone: '', business_phone: '', use_personal_phone_as_business: false, address_zip: '',
+    full_name: '', email: '', phone: '', business_phone: '', use_personal_phone_as_business: false, address_zip: '', city: '',
     early_sign_in_default: true,
     // business / branding
     company_name: '', company_tagline: '', company_description: '',
@@ -168,7 +168,9 @@ export default function MyProfile() {
       setForm(prev => ({
         ...prev,
         full_name: u.full_name || '', email: u.email || '',
-        phone: u.phone || '', business_phone: u.business_phone || (u.use_personal_phone_as_business ? u.phone : '') || '', use_personal_phone_as_business: u.use_personal_phone_as_business || false, address_zip: u.address_zip || '',
+        phone: u.phone || '', business_phone: u.business_phone || (u.use_personal_phone_as_business ? u.phone : '') || '', use_personal_phone_as_business: u.use_personal_phone_as_business || false,
+        address_zip: u.address_zip || u.zip_code || '',
+        city: u.city || u.business_address_city || '',
         early_sign_in_default: u.early_sign_in_default !== false,
         company_name: u.company_name || '', company_tagline: u.company_tagline || '',
         company_description: u.company_description || '',
@@ -246,7 +248,7 @@ export default function MyProfile() {
     setSaving(true);
     try {
       const wasPhoneEmpty = !user?.phone && !user?.phone_number;
-      await base44.auth.updateMe({ ...form, notification_settings: notifications });
+      await base44.auth.updateMe({ ...form, zip_code: form.address_zip, notification_settings: notifications });
 
       // Chapter 5 P1 — refresh the internal operating-base geocode when the business ZIP
       // changes. Internal distance-calculation anchor only; never displayed publicly.
@@ -462,6 +464,7 @@ export default function MyProfile() {
                 <div><Label>Full Name</Label><Input value={form.full_name} onChange={e => setForm(p => ({ ...p, full_name: e.target.value }))} /></div>
                 <div><Label>Email</Label><Input value={form.email} disabled className="bg-slate-50" /></div>
                 <div><Label>Personal Phone</Label><Input value={form.phone} onChange={e => setForm(p => ({ ...p, phone: e.target.value }))} placeholder="(555) 123-4567" /></div>
+                <div><Label>City</Label><Input value={form.city} onChange={e => setForm(p => ({ ...p, city: e.target.value }))} placeholder="City" /></div>
                 <div><Label>ZIP Code</Label><Input value={form.address_zip} onChange={e => setForm(p => ({ ...p, address_zip: e.target.value }))} placeholder="12345" maxLength="5" /></div>
               </div>
             </CardContent>
