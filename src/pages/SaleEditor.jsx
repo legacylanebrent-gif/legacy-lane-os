@@ -31,7 +31,7 @@ import SaleClientPermissionsModal from '@/components/estate/SaleClientPermission
 import DeepSearchPricingModal from '@/components/estate/DeepSearchPricingModal';
 
 import ZipAddressEntry from '@/components/estate/ZipAddressEntry';
-import { isProfileComplete } from '@/components/profile/ProfileCompletionGate';
+import { canCreateSale, getSaleCreationMissing } from '@/components/profile/ProfileCompletionGate';
 import GoogleLensCreditDisplay from '@/components/pricing/GoogleLensCreditDisplay';
 import { getImageSrc } from '@/utils/imageOptimizer';
 import PdfGenerationModal from '@/components/estate/PdfGenerationModal';
@@ -557,7 +557,7 @@ export default function SaleEditor() {
   };
 
   const handleSave = async (publish = false, skipFeeCheck = false) => {
-    if (!isProfileComplete(user)) { alert('Please complete your profile first (company name + location) before saving a sale.'); navigate(createPageUrl('MyProfile')); return; }
+    if (!canCreateSale(user)) { alert(`Please complete your profile before saving a sale. Still missing: ${getSaleCreationMissing(user).join(', ')}. You can add these in My Profile.`); navigate(createPageUrl('MyProfile')); return; }
     if (!formData.title.trim()) { alert('Please enter a sale title'); return; }
     if (!formData.property_address.city.trim()) { alert('Please enter a city'); return; }
 
@@ -1187,7 +1187,7 @@ Be practical and realistic for an estate sale context.`,
     );
   }
 
-  const profileOk = isProfileComplete(user);
+  const profileOk = canCreateSale(user);
 
   return (
     <div className="min-h-screen bg-slate-50 overflow-x-hidden w-full max-w-full">

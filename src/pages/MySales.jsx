@@ -27,7 +27,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { format } from 'date-fns';
 import { getSaleDisplayStatus } from '@/components/estate/getSaleDisplayStatus';
-import ProfileCompletionGate, { isProfileComplete } from '@/components/profile/ProfileCompletionGate';
+import ProfileCompletionGate, { canCreateSale, getSaleCreationMissing } from '@/components/profile/ProfileCompletionGate';
 
 function StageSection({ label, children }) {
   return (
@@ -418,8 +418,9 @@ export default function MySales() {
         <div className="flex gap-2 md:self-start flex-wrap">
           <Button 
             onClick={() => {
-              if (!isProfileComplete(user)) {
-                alert('Please complete your profile first. Set your company name and location in My Profile.');
+              if (!canCreateSale(user)) {
+                const missing = getSaleCreationMissing(user).join(', ');
+                alert(`Please complete your profile before creating a sale. Still missing: ${missing}. You can add these in My Profile.`);
                 navigate(createPageUrl('MyProfile'));
                 return;
               }
@@ -484,7 +485,7 @@ export default function MySales() {
       </div>
 
       {/* Profile completion gate */}
-      {user && !isProfileComplete(user) && (
+      {user && getSaleCreationMissing(user).length > 0 && (
         <ProfileCompletionGate user={user} actionLabel="create a sale" />
       )}
 

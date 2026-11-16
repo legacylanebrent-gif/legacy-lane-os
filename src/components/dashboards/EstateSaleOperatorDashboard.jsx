@@ -21,7 +21,7 @@ import { loadOperatorMoney } from '@/components/operator/dashboard/saleDayMetric
 import { Home, Eye, Heart, MessageSquare, Plus } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
-import ProfileCompletionGate, { isProfileComplete } from '@/components/profile/ProfileCompletionGate';
+import ProfileCompletionGate, { canCreateSale, getSaleCreationMissing } from '@/components/profile/ProfileCompletionGate';
 import UsageTourDialog from '@/components/operator/tour/UsageTourDialog';
 import { useUsageTour } from '@/components/operator/tour/useUsageTour';
 
@@ -131,8 +131,9 @@ export default function EstateSaleOperatorDashboard({ user }) {
   })();
 
   const openCreateModal = () => {
-    if (!isProfileComplete(user)) {
-      alert('Please complete your profile first. Set your company name and location in My Profile.');
+    if (!canCreateSale(user)) {
+      const missing = getSaleCreationMissing(user).join(', ');
+      alert(`Please complete your profile before creating a sale. Still missing: ${missing}. You can add these in My Profile.`);
       navigate(createPageUrl('MyProfile'));
       return;
     }
@@ -177,7 +178,7 @@ export default function EstateSaleOperatorDashboard({ user }) {
       </div>
 
       {/* Profile completion gate */}
-      {user && !isProfileComplete(user) && (
+      {user && getSaleCreationMissing(user).length > 0 && (
         <ProfileCompletionGate user={user} actionLabel="create a sale" />
       )}
 
