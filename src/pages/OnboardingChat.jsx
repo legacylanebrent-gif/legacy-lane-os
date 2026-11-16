@@ -304,11 +304,12 @@ export default function OnboardingChat() {
     setSaving(true);
     try {
       await base44.auth.updateMe({ service_states: serviceStates });
-      setStep('operatorIntro');
     } catch (e) {
-      console.error(e);
+      console.error('Failed to save service states:', e);
     } finally {
+      // Always move forward — a failed save must never trap them on this screen.
       setSaving(false);
+      setStep('operatorIntro');
     }
   };
 
@@ -323,8 +324,10 @@ export default function OnboardingChat() {
       await base44.auth.updateMe({ onboarding_completed: true });
     } catch (e) {
       console.error('Failed to mark operator onboarding complete:', e);
+    } finally {
+      // Always open the plans page, even if the flag could not be saved.
+      navigate(createPageUrl('OperatorPackages'));
     }
-    navigate(createPageUrl('OperatorPackages'));
   };
 
   // ── Consumer: Location ──

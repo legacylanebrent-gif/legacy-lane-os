@@ -95,8 +95,12 @@ export default function Layout({ children, currentPageName }) {
       if (!userData.primary_account_type) userData.primary_account_type = 'consumer';
       setUser(userData);
 
-      // Redirect new users without completed onboarding to the onboarding flow
-      if (!userData.onboarding_completed && currentPageName !== 'OnboardingChat') {
+      // Redirect new users without completed onboarding to the onboarding flow.
+      // Public pages (pricing, directory, how-to, finder) must never bounce them
+      // away — an operator picking a plan has to be able to see the packages.
+      if (!userData.onboarding_completed
+        && currentPageName !== 'OnboardingChat'
+        && !PUBLIC_PAGES.includes(currentPageName)) {
         window.location.href = createPageUrl('OnboardingChat');
         return;
       }
