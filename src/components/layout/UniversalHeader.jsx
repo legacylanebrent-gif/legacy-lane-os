@@ -73,17 +73,17 @@ export default function UniversalHeader({ user: userProp, isAuthenticated: isAut
           <div className="flex items-center gap-3 sm:gap-4">
             {isAuthenticated && user ? (
               <>
-                <Link to={createPageUrl('BrowseItems')} className="text-slate-300 hover:text-white transition-colors p-1.5 rounded-lg hover:bg-slate-800" title="Marketplace">
+                <Link to={createPageUrl('BrowseItems')} className="text-slate-300 hover:text-white transition-colors p-2 rounded-lg hover:bg-slate-800 flex items-center justify-center min-w-10 min-h-10 touch-manipulation" title="Marketplace">
                   <ShoppingBag className="w-5 h-5" />
                 </Link>
-                <Link to={createPageUrl('EstateSaleFinder')} className="text-slate-300 hover:text-white transition-colors p-1.5 rounded-lg hover:bg-slate-800" title="Search Estate Sales">
+                <Link to={createPageUrl('EstateSaleFinder')} className="text-slate-300 hover:text-white transition-colors p-2 rounded-lg hover:bg-slate-800 flex items-center justify-center min-w-10 min-h-10 touch-manipulation" title="Search Estate Sales">
                   <Search className="w-5 h-5" />
                 </Link>
                 <MessagesDropdown />
                 <NotificationsDropdown user={user} />
                 <DropdownMenu>
                    <DropdownMenuTrigger asChild>
-                     <Button variant="ghost" className="flex items-center gap-2 text-white hover:bg-orange-500/20 hover:text-orange-300 pointer-events-auto touch-manipulation">
+                     <Button variant="ghost" className="flex items-center gap-2 text-white hover:bg-orange-500/20 hover:text-orange-300 pointer-events-auto touch-manipulation min-h-10">
                       <Avatar className="h-8 w-8">
                         <AvatarImage src={user?.profile_image_url} />
                         <AvatarFallback className="bg-orange-600 text-white">{userInitials}</AvatarFallback>
@@ -234,10 +234,10 @@ export default function UniversalHeader({ user: userProp, isAuthenticated: isAut
               </>
             ) : (
               <>
-                <Link to={createPageUrl('BrowseItems')} className="text-slate-300 hover:text-white transition-colors p-1.5 rounded-lg hover:bg-slate-800" title="Marketplace">
+                <Link to={createPageUrl('BrowseItems')} className="text-slate-300 hover:text-white transition-colors p-2 rounded-lg hover:bg-slate-800 flex items-center justify-center min-w-10 min-h-10 touch-manipulation" title="Marketplace">
                   <ShoppingBag className="w-5 h-5" />
                 </Link>
-                <Link to={createPageUrl('EstateSaleFinder')} className="text-slate-300 hover:text-white transition-colors p-1.5 rounded-lg hover:bg-slate-800" title="Search Estate Sales">
+                <Link to={createPageUrl('EstateSaleFinder')} className="text-slate-300 hover:text-white transition-colors p-2 rounded-lg hover:bg-slate-800 flex items-center justify-center min-w-10 min-h-10 touch-manipulation" title="Search Estate Sales">
                   <Search className="w-5 h-5" />
                 </Link>
                 <>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -18,6 +18,7 @@ export default function MessageModal({ open, onClose, recipient, relatedEntity, 
   const [conversationId, setConversationId] = useState(null);
   const [selectedPhotos, setSelectedPhotos] = useState([]);
   const [reportingMsgId, setReportingMsgId] = useState(null);
+  const threadRef = useRef(null);
 
   useEffect(() => {
     if (open && recipient) {
@@ -25,6 +26,12 @@ export default function MessageModal({ open, onClose, recipient, relatedEntity, 
       loadConversation();
     }
   }, [open, recipient]);
+
+  // Always land on the newest message, including after a send or a new arrival
+  useEffect(() => {
+    const viewport = threadRef.current?.querySelector('[data-radix-scroll-area-viewport]');
+    if (viewport) viewport.scrollTop = viewport.scrollHeight;
+  }, [messages, open]);
 
   const loadUser = async () => {
     const user = await base44.auth.me();
@@ -171,7 +178,7 @@ export default function MessageModal({ open, onClose, recipient, relatedEntity, 
           )}
 
           {messages.length > 0 && (
-            <ScrollArea className="h-64 sm:h-80 border rounded-lg p-4">
+            <ScrollArea ref={threadRef} className="h-64 sm:h-80 border rounded-lg p-4">
               <div className="space-y-4">
                 {messages.map((msg) => (
                   <div

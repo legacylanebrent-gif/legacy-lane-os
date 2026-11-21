@@ -18,17 +18,6 @@ const US_STATES = [
   'Virginia','Washington','West Virginia','Wisconsin','Wyoming'
 ];
 
-function scoreLead(data) {
-  let score = 0;
-  if (data.has_real_estate) score += 30;
-  if (data.needs_estate_sale) score += 25;
-  if (data.needs_realtor) score += 25;
-  if (data.wants_cash_offer) score += 20;
-  if (data.urgency_level === 'within_30_days') score += 20;
-  if (data.phone) score += 10;
-  return score;
-}
-
 export default function ProbateLeadForm({ sourceState = '', sourceCounty = '', sourcePage = '' }) {
   const [form, setForm] = useState({
     first_name: '', last_name: '', email: '', phone: '',
@@ -47,17 +36,20 @@ export default function ProbateLeadForm({ sourceState = '', sourceCounty = '', s
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    const score = scoreLead(form);
-    await base44.entities.ProbateLead.create({
-      ...form,
-      lead_score: score,
-      source_page: sourcePage,
-      source_state: sourceState,
-      source_county: sourceCounty,
-      status: 'new'
-    });
-    setSubmitted(true);
-    setLoading(false);
+    try {
+      // Routed through the server so the lead is scored, matched to a provider,
+      // synced to Houszu and the admin is alerted in one place.
+      const res = await base44.functions.invoke('createProbateLead', {
+        ...form,
+        source_page: sourcePage,
+        source_state: sourceState,
+        source_county: sourceCounty
+      });
+      if (res.data?.error) throw new Error(res.data.error);
+      setSubmitted(true);
+    } finally {
+      setLoading(false);
+    }
   };
 
   if (submitted) {

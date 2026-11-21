@@ -71,6 +71,17 @@ export default function Messages() {
         new Date(b.lastMessage.created_date) - new Date(a.lastMessage.created_date)
       );
 
+      // Older messages can carry no name snapshot — look the person up so a
+      // conversation is never shown as an anonymous "U".
+      const missingIds = convList.filter(c => !c.otherParty.name && c.otherParty.id).map(c => c.otherParty.id);
+      if (missingIds.length) {
+        const users = await base44.entities.User.filter({ id: { $in: missingIds } });
+        const nameById = new Map(users.map(u => [u.id, u.full_name || u.email]));
+        convList.forEach(c => {
+          if (!c.otherParty.name) c.otherParty.name = nameById.get(c.otherParty.id) || 'EstateSalen member';
+        });
+      }
+
       setConversations(convList);
     } catch (error) {
       console.error('Error loading messages:', error);
@@ -85,7 +96,7 @@ export default function Messages() {
   };
 
   const filteredConversations = conversations.filter(conv =>
-    conv.otherParty.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (conv.otherParty.name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
     conv.lastMessage.message?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
