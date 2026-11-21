@@ -81,6 +81,7 @@ export const OPERATOR_LINK_SECTIONS = [
     links: [
       { page: 'IncomeTracker', label: 'Income Tracker', icon: TrendingUp },
       { page: 'MyBusinessExpenses', label: 'Business Expenses', icon: FileText },
+      { page: 'AllExpenses', label: 'All Expenses', icon: FileText },
       { page: 'BusinessDocuments', label: 'Business Documents', icon: FileCheck2 },
       { page: 'KnowledgeManager', label: 'Company Knowledge', icon: BookMarked },
       { page: 'TeamMembers', label: 'Team Members', icon: UserCog },

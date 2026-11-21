@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
+import { Link } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -525,6 +526,9 @@ export default function MyBusinessExpenses() {
           <p className="text-slate-600">Track and manage your business expenses</p>
         </div>
         <div className="flex flex-col sm:flex-row gap-2">
+          <Button asChild variant="outline" className="border-slate-300 whitespace-nowrap">
+            <Link to="/AllExpenses">All Expenses</Link>
+          </Button>
           <Button
             onClick={() => setShowBulkScanModal(true)}
             variant="outline"
