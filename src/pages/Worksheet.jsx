@@ -9,6 +9,8 @@ import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, DollarSign, QrCode, X, Check, AlertCircle } from 'lucide-react';
 import TransactionForm from '@/components/worksheet/TransactionForm';
 import TransactionImportModal from '@/components/worksheet/TransactionImportModal';
+import SaleOffersTab from '@/components/worksheet/SaleOffersTab';
+import { getSalePhotoOptions, filterSalePhotoOptions } from '@/components/worksheet/salePhotoOptions';
 import { Html5QrcodeScanner } from 'html5-qrcode';
 
 export default function Worksheet() {
@@ -183,31 +185,18 @@ export default function Worksheet() {
     setBundleItems(bundleItems.filter((_, i) => i !== index));
   };
 
-  const handlePhotoSearch = async (query) => {
+  // Untitled photos are still real items — they are listed, never filtered out.
+  const handlePhotoSearch = (query) => {
     setPhotoSearchQuery(query);
-    if (!query.trim() || !sale?.images) {
-      setPhotoSuggestions([]);
-      return;
-    }
-
-    setSearchingPhotos(true);
-    try {
-      const filtered = sale.images.filter(img => 
-        img.name?.toLowerCase().includes(query.toLowerCase()) ||
-        img.description?.toLowerCase().includes(query.toLowerCase())
-      );
-      setPhotoSuggestions(filtered.map(img => ({
-        name: img.name || 'Item',
-        description: img.description,
-        imageUrl: img.url,
-        suggested_price: img.price || null
-      })));
-    } catch (error) {
-      console.error('Error searching photos:', error);
-    } finally {
-      setSearchingPhotos(false);
-    }
+    setPhotoSuggestions(filterSalePhotoOptions(getSalePhotoOptions(sale), query));
   };
+
+  // Opening Photo Mode shows every sale photo straight away.
+  useEffect(() => {
+    if (photoMode && !photoSearchQuery) {
+      setPhotoSuggestions(getSalePhotoOptions(sale));
+    }
+  }, [photoMode, sale]);
 
   const selectPhotoItem = (photo) => {
     setSelectedPhoto(photo);
@@ -413,7 +402,6 @@ export default function Worksheet() {
             Transactions
           </TabsTrigger>
           <TabsTrigger value="offers" className="whitespace-nowrap">Offers</TabsTrigger>
-          <TabsTrigger value="expenses" className="whitespace-nowrap">Expenses</TabsTrigger>
           <TabsTrigger value="profit" className="whitespace-nowrap">Summary</TabsTrigger>
         </TabsList>
 
@@ -496,8 +484,9 @@ export default function Worksheet() {
           )}
         </TabsContent>
 
-        <TabsContent value="offers"><Card><CardContent className="p-6">Coming soon</CardContent></Card></TabsContent>
-        <TabsContent value="expenses"><Card><CardContent className="p-6">Coming soon</CardContent></Card></TabsContent>
+        <TabsContent value="offers">
+          <SaleOffersTab sale={sale} />
+        </TabsContent>
         <TabsContent value="profit"><Card><CardContent className="p-6">Coming soon</CardContent></Card></TabsContent>
       </Tabs>
     </div>

@@ -94,10 +94,10 @@ export default function TransactionForm({
         {photoMode ? (
           <div className="space-y-4 border-2 border-cyan-200 rounded-lg p-4 bg-cyan-50">
             <div>
-              <Label>Search Items from Photos <span className="text-red-500">*</span></Label>
+              <Label>Items from Photos <span className="text-red-500">*</span></Label>
               <div className="relative">
                 <Input
-                  placeholder="Start typing item name... (e.g., 'dining table', 'vase')"
+                  placeholder="Search photos, or leave blank to see all sale photos"
                   value={photoSearchQuery}
                   onChange={(e) => handlePhotoSearch(e.target.value)}
                   className="pr-10"
