@@ -10,6 +10,7 @@ import { ArrowLeft, DollarSign, QrCode, X, Check, AlertCircle } from 'lucide-rea
 import TransactionForm from '@/components/worksheet/TransactionForm';
 import TransactionImportModal from '@/components/worksheet/TransactionImportModal';
 import SaleOffersTab from '@/components/worksheet/SaleOffersTab';
+import SaleSummaryTab from '@/components/worksheet/SaleSummaryTab';
 import { getSalePhotoOptions, filterSalePhotoOptions } from '@/components/worksheet/salePhotoOptions';
 import { Html5QrcodeScanner } from 'html5-qrcode';
 
@@ -20,6 +21,7 @@ export default function Worksheet() {
   const [transactions, setTransactions] = useState([]);
   const [submitting, setSubmitting] = useState(false);
   const [showImport, setShowImport] = useState(false);
+  const [currentUser, setCurrentUser] = useState(null);
   
   // Transaction form state
   const [photoMode, setPhotoMode] = useState(false);
@@ -61,6 +63,7 @@ export default function Worksheet() {
 
   const loadData = async () => {
     try {
+      try { setCurrentUser(await base44.auth.me()); } catch { setCurrentUser(null); }
       const params = new URLSearchParams(window.location.search);
       const saleId = params.get('saleId');
       
@@ -309,6 +312,10 @@ export default function Worksheet() {
 
   const currentTotal = parseFloat(price) * quantity || 0;
 
+  // The overall summary is the operator's financial view — sale team members
+  // count and sell, but never see the owner/operator split or net position.
+  const canViewSummary = !!currentUser && (currentUser.role === 'admin' || currentUser.id === sale?.operator_id);
+
   if (loading) {
     return (
       <div className="p-8">
@@ -402,7 +409,9 @@ export default function Worksheet() {
             Transactions
           </TabsTrigger>
           <TabsTrigger value="offers" className="whitespace-nowrap">Offers</TabsTrigger>
-          <TabsTrigger value="profit" className="whitespace-nowrap">Summary</TabsTrigger>
+          {canViewSummary && (
+            <TabsTrigger value="profit" className="whitespace-nowrap">Summary</TabsTrigger>
+          )}
         </TabsList>
 
         <TabsContent value="transactions" className="space-y-6">
@@ -487,7 +496,11 @@ export default function Worksheet() {
         <TabsContent value="offers">
           <SaleOffersTab sale={sale} />
         </TabsContent>
-        <TabsContent value="profit"><Card><CardContent className="p-6">Coming soon</CardContent></Card></TabsContent>
+        {canViewSummary && (
+          <TabsContent value="profit">
+            <SaleSummaryTab sale={sale} transactions={transactions} />
+          </TabsContent>
+        )}
       </Tabs>
     </div>
   );
