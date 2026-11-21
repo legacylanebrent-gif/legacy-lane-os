@@ -32,3 +32,14 @@ export function downloadEntry(entry) {
   const safe = String(entry.title || 'coaching').replace(/[^a-z0-9]+/gi, '-').replace(/^-+|-+$/g, '').toLowerCase().slice(0, 60);
   downloadTextFile(`${safe || 'coaching'}.md`, entryToMarkdown(entry));
 }
+
+// The whole library in one file, so nothing is lost when a browser blocks
+// a burst of separate downloads.
+export function downloadAllEntries(entries) {
+  if (!entries?.length) return;
+  const body = entries
+    .map(entryToMarkdown)
+    .join('\n\n<div style="page-break-after: always"></div>\n\n');
+  const stamp = new Date().toISOString().slice(0, 10);
+  downloadTextFile(`coaching-glossary-${stamp}.md`, `# Coaching Glossary\n\n${entries.length} saved coaching session(s), exported ${new Date().toLocaleString()}.\n\n---\n\n${body}`);
+}

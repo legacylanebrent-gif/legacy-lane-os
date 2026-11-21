@@ -8,7 +8,7 @@ import { BookOpen, Search, Download, Trash2 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import GlossaryEntryCard from '@/components/coach/GlossaryEntryCard';
 import { GLOSSARY_CATEGORIES } from '@/components/coach/CoachSaveDialog';
-import { downloadEntry } from '@/components/coach/glossaryFile';
+import { downloadEntry, downloadAllEntries } from '@/components/coach/glossaryFile';
 
 const list = (r) => (Array.isArray(r) ? r : (r?.items || []));
 
@@ -72,7 +72,14 @@ export default function CoachingGlossary() {
           <Search className="w-4 h-4 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2" />
           <Input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search your coaching…" className="pl-8" />
         </div>
-        <p className="text-xs text-slate-500 sm:text-right">{filtered.length} of {entries.length} saved</p>
+        <div className="flex items-center gap-2 sm:justify-end">
+          <p className="text-xs text-slate-500">{filtered.length} of {entries.length} saved</p>
+          {entries.length > 0 && (
+            <Button size="sm" variant="outline" className="h-8 text-xs" onClick={() => downloadAllEntries(filtered)}>
+              <Download className="w-3.5 h-3.5 mr-1" />Download all
+            </Button>
+          )}
+        </div>
       </div>
 
       <div className="flex flex-wrap gap-1.5">
