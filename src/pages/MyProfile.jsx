@@ -412,22 +412,22 @@ export default function MyProfile() {
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="flex flex-wrap gap-1 h-auto w-full mb-6 justify-start bg-transparent p-0">
-          {/* ── Universal tabs — all users ── */}
+          {/* ── Account first, then the paid-level basics ── */}
           <TabsTrigger value="account" className="rounded-md border border-input bg-muted px-3 py-1.5 text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:border-primary">Account</TabsTrigger>
-          <TabsTrigger value="estate_sales" className="rounded-md border border-input bg-muted px-3 py-1.5 text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:border-primary">Estate Sales</TabsTrigger>
-          <TabsTrigger value="buyer_prefs" className="rounded-md border border-input bg-muted px-3 py-1.5 text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:border-primary">ISO Wanted Items</TabsTrigger>
-          {/* ── Role-specific tabs ── */}
           {!isConsumer && <TabsTrigger value="business" className="rounded-md border border-input bg-muted px-3 py-1.5 text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:border-primary">
             {isAgentOperator ? 'Business Profile' : isAgent ? 'Agent Profile' : isReseller ? 'Business' : isVendor ? 'Vendor Profile' : 'Business'}
           </TabsTrigger>}
           {!isConsumer && <TabsTrigger value="territory" className="rounded-md border border-input bg-muted px-3 py-1.5 text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:border-primary">{isReseller ? 'Service Area' : isAgent ? 'Service Area (Real Estate)' : 'Service Area (Estate Sales)'}</TabsTrigger>}
+          {isOperator && <TabsTrigger value="sales" className="rounded-md border border-input bg-muted px-3 py-1.5 text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:border-primary">My Sales</TabsTrigger>}
+          {/* ── The rest, unchanged ── */}
+          <TabsTrigger value="estate_sales" className="rounded-md border border-input bg-muted px-3 py-1.5 text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:border-primary">Estate Sales</TabsTrigger>
+          <TabsTrigger value="buyer_prefs" className="rounded-md border border-input bg-muted px-3 py-1.5 text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:border-primary">ISO Wanted Items</TabsTrigger>
           {isVendor && <TabsTrigger value="vendor_services" className="rounded-md border border-input bg-muted px-3 py-1.5 text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:border-primary">Services</TabsTrigger>}
           {isVendor && <TabsTrigger value="vendor_leads" className="rounded-md border border-input bg-muted px-3 py-1.5 text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:border-primary">Buyout Leads</TabsTrigger>}
           {isReseller && <TabsTrigger value="reseller_prefs" className="rounded-md border border-input bg-muted px-3 py-1.5 text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:border-primary">Reseller Buying</TabsTrigger>}
           {isReseller && <TabsTrigger value="reseller_leads" className="rounded-md border border-input bg-muted px-3 py-1.5 text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:border-primary">Buyout Leads</TabsTrigger>}
           {isCollectorDealer && <TabsTrigger value="dealer_profile" className="rounded-md border border-input bg-muted px-3 py-1.5 text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:border-primary">Dealer Profile</TabsTrigger>}
           {isOperator && <TabsTrigger value="payments" className="rounded-md border border-input bg-muted px-3 py-1.5 text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:border-primary">Payments</TabsTrigger>}
-          {isOperator && <TabsTrigger value="sales" className="rounded-md border border-input bg-muted px-3 py-1.5 text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:border-primary">My Sales</TabsTrigger>}
           {(isOperator || (isReseller && subscription?.tier === 'pro')) && <TabsTrigger value="marketplace" className="rounded-md border border-input bg-muted px-3 py-1.5 text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:border-primary">Social & Marketplaces</TabsTrigger>}
           {isAgent && <TabsTrigger value="agent_tools" className="rounded-md border border-input bg-muted px-3 py-1.5 text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:border-primary">Agent Tools</TabsTrigger>}
           {!isConsumer && <TabsTrigger value="subscription" className="rounded-md border border-input bg-muted px-3 py-1.5 text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:border-primary">Subscription</TabsTrigger>}
