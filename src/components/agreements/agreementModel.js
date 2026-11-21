@@ -20,6 +20,9 @@ export const AGREEMENT_STATUS = {
 export const READINESS_STATUS = {
   COMPLETE: { label: 'COMPLETE', tone: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
   NEEDS_REVIEW: { label: 'NEEDS REVIEW', tone: 'bg-amber-50 text-amber-700 border-amber-200' },
+  // SKIPPED is a deliberate operator decision to pass over an item. It is never
+  // counted as complete and never hides what the records actually showed.
+  SKIPPED: { label: 'SKIPPED', tone: 'bg-slate-100 text-slate-600 border-slate-300' },
   NOT_APPLICABLE: { label: 'NOT APPLICABLE', tone: 'bg-slate-50 text-slate-500 border-slate-200' },
   UNKNOWN: { label: 'UNKNOWN', tone: 'bg-slate-50 text-slate-600 border-slate-200' },
 };
@@ -119,7 +122,7 @@ export function mergeTemplate(templateText, values) {
 }
 
 // ── Deterministic AGREEMENT READINESS (no AI judgment) ───────────────────────
-export function analyzeAgreementReadiness({ sale, deal, scope, authorities, openDecisions, items, proposals, agreements }) {
+export function analyzeAgreementReadiness({ sale, deal, scope, authorities, openDecisions, items, proposals, agreements, skips }) {
   const areas = [];
   const push = (id, label, status, detail, link, linkLabel) => areas.push({ id, label, status, detail, link, linkLabel });
   const saleLink = sale?.id ? `/ProposalAgreement?saleId=${sale.id}` : null;
@@ -240,15 +243,30 @@ export function analyzeAgreementReadiness({ sale, deal, scope, authorities, open
     push('open_decisions', 'Open Client Decisions', 'COMPLETE', 'No open client decisions.');
   }
 
+  // OPERATOR SKIPS — a skipped item is NOT complete. The computed status is kept
+  // alongside so the operator always sees what the records actually contained.
+  const skipMap = new Map(asArray(skips).map(s => [s.area_id, s]));
+  areas.forEach(a => {
+    const sk = skipMap.get(a.id);
+    if (!sk) return;
+    a.computedStatus = a.status;
+    a.skipped = sk;
+    a.status = 'SKIPPED';
+    a.detail = `${a.detail} Skipped${sk.skipped_by_name ? ` by ${sk.skipped_by_name}` : ''}${sk.reason ? ` — ${sk.reason}` : ''}. Recorded as skipped, never as complete.`;
+  });
+
   const counts = {
     complete: areas.filter(a => a.status === 'COMPLETE').length,
+    skipped: areas.filter(a => a.status === 'SKIPPED').length,
     review: areas.filter(a => a.status === 'NEEDS_REVIEW').length,
     na: areas.filter(a => a.status === 'NOT_APPLICABLE').length,
     unknown: areas.filter(a => a.status === 'UNKNOWN').length,
     total: areas.length,
   };
   const headline = counts.review === 0
-    ? 'OPERATIONAL INFORMATION COMPLETE'
+    ? (counts.skipped > 0
+      ? `OPERATIONAL INFORMATION COMPLETE — ${counts.skipped} ITEM${counts.skipped === 1 ? '' : 'S'} SKIPPED BY THE OPERATOR`
+      : 'OPERATIONAL INFORMATION COMPLETE')
     : 'ITEMS STILL NEED REVIEW BEFORE PRESENTING THE AGREEMENT';
   return { areas, counts, headline };
 }

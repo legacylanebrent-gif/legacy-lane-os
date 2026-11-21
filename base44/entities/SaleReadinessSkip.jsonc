@@ -1,0 +1,121 @@
+{
+  "name": "SaleReadinessSkip",
+  "type": "object",
+  "description": "One operator decision to deliberately pass over ONE Agreement Readiness item on a sale. A skip is NOT completion: the readiness item keeps showing what the records actually contained, plus who skipped it, when, and why, so an operator can keep moving without pretending the item was satisfied. Removing the record restores the computed status. Skipped items are always labelled SKIPPED and counted separately \u2014 never folded into the complete count.",
+  "properties": {
+    "sale_id": {
+      "type": "string",
+      "description": "EstateSale this skip belongs to."
+    },
+    "operator_id": {
+      "type": "string",
+      "description": "EstateSale.operator_id projection \u2014 sale owner (RLS anchor)."
+    },
+    "sale_team_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "READ-SCOPE PROJECTION of EstateSale.sale_team for RLS. The sale remains the source of truth."
+    },
+    "area_id": {
+      "type": "string",
+      "description": "Readiness area this skip applies to (proposal, authority, scope, commercial_terms, estimate, sale_dates, access, exclusions, discount, post_sale, open_decisions)."
+    },
+    "area_label": {
+      "type": "string",
+      "description": "Label snapshot of the readiness item at the time it was skipped."
+    },
+    "reason": {
+      "type": "string",
+      "description": "Optional operator note on why the item was passed over."
+    },
+    "skipped_by": {
+      "type": "string",
+      "description": "User ID of the operator who skipped the item."
+    },
+    "skipped_by_name": {
+      "type": "string"
+    },
+    "skipped_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "sale_id",
+    "operator_id",
+    "area_id"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "data.operator_id": "{{user.id}}"
+        },
+        {
+          "data.sale_team_ids": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "$or": [
+        {
+          "data.operator_id": "{{user.id}}"
+        },
+        {
+          "data.sale_team_ids": {
+            "$in": [
+              "{{user.id}}"
+            ]
+          }
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.operator_id": "{{user.id}}"
+        },
+        {
+          "data.sale_team_ids": {
+            "$in": [
+              "{{user.id}}"
+            ]
+          }
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.operator_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

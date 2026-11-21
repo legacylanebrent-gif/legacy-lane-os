@@ -13,6 +13,7 @@ import ProposalCard from '@/components/agreements/ProposalCard';
 import AgreementReadiness from '@/components/agreements/AgreementReadiness';
 import AgreementBuilder from '@/components/agreements/AgreementBuilder';
 import AgreementCard from '@/components/agreements/AgreementCard';
+import ClientAssignCard from '@/components/agreements/ClientAssignCard';
 
 // Chapter 9 P0/P1 — PROPOSAL & AGREEMENT. The truth chain:
 // CONSULTATION → PROJECTED ECONOMICS → PROPOSAL (snapshot) → CLIENT ACCEPTANCE
@@ -28,6 +29,7 @@ export default function ProposalAgreement() {
   const [notice, setNotice] = useState(null);
   const [showProposalBuilder, setShowProposalBuilder] = useState(false);
   const [showAgreementBuilder, setShowAgreementBuilder] = useState(false);
+  const [skipBusy, setSkipBusy] = useState(null);
 
   const load = useCallback(async () => {
     const saleId = new URLSearchParams(window.location.search).get('saleId');
@@ -36,7 +38,7 @@ export default function ProposalAgreement() {
       const sales = list(await base44.entities.EstateSale.filter({ id: saleId }));
       if (!sales.length) { navigate('/MySales'); return; }
       const sale = sales[0];
-      const [dealsRes, scopeRes, authRes, proposalsRes, agreementsRes, decisionsRes, templatesRes, itemCountRes] = await Promise.all([
+      const [dealsRes, scopeRes, authRes, proposalsRes, agreementsRes, decisionsRes, templatesRes, itemCountRes, skipsRes, me] = await Promise.all([
         base44.entities.SaleConversionPipeline.filter({ estate_sale_id: sale.id }),
         base44.entities.SaleScope.filter({ sale_id: sale.id, status: 'ACTIVE' }),
         base44.entities.SaleAuthority.filter({ sale_id: sale.id }),
@@ -45,6 +47,8 @@ export default function ProposalAgreement() {
         base44.entities.SaleClientDecision.filter({ sale_id: sale.id, status: 'open' }),
         base44.entities.BusinessDocument.filter({ operator_id: sale.operator_id, category: 'AGREEMENT', scope: 'business' }),
         base44.entities.Item.count({ estate_sale_id: sale.id }),
+        base44.entities.SaleReadinessSkip.filter({ sale_id: sale.id }),
+        base44.auth.me().catch(() => null),
       ]);
       setData({
         sale,
@@ -56,6 +60,8 @@ export default function ProposalAgreement() {
         openDecisions: list(decisionsRes),
         templates: list(templatesRes),
         itemCount: typeof itemCountRes === 'number' ? itemCountRes : list(itemCountRes).length,
+        skips: list(skipsRes),
+        me,
       });
     } catch (e) {
       console.error(e);
@@ -67,9 +73,45 @@ export default function ProposalAgreement() {
   if (loading) return <div className="p-8 animate-pulse"><div className="h-8 bg-slate-200 rounded w-1/4 mb-4" /><div className="h-64 bg-slate-200 rounded" /></div>;
   if (!data) return <div className="p-8 text-slate-500">Sale not found.</div>;
 
-  const { sale, deal, scope, authorities, proposals, agreements, openDecisions, templates, itemCount } = data;
+  const { sale, deal, scope, authorities, proposals, agreements, openDecisions, templates, itemCount, skips, me } = data;
   const acceptedProposal = proposals.find(p => p.status === 'ACCEPTED');
-  const readiness = analyzeAgreementReadiness({ sale, deal, scope, authorities, openDecisions, items: itemCount, proposals, agreements });
+  const readiness = analyzeAgreementReadiness({ sale, deal, scope, authorities, openDecisions, items: itemCount, proposals, agreements, skips });
+
+  // Skipping is a recorded decision, never completion: the item keeps showing what
+  // the records contain and can be un-skipped at any time.
+  const skipArea = async (area, reason) => {
+    setSkipBusy(area.id);
+    try {
+      await base44.entities.SaleReadinessSkip.create({
+        sale_id: sale.id,
+        operator_id: sale.operator_id,
+        sale_team_ids: sale.sale_team || [],
+        area_id: area.id,
+        area_label: area.label,
+        reason,
+        skipped_by: me?.id || '',
+        skipped_by_name: me?.full_name || '',
+        skipped_at: new Date().toISOString(),
+      });
+      notify(`${area.label} skipped — recorded as skipped, not complete.`);
+    } catch (e) {
+      console.error(e);
+      alert('Could not skip this item.');
+    } finally { setSkipBusy(null); }
+  };
+
+  const unskipArea = async (area) => {
+    const sk = (skips || []).find(s => s.area_id === area.id);
+    if (!sk) return;
+    setSkipBusy(area.id);
+    try {
+      await base44.entities.SaleReadinessSkip.delete(sk.id);
+      notify(`${area.label} skip removed — back to what the records show.`);
+    } catch (e) {
+      console.error(e);
+      alert('Could not undo the skip.');
+    } finally { setSkipBusy(null); }
+  };
 
   // AUTHORITY HOLD — operational warning, never a legal conclusion.
   const activeAuth = authorities.filter(a => a.is_active);
@@ -105,7 +147,7 @@ export default function ProposalAgreement() {
       {authorityHold && (
         <div className="flex items-start gap-2 bg-amber-50 border border-amber-300 rounded-md p-3">
           <ShieldAlert className="w-4 h-4 text-amber-600 mt-0.5 flex-shrink-0" />
-          <p className="text-sm text-amber-800">{authorityHold} Record and classify the decision-maker in Client Decisions — operational protection, not a legal conclusion.</p>
+          <p className="text-sm text-amber-800">{authorityHold} Assign the client above — one step records them as the decision-maker. Client Decisions is only needed for co-decision-makers, scopes or evidence.</p>
         </div>
       )}
       {activationNotice && (
@@ -115,7 +157,9 @@ export default function ProposalAgreement() {
         </div>
       )}
 
-      <AgreementReadiness readiness={readiness} />
+      <ClientAssignCard sale={sale} deal={deal} authorities={authorities} user={me} onAssigned={notify} />
+
+      <AgreementReadiness readiness={readiness} onSkip={skipArea} onUnskip={unskipArea} busyAreaId={skipBusy} />
 
       {/* ── PROPOSAL ── */}
       <section className="space-y-3">
