@@ -7,7 +7,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, Loader2, RefreshCw, ExternalLink } from 'lucide-react';
 import { asList } from '@/components/equipment/equipmentModel';
-import { analyzePreparation, prepFactsString, STATUS_STYLES, checklistState } from '@/components/saleops/prepareModel';
+import { analyzePreparation, prepFactsString, STATUS_STYLES, STATUS_LABELS, PHASE_LABELS, checklistState } from '@/components/saleops/prepareModel';
+import RoomPhotoBuilder from '@/components/prep/RoomPhotoBuilder';
 import PrepChecklistSection from '@/components/saleops/PrepChecklistSection';
 import PrepCoachPanel from '@/components/saleops/PrepCoachPanel';
 import AiStagingCoachPanel from '@/components/saleops/AiStagingCoachPanel';
@@ -113,27 +114,26 @@ export default function PrepareSale() {
           <Button variant="ghost" onClick={() => navigate('/MySales')} className="text-slate-600 hover:text-slate-900 -ml-2">
             <ArrowLeft className="w-4 h-4 mr-2" />Back to Sales
           </Button>
-          <h1 className="text-2xl sm:text-3xl font-serif font-bold text-slate-900 break-words">Getting Your Sale Ready</h1>
+          <h1 className="text-2xl sm:text-3xl font-serif font-bold text-slate-900 break-words">Get This Sale Ready</h1>
           <p className="text-sm font-medium text-slate-700 mt-0.5 break-words">{sale.title}</p>
           <div className="flex flex-wrap items-center gap-2 mt-1">
             <span className={`text-xs font-medium border rounded-full px-2.5 py-0.5 ${timingBadge}`}>
-              {timing.phase}{timing.daysUntilFirst !== null && timing.phase !== 'POST-SALE' && timing.phase !== 'SALE DAYS' ? ` · ${timing.daysUntilFirst} day${timing.daysUntilFirst === 1 ? '' : 's'} to first date` : ''}
+              {PHASE_LABELS[timing.phase] || timing.phase}{timing.daysUntilFirst !== null && timing.phase !== 'POST-SALE' && timing.phase !== 'SALE DAYS' ? ` · ${timing.daysUntilFirst} day${timing.daysUntilFirst === 1 ? '' : 's'} to go` : ''}
             </span>
-            <span className="text-xs text-slate-500">See what's ready and what still needs your attention before sale day.</span>
+            <span className="text-xs text-slate-500">What is done, and what still needs you.</span>
           </div>
         </div>
         <Button variant="outline" size="sm" onClick={refresh} disabled={refreshing}>
-          <RefreshCw className={`w-4 h-4 mr-1 ${refreshing ? 'animate-spin' : ''}`} />Refresh analysis
+          <RefreshCw className={`w-4 h-4 mr-1 ${refreshing ? 'animate-spin' : ''}`} />Refresh
         </Button>
       </div>
 
       {/* Readiness summary — counts, never a vanity percentage */}
       <div className="flex flex-wrap gap-2">
-        <Badge className="bg-emerald-600">{summary.ready} AREAS READY</Badge>
-        {summary.attention > 0 && <Badge className="bg-red-600">{summary.attention} NEED ATTENTION</Badge>}
-        {summary.review > 0 && <Badge className="bg-amber-600">{summary.review} NEED REVIEW</Badge>}
-        {summary.na > 0 && <Badge variant="outline" className="text-slate-500">{summary.na} NOT APPLICABLE</Badge>}
-        <span className="text-xs text-slate-400 self-center">Computed from records only — AI never sets a readiness status.</span>
+        <Badge className="bg-emerald-600">{summary.ready} ready</Badge>
+        {summary.attention > 0 && <Badge className="bg-red-600">{summary.attention} need you</Badge>}
+        {summary.review > 0 && <Badge className="bg-amber-600">{summary.review} need a look</Badge>}
+        {summary.na > 0 && <Badge variant="outline" className="text-slate-500">{summary.na} not needed</Badge>}
       </div>
 
       {/* Actionable findings first */}
@@ -143,7 +143,7 @@ export default function PrepareSale() {
           <CardContent className="space-y-2">
             {analysis.findings.map((f, i) => (
               <div key={i} className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3">
-                <Badge variant="outline" className={f.status === 'NEEDS ATTENTION' ? 'border-red-300 text-red-700 w-fit' : 'border-amber-300 text-amber-700 w-fit'}>{f.status}</Badge>
+                <Badge variant="outline" className={f.status === 'NEEDS ATTENTION' ? 'border-red-300 text-red-700 w-fit' : 'border-amber-300 text-amber-700 w-fit'}>{STATUS_LABELS[f.status] || f.status}</Badge>
                 <div className="flex-1 min-w-0 text-sm text-slate-800">
                   <span className="font-medium">{f.areaLabel}:</span> {f.detail}
                 </div>
@@ -161,7 +161,7 @@ export default function PrepareSale() {
             <CardContent className="p-4 flex flex-col gap-2 flex-1">
               <div className="flex items-start justify-between gap-2">
                 <p className="text-sm font-semibold text-slate-800">{a.label}</p>
-                <span className={`text-[10px] font-bold border rounded px-1.5 py-0.5 whitespace-nowrap ${STATUS_STYLES[a.status]}`}>{a.status}</span>
+                <span className={`text-[10px] font-bold border rounded px-1.5 py-0.5 whitespace-nowrap ${STATUS_STYLES[a.status]}`}>{STATUS_LABELS[a.status] || a.status}</span>
               </div>
               <p className="text-xs text-slate-600 flex-1">{a.detail}</p>
               {a.link && areaLink(a)}
@@ -169,6 +169,9 @@ export default function PrepareSale() {
           </Card>
         ))}
       </div>
+
+      {/* Photo Taker — photograph each room and say what is for sale in it */}
+      <RoomPhotoBuilder sale={sale} onChanged={refresh} />
 
       {/* Security walkthrough + checkout setup reviews (existing SaleTask system) */}
       <PrepChecklistSection

@@ -46,10 +46,10 @@ export default function PrepChecklistSection({ sale, templateKey, checklist, onC
   };
 
   const badge = state === 'done'
-    ? <Badge className="bg-emerald-600">Reviewed ({completed}/{total})</Badge>
+    ? <Badge className="bg-emerald-600">All done ({completed}/{total})</Badge>
     : state === 'open'
-    ? <Badge className="bg-amber-600">{completed}/{total} reviewed</Badge>
-    : <Badge className="bg-slate-500">Not reviewed</Badge>;
+    ? <Badge className="bg-amber-600">{completed} of {total} done</Badge>
+    : <Badge className="bg-slate-500">Not started</Badge>;
 
   return (
     <Card id={templateKey === 'SECURITY_WALKTHROUGH' ? 'security' : 'checkout'} className="scroll-mt-24">
@@ -67,8 +67,7 @@ export default function PrepChecklistSection({ sale, templateKey, checklist, onC
       <CardContent className="space-y-2">
         {state === 'none' ? (
           <p className="text-sm text-slate-600">
-            No {tpl.label.toLowerCase()} checklist on this sale yet — this is UNKNOWN, not a failure. Add the checklist,
-            review each point, then the area turns READY (reviewed). Private operational information — never shown publicly.
+            Not started yet. Add the checklist, tick each point as you go, and this area is done. Only you and your team see it.
           </p>
         ) : (
           <>
@@ -82,7 +81,7 @@ export default function PrepChecklistSection({ sale, templateKey, checklist, onC
               </label>
             ))}
             <p className="text-xs text-slate-500 pt-1">
-              Completion means {tpl.label.toUpperCase()} REVIEWED — never SAFE, SECURE, COMPLIANT, ADA COMPLIANT or FIRE-CODE COMPLIANT.
+              Ticking these means you looked at them. It is not a safety or code certificate.
             </p>
           </>
         )}

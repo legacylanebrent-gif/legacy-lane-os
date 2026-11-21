@@ -57,7 +57,8 @@ Rules:
 - Suggest at most 8 practical preparation/execution tasks that follow from these facts only.
 - Each suggestion must have a "reason" citing the specific fact that prompted it (e.g. "Suggested because site assessment indicates limited parking." or "Suggested because 2 items are marked CONTROLLED DISPLAY."). Never invent facts.
 - Do NOT suggest anything that certifies safety, security, or legal compliance, changes the agreed scope, or invents client instructions.
-- Category must be one of: Planning, Preparation, Marketing, Execution, Post-Sale.`;
+- Category must be one of: Planning, Preparation, Marketing, Execution, Post-Sale.
+- Write each task in plain everyday words a crew member understands — no database or system jargon.`;
       const res = await base44.integrations.Core.InvokeLLM({
         prompt,
         response_json_schema: {
@@ -106,7 +107,7 @@ Rules:
       })));
       setSuggestions(suggestions.filter((_, i) => !selected[i]));
       setSelected({});
-      setMsg(`Added ${chosen.length} task(s) to SaleTasks. Rejected suggestions created nothing.`);
+      setMsg(`Added ${chosen.length} task${chosen.length === 1 ? '' : 's'}. Nothing else was created.`);
       if (onTasksAdded) onTasksAdded(chosen.length);
     } catch (e) {
       console.error(e);
@@ -121,15 +122,15 @@ Rules:
   return (
     <Card>
       <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 space-y-0">
-        <CardTitle className="flex items-center gap-2"><Sparkles className="w-4 h-4 text-purple-600" />AI Checklist Builder</CardTitle>
+        <CardTitle className="flex items-center gap-2"><Sparkles className="w-4 h-4 text-purple-600" />Task Ideas</CardTitle>
         <Button size="sm" onClick={buildSuggestions} disabled={loading} className="bg-purple-600 hover:bg-purple-700">
-          {loading ? <><Loader2 className="w-4 h-4 mr-1 animate-spin" />Analyzing sale facts...</> : 'Suggest Preparation Tasks'}
+          {loading ? <><Loader2 className="w-4 h-4 mr-1 animate-spin" />Looking at this sale...</> : 'Suggest Tasks'}
         </Button>
       </CardHeader>
       <CardContent className="space-y-3">
         <p className="text-xs text-slate-500 flex items-start gap-1">
           <Info className="w-3.5 h-3.5 flex-shrink-0 mt-0.5" />
-          Suggestions come from your own records (site assessment, agreed scope, research flags, display attention). You approve — only approved suggestions become SaleTasks. AI never certifies safety, security, or legal compliance.
+          Ideas come from what you already saved on this sale. Pick the ones you want and they become tasks — nothing is added without you.
         </p>
         {msg && <p className="text-sm text-slate-700">{msg}</p>}
         {suggestions && suggestions.length > 0 && (
@@ -150,7 +151,7 @@ Rules:
               ))}
             </div>
             <Button onClick={addSelected} disabled={adding || chosenCount === 0} className="bg-green-600 hover:bg-green-700">
-              {adding ? 'Adding...' : `Add ${chosenCount} selected to SaleTasks`}
+              {adding ? 'Adding...' : `Add ${chosenCount} task${chosenCount === 1 ? '' : 's'}`}
             </Button>
           </>
         )}

@@ -107,10 +107,10 @@ export default function PrepZonesPanel({ sale, discoveries, linkedDeal, highligh
     <Card>
       <CardHeader className="pb-2">
         <CardTitle className="text-base flex items-center gap-2">
-          <Layers className="w-5 h-5 text-cyan-700" /> Preparation Zones
+          <Layers className="w-5 h-5 text-cyan-700" /> Rooms &amp; Work Areas
         </CardTitle>
         <p className="text-xs text-slate-500">
-          Team-readable rooms / work areas projected on the sale (Chapter 14). Prep status is honest human-set state — no percentage progress.
+          The rooms in this house and who is working each one. You set the stage yourself — no percentages.
           {saving && <span className="ml-1 text-cyan-600 inline-flex items-center gap-1"><Loader2 className="w-3 h-3 animate-spin" />saving…</span>}
         </p>
       </CardHeader>
@@ -135,12 +135,12 @@ export default function PrepZonesPanel({ sale, discoveries, linkedDeal, highligh
         </div>
         {consultationRooms.length > 0 && (
           <Button size="sm" variant="outline" onClick={projectConsultationRooms}>
-            <MapPin className="w-3.5 h-3.5 mr-1" />Project {consultationRooms.length} consultation room(s) as zones
+            <MapPin className="w-3.5 h-3.5 mr-1" />Add my {consultationRooms.length} consultation room{consultationRooms.length === 1 ? '' : 's'}
           </Button>
         )}
 
         {zones.length === 0 ? (
-          <p className="text-sm text-slate-400 py-2">No prep zones yet — add a zone or project the consultation rooms.</p>
+          <p className="text-sm text-slate-400 py-2">No rooms yet. Add one, or use the room photos walkthrough on the Prepare page.</p>
         ) : (
           <div className="space-y-3">
             {zones.map(zone => {

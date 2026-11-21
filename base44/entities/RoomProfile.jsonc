@@ -1,0 +1,117 @@
+{
+  "name": "RoomProfile",
+  "type": "object",
+  "description": "One room of a sale, built from photos the operator takes of the whole room. It answers the two things a worker standing in the doorway needs: what in this room is for sale, and whether customers may come in at all. Photos are private storage references and never become public or marketing images. Each room also gets a matching prep zone on the sale so it shows up in the team's room list.",
+  "properties": {
+    "sale_id": {
+      "type": "string",
+      "description": "EstateSale this room belongs to."
+    },
+    "operator_id": {
+      "type": "string",
+      "description": "Sale owner (access anchor)."
+    },
+    "sale_team_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Read-scope projection of EstateSale.sale_team so assigned workers can open the room. The sale stays the source of truth."
+    },
+    "zone_id": {
+      "type": "string",
+      "description": "The prep zone on the sale that this room feeds (the same room in the team's room list)."
+    },
+    "name": {
+      "type": "string",
+      "description": "Room name the operator typed (Living Room, Garage, Upstairs Hall...)."
+    },
+    "sale_scope": {
+      "type": "string",
+      "enum": [
+        "all_items",
+        "some_items",
+        "do_not_enter"
+      ],
+      "default": "all_items",
+      "enumColors": [
+        "green",
+        "yellow",
+        "red"
+      ],
+      "description": "all_items = everything in the room is for sale; some_items = customers may come in but only marked items are for sale; do_not_enter = customers stay out."
+    },
+    "photos": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "PRIVATE file_uri values of the room photos. Never a public URL."
+    },
+    "worker_notes": {
+      "type": "string",
+      "description": "What the team needs to know standing in this room (what is held back, what to watch, where to send questions)."
+    }
+  },
+  "required": [
+    "sale_id",
+    "operator_id",
+    "name",
+    "sale_scope"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.operator_id": "{{user.id}}"
+        },
+        {
+          "data.sale_team_ids": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "$or": [
+        {
+          "data.operator_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.operator_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.operator_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

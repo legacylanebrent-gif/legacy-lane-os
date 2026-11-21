@@ -36,15 +36,16 @@ ${prepFacts}
 
 ${AUTHORITY_RULES}
 
-Produce a concise prep brief with EXACTLY these sections (skip none; write "None from records." where a section has nothing):
-TOP PRIORITIES (max 3, most time-critical first, each with why)
-OPEN RESEARCH
+Produce a short prep brief with EXACTLY these sections (skip none; write "Nothing right now." where a section has nothing):
+DO FIRST (max 3, most urgent first, each with a one-line why)
+STILL RESEARCHING
 EQUIPMENT
-CLIENT QUESTIONS
+ASK YOUR CLIENT
 MARKETING
-SECURITY / CHECKOUT
+SECURITY AND CHECKOUT
 TASKS DUE
-Use plain markdown (### headers, short bullets). Keep it under 300 words.`,
+Use plain markdown (### headers, short bullets). Keep it under 250 words.
+Write in everyday words a busy operator understands — no database, system or code jargon.`,
       });
       setBrief(typeof res === 'string' ? res : (res?.response || JSON.stringify(res)));
     } catch (e) {
@@ -68,7 +69,7 @@ ${prepFacts}
 
 ${AUTHORITY_RULES}
 
-Answer directly and concisely in plain markdown, ending with 1-2 specific next actions the operator can take in the platform.`,
+Answer directly and concisely in plain markdown, in everyday words with no database or system jargon, ending with 1-2 specific next actions the operator can take here in the app.`,
       });
       setAnswer(typeof res === 'string' ? res : (res?.response || JSON.stringify(res)));
     } catch (e) {
@@ -81,15 +82,14 @@ Answer directly and concisely in plain markdown, ending with 1-2 specific next a
 
   return (
     <Card>
-      <CardHeader><CardTitle className="flex items-center gap-2"><BrainCircuit className="w-4 h-4 text-cyan-600" />Operations Coach</CardTitle></CardHeader>
+      <CardHeader><CardTitle className="flex items-center gap-2"><BrainCircuit className="w-4 h-4 text-cyan-600" />Prep Coach</CardTitle></CardHeader>
       <CardContent className="space-y-4">
         <p className="text-xs text-slate-500">
-          Answers come from this sale's records — equipment, research, decisions, tasks, security/checkout reviews,
-          marketing readiness. The coach can summarize, suggest and prioritize; it cannot complete anything for you.
+          Answers come from what you have already saved on this sale. It can tell you what to do next — it cannot tick anything off for you.
         </p>
         <div>
           <Button onClick={getBrief} disabled={briefLoading} className="bg-cyan-700 hover:bg-cyan-800">
-            {briefLoading ? <><Loader2 className="w-4 h-4 mr-1 animate-spin" />Preparing...</> : <><Sun className="w-4 h-4 mr-1" />Today's Prep Brief</>}
+            {briefLoading ? <><Loader2 className="w-4 h-4 mr-1 animate-spin" />Thinking...</> : <><Sun className="w-4 h-4 mr-1" />Today's Prep Brief</>}
           </Button>
         </div>
         {brief && (

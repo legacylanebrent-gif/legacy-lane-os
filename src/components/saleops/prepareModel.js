@@ -22,6 +22,24 @@ export const STATUS_STYLES = {
   UNKNOWN: 'bg-slate-50 text-slate-600 border-slate-200',
 };
 
+// Plain words for the operator. The stored STATUS values never change.
+export const STATUS_LABELS = {
+  READY: 'Ready',
+  NEEDS_ATTENTION: 'Needs attention',
+  NEEDS_REVIEW: 'Needs a look',
+  NOT_APPLICABLE: 'Not needed',
+  UNKNOWN: 'Not started',
+};
+
+export const PHASE_LABELS = {
+  'EARLY PREP': 'Early planning',
+  'ACTIVE PREP': 'Prep in progress',
+  'FINAL PRE-OPEN REVIEW': 'Final check',
+  'SALE DAYS': 'Sale days',
+  'POST-SALE': 'After the sale',
+  UNKNOWN: 'No dates yet',
+};
+
 const SECURITY_PREFIX = 'Security:';
 const CHECKOUT_PREFIX = 'Checkout Setup:';
 
@@ -70,13 +88,13 @@ export function analyzePreparation(input) {
   const hasDates = (sale.sale_dates || []).length > 0;
   const hasAddress = !!(sale.property_address && (sale.property_address.city || sale.property_address.street));
   if (!sale.title || !hasDates) {
-    push('basics', 'Sale Basics', STATUS.NEEDS_ATTENTION,
-      hasDates ? 'No sale dates scheduled yet.' : 'Title, dates or address missing.',
-      `/SaleEditor?saleId=${sale.id}`, 'Open Sale Editor');
+    push('basics', 'Sale Details', STATUS.NEEDS_ATTENTION,
+      !sale.title ? 'This sale still needs a title.' : 'Pick the sale dates.',
+      `/SaleEditor?saleId=${sale.id}`, 'Edit sale');
   } else {
-    push('basics', 'Sale Basics', STATUS.READY,
-      hasAddress ? 'Dates and address on file.' : 'Dates on file; address incomplete.',
-      `/SaleEditor?saleId=${sale.id}`, 'Open Sale Editor');
+    push('basics', 'Sale Details', STATUS.READY,
+      hasAddress ? 'Dates and address are set.' : 'Dates are set. Add the property address.',
+      `/SaleEditor?saleId=${sale.id}`, 'Edit sale');
   }
 
   // CLIENT / SCOPE (Chapter 9 P1 adds the operational AUTHORITY check —
@@ -84,25 +102,25 @@ export function analyzePreparation(input) {
   const activeAuth = authorities.filter(a => a.is_active);
   const primaryAuth = activeAuth.find(a => a.is_primary) || activeAuth[0];
   const authIssue = !activeAuth.length
-    ? 'No authorized decision-maker recorded — AUTHORITY NEEDS REVIEW.'
+    ? 'Say who can make decisions for this client.'
     : primaryAuth?.verification_status !== 'VERIFIED'
-      ? `AUTHORITY NEEDS REVIEW — ${primaryAuth?.full_name || 'the decision-maker'} is classified ${primaryAuth?.verification_status || 'UNRESOLVED'}.`
+      ? `${primaryAuth?.full_name || 'Your client'} is not confirmed as the decision-maker yet.`
       : null;
   if (openDecisions.length > 0) {
-    push('client_scope', 'Client / Scope', STATUS.NEEDS_ATTENTION,
-      `${openDecisions.length} open client decision(s) awaiting an instruction.${authIssue ? ` ${authIssue}` : ''}`,
-      `/SaleClientDecisions?saleId=${sale.id}`, 'Open Client Decisions');
+    push('client_scope', 'Client & Scope', STATUS.NEEDS_ATTENTION,
+      `${openDecisions.length} question${openDecisions.length === 1 ? '' : 's'} waiting on your client.${authIssue ? ` ${authIssue}` : ''}`,
+      `/SaleClientDecisions?saleId=${sale.id}`, 'Open questions');
   } else if (authIssue) {
-    push('client_scope', 'Client / Scope', STATUS.NEEDS_ATTENTION, authIssue,
-      `/ProposalAgreement?saleId=${sale.id}`, 'Review Authority & Agreement');
+    push('client_scope', 'Client & Scope', STATUS.NEEDS_ATTENTION, authIssue,
+      `/ProposalAgreement?saleId=${sale.id}`, 'Who decides');
   } else if (scope) {
     const included = (scope.scope_items || []).filter(s => s.included).length;
-    push('client_scope', 'Client / Scope', STATUS.READY,
-      `Agreed scope on file (${included} included service${included === 1 ? '' : 's'}); no open decisions; decision-maker verified.`);
+    push('client_scope', 'Client & Scope', STATUS.READY,
+      `What this client hired you for is recorded (${included} service${included === 1 ? '' : 's'}).`);
   } else {
-    push('client_scope', 'Client / Scope', STATUS.NEEDS_REVIEW,
-      'No agreed-scope record for this sale — UNKNOWN, not "no scope". Record what this client hired you to do.',
-      `/SaleEditor?saleId=${sale.id}`, 'Record Scope');
+    push('client_scope', 'Client & Scope', STATUS.NEEDS_REVIEW,
+      'No agreed scope yet. Note what this client hired you to do.',
+      `/SaleEditor?saleId=${sale.id}`, 'Add scope');
   }
 
   // PROPERTY / ROOMS
@@ -114,112 +132,112 @@ export function analyzePreparation(input) {
     if (sa.stairs_levels && sa.stairs_levels !== 'unknown') bits.push(`stairs: ${sa.stairs_levels.replace('_', ' ')}`);
     if (sa.parking && sa.parking !== 'unknown') bits.push(`parking: ${sa.parking}`);
     if (sa.merchandise_volume && sa.merchandise_volume !== 'unknown') bits.push(`volume: ${sa.merchandise_volume}`);
-    push('property', 'Property / Rooms', STATUS.READY,
-      `Site assessment on file${bits.length ? ` (${bits.join(', ')})` : ''}.`,
-      `/SaleEditor?saleId=${sale.id}`, 'Open Site Assessment');
+    push('property', 'Property & Rooms', STATUS.READY,
+      `Site notes are on file${bits.length ? ` (${bits.join(', ')})` : ''}.`,
+      `/SaleEditor?saleId=${sale.id}`, 'Site notes');
   } else {
-    push('property', 'Property / Rooms', STATUS.NEEDS_REVIEW,
-      'Site assessment not recorded for this property — NOT REVIEWED, not "no issues".',
-      `/SaleEditor?saleId=${sale.id}`, 'Open Site Assessment');
+    push('property', 'Property & Rooms', STATUS.NEEDS_REVIEW,
+      'No site notes yet. Add property type, stairs, parking and how much there is.',
+      `/SaleEditor?saleId=${sale.id}`, 'Site notes');
   }
 
   // INVENTORY
   if (itemCount === 0) {
-    push('inventory', 'Inventory', STATUS.NEEDS_ATTENTION,
-      'No merchandise recorded for this sale yet.',
-      `/SaleInventory?id=${sale.id}`, 'Open Inventory');
+    push('inventory', 'Items', STATUS.NEEDS_ATTENTION,
+      'No items on this sale yet.',
+      `/SaleInventory?id=${sale.id}`, 'Open items');
   } else {
-    push('inventory', 'Inventory', STATUS.READY,
+    push('inventory', 'Items', STATUS.READY,
       `${itemCount} item${itemCount === 1 ? '' : 's'} on this sale.`,
-      `/SaleInventory?id=${sale.id}`, 'Open Inventory');
+      `/SaleInventory?id=${sale.id}`, 'Open items');
   }
 
   // RESEARCH
   if (researchItems.length > 0) {
     push('research', 'Research', STATUS.NEEDS_ATTENTION,
-      `${researchItems.length} item${researchItems.length === 1 ? '' : 's'} flagged for research or verification.`,
-      `/SaleInventory?id=${sale.id}`, 'Open Research Queue');
+      `${researchItems.length} item${researchItems.length === 1 ? '' : 's'} still need research or a check.`,
+      `/SaleInventory?id=${sale.id}`, 'Research list');
   } else {
-    push('research', 'Research', STATUS.READY, 'No unresolved research flags.', `/SaleInventory?id=${sale.id}`, 'Open Research Queue');
+    push('research', 'Research', STATUS.READY, 'Nothing is waiting on research.', `/SaleInventory?id=${sale.id}`, 'Research list');
   }
 
   // SECURITY (checklist through SaleTask)
   const security = checklistState(tasks, SECURITY_PREFIX);
   if (security.state === 'none') {
     push('security', 'Security', STATUS.NEEDS_REVIEW,
-      'Security walkthrough not reviewed. Completion means CHECKLIST REVIEWED — never a safety certification.',
-      '#security', 'Review Security Walkthrough');
+      'Not reviewed yet. Add the walkthrough checklist below.',
+      '#security', 'Open checklist');
   } else if (security.state === 'open') {
     push('security', 'Security', STATUS.NEEDS_ATTENTION,
-      `Security walkthrough partially reviewed (${security.completed} of ${security.total}).`,
-      '#security', 'Review Security Walkthrough');
+      `${security.completed} of ${security.total} points checked.`,
+      '#security', 'Open checklist');
   } else {
     push('security', 'Security', STATUS.READY,
-      `Security walkthrough reviewed (${security.total} checklist points). Reviewed — not certified safe.`,
-      '#security', 'View Security Walkthrough');
+      `All ${security.total} points checked.`,
+      '#security', 'View checklist');
   }
 
   // CHECKOUT (checklist through SaleTask)
   const checkout = checklistState(tasks, CHECKOUT_PREFIX);
   if (checkout.state === 'none') {
     push('checkout', 'Checkout', STATUS.NEEDS_REVIEW,
-      'Checkout setup not reviewed (location, device, payments, pickup process).',
-      '#checkout', 'Review Checkout Setup');
+      'Not reviewed yet. Add the checkout checklist below.',
+      '#checkout', 'Open checklist');
   } else if (checkout.state === 'open') {
     push('checkout', 'Checkout', STATUS.NEEDS_ATTENTION,
-      `Checkout setup partially reviewed (${checkout.completed} of ${checkout.total}).`,
-      '#checkout', 'Review Checkout Setup');
+      `${checkout.completed} of ${checkout.total} points checked.`,
+      '#checkout', 'Open checklist');
   } else {
     push('checkout', 'Checkout', STATUS.READY,
-      `Checkout setup reviewed (${checkout.total} points). Operational preparation only — payment truth lives in Orders.`,
-      '#checkout', 'View Checkout Setup');
+      `All ${checkout.total} points checked.`,
+      '#checkout', 'View checklist');
   }
 
   // HIGH-VALUE / CONTROLLED ITEMS (handling decided in the security walkthrough)
   if (attentionItems.length === 0) {
-    push('high_value', 'High-Value / Controlled', STATUS.NOT_APPLICABLE,
-      'No items marked for display attention on this sale.',
-      `/SaleInventory?id=${sale.id}`, 'Open Inventory');
+    push('high_value', 'High-Value Items', STATUS.NOT_APPLICABLE,
+      'Nothing is flagged for special handling.',
+      `/SaleInventory?id=${sale.id}`, 'Open items');
   } else if (security.state === 'done') {
-    push('high_value', 'High-Value / Controlled', STATUS.READY,
-      `${attentionItems.length} item(s) marked for display attention; handling reviewed in the security walkthrough.`,
-      `#security`, 'View Security Walkthrough');
+    push('high_value', 'High-Value Items', STATUS.READY,
+      `${attentionItems.length} item${attentionItems.length === 1 ? '' : 's'} flagged — how to display them is covered in the security checklist.`,
+      `#security`, 'View checklist');
   } else {
-    push('high_value', 'High-Value / Controlled', STATUS.NEEDS_REVIEW,
-      `${attentionItems.length} item(s) marked for display attention — how they are displayed/handled is decided in the security walkthrough, which is not reviewed yet.`,
-      `#security`, 'Review Security Walkthrough');
+    push('high_value', 'High-Value Items', STATUS.NEEDS_REVIEW,
+      `${attentionItems.length} item${attentionItems.length === 1 ? '' : 's'} flagged. Decide how to display them in the security checklist.`,
+      `#security`, 'Open checklist');
   }
 
   // EQUIPMENT / LOAD-OUT
   const unpacked = assignments.filter(a => !a.packed);
   const unresolvedPackout = assignments.filter(a => a.packed && a.entry_type === 'REUSABLE_EQUIPMENT' && (a.packout_state || 'PENDING') === 'PENDING');
   if (assignments.length === 0 && !kit) {
-    push('equipment', 'Equipment / Load-Out', STATUS.NEEDS_REVIEW,
-      'No equipment plan recorded for this sale — UNKNOWN, not "no equipment required".',
-      '/EquipmentManager', 'Open Equipment & Kit');
+    push('equipment', 'Equipment', STATUS.NEEDS_REVIEW,
+      'No equipment list for this sale yet.',
+      '/EquipmentManager', 'Set up equipment');
   } else if (assignments.length === 0 && kit) {
-    push('equipment', 'Equipment / Load-Out', STATUS.NEEDS_ATTENTION,
-      `Standard kit "${kit.name}" exists but has not been projected to this sale.`,
-      `/SaleEquipment?saleId=${sale.id}`, 'Open Load-Out');
+    push('equipment', 'Equipment', STATUS.NEEDS_ATTENTION,
+      `Your standard kit "${kit.name}" has not been added to this sale yet.`,
+      `/SaleEquipment?saleId=${sale.id}`, 'Add kit');
   } else if (unpacked.length > 0) {
-    push('equipment', 'Equipment / Load-Out', STATUS.NEEDS_ATTENTION,
-      `${unpacked.length} of ${assignments.length} equipment entr${unpacked.length === 1 ? 'y is' : 'ies are'} not packed yet.`,
-      `/SaleEquipment?saleId=${sale.id}`, 'Open Load-Out');
+    push('equipment', 'Equipment', STATUS.NEEDS_ATTENTION,
+      `${unpacked.length} of ${assignments.length} still need packing.`,
+      `/SaleEquipment?saleId=${sale.id}`, 'Packing list');
   } else if (unresolvedPackout.length > 0 && timing.phase === 'POST-SALE') {
-    push('equipment', 'Equipment / Pack-Out', STATUS.NEEDS_ATTENTION,
-      `${unresolvedPackout.length} reusable asset(s) went to the sale with no pack-out ending recorded.`,
-      `/SaleEquipment?saleId=${sale.id}`, 'Open Pack-Out');
+    push('equipment', 'Equipment', STATUS.NEEDS_ATTENTION,
+      `${unresolvedPackout.length} company item${unresolvedPackout.length === 1 ? '' : 's'} left with no return recorded.`,
+      `/SaleEquipment?saleId=${sale.id}`, 'Record returns');
   } else {
-    push('equipment', 'Equipment / Load-Out', STATUS.READY,
-      `${assignments.length} equipment entr${assignments.length === 1 ? 'y' : 'ies'} packed for this sale.`,
-      `/SaleEquipment?saleId=${sale.id}`, 'Open Load-Out');
+    push('equipment', 'Equipment', STATUS.READY,
+      `${assignments.length} item${assignments.length === 1 ? '' : 's'} packed for this sale.`,
+      `/SaleEquipment?saleId=${sale.id}`, 'Packing list');
   }
 
   // MARKETING (derived from actual MarketingKit component states)
   if (!marketingKit) {
     push('marketing', 'Marketing', STATUS.NEEDS_REVIEW,
-      'No marketing kit record for this sale — UNKNOWN readiness, not "no marketing needed".',
-      `/MarketingKit?saleId=${sale.id}`, 'Open Marketing Kit');
+      'No marketing kit for this sale yet.',
+      `/MarketingKit?saleId=${sale.id}`, 'Open marketing kit');
   } else {
     const comps = marketingKit.component_status || {};
     const keys = ['description', 'social', 'email', 'sms', 'qr', 'signs', 'featured'];
@@ -227,15 +245,15 @@ export function analyzePreparation(input) {
     const untouched = keys.filter(k => !comps[k]);
     if (notReady.length === 0 && untouched.length === 0) {
       push('marketing', 'Marketing', STATUS.READY,
-        'Marketing kit components are ready. Publication states live in their own systems.',
-        `/MarketingKit?saleId=${sale.id}`, 'Open Marketing Kit');
+        'Marketing kit is ready.',
+        `/MarketingKit?saleId=${sale.id}`, 'Open marketing kit');
     } else {
       const bits = [];
-      if (notReady.length) bits.push(`${notReady.length} component(s) still draft`);
+      if (notReady.length) bits.push(`${notReady.length} still in draft`);
       if (untouched.length) bits.push(`${untouched.length} not started`);
       push('marketing', 'Marketing', STATUS.NEEDS_ATTENTION,
-        `Marketing kit incomplete — ${bits.join('; ')}.`,
-        `/MarketingKit?saleId=${sale.id}`, 'Open Marketing Kit');
+        `Not finished yet — ${bits.join(', ')}.`,
+        `/MarketingKit?saleId=${sale.id}`, 'Open marketing kit');
     }
   }
 
@@ -244,17 +262,17 @@ export function analyzePreparation(input) {
   const todayStr = new Date().toISOString().slice(0, 10);
   const overdue = openTasks.filter(t => t.due_date && t.due_date < todayStr);
   if (tasks.length === 0) {
-    push('team_tasks', 'Team / Tasks', STATUS.NEEDS_REVIEW,
-      'No tasks recorded for this sale — preparation work is UNKNOWN, not "nothing to do".',
-      `/SaleTasks?saleId=${sale.id}`, 'Open Tasks');
+    push('team_tasks', 'Team & Tasks', STATUS.NEEDS_REVIEW,
+      'No tasks on this sale yet.',
+      `/SaleTasks?saleId=${sale.id}`, 'Open tasks');
   } else if (overdue.length > 0) {
-    push('team_tasks', 'Team / Tasks', STATUS.NEEDS_ATTENTION,
-      `${overdue.length} task(s) overdue, ${openTasks.length} open.`,
-      `/SaleTasks?saleId=${sale.id}`, 'Open Tasks');
+    push('team_tasks', 'Team & Tasks', STATUS.NEEDS_ATTENTION,
+      `${overdue.length} late, ${openTasks.length} still open.`,
+      `/SaleTasks?saleId=${sale.id}`, 'Open tasks');
   } else {
-    push('team_tasks', 'Team / Tasks', STATUS.READY,
-      `${tasks.length} task(s) tracked, ${openTasks.length} open, none overdue.`,
-      `/SaleTasks?saleId=${sale.id}`, 'Open Tasks');
+    push('team_tasks', 'Team & Tasks', STATUS.READY,
+      `${tasks.length} task${tasks.length === 1 ? '' : 's'}, ${openTasks.length} open, none late.`,
+      `/SaleTasks?saleId=${sale.id}`, 'Open tasks');
   }
 
   // Findings: every NEEDS ATTENTION / NEEDS REVIEW area leads somewhere useful.
@@ -283,7 +301,7 @@ export function analyzePreparation(input) {
 export function prepFactsString({ sale, analysis, researchItems, attentionItems, assignments, openDecisions, tasks }) {
   const lines = [];
   lines.push(`SALE: "${sale.title}" — status ${sale.status || 'unknown'}, timing phase ${analysis.timing.phase}${analysis.timing.daysUntilFirst !== null ? ` (${analysis.timing.daysUntilFirst} days until first date)` : ' (no dates set)'}.`);
-  lines.push('DETERMINISTIC PREPARATION ANALYSIS (computed from records, not by AI):');
+  lines.push('WHAT THE RECORDS SHOW (computed, not written by AI):');
   for (const a of analysis.areas) lines.push(`- ${a.label}: ${a.status} — ${a.detail}`);
   if (researchItems.length) lines.push(`RESEARCH FLAGGED ITEMS: ${researchItems.map(i => `"${i.title}" (${i.research_status})`).join('; ')}`);
   if (attentionItems.length) lines.push(`DISPLAY ATTENTION ITEMS: ${attentionItems.map(i => `"${i.title}" (${i.display_attention})`).join('; ')}`);

@@ -78,12 +78,11 @@ STRICT RULES:
 
   return (
     <Card>
-      <CardHeader><CardTitle className="flex items-center gap-2"><Sparkles className="w-4 h-4 text-purple-600" />AI Staging Coach <Badge variant="outline" className="font-normal">Advisory</Badge></CardTitle></CardHeader>
+      <CardHeader><CardTitle className="flex items-center gap-2"><Sparkles className="w-4 h-4 text-purple-600" />Room Setup Ideas <Badge variant="outline" className="font-normal">Ideas only</Badge></CardTitle></CardHeader>
       <CardContent className="space-y-3">
         <p className="text-xs text-slate-500">
-          Describe a room (and optionally attach a photo — stored privately, never shown publicly). Suggestions are advisory
-          considerations only: the AI never certifies safety, security, structural, ADA, fire-code, occupancy or electrical
-          adequacy, and nothing is written to sale records automatically.
+          Describe a room or attach a photo (stored privately, never shown publicly) and get ideas on how to set it up.
+          Nothing is saved to the sale — you decide what to use.
         </p>
         <Textarea
           placeholder="e.g. Living room, moderate volume: two sofas to sell, mixed smalls on shelves, one folding table, narrow doorway to dining room..."
@@ -98,7 +97,7 @@ STRICT RULES:
             <input type="file" accept="image/*" className="hidden" onChange={e => setFile(e.target.files?.[0] || null)} />
           </label>
           <Button onClick={analyze} disabled={loading} className="bg-purple-600 hover:bg-purple-700">
-            {loading ? <><Loader2 className="w-4 h-4 mr-1 animate-spin" />Analyzing...</> : 'Get staging considerations'}
+            {loading ? <><Loader2 className="w-4 h-4 mr-1 animate-spin" />Looking...</> : 'Get Ideas'}
           </Button>
         </div>
         {error && <p className="text-sm text-red-600">{error}</p>}
@@ -106,7 +105,7 @@ STRICT RULES:
           <div className="space-y-3 pt-2">
             {(result.photo_observations || []).length > 0 && (
               <div className="border border-slate-200 rounded-lg p-3">
-                <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 mb-1">Photo observation (what is visible)</p>
+                <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 mb-1">What the photo shows</p>
                 <ul className="text-sm text-slate-700 space-y-1 list-disc pl-4">
                   {(result.photo_observations || []).map((o, i) => <li key={i}>{o}</li>)}
                 </ul>
@@ -114,7 +113,7 @@ STRICT RULES:
             )}
             {(result.suggestions || []).length > 0 && (
               <div className="border border-purple-200 bg-purple-50/50 rounded-lg p-3">
-                <p className="text-xs font-semibold uppercase tracking-wide text-purple-700 mb-1">AI suggestion (advisory — not fact)</p>
+                <p className="text-xs font-semibold uppercase tracking-wide text-purple-700 mb-1">Ideas to consider</p>
                 <ul className="text-sm text-slate-700 space-y-2 list-disc pl-4">
                   {(result.suggestions || []).map((s, i) => (
                     <li key={i}><span className="font-medium">{s.area}:</span> {s.suggestion}{s.why ? <span className="text-slate-500"> ({s.why})</span> : null}</li>
@@ -123,10 +122,10 @@ STRICT RULES:
               </div>
             )}
             <div className="border border-slate-200 rounded-lg p-3">
-              <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 mb-1">Operator decision (yours only)</p>
+              <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 mb-1">Your call</p>
               <p className="text-sm text-slate-600">
-                Suggestions are not saved to sale records. Take what helps, verify it on site, and record real commitments
-                where your team works — SaleTasks or the security/checkout reviews above.
+                Nothing here is saved. Take what helps, check it on site, and put real commitments in your tasks or the
+                checklists above.
               </p>
             </div>
           </div>
