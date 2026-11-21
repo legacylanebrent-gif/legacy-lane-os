@@ -14,38 +14,11 @@ import {
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
 import {
-  Plus, ListChecks, Trash2, Loader2, Pencil,
+  Plus, ListChecks, Loader2, ClipboardPaste,
 } from "lucide-react";
-
-const CATEGORY_LABELS = {
-  public_experience: "Public Experience",
-  consumer: "Consumer",
-  operator: "Operator",
-  vendor: "Vendor",
-  reseller: "Reseller",
-  agent: "Agent",
-  admin: "Admin",
-  seo_marketing: "SEO & Marketing",
-  payments: "Payments",
-  security: "Security",
-  data: "Data",
-  other: "Other",
-};
-
-const SEVERITY_STYLES = {
-  critical: "bg-red-100 text-red-700 border-red-200",
-  high: "bg-orange-100 text-orange-700 border-orange-200",
-  medium: "bg-amber-100 text-amber-700 border-amber-200",
-  low: "bg-slate-100 text-slate-600 border-slate-200",
-};
-
-const STATUS_STYLES = {
-  open: "bg-slate-100 text-slate-700",
-  in_progress: "bg-blue-100 text-blue-700",
-  resolved: "bg-green-100 text-green-700",
-  blocked: "bg-red-100 text-red-700",
-  wont_fix: "bg-slate-200 text-slate-500",
-};
+import { CATEGORY_LABELS } from "@/lib/punchList";
+import PastePunchListDialog from "@/components/punchlist/PastePunchListDialog";
+import PunchListItemCard from "@/components/punchlist/PunchListItemCard";
 
 const EMPTY_FORM = {
   title: "",
@@ -64,6 +37,7 @@ export default function PunchList() {
   const [statusFilter, setStatusFilter] = useState("all");
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [showPaste, setShowPaste] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [form, setForm] = useState(EMPTY_FORM);
   const [saving, setSaving] = useState(false);
@@ -183,6 +157,14 @@ export default function PunchList() {
               Launch readiness punch list — track what still needs to be built or fixed
             </p>
           </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <Button
+              variant="outline"
+              onClick={() => setShowPaste(true)}
+              className="border-orange-300 text-orange-700 hover:bg-orange-50"
+            >
+              <ClipboardPaste className="w-4 h-4 mr-1" /> Paste &amp; Create
+            </Button>
           <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
             <DialogTrigger asChild>
               <Button onClick={openAdd} className="bg-orange-600 hover:bg-orange-700">
@@ -275,6 +257,7 @@ export default function PunchList() {
               </DialogFooter>
             </DialogContent>
           </Dialog>
+          </div>
         </div>
 
         {/* Stats */}
@@ -340,51 +323,22 @@ export default function PunchList() {
       ) : (
         <div className="space-y-3">
           {filtered.map((item) => (
-            <Card key={item.id} className={item.is_launch_blocker && item.status !== "resolved" ? "border-red-300" : ""}>
-              <CardContent className="p-4">
-                <div className="flex flex-wrap items-start gap-3">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex flex-wrap items-center gap-2 mb-1">
-                      <h3 className={`font-semibold text-slate-900 ${item.status === "resolved" ? "line-through text-slate-400" : ""}`}>
-                        {item.title}
-                      </h3>
-                      {item.is_launch_blocker && item.status !== "resolved" && (
-                        <Badge variant="destructive" className="text-[10px]">LAUNCH BLOCKER</Badge>
-                      )}
-                      <Badge className={`text-[10px] border ${SEVERITY_STYLES[item.severity] || SEVERITY_STYLES.medium}`}>
-                        {item.severity}
-                      </Badge>
-                      <Badge className={`text-[10px] ${STATUS_STYLES[item.status] || STATUS_STYLES.open}`}>
-                        {(item.status || "open").replace("_", " ")}
-                      </Badge>
-                      <Badge variant="outline" className="text-[10px]">
-                        {CATEGORY_LABELS[item.category] || "Other"}
-                      </Badge>
-                    </div>
-                    {item.description && (
-                      <p className="text-sm text-slate-600 whitespace-pre-wrap">{item.description}</p>
-                    )}
-                    {item.assigned_to && (
-                      <p className="text-xs text-slate-400 mt-1">Assigned to: {item.assigned_to}</p>
-                    )}
-                  </div>
-                  <div className="flex items-center gap-1 flex-shrink-0">
-                    <Button variant="outline" size="sm" onClick={() => cycleStatus(item)} title="Advance status">
-                      Advance
-                    </Button>
-                    <Button variant="ghost" size="sm" onClick={() => openEdit(item)} title="Edit">
-                      <Pencil className="w-4 h-4" />
-                    </Button>
-                    <Button variant="ghost" size="sm" onClick={() => handleDelete(item)} title="Delete">
-                      <Trash2 className="w-4 h-4 text-red-500" />
-                    </Button>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            <PunchListItemCard
+              key={item.id}
+              item={item}
+              onAdvance={cycleStatus}
+              onEdit={openEdit}
+              onDelete={handleDelete}
+            />
           ))}
         </div>
       )}
+
+      <PastePunchListDialog
+        open={showPaste}
+        onOpenChange={setShowPaste}
+        onCreated={loadItems}
+      />
     </div>
   );
 }

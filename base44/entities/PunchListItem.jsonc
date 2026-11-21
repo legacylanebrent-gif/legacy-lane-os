@@ -1,6 +1,7 @@
 {
   "name": "PunchListItem",
   "type": "object",
+  "description": "One item on the admin's platform punch list \u2014 something that needs to be built or fixed. Items arrive four ways: added by hand, created in bulk from pasted text, duplicated automatically from a support ticket, or submitted by a paid subscriber from the AI Coach. Every item can be turned into a copy/paste Base44 AI fix prompt. Admin owns the lifecycle; a subscriber sees only what they reported.",
   "properties": {
     "title": {
       "type": "string",
@@ -27,6 +28,20 @@
         "other"
       ],
       "default": "other",
+      "enumColors": [
+        "blue",
+        "blue",
+        "purple",
+        "purple",
+        "purple",
+        "purple",
+        "gray",
+        "pink",
+        "green",
+        "red",
+        "yellow",
+        "gray"
+      ],
       "description": "Area of the platform this item belongs to"
     },
     "severity": {
@@ -38,6 +53,12 @@
         "low"
       ],
       "default": "medium",
+      "enumColors": [
+        "red",
+        "yellow",
+        "blue",
+        "gray"
+      ],
       "description": "Severity / urgency of the item"
     },
     "status": {
@@ -50,6 +71,13 @@
         "wont_fix"
       ],
       "default": "open",
+      "enumColors": [
+        "gray",
+        "blue",
+        "green",
+        "red",
+        "gray"
+      ],
       "description": "Current status of the item"
     },
     "is_launch_blocker": {
@@ -64,9 +92,85 @@
     "resolution_notes": {
       "type": "string",
       "description": "Notes recorded when the item is resolved"
+    },
+    "source": {
+      "type": "string",
+      "enum": [
+        "manual",
+        "bulk_paste",
+        "support_ticket",
+        "ai_coach"
+      ],
+      "default": "manual",
+      "enumColors": [
+        "gray",
+        "blue",
+        "yellow",
+        "purple"
+      ],
+      "description": "How this item entered the punch list. Set once at creation; it is provenance, not an editable field."
+    },
+    "source_ref": {
+      "type": "string",
+      "description": "Reference back to where the item came from \u2014 the support ticket number, or the pasted batch label. Never a credential."
+    },
+    "requested_by_id": {
+      "type": "string",
+      "description": "Subscriber who reported the issue (support ticket or AI Coach). Empty for admin-created items. Access anchor so a reporter can see their own submission."
+    },
+    "requested_by_name": {
+      "type": "string"
+    },
+    "requested_by_email": {
+      "type": "string"
+    },
+    "requested_by_account_type": {
+      "type": "string",
+      "description": "Account type the reporter was using when they submitted the item, for triage context."
     }
   },
   "required": [
     "title"
-  ]
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "data.requested_by_id": "{{user.id}}"
+        },
+        {
+          "created_by_id": "{{user.id}}"
+        }
+      ]
+    },
+    "create": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "user"
+          }
+        }
+      ]
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
 }

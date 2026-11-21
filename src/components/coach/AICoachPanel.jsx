@@ -3,7 +3,7 @@ import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { X, Send, Loader2, RotateCcw, ChevronDown, AlertTriangle, Brain, ChevronRight, Settings } from 'lucide-react';
+import { X, Send, Loader2, RotateCcw, ChevronDown, AlertTriangle, Brain, ChevronRight, Settings, Wrench } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { MODE_GROUPS, ALL_MODES, getModeByKey, MODE_STARTERS } from './coachModes';
 import { SCREEN_ACTIONS, getScreenKey } from './screenActions';
@@ -11,6 +11,7 @@ import SalePromotionEngine from './SalePromotionEngine';
 import ToneAdjustmentPanel from './ToneAdjustmentPanel';
 import VoicePreferencesModal from './VoicePreferencesModal';
 import GuidedContentFlow from './GuidedContentFlow';
+import PunchListReportDialog from './PunchListReportDialog';
 
 // Chapter 2 P1 — sale context pointer for context-aware communication modes.
 // The backend re-fetches all sale data server-side; only the ID is passed.
@@ -217,6 +218,7 @@ export default function AICoachPanel({ user, onClose, currentPathname }) {
   const [voicePreferences, setVoicePreferences] = useState(null);
   const [showVoiceModal, setShowVoiceModal] = useState(false);
   const [showContentFlow, setShowContentFlow] = useState(false);
+  const [showPunchReport, setShowPunchReport] = useState(false);
   const [lastAssistantIndex, setLastAssistantIndex] = useState(null);
   const messagesEndRef = useRef(null);
 
@@ -385,6 +387,13 @@ export default function AICoachPanel({ user, onClose, currentPathname }) {
                 <RotateCcw className="w-4 h-4" />
               </button>
             )}
+            <button
+              onClick={() => setShowPunchReport(true)}
+              className="text-slate-400 hover:text-orange-400 p-1 rounded"
+              title="Report an issue to the fix list"
+            >
+              <Wrench className="w-4 h-4" />
+            </button>
             <button onClick={() => setShowVoiceModal(true)} className="text-slate-400 hover:text-orange-400 p-1 rounded" title="Voice preferences">
               <Settings className="w-4 h-4" />
             </button>
@@ -576,6 +585,9 @@ export default function AICoachPanel({ user, onClose, currentPathname }) {
         </div>
         <p className="text-xs text-slate-600 mt-1.5 text-center">Enter to send · Shift+Enter for new line</p>
       </div>}
+
+      {/* ── Report an issue to the admin punch list ── */}
+      <PunchListReportDialog open={showPunchReport} onOpenChange={setShowPunchReport} />
 
       {/* ── Voice Preferences Modal ── */}
       <VoicePreferencesModal

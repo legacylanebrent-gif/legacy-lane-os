@@ -119,6 +119,61 @@ Deno.serve(async (req) => {
   const user = await base44.auth.me();
   if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
 
+  const body = await req.json();
+
+  // ── Punch list intake ────────────────────────────────────────────────────────
+  // Operators and other paid subscribers can report a problem from the AI Coach.
+  // Handled before the coach's operator/tier gate (and before any AI call) so it
+  // works for every paid account type and never spends AI credits.
+  if (body?.action === 'create_punch_list_item') {
+    const PAID_STATUSES = ['active', 'trial', 'past_due'];
+    const isPaidSubscriber = user.role === 'admin'
+      || PAID_STATUSES.includes(user.subscription_status || '')
+      || ['growth', 'professional', 'elite'].includes(user.subscription_tier || '');
+
+    if (!isPaidSubscriber) {
+      return Response.json({
+        error: 'access_denied',
+        message: 'Reporting an issue from the AI Coach is available on paid plans.',
+      }, { status: 403 });
+    }
+
+    const ALLOWED_CATEGORIES = [
+      'public_experience', 'consumer', 'operator', 'vendor', 'reseller', 'agent',
+      'admin', 'seo_marketing', 'payments', 'security', 'data', 'other',
+    ];
+    const ALLOWED_SEVERITIES = ['critical', 'high', 'medium', 'low'];
+
+    const draft = body?.punch_list || {};
+    const title = String(draft.title || '').trim().slice(0, 160);
+    const description = String(draft.description || '').trim().slice(0, 4000);
+
+    if (title.length < 4) {
+      return Response.json({
+        error: 'invalid_request',
+        message: 'Give the issue a short title (at least 4 characters).',
+      }, { status: 400 });
+    }
+
+    const item = await base44.asServiceRole.entities.PunchListItem.create({
+      title,
+      description,
+      category: ALLOWED_CATEGORIES.includes(draft.category) ? draft.category : 'other',
+      severity: ALLOWED_SEVERITIES.includes(draft.severity) ? draft.severity : 'medium',
+      status: 'open',
+      source: 'ai_coach',
+      requested_by_id: user.id,
+      requested_by_name: user.full_name || user.email,
+      requested_by_email: user.email,
+      requested_by_account_type: user.primary_account_type || user.role,
+    });
+
+    return Response.json({
+      punch_list_item: { id: item.id, title: item.title },
+      message: 'Added to the punch list. Our team reviews it and gets it fixed.',
+    });
+  }
+
   // ── AI Coach is reserved for estate sale operators on the top 3 tiers (growth, professional, elite) ──
   const ALLOWED_OPERATOR_ROLES = ['estate_sale_operator', 'team_admin', 'team_member', 'team_marketer'];
   const ALLOWED_TIERS = ['growth', 'professional', 'elite'];
@@ -139,7 +194,7 @@ Deno.serve(async (req) => {
     }, { status: 403 });
   }
 
-  const { messages, model, ai_mode, voice_preferences, saleId } = await req.json();
+  const { messages, model, ai_mode, voice_preferences, saleId } = body;
   // NOTE: any "context" from the frontend is intentionally discarded here.
   // All context is fetched below using the authenticated user.id. (saleId is an ID
   // pointer only — the sale data below is fetched and ownership-checked server-side.)

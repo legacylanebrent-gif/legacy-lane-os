@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Plus, MessageSquare, Clock, CheckCircle, AlertCircle, Upload, Send } from 'lucide-react';
 import { format } from 'date-fns';
 import SharedFooter from '@/components/layout/SharedFooter';
+import { buildPunchItemFromTicket } from '@/lib/punchList';
 
 export default function MyTickets() {
   const [tickets, setTickets] = useState([]);
@@ -81,7 +82,7 @@ export default function MyTickets() {
     try {
       const ticketNumber = `TKT-${Date.now().toString().slice(-6)}`;
       
-      await base44.entities.Ticket.create({
+      const createdTicket = await base44.entities.Ticket.create({
         ...formData,
         ticket_number: ticketNumber,
         user_id: currentUser.id,
@@ -90,6 +91,15 @@ export default function MyTickets() {
         account_type: currentUser.primary_account_type,
         last_response_date: new Date().toISOString()
       });
+
+      // Every support ticket is also a punch list item so the admin sees the fix
+      // work in one place. The ticket itself is already saved, so a punch list
+      // failure must never lose it.
+      try {
+        await base44.entities.PunchListItem.create(buildPunchItemFromTicket(createdTicket, currentUser));
+      } catch (punchError) {
+        console.error('Ticket created, but the punch list item failed:', punchError);
+      }
 
       setShowCreateModal(false);
       setFormData({
