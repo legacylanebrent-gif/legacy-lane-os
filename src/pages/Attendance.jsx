@@ -114,6 +114,12 @@ export default function Attendance() {
     }
   };
 
+  // An accidental tap must never wipe the count in the middle of a sale.
+  const handleResetCounter = () => {
+    if (!window.confirm('Are you sure you want to reset the counter to zero?')) return;
+    setManualCount(0);
+  };
+
   const handleDeduplicateCheckins = async () => {
     const params = new URLSearchParams(window.location.search);
     const saleId = params.get('saleId');
@@ -258,7 +264,7 @@ export default function Attendance() {
                 </div>
 
                 <div className="pt-6 border-t">
-                  <Button variant="outline" className="w-full">
+                  <Button variant="outline" className="w-full" onClick={handleResetCounter}>
                     Reset Counter
                   </Button>
                 </div>
