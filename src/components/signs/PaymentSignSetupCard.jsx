@@ -8,8 +8,8 @@ import { CreditCard, QrCode, ArrowRight } from 'lucide-react';
 import { CARD_BRANDS, methodLabel } from './paymentSignData';
 
 // Shown with the Payment Signs. The payment signs read the operator's business
-// profile: accepted methods, the Zelle / Venmo QR codes and the card brands.
-// Card brands are the one thing chosen here, and they save to the profile.
+// profile: accepted methods, the Zelle / Venmo / Cash App QR codes and the card
+// brands. Card brands are the one thing chosen here, and they save to the profile.
 export default function PaymentSignSetupCard({ payment, cardBrands = [], onToggleBrand }) {
   const methods = payment?.methods || [];
   const brands = cardBrands || [];
@@ -24,7 +24,7 @@ export default function PaymentSignSetupCard({ payment, cardBrands = [], onToggl
           <div className="min-w-0">
             <p className="font-semibold text-slate-900 text-sm">Payment sign details</p>
             <p className="text-xs text-slate-600">
-              Payment signs print your business profile: accepted methods, your Zelle and Venmo QR codes, and the cards below.
+              Payment signs print your business profile: accepted methods, your Zelle, Venmo and Cash App QR codes, and the cards below. Apple Pay prints as an accepted method — customers tap their own phone.
             </p>
           </div>
         </div>
@@ -68,7 +68,7 @@ export default function PaymentSignSetupCard({ payment, cardBrands = [], onToggl
 
         <div className="flex items-center gap-2 text-xs">
           <QrCode className="w-4 h-4 text-purple-600 flex-shrink-0" />
-          <span className="text-slate-600">QR codes and handles come from your business profile.</span>
+          <span className="text-slate-600">Zelle, Venmo and Cash App QR codes come from your business profile.</span>
           <Link to={createPageUrl('MyProfile')} className="inline-flex items-center gap-0.5 text-purple-700 font-semibold hover:underline whitespace-nowrap">
             Edit profile <ArrowRight className="w-3 h-3" />
           </Link>

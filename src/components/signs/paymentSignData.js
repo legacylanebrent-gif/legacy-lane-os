@@ -1,8 +1,9 @@
 // What the payment signs print: which methods the operator actually accepts,
-// the Zelle and Venmo QR codes from the business profile (a sale's own payment
-// settings win when the seller uploaded one there), and which cards are and are
-// not accepted. Nothing here is invented: a method, handle or QR that is not on
-// the profile or the sale is simply left off the sign.
+// the Zelle, Venmo and Cash App QR codes from the business profile (a sale's
+// own payment settings win when the seller uploaded one there), and which cards
+// are and are not accepted. Apple Pay has no QR of its own — it prints as an
+// accepted method only. Nothing here is invented: a method, handle or QR that is
+// not on the profile or the sale is simply left off the sign.
 
 export const CARD_BRANDS = [
   { value: 'visa', label: 'Visa' },
@@ -20,6 +21,7 @@ export const PAYMENT_METHOD_LABELS = {
   venmo: 'Venmo',
   paypal: 'PayPal',
   cashapp: 'Cash App',
+  apple_pay: 'Apple Pay',
   stripe: 'Stripe',
   square: 'Square',
   other: 'Other',
@@ -63,5 +65,12 @@ export function resolvePaymentSignData(user, saleOptions) {
       handle: saleOptions?.venmo_handle || user?.venmo_username || '',
       qrUrl: saleOptions?.venmo_qr_url || user?.venmo_qr_code || '',
     },
+    cashapp: {
+      handle: user?.cashapp_tag || '',
+      qrUrl: user?.cashapp_qr_code || '',
+    },
+    // Apple Pay is tap to pay on the customer's own phone, so there is no QR
+    // or handle to print — only whether it is accepted.
+    acceptsApplePay: methods.includes('apple_pay'),
   };
 }

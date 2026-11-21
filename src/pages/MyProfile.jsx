@@ -37,20 +37,13 @@ import InteractiveTerritorySelector from '@/components/profile/InteractiveTerrit
 import LocationRequiredCard from '@/components/profile/LocationRequiredCard';
 import BuyerPrefsTab from '@/components/profile/BuyerPrefsTab';
 import EmailPreferencesTab from '@/components/profile/EmailPreferencesTab.jsx';
+import PaymentSettingsTab from '@/components/profile/PaymentSettingsTab.jsx';
 
 const US_STATES = [
   'AL','AK','AZ','AR','CA','CO','CT','DE','FL','GA','HI','ID','IL','IN','IA',
   'KS','KY','LA','ME','MD','MA','MI','MN','MS','MO','MT','NE','NV','NH','NJ',
   'NM','NY','NC','ND','OH','OK','OR','PA','RI','SC','SD','TN','TX','UT','VT',
   'VA','WA','WV','WI','WY','DC'
-];
-
-const PAYMENT_OPTIONS = [
-  { value: 'cash', label: 'Cash' }, { value: 'check', label: 'Check' },
-  { value: 'credit_card', label: 'Credit/Debit Card' }, { value: 'venmo', label: 'Venmo' },
-  { value: 'paypal', label: 'PayPal' }, { value: 'zelle', label: 'Zelle' },
-  { value: 'cashapp', label: 'Cash App' }, { value: 'stripe', label: 'Stripe' },
-  { value: 'square', label: 'Square' }, { value: 'other', label: 'Other' },
 ];
 
 const SPECIALTY_OPTIONS = [
@@ -141,7 +134,8 @@ export default function MyProfile() {
     venmo_username: '', paypal_email: '', zelle_phone_or_email: '',
     cashapp_tag: '', stripe_account_id: '', square_location_id: '',
     // media
-    logo_dark: '', logo_light: '', profile_image_url: '', venmo_qr_code: '', zelle_qr_code: '',
+    logo_dark: '', logo_light: '', profile_image_url: '',
+    venmo_qr_code: '', zelle_qr_code: '', cashapp_qr_code: '',
     // vendor
     vendor_service_categories: [],
     // reseller
@@ -195,7 +189,7 @@ export default function MyProfile() {
         square_location_id: u.square_location_id || '',
         logo_dark: u.logo_dark || '', logo_light: u.logo_light || '',
         profile_image_url: u.profile_image_url || '', venmo_qr_code: u.venmo_qr_code || '',
-        zelle_qr_code: u.zelle_qr_code || '',
+        zelle_qr_code: u.zelle_qr_code || '', cashapp_qr_code: u.cashapp_qr_code || '',
         vendor_service_categories: u.vendor_service_categories || [],
         reseller_business_type: u.reseller_business_type || [],
         reseller_inventory_interests: u.reseller_inventory_interests || [],
@@ -1069,60 +1063,14 @@ export default function MyProfile() {
         {/* ─────────────── PAYMENTS TAB ─────────────── */}
         {!isConsumer && !(acct === 'reseller') && (
           <TabsContent value="payments" className="space-y-6">
-            <Card>
-              <CardHeader><CardTitle className="flex items-center gap-2"><CreditCard className="w-5 h-5" />Accepted Payment Methods</CardTitle></CardHeader>
-              <CardContent>
-                <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-2">
-                  {PAYMENT_OPTIONS.map(opt => (
-                    <label key={opt.value} className="flex items-center gap-2 cursor-pointer p-3 rounded-lg border border-slate-200 hover:bg-slate-50">
-                      <Checkbox checked={form.payment_methods_accepted.includes(opt.value)} onCheckedChange={() => toggleArr('payment_methods_accepted', opt.value)} />
-                      <span className="text-sm font-medium">{opt.label}</span>
-                    </label>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader><CardTitle>Payment Account Details</CardTitle></CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid md:grid-cols-2 gap-4">
-                  <div><Label>Venmo Username</Label><Input value={form.venmo_username} onChange={e => setForm(p => ({ ...p, venmo_username: e.target.value }))} placeholder="@YourVenmo" /></div>
-                  <div><Label>PayPal Email</Label><Input value={form.paypal_email} onChange={e => setForm(p => ({ ...p, paypal_email: e.target.value }))} placeholder="paypal@email.com" type="email" /></div>
-                  <div><Label>Zelle Phone or Email</Label><Input value={form.zelle_phone_or_email} onChange={e => setForm(p => ({ ...p, zelle_phone_or_email: e.target.value }))} placeholder="(555) 123-4567 or email" /></div>
-                  <div><Label>Cash App Tag</Label><Input value={form.cashapp_tag} onChange={e => setForm(p => ({ ...p, cashapp_tag: e.target.value }))} placeholder="$YourCashTag" /></div>
-                  <div><Label>Stripe Account ID</Label><Input value={form.stripe_account_id} onChange={e => setForm(p => ({ ...p, stripe_account_id: e.target.value }))} placeholder="acct_xxxxxxxxxxxx" /></div>
-                  <div><Label>Square Location ID</Label><Input value={form.square_location_id} onChange={e => setForm(p => ({ ...p, square_location_id: e.target.value }))} placeholder="Square location ID" /></div>
-                </div>
-                <div className="pt-4 border-t grid md:grid-cols-2 gap-5">
-                  {[
-                    { field: 'venmo_qr_code', label: 'Venmo QR Code' },
-                    { field: 'zelle_qr_code', label: 'Zelle QR Code' },
-                  ].map(({ field, label }) => (
-                    <div key={field}>
-                      <Label className="mb-2 block">{label}</Label>
-                      <div className="flex items-start gap-4">
-                        {form[field] && (
-                          <img src={form[field]} alt={label} className="w-28 h-28 object-contain border rounded-lg p-2 bg-white" />
-                        )}
-                        <div>
-                          <label className="cursor-pointer">
-                            <Button variant="outline" size="sm" asChild>
-                              <span><Upload className="w-4 h-4 mr-2" />{uploading[field] ? 'Uploading...' : form[field] ? 'Change QR' : 'Upload QR Code'}</span>
-                            </Button>
-                            <input type="file" accept="image/*" className="hidden" onChange={e => handleUpload(field, e.target.files[0])} disabled={uploading[field]} />
-                          </label>
-                          {form[field] && <Button variant="ghost" size="sm" className="text-red-500 ml-2" onClick={() => setForm(p => ({ ...p, [field]: '' }))}>Remove</Button>}
-                          <p className="text-xs text-slate-400 mt-1">Printed on payment signs for customers to scan</p>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-
-            <SaveBtn label="Save Payment Settings" />
+            <PaymentSettingsTab
+              form={form}
+              setForm={setForm}
+              toggleArr={toggleArr}
+              handleUpload={handleUpload}
+              uploading={uploading}
+              saveButton={<SaveBtn label="Save Payment Settings" />}
+            />
           </TabsContent>
         )}
 

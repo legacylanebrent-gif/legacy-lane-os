@@ -57,12 +57,14 @@ const arrowHtml = (direction = 'right', size = 220) => {
   return `<svg class="arrow" viewBox="0 0 120 100" width="${size}" height="${Math.round(size * 0.83)}" aria-hidden="true"><polygon points="0,38 68,38 68,10 120,50 68,90 68,62 0,62" fill="#1e293b"${flip}${spin}/></svg>`;
 };
 
-// Zelle / Venmo QR panel. The image and handle come from the operator's
-// business profile (or the sale's own payment settings); a handle without an
-// uploaded QR still prints so the sign is never blank.
+// Zelle / Venmo / Cash App QR panel. The image and handle come from the
+// operator's business profile (or the sale's own payment settings); a handle
+// without an uploaded QR still prints so the sign is never blank.
+const QR_LABELS = { zelle: 'Zelle', venmo: 'Venmo', cashapp: 'Cash App' };
+
 const qrBlockHtml = (key, data, scale) => {
   if (!data) return '';
-  const label = key === 'zelle' ? 'Zelle' : 'Venmo';
+  const label = QR_LABELS[key] || key;
   const img = data.qrUrl
     ? `<img src="${esc(data.qrUrl)}" alt="${esc(label)} QR code" style="width:${Math.round(205 * scale)}px;height:${Math.round(205 * scale)}px" />`
     : '';
@@ -106,8 +108,9 @@ const signFaceHtml = (template, { width, pad, maxTitle, scale, logoUrl, payment 
   const body = bodyText
     ? `<div class="body" style="font-size:${Math.round(26 * scale)}px">${esc(bodyText)}</div>`
     : '';
-  const qrKeys = template.paymentQr === 'both'
-    ? ['zelle', 'venmo']
+  // 'both' / 'all' print every QR the operator has; a missing one prints nothing.
+  const qrKeys = template.paymentQr === 'both' || template.paymentQr === 'all'
+    ? ['zelle', 'venmo', 'cashapp']
     : template.paymentQr
       ? [template.paymentQr]
       : [];

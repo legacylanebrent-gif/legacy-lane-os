@@ -154,6 +154,50 @@
     "operator_id": {
       "type": "string",
       "description": "For team roles: the estate sale company owner this user works under. Used to resolve the company whose subscription carries publishing rights."
+    },
+    "payment_methods_accepted": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Payment methods this business accepts at its sales (cash, check, credit_card, venmo, zelle, cashapp, apple_pay, paypal). Printed on the operator's payment signs."
+    },
+    "accepted_card_brands": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Card brands this business accepts (visa, mastercard, discover, american_express, debit). Printed on payment signs; empty means nothing is known, so no brand is ever printed as refused."
+    },
+    "venmo_username": {
+      "type": "string",
+      "description": "Venmo handle printed on payment signs."
+    },
+    "venmo_qr_code": {
+      "type": "string",
+      "description": "Uploaded Venmo QR image printed on payment signs for customers to scan."
+    },
+    "zelle_phone_or_email": {
+      "type": "string",
+      "description": "Zelle phone number or email printed on payment signs."
+    },
+    "zelle_qr_code": {
+      "type": "string",
+      "description": "Uploaded Zelle QR image printed on payment signs for customers to scan."
+    },
+    "cashapp_tag": {
+      "type": "string",
+      "description": "Cash App $cashtag printed on payment signs."
+    },
+    "cashapp_qr_code": {
+      "type": "string",
+      "description": "Uploaded Cash App QR image printed on payment signs for customers to scan."
+    },
+    "paypal_email": {
+      "type": "string",
+      "description": "PayPal email for customer payments."
     }
   }
 }
