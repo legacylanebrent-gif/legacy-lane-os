@@ -2,6 +2,8 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import UniversalHeader from '@/components/layout/UniversalHeader';
+import SharedFooter from '@/components/layout/SharedFooter';
 import { 
   Clock, 
   TrendingUp, 
@@ -24,6 +26,7 @@ import {
 export default function WhyIEstateSalen() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-orange-50 to-cyan-50">
+      <UniversalHeader />
       {/* Hero Section */}
       <div className="bg-gradient-to-r from-navy-900 to-navy-800 text-white py-20 px-4">
         <div className="max-w-5xl mx-auto">
@@ -440,7 +443,7 @@ export default function WhyIEstateSalen() {
 
           {/* CTA Button */}
           <div className="text-center mb-16">
-            <Button className="bg-orange-600 hover:bg-orange-700 text-white px-8 py-6 text-lg font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all" asChild><Link to="/subscriptions">🚀 View Subscription Plans</Link></Button>
+            <Button className="bg-orange-600 hover:bg-orange-700 text-white px-8 py-6 text-lg font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all" asChild><Link to="/OperatorPackages">🚀 View Subscription Plans</Link></Button>
           </div>
         </div>
 
@@ -630,7 +633,7 @@ export default function WhyIEstateSalen() {
 
         {/* CTA Button */}
         <div className="text-center mb-16">
-          <Button className="bg-orange-600 hover:bg-orange-700 text-white px-8 py-6 text-lg font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all" asChild><Link to="/subscriptions">📈 Compare Subscription Plans</Link></Button>
+          <Button className="bg-orange-600 hover:bg-orange-700 text-white px-8 py-6 text-lg font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all" asChild><Link to="/OperatorPackages">📈 Compare Subscription Plans</Link></Button>
         </div>
 
         {/* Post-Sale Section */}
@@ -859,7 +862,7 @@ export default function WhyIEstateSalen() {
             ))}
           </div>
 
-          <Button className="bg-white text-orange-600 hover:bg-slate-100 px-8 py-6 text-lg font-bold rounded-lg shadow-lg hover:shadow-xl transition-all" asChild><Link to="/subscriptions">🚀 Start Your Free Trial</Link></Button>
+          <Button className="bg-white text-orange-600 hover:bg-slate-100 px-8 py-6 text-lg font-bold rounded-lg shadow-lg hover:shadow-xl transition-all" asChild><Link to="/OperatorPackages">🚀 Start Your Free Trial</Link></Button>
         </div>
 
         {/* Demo CTA */}
@@ -868,9 +871,10 @@ export default function WhyIEstateSalen() {
           <p className="text-slate-700 mb-6 max-w-2xl mx-auto">
             Schedule a Demo and see exactly how EstateSalen can help you save time, grow revenue, and create a more efficient estate sale business.
           </p>
-          <Button variant="outline" className="border-2 border-navy-600 text-navy-600 hover:bg-navy-50 px-8 py-6 text-lg font-semibold" asChild><Link to="/subscriptions">📅 Book A Demo</Link></Button>
+          <Button variant="outline" className="border-2 border-navy-600 text-navy-600 hover:bg-navy-50 px-8 py-6 text-lg font-semibold" asChild><Link to="/OperatorPackages">📅 Book A Demo</Link></Button>
         </div>
       </div>
+      <SharedFooter />
     </div>
   );
 }

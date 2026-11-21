@@ -120,6 +120,13 @@ export default function Inventory() {
     if (!confirm('Are you sure you want to delete this item?')) return;
     
     try {
+      // Delist first so the marketplace never points at a deleted item
+      const listings = await base44.entities.MarketplaceItem.filter({ item_id: itemId });
+      for (const listing of listings) {
+        if (listing.status !== 'SOLD') {
+          await base44.entities.MarketplaceItem.update(listing.id, { status: 'DELISTED' });
+        }
+      }
       await base44.entities.Item.delete(itemId);
       await loadData();
     } catch (error) {

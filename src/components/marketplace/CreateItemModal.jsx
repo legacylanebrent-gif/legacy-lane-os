@@ -241,9 +241,19 @@ export default function CreateItemModal({ open, onClose, onSuccess, item, saleId
         savedItemId = created.id;
       }
 
-      // If marketplace channel is selected, sync to MarketplaceItem
+      // Keep the marketplace listing in step with the item's channels: publish
+      // when marketplace is chosen, delist when it is removed.
+      const existingMI = savedItemId
+        ? await base44.entities.MarketplaceItem.filter({ item_id: savedItemId })
+        : [];
+      if (!formData.sales_channels.includes('marketplace') && existingMI.length > 0) {
+        for (const mi of existingMI) {
+          if (mi.status !== 'SOLD') {
+            await base44.entities.MarketplaceItem.update(mi.id, { status: 'DELISTED' });
+          }
+        }
+      }
       if (formData.sales_channels.includes('marketplace') && savedItemId) {
-        const existingMI = await base44.entities.MarketplaceItem.filter({ item_id: savedItemId });
         const miPayload = {
           item_id: savedItemId,
           operator_id: user.id,
