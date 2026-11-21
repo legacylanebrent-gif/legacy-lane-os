@@ -21,7 +21,8 @@ import { toast } from 'sonner';
 
 export default function SaleInventory() {
   const [searchParams] = useSearchParams();
-  const saleId = searchParams.get('id');
+  // Accept both ?id= and ?saleId= so every entry point opens the same sale.
+  const saleId = searchParams.get('id') || searchParams.get('saleId');
 
   const [items, setItems] = useState([]);
   const [filteredItems, setFilteredItems] = useState([]);
