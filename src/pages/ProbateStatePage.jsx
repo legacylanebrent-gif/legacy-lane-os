@@ -128,7 +128,7 @@ export default function ProbateStatePage() {
                 During or after probate in {stateName}, many families choose to liquidate the personal property of an estate through an estate sale. A licensed estate sale company can appraise items, organize the sale, and handle pricing — helping the estate settle faster. EstateSalen can connect you with estate sale companies in {stateName} that have experience with probate estates.
               </p>
             )}
-            <Button className="mt-4 bg-orange-600 hover:bg-orange-700 text-white" asChild><Link to="/probate#get-help">Find an Estate Sale Company in {stateName}</Link></Button>
+            <Button className="mt-4 bg-orange-600 hover:bg-orange-700 text-white" asChild><Link to={`/estate-sale-companies/${stateSlug}`}>Find an Estate Sale Company in {stateName}</Link></Button>
           </CardContent>
         </Card>
 

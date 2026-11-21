@@ -493,6 +493,7 @@ const AuthenticatedApp = () => {
       <Route path="/agent-listing-estate-sale-request" element={<AgentListingEstateSaleRequest />} />
       <Route path="/claim-business" element={<ClaimBusiness />} />
       <Route path="/ResellerNetwork" element={<ResellerNetwork />} />
+      <Route path="/reseller-network" element={<ResellerNetwork />} />
       <Route path="/MyResellerLeads" element={<LayoutWrapper currentPageName="MyResellerLeads"><MyResellerLeads /></LayoutWrapper>} />
       <Route path="/cleanout-network" element={<CleanoutNetwork />} />
       <Route path="/AdminCleanoutLeads" element={<LayoutWrapper currentPageName="AdminCleanoutLeads"><AdminCleanoutLeads /></LayoutWrapper>} />

@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { CheckCircle, Search, MapPin, Bell, Smartphone, ShoppingBag, Heart, Route, Camera } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import SharedFooter from '@/components/layout/SharedFooter';
+import UniversalHeader from '@/components/layout/UniversalHeader';
 
 const FEATURES = [
   {
@@ -87,16 +88,8 @@ const HOW_IT_WORKS = [
 export default function LandingPageConsumer() {
   return (
     <div className="min-h-screen bg-white font-sans">
-      {/* Header */}
-      <div className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 px-6 py-4 flex items-center justify-between">
-        <Link to="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-          <span className="text-orange-400 font-serif font-bold text-2xl tracking-tight">Estate<span className="text-white">Salen</span></span>
-        </Link>
-        <div className="flex items-center gap-4">
-          <Link to="/EstateSaleFinder" className="text-slate-300 hover:text-white text-sm font-medium transition-colors">Browse Sales</Link>
-          <Button size="sm" className="bg-orange-500 hover:bg-orange-600 text-white text-sm font-semibold px-4 py-2 rounded-lg" asChild><Link to="/OnboardingChat">Get Started Free</Link></Button>
-        </div>
-      </div>
+      {/* Universal site header */}
+      <UniversalHeader user={null} isAuthenticated={false} />
 
       {/* Hero */}
       <section className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white py-20 px-6">
@@ -111,7 +104,7 @@ export default function LandingPageConsumer() {
             Tell us what you're hunting for. We'll scan thousands of estate sales and notify you the moment it appears. Find treasures, save time, and beat the crowds.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
-            <Button className="bg-purple-600 hover:bg-purple-700 text-white text-lg font-bold px-10 py-6 rounded-xl shadow-lg shadow-purple-500/30" asChild><Link to="/OnboardingChat"><Heart className="w-5 h-5 mr-2" /> Start Your Hunt List</Link></Button>
+            <Button className="bg-purple-600 hover:bg-purple-700 text-white text-lg font-bold px-10 py-6 rounded-xl shadow-lg shadow-purple-500/30" asChild><Link to="/IsoCenter"><Heart className="w-5 h-5 mr-2" /> Start Your Hunt List</Link></Button>
             <Button variant="outline" className="border-white/40 text-white bg-white/10 hover:bg-white/20 text-lg font-semibold px-10 py-6 rounded-xl" asChild><Link to="/EstateSaleFinder"><MapPin className="w-5 h-5 mr-2" /> Browse Sales Near You</Link></Button>
           </div>
         </div>
@@ -200,7 +193,7 @@ export default function LandingPageConsumer() {
           <p className="text-slate-300 text-lg max-w-2xl mx-auto">
             We have a dedicated network of antique dealers, art collectors, furniture buyers, and vintage resellers actively looking for inventory. When you create your hunt list, you can choose to let dealers contact you with items that match your criteria.
           </p>
-          <Button className="bg-purple-600 hover:bg-purple-700 text-white text-lg font-bold px-10 py-6 rounded-xl mt-4" asChild><Link to="/OnboardingChat">Set Up Your Collector Profile</Link></Button>
+          <Button className="bg-purple-600 hover:bg-purple-700 text-white text-lg font-bold px-10 py-6 rounded-xl mt-4" asChild><Link to="/IsoCenter">Set Up Your Collector Profile</Link></Button>
         </div>
       </section>
 

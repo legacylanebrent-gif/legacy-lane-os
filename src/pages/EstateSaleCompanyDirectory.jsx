@@ -7,10 +7,11 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import UniversalHeader from '@/components/layout/UniversalHeader';
 import ClaimCompanyModal from '@/components/operators/ClaimCompanyModal';
+import ContactCompanyModal from '@/components/operators/ContactCompanyModal';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
-import { Search, MapPin, Building2, Phone, Globe, Star, ArrowLeft, Loader2, Navigation } from 'lucide-react';
+import { Search, MapPin, Building2, Phone, Globe, Star, ArrowLeft, Loader2, Navigation, MessageSquare, Mail, MessageCircle } from 'lucide-react';
 import { US_STATES } from '@/components/data/USStates';
 import SharedFooter from '@/components/layout/SharedFooter';
 import { formatPhone } from '@/utils/formatPhone';
@@ -80,11 +81,25 @@ export default function EstateSaleCompanyDirectory() {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [stateCounts, setStateCounts] = useState({});
+  const [contactingOperator, setContactingOperator] = useState(null);
+  const [autoLocated, setAutoLocated] = useState(false);
 
   useEffect(() => {
     base44.auth.isAuthenticated().then(authed => {
       setIsAuthenticated(authed);
-      if (authed) base44.auth.me().then(setCurrentUser).catch(() => {});
+      if (authed) {
+        base44.auth.me().then(u => {
+          setCurrentUser(u);
+          // Signed-in visitors land on their own area first; they can look elsewhere.
+          const st = (u?.business_address_state || u?.state || u?.address_state || '').toUpperCase();
+          if (st && st.length === 2) {
+            setSelectedState(st);
+            setAutoLocated(true);
+            const county = u?.county || u?.business_address_county || '';
+            if (county) setSearchQuery(county);
+          }
+        }).catch(() => {});
+      }
     });
     loadAllCompanies();
   }, []);
@@ -222,6 +237,29 @@ export default function EstateSaleCompanyDirectory() {
             </a>
           )}
         </div>
+        {/* Direct text/email only for current EstateSalen subscribers */}
+        {isEstateSalenSubscriber(op) && (op.phone || op.email) && (
+          <div className="flex flex-wrap gap-1.5 mt-2">
+            {op.phone && (
+              <a href={`sms:${stripHtml(op.phone)}`} className="inline-flex items-center gap-1 text-xs font-medium px-2 py-1 rounded-md border border-cyan-200 text-cyan-700 hover:bg-cyan-50">
+                <MessageSquare className="w-3 h-3" /> Text
+              </a>
+            )}
+            {op.email && (
+              <a href={`mailto:${stripHtml(op.email)}`} className="inline-flex items-center gap-1 text-xs font-medium px-2 py-1 rounded-md border border-cyan-200 text-cyan-700 hover:bg-cyan-50">
+                <Mail className="w-3 h-3" /> Email
+              </a>
+            )}
+          </div>
+        )}
+        <Button
+          size="sm"
+          variant="outline"
+          className="mt-2 w-full text-xs h-7 gap-1"
+          onClick={() => setContactingOperator(op)}
+        >
+          <MessageCircle className="w-3 h-3" /> Contact
+        </Button>
         {isEstateSalenSubscriber(op) ? (
           <Badge className={`mt-2 text-xs ${featured ? 'bg-yellow-100 text-yellow-800 border-yellow-300' : 'bg-cyan-100 text-cyan-800 border-cyan-200'}`}>
             ✓ EstateSalen Member
@@ -241,6 +279,12 @@ export default function EstateSaleCompanyDirectory() {
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-orange-50 to-cyan-50">
         <UniversalHeader user={currentUser} isAuthenticated={isAuthenticated} />
         <ClaimCompanyModal operator={claimingOperator} open={!!claimingOperator} onClose={() => setClaimingOperator(null)} />
+        <ContactCompanyModal
+          operator={contactingOperator}
+          open={!!contactingOperator}
+          onClose={() => setContactingOperator(null)}
+          currentUser={currentUser}
+        />
 
         {/* Hero */}
         <section className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 py-12 px-4">
@@ -266,6 +310,24 @@ export default function EstateSaleCompanyDirectory() {
             </div>
           </div>
         </section>
+
+        {autoLocated && (
+          <div className="max-w-7xl mx-auto px-4 pt-4">
+            <div className="rounded-xl border border-cyan-200 bg-cyan-50 px-4 py-3 flex flex-col sm:flex-row sm:items-center gap-2">
+              <p className="text-sm text-cyan-900 flex-1">
+                Showing companies near you in {stateName}{searchQuery ? ` — ${searchQuery}` : ''}.
+              </p>
+              <Button
+                size="sm"
+                variant="outline"
+                className="border-cyan-300 text-cyan-800 hover:bg-cyan-100"
+                onClick={() => { setAutoLocated(false); setSearchQuery(''); }}
+              >
+                Look elsewhere
+              </Button>
+            </div>
+          </div>
+        )}
 
         {loading ? (
           <div className="flex items-center justify-center py-32">

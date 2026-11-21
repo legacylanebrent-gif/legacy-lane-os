@@ -997,7 +997,7 @@ export default function EstateSaleDetail() {
                        className="w-full bg-orange-600 hover:bg-orange-700 gap-2"
                      >
                        <MessageSquare className="w-4 h-4" />
-                       Message Seller About These Photos
+                       Message Estate Sale Co About These Photos
                      </Button>
                      <Button
                        variant="outline"
@@ -1099,7 +1099,7 @@ export default function EstateSaleDetail() {
                       className="w-full bg-orange-600 hover:bg-orange-700 gap-2"
                     >
                       <MessageSquare className="w-4 h-4" />
-                      Message Seller
+                      Message Estate Sale Co
                     </Button>
                   )}
                   {!currentUser && (

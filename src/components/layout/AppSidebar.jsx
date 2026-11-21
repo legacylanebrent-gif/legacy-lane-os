@@ -24,7 +24,7 @@ import {
 export const ALL_NAV_ITEMS = [
 
   // ── MAIN ────────────────────────────────────────────────────────────────────
-  { page: 'Home',                   label: 'Main Website',           icon: Home,            group: 'Main' },
+  { page: 'Home',                   label: 'Home Page',              icon: Home,            group: 'Main' },
   { page: 'Dashboard',              label: 'Dashboard',              icon: LayoutDashboard, group: 'Main' },
   { page: 'CoachingGlossary',       label: 'Coaching Glossary',      icon: BookOpen,        group: 'Main' },
   { page: 'MyProfile',              label: 'My Profile',             icon: User,            group: 'Main' },
@@ -36,7 +36,7 @@ export const ALL_NAV_ITEMS = [
   { page: 'Inventory',              label: 'My Inventory',           icon: Package,         group: 'Estate Sales' },
 
   // ── CRM & LEADS (operator core) ─────────────────────────────────────────────
-  { page: 'CRM',                    label: 'CRM',                    icon: Users,           group: 'CRM & Leads' },
+  { page: 'CRM',                    label: 'CRM Contacts',           icon: Users,           group: 'CRM & Leads' },
   { page: 'Leads',                  label: 'Lead Center',            icon: Award,           group: 'CRM & Leads' },
   { page: 'SubmitClientReferral',    label: 'Submit Client Referral', icon: UserPlus,        group: 'CRM & Leads' },
 
@@ -52,7 +52,7 @@ export const ALL_NAV_ITEMS = [
   // ══════════════════════════════════════════════════════════════════════
   // Operators — single hub page (all operator links consolidated on /OperatorLinks)
   // ══════════════════════════════════════════════════════════════════════
-  { page: 'OperatorLinks',          label: 'Operator Links',         icon: LayoutGrid,      group: 'More' },
+  { page: 'OperatorLinks',          label: 'All EstateSalen Features', icon: LayoutGrid,    group: 'More' },
 
   // ── AGENT ───────────────────────────────────────────────────────────────────
   { page: 'AgentPendingListings',   label: 'Pending Listings',       icon: Building2,       group: 'More' },
@@ -66,8 +66,12 @@ export const ALL_NAV_ITEMS = [
   { page: 'AdminAgentListingImports', label: 'Agent Listing Imports', icon: Shield,         group: 'Admin' },
 ];
 
-// Agent-facing tools that every signed-in user may reach without a page grant
-const ALWAYS_VISIBLE_PAGES = new Set(['AgentPendingListings', 'SubmitClientReferral']);
+// The home page and the client-referral tool stay reachable for everyone.
+const ALWAYS_VISIBLE_PAGES = new Set(['Home', 'SubmitClientReferral']);
+
+// Pending listings are an agent/admin tool — an operator has no use for them.
+const AGENT_ONLY_PAGES = new Set(['AgentPendingListings']);
+const AGENT_ACCOUNT_TYPES = ['real_estate_agent', 'agent_operator'];
 
 // Subgroup ordering within Admin
 const ADMIN_SUBGROUP_ORDER = [
@@ -164,8 +168,18 @@ export default function AppSidebar({ user, currentPageName, allowedPages }) {
 
   const handleLogout = () => base44.auth.logout(createPageUrl('Home'));
 
+  const isAgentOrAdminUser = !!user && (
+    AGENT_ACCOUNT_TYPES.includes(user.primary_account_type)
+    || ADMIN_ROLES_SIDEBAR.includes(user.primary_account_type)
+    || user.role === 'admin'
+  );
+  const isOperatorUser = !!user && ['estate_sale_operator', 'agent_operator'].includes(user.primary_account_type);
+
   const visibleItems = ALL_NAV_ITEMS.filter(item => {
+    if (AGENT_ONLY_PAGES.has(item.page)) return isAgentOrAdminUser;
     if (ALWAYS_VISIBLE_PAGES.has(item.page)) return !!user;
+    // Operators get reseller access too — don't show a second "My Inventory" under Reseller
+    if (item.group === 'Reseller' && item.page === 'Inventory' && isOperatorUser) return false;
     if (!allowedPages.includes(item.page)) return false;
     // Gate Elite-only marketing pages for Professional tier
     if (ELITE_ONLY_MARKETING_PAGES.has(item.page)) {

@@ -19,7 +19,7 @@ const NAV_LINKS = [
 ];
 
 const STATS = [
-  { value: '10,000+', label: 'Companies Nationwide' },
+  { value: 'All-in-One', label: 'Sales, Marketing & Payments' },
   { value: '3x', label: 'Average Revenue Increase' },
   { value: '70+', label: 'Built-In Features' },
   { value: '1 Month', label: 'Free Trial' },
@@ -279,7 +279,7 @@ export default function CompanyLanding() {
               <Heart className="w-4 h-4" /> FOR YOUR CUSTOMERS
             </div>
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-serif font-bold text-slate-900 mb-4">
-              Give Buyers an Experience They Love
+              Give Buyers, Sellers and Staff an Experience They Love
             </h2>
             <p className="text-lg text-slate-500 max-w-xl mx-auto">
               Happy buyers become repeat customers. Our platform keeps them coming back to every sale you host.

@@ -170,16 +170,16 @@ export default function BusinessProfile() {
           <CardContent className="p-8">
             <div className="flex flex-col md:flex-row gap-8">
               {/* Logo/Image */}
-              <div className="flex-shrink-0">
+              <div className="flex-shrink-0 flex items-center justify-center mx-auto md:mx-0 w-40 h-32 rounded-lg border-2 border-slate-200 bg-white p-2">
                 {(business.company_logo_url || business.company_logo || business.logo_dark || business.logo_light) ? (
                   <img
                     src={business.company_logo_url || business.company_logo || business.logo_dark || business.logo_light}
                     alt={business.company_name || business.full_name}
-                    className="w-32 h-32 rounded-lg object-cover border-2 border-slate-200"
+                    className="max-w-full max-h-full w-auto h-auto object-contain"
                   />
                 ) : (
-                  <div className="w-32 h-32 bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg flex items-center justify-center">
-                    <Building2 className="w-16 h-16 text-white" />
+                  <div className="w-24 h-24 bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg flex items-center justify-center">
+                    <Building2 className="w-12 h-12 text-white" />
                   </div>
                 )}
               </div>
@@ -265,7 +265,7 @@ export default function BusinessProfile() {
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mt-6 pt-6 border-t border-slate-200">
                   <div className="text-center">
                     <div className="text-2xl font-bold text-slate-900">{currentSales.length + pastSales.length}</div>
-                    <div className="text-sm text-slate-600">Total Sales</div>
+                    <div className="text-sm text-slate-600">Sales on EstateSalen</div>
                   </div>
                   <div className="text-center">
                     <div className="text-2xl font-bold text-slate-900">
@@ -318,12 +318,12 @@ export default function BusinessProfile() {
 
         {/* Tabs Section */}
         <Tabs defaultValue="current" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5 max-w-3xl">
-            <TabsTrigger value="current">Current Sales</TabsTrigger>
-            <TabsTrigger value="past">Past Sales</TabsTrigger>
-            <TabsTrigger value="blog">Blog</TabsTrigger>
-            <TabsTrigger value="about">About</TabsTrigger>
-            <TabsTrigger value="services">Services</TabsTrigger>
+          <TabsList className="flex flex-wrap gap-1 h-auto w-full max-w-3xl justify-start bg-transparent p-0">
+            <TabsTrigger value="current" className="rounded-md border border-input bg-muted px-3 py-1.5 text-xs sm:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Current Sales</TabsTrigger>
+            <TabsTrigger value="past" className="rounded-md border border-input bg-muted px-3 py-1.5 text-xs sm:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Past Sales</TabsTrigger>
+            <TabsTrigger value="blog" className="rounded-md border border-input bg-muted px-3 py-1.5 text-xs sm:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Blog</TabsTrigger>
+            <TabsTrigger value="about" className="rounded-md border border-input bg-muted px-3 py-1.5 text-xs sm:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">About</TabsTrigger>
+            <TabsTrigger value="services" className="rounded-md border border-input bg-muted px-3 py-1.5 text-xs sm:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Services</TabsTrigger>
           </TabsList>
 
           {/* Current Sales Tab */}
@@ -490,11 +490,11 @@ export default function BusinessProfile() {
             <p className="text-slate-600 mb-6">
               Contact {business.company_name || business.full_name} to learn more about their services
             </p>
-            <div className="flex gap-4 justify-center">
+            <div className="flex flex-col sm:flex-row gap-3 justify-center items-stretch sm:items-center">
               {currentUser && (
                 <Button 
                   onClick={() => setMessageModalOpen(true)}
-                  className="bg-cyan-600 hover:bg-cyan-700 gap-2"
+                  className="bg-cyan-600 hover:bg-cyan-700 gap-2 w-full sm:w-auto"
                 >
                   <MessageSquare className="w-4 h-4" />
                   Message Company
@@ -503,7 +503,7 @@ export default function BusinessProfile() {
               {(business.business_phone || business.phone) && (
                 <Button 
                   onClick={() => window.location.href = `tel:${business.business_phone || business.phone}`}
-                  className="bg-orange-600 hover:bg-orange-700 gap-2"
+                  className="bg-orange-600 hover:bg-orange-700 gap-2 w-full sm:w-auto"
                 >
                   <Phone className="w-4 h-4" />
                   Call Now
@@ -513,7 +513,7 @@ export default function BusinessProfile() {
                 <Button 
                   onClick={() => setContactFormOpen(true)}
                   variant="outline"
-                  className="gap-2"
+                  className="gap-2 w-full sm:w-auto"
                 >
                   <Mail className="w-4 h-4" />
                   Send Email
