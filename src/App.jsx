@@ -193,6 +193,7 @@ import TerritoryMigrationAudit from './pages/TerritoryMigrationAudit';
 import AdminIdentityMonitor from './pages/AdminIdentityMonitor';
 import AdminLinks from './pages/AdminLinks';
 import PunchList from './pages/PunchList';
+import CoachingGlossary from './pages/CoachingGlossary';
 import SalePublication from './pages/SalePublication';
 import SaleClientDecisions from './pages/SaleClientDecisions';
 import SaleCloseout from './pages/SaleCloseout';
@@ -398,6 +399,7 @@ const AuthenticatedApp = () => {
       <Route path="/AdminDashboard" element={<LayoutWrapper currentPageName="AdminDashboard"><AdminDashboard /></LayoutWrapper>} />
       <Route path="/AdminLinks" element={<LayoutWrapper currentPageName="AdminLinks"><AdminLinks /></LayoutWrapper>} />
       <Route path="/PunchList" element={<LayoutWrapper currentPageName="PunchList"><PunchList /></LayoutWrapper>} />
+      <Route path="/CoachingGlossary" element={<LayoutWrapper currentPageName="CoachingGlossary"><CoachingGlossary /></LayoutWrapper>} />
       <Route path="/SalePublication" element={<LayoutWrapper currentPageName="SalePublication"><SalePublication /></LayoutWrapper>} />
       <Route path="/SaleClientDecisions" element={<LayoutWrapper currentPageName="SaleClientDecisions"><SaleClientDecisions /></LayoutWrapper>} />
       <Route path="/SaleCloseout" element={<LayoutWrapper currentPageName="SaleCloseout"><SaleCloseout /></LayoutWrapper>} />

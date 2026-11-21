@@ -17,6 +17,7 @@ import CoolFindsCard from '@/components/operator/dashboard/CoolFindsCard';
 import LocalIsoCard from '@/components/operator/dashboard/LocalIsoCard';
 import MlsListingsCard from '@/components/operator/dashboard/MlsListingsCard';
 import ReferralTrackerCard from '@/components/operator/dashboard/ReferralTrackerCard';
+import CoachingGlossaryCard from '@/components/operator/dashboard/CoachingGlossaryCard';
 import { loadOperatorMoney } from '@/components/operator/dashboard/saleDayMetrics';
 import { Home, Eye, Heart, MessageSquare, Plus } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -174,6 +175,7 @@ export default function EstateSaleOperatorDashboard({ user }) {
         </div>
         <div className="space-y-4">
           <GoalRing user={user} monthRevenue={money.thisMonth} />
+          <CoachingGlossaryCard user={user} />
           <RecentActivity user={user} />
         </div>
       </div>

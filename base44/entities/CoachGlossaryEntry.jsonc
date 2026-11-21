@@ -1,0 +1,131 @@
+{
+  "name": "CoachGlossaryEntry",
+  "type": "object",
+  "description": "One saved piece of AI Coach advice, kept so the operator can retrieve it after the coaching window is closed. An entry is a snapshot of what the coach actually said (or the whole conversation) with the operator's own title, category and tags \u2014 it is a library of their own coaching, never a claim that the advice was applied. Private to the operator who saved it; admins can read for support.",
+  "properties": {
+    "user_id": {
+      "type": "string",
+      "description": "Operator who saved this entry (access anchor)."
+    },
+    "user_name": {
+      "type": "string"
+    },
+    "title": {
+      "type": "string",
+      "description": "Operator-facing title of the saved advice."
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "marketing",
+        "sales",
+        "operations",
+        "pricing",
+        "team_accountability",
+        "referrals",
+        "client_communication",
+        "growth",
+        "other"
+      ],
+      "default": "other",
+      "enumColors": [
+        "pink",
+        "green",
+        "blue",
+        "yellow",
+        "purple",
+        "blue",
+        "gray",
+        "green",
+        "gray"
+      ],
+      "description": "How the operator files this coaching for later retrieval."
+    },
+    "mode_key": {
+      "type": "string",
+      "description": "Coach specialist mode that produced the advice (e.g. business_coaching)."
+    },
+    "mode_label": {
+      "type": "string"
+    },
+    "summary": {
+      "type": "string",
+      "description": "Short excerpt shown in the glossary list."
+    },
+    "content": {
+      "type": "string",
+      "description": "The saved coaching text in markdown \u2014 exactly what the coach produced."
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Free-form keywords the operator adds for quick search."
+    },
+    "sale_id": {
+      "type": "string",
+      "description": "Sale the coaching was about, when the coach was opened from a sale."
+    },
+    "saved_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "user_id",
+    "title",
+    "content"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "$or": [
+        {
+          "data.user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

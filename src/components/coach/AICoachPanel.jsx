@@ -3,7 +3,7 @@ import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { X, Send, Loader2, RotateCcw, ChevronDown, AlertTriangle, Brain, ChevronRight, Settings, Wrench } from 'lucide-react';
+import { X, Send, Loader2, RotateCcw, ChevronDown, AlertTriangle, Brain, ChevronRight, Settings, Wrench, BookmarkPlus, CheckSquare } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { MODE_GROUPS, ALL_MODES, getModeByKey, MODE_STARTERS } from './coachModes';
 import { SCREEN_ACTIONS, getScreenKey } from './screenActions';
@@ -12,6 +12,10 @@ import ToneAdjustmentPanel from './ToneAdjustmentPanel';
 import VoicePreferencesModal from './VoicePreferencesModal';
 import GuidedContentFlow from './GuidedContentFlow';
 import PunchListReportDialog from './PunchListReportDialog';
+import CoachToolLinks from './CoachToolLinks';
+import CoachSaveDialog from './CoachSaveDialog';
+import CoachTaskDialog from './CoachTaskDialog';
+import { suggestTaskTitle } from './coachToolLinks';
 
 // Chapter 2 P1 — sale context pointer for context-aware communication modes.
 // The backend re-fetches all sale data server-side; only the ID is passed.
@@ -220,6 +224,9 @@ export default function AICoachPanel({ user, onClose, currentPathname }) {
   const [showContentFlow, setShowContentFlow] = useState(false);
   const [showPunchReport, setShowPunchReport] = useState(false);
   const [lastAssistantIndex, setLastAssistantIndex] = useState(null);
+  const [showSave, setShowSave] = useState(false);
+  const [showTask, setShowTask] = useState(false);
+  const [actionNotice, setActionNotice] = useState('');
   const messagesEndRef = useRef(null);
 
   useEffect(() => { loadContext(); loadCredits(); loadVoicePreferences(); }, []);
@@ -361,6 +368,7 @@ export default function AICoachPanel({ user, onClose, currentPathname }) {
   const isLow = creditAccount && !isExhausted && creditPct >= 75;
 
   const starters = MODE_STARTERS[activeMode.key] || MODE_STARTERS.general_assistant;
+  const lastAssistant = [...messages].reverse().find(m => m.role === 'assistant');
   const screenKey = getScreenKey(currentPathname || '');
   const screenActions = screenKey ? (SCREEN_ACTIONS[screenKey] || null) : null;
 
@@ -521,11 +529,30 @@ export default function AICoachPanel({ user, onClose, currentPathname }) {
               </div>
             </div>
             {msg.role === 'assistant' && i === messages.length - 1 && (
-              <ToneAdjustmentPanel
-                onAdjust={(tone) => sendMessage(`Make this ${tone}`, tone)}
-                onSaveStyle={() => saveVoicePreferences({ ...voicePreferences, last_saved_style: new Date().toISOString() })}
-                isAdjusting={adjustingMessage}
-              />
+              <>
+                <div className="mt-2 ml-8 flex flex-wrap gap-1.5">
+                  <button
+                    type="button"
+                    onClick={() => setShowSave(true)}
+                    className="inline-flex items-center gap-1 text-[11px] font-medium bg-slate-800 hover:bg-slate-700 border border-slate-600 text-slate-100 hover:text-white rounded-lg px-2.5 py-1.5 transition-colors"
+                  >
+                    <BookmarkPlus className="w-3 h-3" />Save to glossary
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setShowTask(true)}
+                    className="inline-flex items-center gap-1 text-[11px] font-medium bg-slate-800 hover:bg-slate-700 border border-slate-600 text-slate-100 hover:text-white rounded-lg px-2.5 py-1.5 transition-colors"
+                  >
+                    <CheckSquare className="w-3 h-3" />Create task
+                  </button>
+                </div>
+                <CoachToolLinks text={msg.content} />
+                <ToneAdjustmentPanel
+                  onAdjust={(tone) => sendMessage(`Make this ${tone}`, tone)}
+                  onSaveStyle={() => saveVoicePreferences({ ...voicePreferences, last_saved_style: new Date().toISOString() })}
+                  isAdjusting={adjustingMessage}
+                />
+              </>
             )}
           </div>
         ))}
@@ -563,6 +590,14 @@ export default function AICoachPanel({ user, onClose, currentPathname }) {
         </div>
       )}
 
+      {actionNotice && (
+        <div className="flex-shrink-0 mx-3 mb-1.5 flex items-start gap-2 bg-emerald-900/40 border border-emerald-700 rounded-lg px-3 py-2 text-xs text-emerald-100">
+          <CheckSquare className="w-3.5 h-3.5 flex-shrink-0 mt-0.5" />
+          <span className="flex-1">{actionNotice}</span>
+          <button onClick={() => setActionNotice('')} className="text-emerald-300 hover:text-white">×</button>
+        </div>
+      )}
+
       {/* ── Input (hidden for promotion engine) ── */}
       {activeMode.key !== 'sale_promotion_package' && <div className="flex-shrink-0 border-t border-slate-700 p-3 bg-slate-900">
         <div className="flex gap-2 items-end">
@@ -588,6 +623,28 @@ export default function AICoachPanel({ user, onClose, currentPathname }) {
 
       {/* ── Report an issue to the admin punch list ── */}
       <PunchListReportDialog open={showPunchReport} onOpenChange={setShowPunchReport} />
+
+      {/* ── Save the coaching, or turn it into a task ── */}
+      <CoachSaveDialog
+        open={showSave}
+        onOpenChange={setShowSave}
+        user={user}
+        messages={messages}
+        modeKey={activeMode.key}
+        modeLabel={activeMode.label}
+        saleId={getSaleIdFromUrl()}
+        onSaved={(msg) => setActionNotice(msg)}
+      />
+
+      <CoachTaskDialog
+        open={showTask}
+        onOpenChange={setShowTask}
+        user={user}
+        suggestedTitle={suggestTaskTitle(lastAssistant?.content || '')}
+        suggestedDetail={lastAssistant?.content || ''}
+        saleId={getSaleIdFromUrl()}
+        onDone={(msg) => setActionNotice(msg)}
+      />
 
       {/* ── Voice Preferences Modal ── */}
       <VoicePreferencesModal
