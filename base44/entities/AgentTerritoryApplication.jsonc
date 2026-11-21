@@ -83,6 +83,20 @@
     },
     "admin_notes": {
       "type": "string"
+    },
+    "decided_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When an admin approved or denied this application. Set by the review screen; never edited by the applicant."
+    },
+    "decided_by_name": {
+      "type": "string",
+      "description": "Admin who made the decision, kept for accountability on shared territories."
+    },
+    "conflict_override": {
+      "type": "boolean",
+      "default": false,
+      "description": "TRUE only when an admin approved this territory knowing it overlaps an already approved agent. Records a deliberate decision, never an automatic grant."
     }
   },
   "required": [

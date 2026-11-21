@@ -3,7 +3,13 @@ import { base44 } from '@/api/base44Client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Check, XCircle, ChevronDown, ChevronUp, RefreshCw } from 'lucide-react';
+import { Check, XCircle, ChevronDown, ChevronUp, RefreshCw, AlertTriangle } from 'lucide-react';
+import {
+  AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction,
+} from '@/components/ui/alert-dialog';
+import { findTerritoryConflicts, isExclusive } from '@/lib/territoryConflicts';
+import TerritoryConflictNotice from '@/components/admin/TerritoryConflictNotice';
 
 const statusColors = {
   pending: 'bg-amber-100 text-amber-700',
@@ -29,19 +35,42 @@ export default function AdminAgentApplications() {
   const [apps, setApps] = useState([]);
   const [loading, setLoading] = useState(true);
   const [expanded, setExpanded] = useState({});
+  const [me, setMe] = useState(null);
+  const [confirmApprove, setConfirmApprove] = useState(null);
 
   const load = async () => {
     setLoading(true);
-    const data = await base44.entities.AgentTerritoryApplication.list('-created_date', 200);
+    const [data, user] = await Promise.all([
+      base44.entities.AgentTerritoryApplication.list('-created_date', 200),
+      base44.auth.me().catch(() => null),
+    ]);
     setApps(data || []);
+    setMe(user);
     setLoading(false);
   };
 
   useEffect(() => { load(); }, []);
 
-  const updateStatus = async (id, status) => {
-    await base44.entities.AgentTerritoryApplication.update(id, { status });
-    setApps(prev => prev.map(a => a.id === id ? { ...a, status } : a));
+  const updateStatus = async (id, status, extra = {}) => {
+    const patch = { status, ...extra };
+    if (status === 'approved' || status === 'denied') {
+      patch.decided_at = new Date().toISOString();
+      patch.decided_by_name = me?.full_name || me?.email || '';
+    }
+    await base44.entities.AgentTerritoryApplication.update(id, patch);
+    setApps(prev => prev.map(a => a.id === id ? { ...a, ...patch } : a));
+  };
+
+  const approvedApps = apps.filter(a => a.status === 'approved');
+  const conflictsById = {};
+  apps.forEach(a => { conflictsById[a.id] = findTerritoryConflicts(a, approvedApps); });
+
+  const handleApprove = (app, conflicts) => {
+    if (conflicts.length > 0) {
+      setConfirmApprove({ app, conflicts });
+      return;
+    }
+    updateStatus(app.id, 'approved');
   };
 
   const toggle = (id) => setExpanded(prev => ({ ...prev, [id]: !prev[id] }));
@@ -67,6 +96,11 @@ export default function AdminAgentApplications() {
         <div className="flex items-center gap-3 flex-shrink-0">
           <Badge className={statusColors[app.status]}>{app.status}</Badge>
           <Badge variant="outline" className="text-xs">{interestLabels[app.interested_in] || app.interested_in}</Badge>
+          {conflictsById[app.id]?.length > 0 && (
+            <Badge className="bg-red-100 text-red-700 text-xs gap-1">
+              <AlertTriangle className="w-3 h-3" /> Overlaps {conflictsById[app.id].length}
+            </Badge>
+          )}
           {expanded[app.id] ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
         </div>
       </div>
@@ -99,6 +133,7 @@ export default function AdminAgentApplications() {
             <p className="text-xs text-slate-500 mb-0.5">Why Should Be Considered</p>
             <p className="text-slate-700 text-sm bg-slate-50 rounded p-3 whitespace-pre-wrap">{app.why_should_be_considered || '—'}</p>
           </div>
+          <TerritoryConflictNotice conflicts={conflictsById[app.id]} />
           {(app.status === 'pending' || app.status === 'reviewing') && (
             <div className="flex gap-2 pt-1 flex-wrap">
               {app.status === 'pending' && (
@@ -106,7 +141,7 @@ export default function AdminAgentApplications() {
                   <RefreshCw className="w-3.5 h-3.5" /> Mark as Reviewing
                 </Button>
               )}
-              <Button size="sm" className="bg-green-600 hover:bg-green-700 text-white gap-1" onClick={() => updateStatus(app.id, 'approved')}>
+              <Button size="sm" className="bg-green-600 hover:bg-green-700 text-white gap-1" onClick={() => handleApprove(app, conflictsById[app.id] || [])}>
                 <Check className="w-3.5 h-3.5" /> Approve
               </Button>
               <Button size="sm" variant="outline" className="border-red-300 text-red-600 hover:bg-red-50 gap-1" onClick={() => updateStatus(app.id, 'denied')}>
@@ -169,6 +204,36 @@ export default function AdminAgentApplications() {
           )}
         </>
       )}
+
+      <AlertDialog open={!!confirmApprove} onOpenChange={(open) => { if (!open) setConfirmApprove(null); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>This territory is already assigned</AlertDialogTitle>
+            <AlertDialogDescription>
+              {confirmApprove?.app?.name} requested ground that overlaps{' '}
+              {confirmApprove?.conflicts?.length === 1
+                ? confirmApprove.conflicts[0].name
+                : `${confirmApprove?.conflicts?.length} already approved agents`}
+              {isExclusive(confirmApprove?.app) ? ', and asked for an exclusive territory.' : '.'}
+              {' '}Approving anyway is your call, but both agents will see the same area as theirs.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-amber-600 hover:bg-amber-700 text-white"
+              onClick={() => {
+                if (confirmApprove?.app) {
+                  updateStatus(confirmApprove.app.id, 'approved', { conflict_override: true });
+                }
+                setConfirmApprove(null);
+              }}
+            >
+              Approve anyway
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
