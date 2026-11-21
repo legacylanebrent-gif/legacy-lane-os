@@ -8,6 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, DollarSign, QrCode, X, Check, AlertCircle } from 'lucide-react';
 import TransactionForm from '@/components/worksheet/TransactionForm';
+import TransactionImportModal from '@/components/worksheet/TransactionImportModal';
 import { Html5QrcodeScanner } from 'html5-qrcode';
 
 export default function Worksheet() {
@@ -16,6 +17,7 @@ export default function Worksheet() {
   const [loading, setLoading] = useState(true);
   const [transactions, setTransactions] = useState([]);
   const [submitting, setSubmitting] = useState(false);
+  const [showImport, setShowImport] = useState(false);
   
   // Transaction form state
   const [photoMode, setPhotoMode] = useState(false);
@@ -309,6 +311,13 @@ export default function Worksheet() {
     setShowItemScanner(false);
   };
 
+  const reloadTransactions = async () => {
+    const params = new URLSearchParams(window.location.search);
+    const saleId = params.get('saleId');
+    const transData = await base44.entities.Transaction.filter({ sale_id: saleId }, '-created_date');
+    setTransactions(transData);
+  };
+
   const currentTotal = parseFloat(price) * quantity || 0;
 
   if (loading) {
@@ -358,6 +367,15 @@ export default function Worksheet() {
             )}
           </div>
         </div>
+      )}
+
+      {/* Import from Excel / CSV Modal */}
+      {showImport && (
+        <TransactionImportModal
+          sale={sale}
+          onClose={() => setShowImport(false)}
+          onImported={async () => { await reloadTransactions(); }}
+        />
       )}
 
       {/* Item QR Scanner Modal */}
@@ -458,6 +476,7 @@ export default function Worksheet() {
             selectPhotoItem={selectPhotoItem}
             onScanCart={handleScanCart}
             onScanItem={handleScanItem}
+            onImportFile={() => setShowImport(true)}
           />
 
           {transactions.length > 0 && (

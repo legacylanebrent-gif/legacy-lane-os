@@ -4,7 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Camera, Plus, X, QrCode } from 'lucide-react';
+import { Camera, Plus, X, QrCode, FileSpreadsheet } from 'lucide-react';
 
 export default function TransactionForm({
   photoMode, setPhotoMode,
@@ -29,6 +29,7 @@ export default function TransactionForm({
   selectPhotoItem,
   onScanCart,
   onScanItem,
+  onImportFile,
 }) {
   return (
     <Card className="bg-white shadow-md">
@@ -76,6 +77,17 @@ export default function TransactionForm({
               <Plus className="w-4 h-4 mr-2" />
               {bundleMode ? 'Bundle Mode' : 'Create Bundle'}
             </Button>
+            {onImportFile && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={onImportFile}
+                className="whitespace-nowrap text-slate-700"
+              >
+                <FileSpreadsheet className="w-4 h-4 mr-2" />
+                Import Excel / CSV
+              </Button>
+            )}
           </div>
         </div>
 
