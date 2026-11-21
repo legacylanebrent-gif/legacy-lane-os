@@ -14,6 +14,7 @@
 //    ranges. A printed range is a guide only; the item record stays the price.
 
 import { methodLabel } from './paymentSignData';
+import { priceRowText, printableRows } from './pricingSignModel';
 
 const esc = (value) =>
   String(value ?? '').replace(/[&<>"']/g, (c) => ({
@@ -155,14 +156,14 @@ const pricePagesHtml = (template, logoUrl) => {
 
   return pages.map((page, index) => `
     <div class="page">
-      <div class="eyebrow">${esc(tidySignText(template.name))}</div>
+      <div class="eyebrow">${esc(tidySignText(page.eyebrow || template.name))}</div>
       <h1 style="font-size:${headingSize(page)}px">${esc(tidySignText(page.heading || template.name))}</h1>
       <div class="rule"></div>
       <table>
         <tbody>
-          ${(page.rows || []).map((row) => `<tr>
+          ${printableRows(page.rows).map((row) => `<tr>
             <td class="label">${esc(tidySignText(row.label))}</td>
-            <td class="price">${esc(row.price)}</td>
+            <td class="price">${esc(priceRowText(row))}</td>
           </tr>`).join('')}
         </tbody>
       </table>

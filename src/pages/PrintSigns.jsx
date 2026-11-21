@@ -15,6 +15,9 @@ import PaymentSignSetupCard from '@/components/signs/PaymentSignSetupCard';
 import { renderSignDocument } from '@/components/signs/signRenderer';
 import { resolvePaymentSignData } from '@/components/signs/paymentSignData';
 import SaleFloorSigns from '@/components/signs/SaleFloorSigns';
+import CustomSignsSection from '@/components/signs/CustomSignsSection';
+import SignEditDialog from '@/components/signs/SignEditDialog';
+import { customSignToTemplate } from '@/components/signs/pricingSignModel';
 import { loadBusinessIdentity } from '@/lib/businessIdentity';
 
 export default function PrintSigns() {
@@ -31,6 +34,8 @@ export default function PrintSigns() {
   const [zoneQrs, setZoneQrs] = useState({}); // Chapter 14 — prep-zone QR signs
   const [items, setItems] = useState([]); // Chapter 17 — for item-tied floor signs
   const [paymentOptions, setPaymentOptions] = useState(null); // SalePaymentOptions — Zelle/Venmo QRs
+  const [customSigns, setCustomSigns] = useState([]); // SaleSignTemplate — this sale's edited pricing signs
+  const [editingSign, setEditingSign] = useState(null); // { template, record }
 
   useEffect(() => {
     loadSale();
@@ -48,15 +53,18 @@ export default function PrintSigns() {
         return;
       }
 
-      const [userData, saleData, itemsData, paymentData] = await Promise.all([
+      const [userData, saleData, itemsData, paymentData, customData] = await Promise.all([
         base44.auth.me(),
         base44.entities.EstateSale.filter({ id: saleId }),
         base44.entities.Item.filter({ estate_sale_id: saleId }),
         // Optional: a sale can carry its own Zelle/Venmo QRs; otherwise the
         // business profile's are used on the payment signs.
-        base44.entities.SalePaymentOptions.filter({ sale_id: saleId }).catch(() => [])
+        base44.entities.SalePaymentOptions.filter({ sale_id: saleId }).catch(() => []),
+        // This sale's own edited or built pricing signs.
+        base44.entities.SaleSignTemplate.filter({ sale_id: saleId }, { sort: '-updated_date' }).catch(() => [])
       ]);
       setPaymentOptions(paymentData?.[0] || null);
+      setCustomSigns(customData || []);
 
       setCurrentUser(userData);
       // Chapter 7 P1 — canonical business identity (Company first, documented
@@ -261,6 +269,75 @@ export default function PrintSigns() {
     printWindow.document.close();
   };
 
+  const reloadCustomSigns = async () => {
+    if (!sale?.id) return;
+    try {
+      const records = await base44.entities.SaleSignTemplate.filter({ sale_id: sale.id }, { sort: '-updated_date' });
+      setCustomSigns(records);
+    } catch (error) {
+      console.error('Could not load custom signs:', error);
+    }
+  };
+
+  const getOperatorLogo = () => {
+    // Chapter 7 P1 — canonical Company logo first; legacy User logo fields are
+    // the documented fallback.
+    return brandIdentity?.logoUrl || currentUser?.logo_dark || currentUser?.logo_light || currentUser?.company_logo_url || currentUser?.company_logo || '';
+  };
+
+  // Payment signs: accepted methods, the profile's Zelle / Venmo QR codes and
+  // the accepted / not accepted card brands.
+  const paymentSignData = resolvePaymentSignData(currentUser, paymentOptions);
+
+  // Shared sign renderer: hyphen free text, word by word titles that fit one
+  // row, real SVG arrows, 4 up sheets and multi page category guides.
+  const generateSignHtml = (template, forView = false) =>
+    renderSignDocument(template, { forView, logoUrl: getOperatorLogo(), payment: paymentSignData });
+
+  const handlePrintSign = (template) => {
+    const printWindow = window.open('', '', 'width=850,height=1100');
+    printWindow.document.write(generateSignHtml(template));
+    printWindow.document.close();
+  };
+
+  const handleDownloadSign = (template) => {
+    const html = generateSignHtml(template);
+    const blob = new Blob([html], { type: 'text/html' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${template.name.replace(/[^a-z0-9]/gi, '-')}.html`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const handleViewSign = (template) => {
+    const viewWindow = window.open('', '', 'width=880,height=1140');
+    viewWindow.document.write(generateSignHtml(template, true));
+    viewWindow.document.close();
+  };
+
+  // Edit a library pricing sign for THIS sale — the copy lives on the sale.
+  const handleEditSign = (template) => setEditingSign({ template, record: null });
+
+  const handleEditCustomSign = (record) =>
+    setEditingSign({ template: customSignToTemplate(record), record });
+
+  const handleDeleteCustomSign = async (record) => {
+    if (!window.confirm(`Delete "${record.name}"?`)) return;
+    try {
+      await base44.entities.SaleSignTemplate.delete(record.id);
+      await reloadCustomSigns();
+    } catch (error) {
+      console.error('Could not delete custom sign:', error);
+    }
+  };
+
+  const getCategoryColor = (catId) => {
+    const cat = SIGN_CATEGORIES.find(c => c.id === catId);
+    return cat?.color || 'bg-slate-100 text-slate-500 border-slate-200';
+  };
+
   if (loading) {
     return (
       <div className="p-8">
@@ -420,6 +497,17 @@ export default function PrintSigns() {
 
         {/* Sign Templates Tab */}
         <TabsContent value="signs" className="space-y-4">
+          {/* This sale's own pricing signs — edited library signs and new ones */}
+          <CustomSignsSection
+            records={customSigns}
+            onNew={() => setEditingSign({ template: null, record: null })}
+            onEdit={handleEditCustomSign}
+            onView={handleViewSign}
+            onPrint={handlePrintSign}
+            onDownload={handleDownloadSign}
+            onDelete={handleDeleteCustomSign}
+          />
+
           {/* Search & Filter Bar */}
           <div className="flex flex-col sm:flex-row gap-3 bg-white border border-slate-200 rounded-lg p-4">
             <div className="relative flex-1">
@@ -482,54 +570,6 @@ export default function PrintSigns() {
               return matchesSearch && matchesCat;
             });
 
-            const getOperatorLogo = () => {
-              // Chapter 7 P1 — canonical Company logo first; legacy User logo
-              // fields are the documented fallback.
-              return brandIdentity?.logoUrl || currentUser?.logo_dark || currentUser?.logo_light || currentUser?.company_logo_url || currentUser?.company_logo || '';
-            };
-
-            // Payment signs: accepted methods, the profile's Zelle / Venmo QR
-            // codes and the accepted / not accepted card brands.
-            const paymentSignData = resolvePaymentSignData(currentUser, paymentOptions);
-
-            // Shared sign renderer: hyphen free text, word by word titles that fit
-            // one row, real SVG arrows, 4 up sheets and multi page category guides.
-            const generateSignHtml = (template, forView = false) =>
-              renderSignDocument(template, { forView, logoUrl: getOperatorLogo(), payment: paymentSignData });
-
-
-            const handlePrintSign = (template) => {
-              const printWindow = window.open('', '', 'width=850,height=1100');
-              printWindow.document.write(generateSignHtml(template));
-              printWindow.document.close();
-            };
-
-            const handleDownloadSign = (template) => {
-              const html = generateSignHtml(template);
-              const blob = new Blob([html], { type: 'text/html' });
-              const url = URL.createObjectURL(blob);
-              const a = document.createElement('a');
-              a.href = url;
-              a.download = `${template.name.replace(/[^a-z0-9]/gi, '-')}.html`;
-              a.click();
-              URL.revokeObjectURL(url);
-            };
-
-            const handleViewSign = (template) => {
-              const viewWindow = window.open('', '', 'width=880,height=1140');
-              viewWindow.document.write(generateSignHtml(template, true));
-              viewWindow.document.close();
-            };
-
-            const handleEditSign = (template) => {
-              alert(`Edit functionality for "${template.name}" — content will be added soon.`);
-            };
-
-            const getCategoryColor = (catId) => {
-              const cat = SIGN_CATEGORIES.find(c => c.id === catId);
-              return cat?.color || 'bg-slate-100 text-slate-500 border-slate-200';
-            };
-
             if (filtered.length === 0) {
               return (
                 <div className="text-center py-12 text-slate-500">
@@ -573,6 +613,18 @@ export default function PrintSigns() {
           })()}
         </TabsContent>
       </Tabs>
+
+      <SignEditDialog
+        open={!!editingSign}
+        onClose={() => setEditingSign(null)}
+        sale={sale}
+        template={editingSign?.template || null}
+        existing={editingSign?.record || null}
+        onSaved={async () => {
+          setEditingSign(null);
+          await reloadCustomSigns();
+        }}
+      />
     </div>
   );
 }

@@ -1,0 +1,135 @@
+{
+  "name": "SaleSignTemplate",
+  "type": "object",
+  "description": "A pricing sign the operator changed or built for ONE sale: the item list it prints, which items are kept, and each item's price range or starts at value. Created from a library pricing sign (source 'modified') or from scratch (source 'custom'). It belongs to one sale and never changes the shared sign library, and it never changes any item's price \u2014 a printed range is a guide only. The sale remains the source of truth for pricing.",
+  "properties": {
+    "sale_id": {
+      "type": "string",
+      "description": "EstateSale this sign belongs to."
+    },
+    "operator_id": {
+      "type": "string",
+      "description": "Sale owner (access anchor)."
+    },
+    "name": {
+      "type": "string",
+      "description": "Sign name shown in the operator's custom signs list."
+    },
+    "heading": {
+      "type": "string",
+      "description": "Heading printed at the top of the sign."
+    },
+    "base_template_id": {
+      "type": "string",
+      "description": "Library sign this was started from; empty for a sign built from scratch."
+    },
+    "source": {
+      "type": "string",
+      "enum": [
+        "modified",
+        "custom"
+      ],
+      "default": "modified",
+      "enumColors": [
+        "blue",
+        "purple"
+      ],
+      "description": "modified = an edited library pricing sign; custom = a sign the operator built."
+    },
+    "rows": {
+      "type": "array",
+      "default": [],
+      "description": "The items on this sign in print order. An item with included false is kept on the record but never prints.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "label": {
+            "type": "string",
+            "description": "Item name as it prints."
+          },
+          "included": {
+            "type": "boolean",
+            "default": true,
+            "description": "False when the operator deselected this item so it does not appear on the sign."
+          },
+          "mode": {
+            "type": "string",
+            "enum": [
+              "range",
+              "starts_at",
+              "text"
+            ],
+            "default": "range",
+            "description": "range prints low to high; starts_at prints 'Starts at $X'; text prints the wording as written."
+          },
+          "min": {
+            "type": "string"
+          },
+          "max": {
+            "type": "string"
+          },
+          "starts_at": {
+            "type": "string"
+          },
+          "text": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  },
+  "required": [
+    "sale_id",
+    "name"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.operator_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "$or": [
+        {
+          "data.operator_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.operator_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.operator_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

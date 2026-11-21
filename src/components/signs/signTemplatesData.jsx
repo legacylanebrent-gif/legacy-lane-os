@@ -9,6 +9,7 @@
 //    (2 × 2 with cut lines) so the operator can cut out four signs.
 //  • `layout: 'price-pages'` prints a multi page category price guide.
 import { CATEGORY_PRICE_GUIDES } from './categoryPriceGuides';
+import { PRICING_ITEM_LISTS } from './pricingItemLists';
 
 export const SIGN_CATEGORIES = [
   { id: 'general', name: 'General Signs', color: 'bg-blue-50 text-blue-700 border-blue-200' },
@@ -166,4 +167,16 @@ export const SIGN_TEMPLATES = [
   { id: 'sorting-sensitive', name: 'SENSITIVE MATERIAL — PRIVATE', category: 'prep-sorting', content: 'Private personal material. Never photographed for marketing, displayed, or sold.' },
   { id: 'sorting-donation', name: 'DONATION', category: 'prep-sorting', content: 'Routed for donation through the donation workflow.' },
   { id: 'sorting-restricted', name: 'RESTRICTED — HOLD — DO NOT PROCESS', category: 'prep-sorting', content: 'Ordinary sale processing STOPPED pending review. Never a legality or safety conclusion — the operator or an appropriate professional decides.' },
-];
+]
+  // Every pricing sign topic ships its generated list of the typical items that
+  // belong on it, so the operator starts from a real price guide instead of a
+  // blank sign and trims it for the sale in the sign editor.
+  .map((template) => (
+    PRICING_ITEM_LISTS[template.id] && !template.pages
+      ? {
+        ...template,
+        layout: 'price-pages',
+        pages: [{ eyebrow: 'Price Guide', ...PRICING_ITEM_LISTS[template.id] }],
+      }
+      : template
+  ));
