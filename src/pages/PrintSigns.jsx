@@ -11,6 +11,7 @@ import { Input } from '@/components/ui/input';
 import QRCode from 'qrcode';
 import { SIGN_TEMPLATES, SIGN_CATEGORIES } from '@/components/signs/signTemplatesData';
 import SignTemplateCard from '@/components/signs/SignTemplateCard';
+import { renderSignDocument } from '@/components/signs/signRenderer';
 import SaleFloorSigns from '@/components/signs/SaleFloorSigns';
 import { loadBusinessIdentity } from '@/lib/businessIdentity';
 
@@ -461,78 +462,11 @@ export default function PrintSigns() {
               return brandIdentity?.logoUrl || currentUser?.logo_dark || currentUser?.logo_light || currentUser?.company_logo_url || currentUser?.company_logo || '';
             };
 
-            const generateSignHtml = (template, forView = false) => {
-              const logoUrl = getOperatorLogo();
-              const bg = forView ? 'background: #f8fafc;' : '';
-              
-              // Dynamic font size: shorter text = bigger, up to 120px
-              const charCount = template.name.length;
-              const fontSize = charCount <= 10 ? 120 : charCount <= 16 ? 100 : charCount <= 24 ? 80 : charCount <= 36 ? 64 : 52;
+            // Shared sign renderer: hyphen free text, word by word titles that fit
+            // one row, real SVG arrows, 4 up sheets and multi page category guides.
+            const generateSignHtml = (template, forView = false) =>
+              renderSignDocument(template, { forView, logoUrl: getOperatorLogo() });
 
-              return `<html><head><title>${template.name}</title>
-                <style>
-                  * { box-sizing: border-box; margin: 0; padding: 0; }
-                  html, body { 
-                    ${forView ? 'height: 100%; display: flex; align-items: center; justify-content: center; background: #f8fafc;' : 'height: auto;'}
-                    font-family: Arial, Helvetica, sans-serif; 
-                  }
-                  .letter-page {
-                    ${forView ? 'width: 816px; height: 1056px; margin: 20px auto; box-shadow: 0 4px 24px rgba(0,0,0,0.12); border-radius: 4px; overflow: hidden;' : 'width: 8.5in; height: 11in; margin: 0;'}
-                    border: 3px solid #1e293b;
-                    display: flex; flex-direction: column;
-                    padding: 48px;
-                    page-break-after: always;
-                    break-after: page;
-                  }
-                  .sign-content {
-                    flex: 1;
-                    display: flex; flex-direction: column; align-items: center; justify-content: center;
-                    text-align: center;
-                  }
-                  .sign-content h1 {
-                    font-size: ${fontSize}px; font-family: 'Arial Black', Gadget, sans-serif; font-weight: 900; margin: 0; color: #1e293b;
-                    text-transform: uppercase; letter-spacing: 4px; line-height: 1.15;
-                    word-break: break-word; max-width: 100%;
-                  }
-                  .sign-content .body { font-size: 28px; color: #334155; white-space: pre-line; line-height: 1.6; }
-                  .logo-footer {
-                    display: flex; justify-content: flex-end; align-items: flex-end;
-                    padding-top: 12px; width: 100%;
-                  }
-                  .logo-footer img {
-                    max-height: 192px; max-width: 600px; object-fit: contain;
-                  }
-                  @media print {
-                    @page { size: letter; margin: 0.5in; }
-                    html, body { 
-                      height: auto; 
-                      margin: 0; 
-                      padding: 0; 
-                      print-color-adjust: exact; 
-                      -webkit-print-color-adjust: exact; 
-                    }
-                    .letter-page { 
-                      width: 8.5in; 
-                      height: 11in; 
-                      border: 3px solid #000; 
-                      box-shadow: none; 
-                      margin: 0; 
-                      border-radius: 0;
-                      page-break-after: always;
-                      break-after: page;
-                    }
-                  }
-                </style></head><body>
-                <div class="letter-page">
-                  <div class="sign-content">
-                    <h1>${template.name}</h1>
-                    ${template.content && template.id !== 'garage-arrow' ? `<div class="body">${template.content}</div>` : ''}
-                  </div>
-                  ${logoUrl ? `<div class="logo-footer"><img src="${logoUrl}" alt="Logo" /></div>` : ''}
-                </div>
-                ${forView ? '' : '<script>window.onload = () => window.print();</script>'}
-              </body></html>`;
-            };
 
             const handlePrintSign = (template) => {
               const printWindow = window.open('', '', 'width=850,height=1100');

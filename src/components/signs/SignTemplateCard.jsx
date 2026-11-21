@@ -2,6 +2,7 @@ import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Eye, Pencil, Printer, Download, FileText } from 'lucide-react';
+import { signLayoutLabel } from '@/components/signs/signRenderer';
 
 export default function SignTemplateCard({ template, categoryColor, onView, onEdit, onPrint, onDownload }) {
   return (
@@ -13,6 +14,7 @@ export default function SignTemplateCard({ template, categoryColor, onView, onEd
           </div>
           <div className="flex-1 min-w-0">
             <h3 className="font-semibold text-slate-900 text-sm leading-tight mb-0.5 truncate">{template.name}</h3>
+            <p className="text-[11px] text-slate-500">{signLayoutLabel(template)}</p>
             <div className="grid grid-cols-4 gap-1.5 mt-2">
               <Button variant="outline" size="sm" className="text-xs h-7 px-1.5" onClick={() => onView(template)}>
                 <Eye className="w-3 h-3 mr-0.5" />
