@@ -52,8 +52,23 @@ export default function SaleInventory() {
     try {
       setLoading(true);
       if (saleId) {
-        const saleData = await base44.entities.EstateSale.filter({ id: saleId });
-        setSale(saleData[0]);
+        // The record is only used for the header and sale context; never let a
+        // read miss block the items the operator came here for.
+        let saleRecord = null;
+        try {
+          const saleData = await base44.entities.EstateSale.filter({ id: saleId });
+          saleRecord = Array.isArray(saleData) ? saleData[0] : (saleData?.items || [])[0];
+        } catch (error) {
+          console.warn('Sale lookup by filter failed:', error.message);
+        }
+        if (!saleRecord) {
+          try {
+            saleRecord = await base44.entities.EstateSale.get(saleId);
+          } catch (error) {
+            console.warn('Sale lookup by id failed:', error.message);
+          }
+        }
+        setSale(saleRecord || { id: saleId, title: 'This sale' });
       }
 
       const itemData = await base44.entities.Item.filter({
@@ -270,11 +285,12 @@ export default function SaleInventory() {
     );
   }
 
-  if (!sale) {
+  if (!saleId) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 to-cream-50 flex items-center justify-center">
         <div className="text-center">
-          <h2 className="text-2xl font-bold text-slate-900">Sale not found</h2>
+          <h2 className="text-2xl font-bold text-slate-900">Choose a sale first</h2>
+          <Button className="mt-4" asChild><Link to="/MySales">Back to My Sales</Link></Button>
         </div>
       </div>
     );

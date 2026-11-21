@@ -5,6 +5,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import CreateItemModal from '@/components/marketplace/CreateItemModal';
+import AddFromSaleModal from '@/components/inventory/AddFromSaleModal';
 import { 
     Plus, Search, Package, DollarSign, Tag, Image as ImageIcon,
     Filter, Grid3x3, List, MoreVertical, Edit, Trash2, Sparkles, CheckCircle, ExternalLink, MapPin
@@ -37,6 +38,7 @@ export default function Inventory() {
   const [seoDone, setSeoDone] = useState({});
   const [postingEtsy, setPostingEtsy] = useState({});
   const [postingEbay, setPostingEbay] = useState({});
+  const [showAddFromSale, setShowAddFromSale] = useState(false);
 
   useEffect(() => {
     loadData();
@@ -179,17 +181,33 @@ export default function Inventory() {
           <h1 className="text-4xl font-serif font-bold text-slate-900 mb-2">Active Inventory</h1>
           <p className="text-slate-600">Manage your estate sale items and listings</p>
         </div>
-        <Button 
-          onClick={() => {
-            setEditingItem(null);
-            setShowCreateModal(true);
-          }}
-          className="bg-orange-600 hover:bg-orange-700"
-        >
-          <Plus className="w-4 h-4 mr-2" />
-          Add Item
-        </Button>
+        <div className="flex flex-wrap gap-2">
+          <Button
+            variant="outline"
+            onClick={() => setShowAddFromSale(true)}
+            className="border-cyan-300 text-cyan-700 hover:bg-cyan-50"
+          >
+            <Package className="w-4 h-4 mr-2" />
+            From a Sale
+          </Button>
+          <Button 
+            onClick={() => {
+              setEditingItem(null);
+              setShowCreateModal(true);
+            }}
+            className="bg-orange-600 hover:bg-orange-700"
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            Add Item
+          </Button>
+        </div>
       </div>
+
+      <AddFromSaleModal
+        open={showAddFromSale}
+        onClose={() => setShowAddFromSale(false)}
+        onCreated={loadData}
+      />
 
       <CreateItemModal
         open={showCreateModal}
