@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Plus, Edit, Check, CreditCard, Package, Trash2, Lock, Star } from 'lucide-react';
 import PackageModal from '@/components/admin/PackageModal';
+import ProrationCalculator from '@/components/admin/ProrationCalculator';
 
 export default function AdminPackages() {
   const [packages, setPackages] = useState([]);
@@ -136,6 +137,8 @@ export default function AdminPackages() {
         package={editingPackage}
         onSuccess={loadPackages}
       />
+
+      <ProrationCalculator packages={packages} />
 
       <Tabs value={selectedAccountType} onValueChange={setSelectedAccountType}>
         <div className="overflow-x-auto pb-2 -mx-6 px-6 lg:mx-0 lg:px-0">
