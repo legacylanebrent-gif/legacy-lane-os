@@ -16,6 +16,7 @@ export default function BuyoutModal({ open, onClose, sale }) {
   const [isLabeling, setIsLabeling] = useState(false);
   const [labeledItems, setLabeledItems] = useState([]);
   const [offerPercentage, setOfferPercentage] = useState(25);
+  const [agreedPrice, setAgreedPrice] = useState('');
   const [showCameraPrompt, setShowCameraPrompt] = useState(false);
 
   const processImage = async (file) => {
@@ -219,17 +220,30 @@ Return ONLY valid JSON in this exact format:
     }
   };
 
+  const money = (n) => `$${(Number(n) || 0).toFixed(2)}`;
+
+  // Estimated resale = what the item is worth at estate-sale pricing.
   const getTotalValue = () => {
     return labeledItems.reduce((sum, item) => sum + (item.suggested_used_price || 0), 0);
   };
+
+  // Buyout is deliberately LOW — 20-30% of resale — because the operator
+  // resells through consignment and online channels later.
+  const getItemBuyout = (item) => (item.suggested_used_price || 0) * (offerPercentage / 100);
 
   const getOfferAmount = () => {
     return getTotalValue() * (offerPercentage / 100);
   };
 
+  const getAgreedAmount = () => {
+    const entered = parseFloat(agreedPrice);
+    return Number.isFinite(entered) ? entered : getOfferAmount();
+  };
+
   const handleClose = () => {
     setImages([]);
     setLabeledItems([]);
+    setAgreedPrice('');
     setLabelingStatus({ current: 0, total: 0, completed: false });
     onClose();
   };
@@ -348,20 +362,20 @@ Return ONLY valid JSON in this exact format:
             {/* Labeled Items Display */}
             {labeledItems.length > 0 && (
               <div>
-                <Label className="text-lg font-semibold mb-3 block">3. Item Valuations</Label>
-                <div className="space-y-2 max-h-64 overflow-y-auto">
+                <Label className="text-lg font-semibold mb-3 block">3. Buyout Report</Label>
+                <div className="space-y-2 max-h-80 overflow-y-auto">
                   {labeledItems.map((item, idx) => (
                     <div key={idx} className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg">
-                      <img src={item.url} alt={item.name} className="w-16 h-16 object-cover rounded" />
-                      <div className="flex-1">
+                      <img src={item.url} alt={item.name} className="w-16 h-16 object-cover rounded shrink-0" />
+                      <div className="flex-1 min-w-0">
                         <h4 className="font-semibold text-slate-900">{item.name}</h4>
                         <p className="text-xs text-slate-600 line-clamp-1">{item.description}</p>
                       </div>
-                      <div className="text-right">
-                        <div className="text-xs text-slate-500 line-through">${item.suggested_new_price?.toFixed(2) || '0.00'}</div>
-                        <Badge className="bg-green-600 text-white">
-                          ${item.suggested_used_price?.toFixed(2) || '0.00'}
-                        </Badge>
+                      <div className="text-right shrink-0">
+                        <div className="text-[11px] text-slate-500">Est. resale</div>
+                        <div className="text-sm font-semibold text-slate-900">{money(item.suggested_used_price)}</div>
+                        <div className="text-[11px] text-slate-500 mt-1">Suggested buyout</div>
+                        <Badge className="bg-orange-600 text-white">{money(getItemBuyout(item))}</Badge>
                       </div>
                     </div>
                   ))}
@@ -376,13 +390,13 @@ Return ONLY valid JSON in this exact format:
                 
                 <div className="bg-gradient-to-br from-orange-50 to-orange-100 p-6 rounded-lg space-y-4">
                   <div className="flex items-center justify-between">
-                    <span className="text-slate-700">Total Estimated Value:</span>
-                    <span className="text-xl font-bold text-slate-900">${getTotalValue().toFixed(2)}</span>
+                    <span className="text-slate-700">Total Estimated Resale Value:</span>
+                    <span className="text-xl font-bold text-slate-900">{money(getTotalValue())}</span>
                   </div>
 
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
-                      <Label htmlFor="offer-percentage">Offer Percentage:</Label>
+                      <Label htmlFor="offer-percentage">Buyout Percentage:</Label>
                       <Input
                         id="offer-percentage"
                         type="number"
@@ -393,19 +407,36 @@ Return ONLY valid JSON in this exact format:
                         className="w-20 text-center"
                       />
                     </div>
-                    <p className="text-xs text-slate-600">Adjust between 20-30% of estimated value</p>
+                    <p className="text-xs text-slate-600">20-30% of estate sale pricing — low on purpose, since the operator resells through consignment and online sales.</p>
                   </div>
 
                   <div className="border-t-2 border-orange-200 pt-4">
                     <div className="flex items-center justify-between">
                       <span className="text-lg font-semibold text-slate-900 flex items-center gap-2">
                         <DollarSign className="w-6 h-6 text-orange-600" />
-                        Buyout Offer Amount:
+                        Suggested Gross Buyout Total:
                       </span>
                       <span className="text-3xl font-bold text-orange-600">
-                        ${getOfferAmount().toFixed(2)}
+                        {money(getOfferAmount())}
                       </span>
                     </div>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="agreed-price">Agreed Price Paid to Owner</Label>
+                    <Input
+                      id="agreed-price"
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      value={agreedPrice}
+                      onChange={(e) => setAgreedPrice(e.target.value)}
+                      placeholder={getOfferAmount().toFixed(2)}
+                      className="mt-1 font-semibold text-lg"
+                    />
+                    <p className="text-xs text-slate-600 mt-1">
+                      Leave blank to use the suggested total of {money(getOfferAmount())}.
+                    </p>
                   </div>
                 </div>
 
@@ -415,15 +446,16 @@ Return ONLY valid JSON in this exact format:
                   </Button>
                   <Button
                     onClick={() => {
-                      const summary = `Buyout Analysis for ${sale?.title}
+                      const summary = `Buyout Report for ${sale?.title}
 
 Total Items: ${labeledItems.length}
-Estimated Value: $${getTotalValue().toFixed(2)}
-Offer Percentage: ${offerPercentage}%
-Buyout Offer: $${getOfferAmount().toFixed(2)}
+Estimated Resale Value: ${money(getTotalValue())}
+Buyout Percentage: ${offerPercentage}%
+Suggested Gross Buyout Total: ${money(getOfferAmount())}
+Agreed Price Paid to Owner: ${money(getAgreedAmount())}
 
 Items:
-${labeledItems.map((item, i) => `${i + 1}. ${item.name} - $${item.suggested_used_price?.toFixed(2)}`).join('\n')}`;
+${labeledItems.map((item, i) => `${i + 1}. ${item.name} - Resale: ${money(item.suggested_used_price)}, Suggested buyout: ${money(getItemBuyout(item))}`).join('\n')}`;
                       
                       navigator.clipboard.writeText(summary);
                       alert('Buyout summary copied to clipboard!');
@@ -437,16 +469,16 @@ ${labeledItems.map((item, i) => `${i + 1}. ${item.name} - $${item.suggested_used
                     onClick={async () => {
                       try {
                         const itemsList = labeledItems.map((item, i) => 
-                          `${i + 1}. ${item.name} - Retail: $${item.suggested_new_price?.toFixed(2)}, Estate: $${item.suggested_used_price?.toFixed(2)}`
+                          `${i + 1}. ${item.name} - Est. resale: ${money(item.suggested_used_price)}, Suggested buyout: ${money(getItemBuyout(item))}`
                         ).join('\n');
 
                         await base44.entities.Offer.create({
                           sale_id: sale?.id,
                           operator_id: sale?.operator_id,
                           item_name: `Buyout Offer - ${labeledItems.length} Items`,
-                          offer_amount: getOfferAmount(),
+                          offer_amount: getAgreedAmount(),
                           full_name: 'Estate Buyout',
-                          notes: `Buyout Analysis:\n\nTotal Items: ${labeledItems.length}\nTotal Estate Value: $${getTotalValue().toFixed(2)}\nOffer Percentage: ${offerPercentage}%\nOffer Amount: $${getOfferAmount().toFixed(2)}\n\nItems:\n${itemsList}`,
+                          notes: `Buyout Report:\n\nTotal Items: ${labeledItems.length}\nTotal Estimated Resale Value: ${money(getTotalValue())}\nBuyout Percentage: ${offerPercentage}%\nSuggested Gross Buyout Total: ${money(getOfferAmount())}\nAgreed Price Paid to Owner: ${money(getAgreedAmount())}\n\nItems:\n${itemsList}`,
                           status: 'pending'
                         });
 
