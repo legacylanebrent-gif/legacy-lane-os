@@ -10,6 +10,7 @@ import { Separator } from '@/components/ui/separator';
 import VendorFields from './VendorFields';
 import VendorSubcategoryDropdown from './VendorSubcategoryDropdown';
 import TerritoryServiceSelector from './TerritoryServiceSelector';
+import OperatorPackageSection from './OperatorPackageSection';
 
 const US_STATES = [
   'Alabama','Alaska','Arizona','Arkansas','California','Colorado','Connecticut','Delaware',
@@ -46,6 +47,9 @@ export default function AddUserModal({ open, onClose, onSuccess, editUser }) {
     email: '',
     is_admin: false,
     primary_account_type: 'consumer',
+    selected_package: '',
+    subscription_tier: '',
+    subscription_status: '',
     phone: '',
     bio: '',
     address: {
@@ -142,6 +146,13 @@ export default function AddUserModal({ open, onClose, onSuccess, editUser }) {
   const [uploadingLightLogo, setUploadingLightLogo] = useState(false);
   const [uploadingDarkLogo, setUploadingDarkLogo] = useState(false);
   const [uploadingTeamLogo, setUploadingTeamLogo] = useState(false);
+  const [packages, setPackages] = useState([]);
+
+  useEffect(() => {
+    base44.entities.SubscriptionPackage.list()
+      .then(list => setPackages((list || []).filter(p => p.is_active !== false)))
+      .catch(err => console.error('Error loading packages:', err));
+  }, []);
 
   useEffect(() => {
     const loadCounties = async () => {
@@ -161,6 +172,9 @@ export default function AddUserModal({ open, onClose, onSuccess, editUser }) {
         full_name: editUser.full_name || '',
         email: editUser.email || '',
         primary_account_type: editUser.primary_account_type || '',
+        selected_package: editUser.selected_package || '',
+        subscription_tier: editUser.subscription_tier || '',
+        subscription_status: editUser.subscription_status || '',
         is_admin: editUser.is_admin || false,
         phone: editUser.phone || '',
         bio: editUser.bio || '',
@@ -377,6 +391,9 @@ export default function AddUserModal({ open, onClose, onSuccess, editUser }) {
         divisions.push('education');
       }
 
+      const assignedPkg = packages.find(p => p.id === formData.selected_package);
+      let savedUserId = editUser?.id;
+
       if (editUser) {
         await base44.entities.User.update(editUser.id, {
           ...formData,
@@ -385,12 +402,39 @@ export default function AddUserModal({ open, onClose, onSuccess, editUser }) {
           onboarding_completed: true
         });
       } else {
-        await base44.asServiceRole.entities.User.create({
+        const created = await base44.asServiceRole.entities.User.create({
           ...formData,
           account_types: [formData.primary_account_type],
           divisions_access: [...new Set(divisions)],
           onboarding_completed: true
         });
+        savedUserId = created?.id;
+      }
+
+      // A package assigned here is granted by the admin — it activates at once,
+      // no checkout, and is recorded on the subscription like a paid plan.
+      if (assignedPkg && savedUserId && (!editUser || editUser.selected_package !== assignedPkg.id)) {
+        const now = new Date();
+        const renewal = new Date(now);
+        renewal.setMonth(renewal.getMonth() + 1);
+        const subPayload = {
+          user_id: savedUserId,
+          plan_type: assignedPkg.account_type,
+          tier: assignedPkg.tier_level,
+          price: assignedPkg.monthly_price || 0,
+          billing_period: 'monthly',
+          status: 'active',
+          start_date: now.toISOString(),
+          renewal_date: renewal.toISOString(),
+          package_name: assignedPkg.package_name,
+          account_type: assignedPkg.account_type,
+        };
+        const existingSubs = await base44.entities.Subscription.filter({ user_id: savedUserId });
+        if (existingSubs.length > 0) {
+          await base44.entities.Subscription.update(existingSubs[0].id, subPayload);
+        } else {
+          await base44.entities.Subscription.create(subPayload);
+        }
       }
 
       // If role is real_estate_agent and territory fields provided, upsert an approved application
@@ -424,6 +468,9 @@ export default function AddUserModal({ open, onClose, onSuccess, editUser }) {
         full_name: '',
         email: '',
         primary_account_type: 'consumer',
+        selected_package: '',
+        subscription_tier: '',
+        subscription_status: '',
         phone: '',
         bio: '',
         address: {
@@ -550,6 +597,13 @@ export default function AddUserModal({ open, onClose, onSuccess, editUser }) {
               <p className="text-xs text-orange-600">User keeps their primary account type but gains access to the Admin Panel link in their sidebar.</p>
             </div>
           </div>
+
+          <OperatorPackageSection
+            packages={packages}
+            formData={formData}
+            setFormData={setFormData}
+            accountTypes={ACCOUNT_TYPES}
+          />
 
           {formData.primary_account_type && (
             <>
