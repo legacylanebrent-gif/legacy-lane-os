@@ -1,0 +1,161 @@
+{
+  "name": "MarketplacePostDraft",
+  "type": "object",
+  "description": "One ready to copy Facebook Marketplace post for one sale photo. The AI writes the title, price, description, category, condition and tags from the item's own saved title, description and asking price; the operator can edit every field. The item's own saved values are kept alongside as source_* snapshots, so a draft never rewrites the item and never invents a brand, maker, size or flaw the item data does not state. Facebook has no public Marketplace posting API yet; every post is stored here so it is ready to auto post the day one exists. A post is only ever a draft or a copy the operator made; nothing here proves a listing is live on Facebook.",
+  "properties": {
+    "sale_id": {
+      "type": "string",
+      "description": "EstateSale the item belongs to."
+    },
+    "operator_id": {
+      "type": "string",
+      "description": "Sale owner (access anchor)."
+    },
+    "photo_key": {
+      "type": "string",
+      "description": "Stable identity of the sale photo this post was written for (its uploaded image url)."
+    },
+    "photo_url": {
+      "type": "string"
+    },
+    "thumbnail_url": {
+      "type": "string"
+    },
+    "item_name": {
+      "type": "string",
+      "description": "The item's saved name snapshot, used as the fallback title."
+    },
+    "source_price": {
+      "type": "number",
+      "description": "The item's saved asking price snapshot. Null when the item has no price."
+    },
+    "source_description": {
+      "type": "string",
+      "description": "The item's saved description snapshot."
+    },
+    "fb_title": {
+      "type": "string",
+      "description": "Marketplace listing title the operator copies."
+    },
+    "fb_price": {
+      "type": "number",
+      "description": "Marketplace asking price. Defaults to the item's own price; the operator can change it."
+    },
+    "fb_description": {
+      "type": "string"
+    },
+    "fb_category": {
+      "type": "string",
+      "description": "Short Marketplace style category (Furniture, Tools, Home Decor...)."
+    },
+    "fb_condition": {
+      "type": "string",
+      "enum": [
+        "New",
+        "Used Like New",
+        "Used Good",
+        "Used Fair"
+      ],
+      "enumColors": [
+        "green",
+        "blue",
+        "yellow",
+        "gray"
+      ],
+      "description": "The Marketplace condition option the operator picks when posting."
+    },
+    "fb_tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Up to five search words the operator can paste into the listing."
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "copied",
+        "posted"
+      ],
+      "default": "draft",
+      "enumColors": [
+        "gray",
+        "blue",
+        "green"
+      ],
+      "description": "draft = written and waiting; copied = the operator copied the fields to post by hand; posted = the operator recorded that the listing is live."
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "copied_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "posted_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "post_url": {
+      "type": "string",
+      "description": "The live Marketplace listing link once the operator records it."
+    }
+  },
+  "required": [
+    "sale_id",
+    "photo_key"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.operator_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "$or": [
+        {
+          "data.operator_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.operator_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.operator_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

@@ -15,9 +15,10 @@ import SaleExpensesModal from '@/components/expenses/SaleExpensesModal';
 import GuestSalePackageCard from '@/components/estate/GuestSalePackageCard';
 import { 
         Plus, Search, Calendar, MapPin, Eye, Heart, DollarSign,
-        Package, Edit, TrendingUp, Star, Briefcase, Trash, FileText, BarChart3, Megaphone, Download, Globe, Users, Receipt, Sparkles, ChevronDown, ChevronUp, BookOpen, Pin, UserCheck, Rocket, Building2, ClipboardCheck, ListChecks, CalendarDays, ClipboardList, Wrench, Target
+        Package, Edit, TrendingUp, Star, Briefcase, Trash, FileText, BarChart3, Megaphone, Download, Globe, Users, Receipt, Sparkles, ChevronDown, ChevronUp, BookOpen, Pin, UserCheck, Rocket, Building2, ClipboardCheck, ListChecks, CalendarDays, ClipboardList, Wrench, Target, ShoppingBag
       } from 'lucide-react';
 import SocialCampaignModal from '@/components/social/SocialCampaignModal';
+import FbMarketplacePostModal from '@/components/marketplace/FbMarketplacePostModal';
 import LiquidationProgressModal from '@/components/estate/LiquidationProgressModal';
 import {
   DropdownMenu,
@@ -73,6 +74,7 @@ export default function MySales() {
   const [showExpensesModal, setShowExpensesModal] = useState(false);
   const [expensesSale, setExpensesSale] = useState(null);
   const [showSocialModal, setShowSocialModal] = useState(false);
+  const [marketplaceSale, setMarketplaceSale] = useState(null);
   const [socialSale, setSocialSale] = useState(null);
   const [showCompletedSection, setShowCompletedSection] = useState(false);
   const [isElite, setIsElite] = useState(false);
@@ -542,6 +544,13 @@ export default function MySales() {
         user={user}
       />
 
+      <FbMarketplacePostModal
+        open={!!marketplaceSale}
+        onClose={() => setMarketplaceSale(null)}
+        sale={marketplaceSale}
+        user={user}
+      />
+
       <LiquidationProgressModal
         open={liquidationModal.open}
         currentStep={liquidationModal.step}
@@ -713,6 +722,7 @@ export default function MySales() {
 
                            <StageSection label="3. Promote &amp; Presale">
                              {!isCompleted && (<Button variant="outline" size="sm" asChild className={`${btnClass} border-pink-500 hover:bg-pink-50`}><Link to={createPageUrl('SaleMarketingCampaigns') + '?saleId=' + sale.id}><Megaphone className="w-3 h-3 mr-1 flex-shrink-0" />Marketing</Link></Button>)}
+                             {!isCompleted && (<Button variant="outline" size="sm" onClick={() => setMarketplaceSale(sale)} className={`${btnClass} border-blue-600 hover:bg-blue-50`}><ShoppingBag className="w-3 h-3 mr-1 flex-shrink-0" />FB Marketplace</Button>)}
                              {!isCompleted && (<Button variant="outline" size="sm" onClick={() => { setSocialSale(sale); setShowSocialModal(true); }} className={`${btnClass} border-purple-500 hover:bg-purple-50`}><Sparkles className="w-3 h-3 mr-1 flex-shrink-0" />Social Posts</Button>)}
                              {!isCompleted && !sale.local_featured && (
                                <Button variant="outline" size="sm" onClick={() => handleBuyPlacement(sale, 'local')} disabled={featuringId === sale.id}
