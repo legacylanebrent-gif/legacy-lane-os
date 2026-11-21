@@ -9,11 +9,12 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import {
-  Plus, ArrowLeft, Trash2, Upload, Eye, Heart,
+  Plus, ArrowLeft, Eye, Heart,
   MapPin, Calendar, Image as ImageIcon, Loader2, Send, User, Phone, Mail
 } from 'lucide-react';
 import { format } from 'date-fns';
 import BackToMySales from '@/components/layout/BackToMySales';
+import PhotoAttachField from '@/components/uploads/PhotoAttachField';
 
 const STATUS_CONFIG = {
   draft: { label: 'Draft', color: 'bg-slate-100 text-slate-700' },
@@ -49,7 +50,6 @@ export default function DonationEditor() {
   });
   const [saving, setSaving] = useState(false);
   const [publishing, setPublishing] = useState(false);
-  const [uploadingPhotos, setUploadingPhotos] = useState(false);
   const [currentDonationId, setCurrentDonationId] = useState(null);
 
   useEffect(() => {
@@ -107,25 +107,6 @@ export default function DonationEditor() {
       console.error('Error loading donation:', err);
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handlePhotoUpload = async (e) => {
-    const files = Array.from(e.target.files);
-    if (!files.length) return;
-    setUploadingPhotos(true);
-    try {
-      const urls = [];
-      for (const file of files) {
-        const { file_url } = await base44.integrations.Core.UploadFile({ file });
-        urls.push(file_url);
-      }
-      setForm(prev => ({ ...prev, photos: [...prev.photos, ...urls] }));
-    } catch (err) {
-      alert('Failed to upload photos: ' + err.message);
-    } finally {
-      setUploadingPhotos(false);
-      e.target.value = '';
     }
   };
 
@@ -346,37 +327,11 @@ export default function DonationEditor() {
 
           <div>
             <Label>Photos</Label>
-            <div className="border-2 border-dashed border-slate-300 rounded-xl p-6 text-center">
-              {uploadingPhotos ? (
-                <div className="flex items-center justify-center gap-2 text-slate-500">
-                  <Loader2 className="w-5 h-5 animate-spin" /> Uploading...
-                </div>
-              ) : (
-                <>
-                  <Upload className="w-8 h-8 text-slate-400 mx-auto mb-2" />
-                  <p className="text-sm text-slate-500 mb-2">Click to upload photos</p>
-                  <input type="file" multiple accept="image/*" onChange={handlePhotoUpload} className="hidden" id="photo-upload" />
-                  <Button variant="outline" size="sm" asChild>
-                    <label htmlFor="photo-upload" className="cursor-pointer">Select Photos</label>
-                  </Button>
-                </>
-              )}
-            </div>
-            {form.photos.length > 0 && (
-              <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3 mt-4">
-                {form.photos.map((url, idx) => (
-                  <div key={idx} className="relative group aspect-square rounded-lg overflow-hidden border border-slate-200">
-                    <img src={url} alt={`Photo ${idx + 1}`} className="w-full h-full object-cover" />
-                    <button
-                      onClick={() => handleRemovePhoto(idx)}
-                      className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
-                    >
-                      <Trash2 className="w-3 h-3" />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
+            <PhotoAttachField
+              photos={form.photos}
+              onAdd={(urls) => setForm(prev => ({ ...prev, photos: [...prev.photos, ...urls] }))}
+              onRemove={handleRemovePhoto}
+            />
           </div>
 
           {/* Seller Contact Details Section */}
@@ -423,7 +378,7 @@ export default function DonationEditor() {
             <Button variant="outline" onClick={handleSaveDraft} disabled={saving || publishing} className="flex-1">
               {saving ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Saving...</> : 'Save as Draft'}
             </Button>
-            <Button onClick={handlePublish} disabled={saving || publishing || uploadingPhotos} className="bg-pink-600 hover:bg-pink-700 flex-1">
+            <Button onClick={handlePublish} disabled={saving || publishing} className="bg-pink-600 hover:bg-pink-700 flex-1">
               {publishing ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Publishing...</> : <><Send className="w-4 h-4 mr-2" /> Publish to Donation Companies</>}
             </Button>
           </div>
