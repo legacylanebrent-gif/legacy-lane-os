@@ -6,29 +6,13 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Car, Receipt, ChevronRight, Loader2, CheckCircle2, Plus } from 'lucide-react';
+import { Car, Receipt, ChevronRight, Loader2, CheckCircle2, Plus, ListChecks } from 'lucide-react';
+import SaleExpensesList from '@/components/expenses/SaleExpensesList';
+import { EXPENSE_CATEGORY_OPTIONS as CATEGORY_OPTIONS } from '@/components/expenses/expenseCategories';
 
 // Chapter 4 P1 — sale expenses write to the CANONICAL sale-scoped Expense entity
 // (sale_id + category + amount + date). BusinessExpense remains COMPANY OVERHEAD only.
 // The legacy path (BusinessExpense with a sale id in a text tag) is retired.
-
-const CATEGORY_OPTIONS = [
-  { value: 'advertising_marketing', label: 'Advertising & Marketing' },
-  { value: 'signage_banners', label: 'Signage & Banners' },
-  { value: 'supplies_materials', label: 'Supplies & Materials' },
-  { value: 'labor_wages', label: 'Labor / Wages (no hours tracked)' },
-  { value: 'transportation_fuel', label: 'Transportation & Fuel' },
-  { value: 'processing_fees', label: 'Card / Processing Fees' },
-  { value: 'professional_services', label: 'Outside / Professional Services' },
-  { value: 'cleaning_services', label: 'Cleaning Services' },
-  { value: 'dumpster_disposal', label: 'Dumpster & Disposal' },
-  { value: 'equipment_rental', label: 'Equipment Rental' },
-  { value: 'photography', label: 'Photography' },
-  { value: 'staging_setup', label: 'Staging & Setup' },
-  { value: 'meals_entertainment', label: 'Meals (Sale Day Crew)' },
-  { value: 'permits_licenses', label: 'Permits & Licenses' },
-  { value: 'other', label: 'Other Direct Expense' },
-];
 
 const CATEGORY_LABEL = (v) => CATEGORY_OPTIONS.find(c => c.value === v)?.label || v;
 
@@ -98,6 +82,19 @@ function ChooseView({ onChoose }) {
           <div>
             <p className="font-semibold text-slate-900">Log Mileage</p>
             <p className="text-xs text-slate-500">Track round trips to the sale address — auto-calculates total miles & cost</p>
+          </div>
+          <ChevronRight className="w-4 h-4 text-slate-400 ml-auto" />
+        </button>
+        <button
+          onClick={() => onChoose('list')}
+          className="flex items-center gap-4 p-4 border-2 border-slate-200 hover:border-slate-400 rounded-xl transition-colors text-left"
+        >
+          <div className="w-10 h-10 bg-slate-100 rounded-lg flex items-center justify-center flex-shrink-0">
+            <ListChecks className="w-5 h-5 text-slate-600" />
+          </div>
+          <div>
+            <p className="font-semibold text-slate-900">Review & Edit This Sale's Expenses</p>
+            <p className="text-xs text-slate-500">See everything already logged for this sale — fix an amount, category or date, or delete one</p>
           </div>
           <ChevronRight className="w-4 h-4 text-slate-400 ml-auto" />
         </button>
@@ -544,6 +541,7 @@ export default function SaleExpensesModal({ open, onClose, sale, user }) {
 
   const title = view === 'choose' ? 'Sale Expenses & Mileage'
     : view === 'expense' ? 'Log Sale Expense'
+    : view === 'list' ? 'This Sale’s Expenses'
     : 'Log Mileage';
 
   return (
@@ -570,6 +568,7 @@ export default function SaleExpensesModal({ open, onClose, sale, user }) {
         {!successMsg && view === 'choose' && <ChooseView onChoose={setView} />}
         {!successMsg && view === 'expense' && <ExpenseView sale={sale} onSaved={handleSaved} onBack={() => setView('choose')} />}
         {!successMsg && view === 'mileage' && <MileageView sale={sale} user={user} onSaved={handleSaved} onBack={() => setView('choose')} />}
+        {view === 'list' && <SaleExpensesList sale={sale} onBack={() => setView('choose')} />}
       </DialogContent>
     </Dialog>
   );
