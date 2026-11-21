@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { ChevronLeft, ChevronRight, CalendarDays, Columns3 } from 'lucide-react';
 import { startOfMonth, endOfMonth, startOfWeek, endOfWeek, addMonths, addWeeks, eachDayOfInterval, format, isSameMonth, isToday, isSameDay } from 'date-fns';
 import BackToMySales from '@/components/layout/BackToMySales';
+import CalendarTaskItem from '@/components/calendar/CalendarTaskItem';
 
 // Chapter 3 P1 — operator sale calendar. A VIEW over existing EstateSale.sale_dates;
 // no scheduling records are created or duplicated here. Consumer MyCalendar is untouched.
@@ -23,7 +24,10 @@ const WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
 export default function OperatorCalendar() {
   const navigate = useNavigate();
+  const [me, setMe] = useState(null);
   const [sales, setSales] = useState([]);
+  const [tasks, setTasks] = useState([]);
+  const [userNames, setUserNames] = useState({});
   const [loading, setLoading] = useState(true);
   const [view, setView] = useState('month');
   const [cursor, setCursor] = useState(new Date());
@@ -33,9 +37,27 @@ export default function OperatorCalendar() {
 
   const load = async () => {
     try {
-      const me = await base44.auth.me();
-      const mySales = await base44.entities.EstateSale.filter({ operator_id: me.id });
-      setSales(mySales || []);
+      const user = await base44.auth.me();
+      setMe(user);
+      const [mySales, myTasks] = await Promise.all([
+        base44.entities.EstateSale.filter({ operator_id: user.id }),
+        base44.entities.SaleTask.filter({ operator_id: user.id }),
+      ]);
+      const saleList = Array.isArray(mySales) ? mySales : (mySales?.items || []);
+      setSales(saleList);
+      setTasks(Array.isArray(myTasks) ? myTasks : (myTasks?.items || []));
+
+      // Names for the people a task can be assigned to (sale team members).
+      const teamIds = [...new Set(saleList.flatMap(s => s.sale_team || []))];
+      if (teamIds.length) {
+        try {
+          const users = await base44.entities.User.filter({ id: { $in: teamIds } });
+          const list = Array.isArray(users) ? users : (users.items || []);
+          setUserNames(Object.fromEntries(list.map(u => [u.id, u.full_name || u.email || 'Team member'])));
+        } catch (e) {
+          console.error('Could not load team names:', e);
+        }
+      }
     } catch (error) {
       console.error('Error loading sales:', error);
     } finally {
@@ -56,6 +78,28 @@ export default function OperatorCalendar() {
     return map;
   }, [sales]);
 
+  const saleById = useMemo(() => {
+    const map = {};
+    (sales || []).forEach(s => { map[s.id] = s; });
+    return map;
+  }, [sales]);
+
+  // date string (yyyy-MM-dd) -> tasks due that day
+  const tasksByDate = useMemo(() => {
+    const map = {};
+    (tasks || []).forEach(t => {
+      if (!t.due_date) return;
+      if (!map[t.due_date]) map[t.due_date] = [];
+      map[t.due_date].push(t);
+    });
+    Object.values(map).forEach(list => list.sort((a, b) => {
+      const aDone = a.status === 'completed' ? 1 : 0;
+      const bDone = b.status === 'completed' ? 1 : 0;
+      return aDone - bDone;
+    }));
+    return map;
+  }, [tasks]);
+
   const days = useMemo(() => {
     if (view === 'month') {
       return eachDayOfInterval({ start: startOfWeek(startOfMonth(cursor)), end: endOfWeek(endOfMonth(cursor)) });
@@ -65,10 +109,53 @@ export default function OperatorCalendar() {
 
   const step = (dir) => setCursor(c => (view === 'month' ? addMonths(c, dir) : addWeeks(c, dir)));
 
-  const activeCount = sales.filter(s => s.status === 'active').length;
-  const upcomingCount = sales.filter(s => s.status === 'upcoming').length;
-
   const eventsFor = (day) => eventsByDate[format(day, 'yyyy-MM-dd')] || [];
+  const tasksFor = (day) => tasksByDate[format(day, 'yyyy-MM-dd')] || [];
+
+  const assigneeOptionsFor = (task) => {
+    const sale = saleById[task.sale_id];
+    const options = [{ id: 'unassigned', label: 'Unassigned' }];
+    if (me?.id) options.push({ id: me.id, label: `${me.full_name || me.email || 'You'} (You)` });
+    (sale?.sale_team || []).forEach(id => {
+      if (id === me?.id) return;
+      options.push({ id, label: userNames[id] || 'Team member' });
+    });
+    return options;
+  };
+
+  const patchTask = async (taskId, patch) => {
+    setTasks(prev => prev.map(t => (t.id === taskId ? { ...t, ...patch } : t)));
+    try {
+      await base44.entities.SaleTask.update(taskId, patch);
+    } catch (error) {
+      console.error('Could not save the task change:', error);
+      load();
+    }
+  };
+
+  const toggleTaskComplete = async (task) => {
+    if (task.status === 'completed') {
+      await patchTask(task.id, { status: 'not_started', completed_at: '', completed_by: '', completed_by_name: '' });
+    } else {
+      await patchTask(task.id, {
+        status: 'completed',
+        completed_at: new Date().toISOString(),
+        completed_by: me?.id || '',
+        completed_by_name: me?.full_name || '',
+        blocked: false,
+        blocked_reason: '',
+      });
+    }
+  };
+
+  const assignTask = async (task, userId) => {
+    if (userId === 'unassigned') {
+      await patchTask(task.id, { assignee_user_id: '', assignee_name: '' });
+      return;
+    }
+    const option = assigneeOptionsFor(task).find(o => o.id === userId);
+    await patchTask(task.id, { assignee_user_id: userId, assignee_name: option?.label || 'Team member' });
+  };
 
   const SalePills = ({ day, compact }) => {
     const events = eventsFor(day);
@@ -92,6 +179,28 @@ export default function OperatorCalendar() {
     );
   };
 
+  const TaskPills = ({ day, compact }) => {
+    const list = tasksFor(day);
+    if (!list.length) return null;
+    const shown = compact ? list.slice(0, 1) : list.slice(0, 3);
+    const more = list.length - shown.length;
+    return (
+      <div className="space-y-1 mt-1">
+        {shown.map(t => (
+          <button
+            key={t.id}
+            onClick={e => { e.stopPropagation(); setSelectedDay(day); }}
+            title={`Task: ${t.name} — ${t.assignee_name || 'unassigned'}`}
+            className={`w-full text-left text-[10px] leading-tight px-1.5 py-1 rounded border truncate ${t.status === 'completed' ? 'bg-slate-100 text-slate-400 border-slate-200 line-through' : 'bg-violet-100 text-violet-800 border-violet-300'}`}
+          >
+            {t.name}
+          </button>
+        ))}
+        {more > 0 && <p className="text-[10px] text-slate-500 px-1">+{more} tasks</p>}
+      </div>
+    );
+  };
+
   return (
     <div className="p-6 lg:p-8 space-y-6">
       <BackToMySales />
@@ -99,10 +208,7 @@ export default function OperatorCalendar() {
         <div>
           <h1 className="text-3xl font-serif font-bold text-slate-900">Sale Calendar</h1>
           <p className="text-sm md:text-base text-slate-600">
-            See active and upcoming projects together before accepting more work than you can properly handle.
-            {activeCount > 0 || upcomingCount > 0 ? (
-              <span className="ml-1 font-medium text-slate-700">{activeCount} active · {upcomingCount} upcoming</span>
-            ) : null}
+            See active and upcoming projects
           </p>
         </div>
         <div className="flex gap-2 flex-wrap">
@@ -141,6 +247,7 @@ export default function OperatorCalendar() {
               <Badge className="bg-blue-100 text-blue-800 border border-blue-300">Upcoming</Badge>
               <Badge className="bg-amber-100 text-amber-800 border border-amber-300">Draft</Badge>
               <Badge className="bg-slate-100 text-slate-600 border border-slate-300">Completed</Badge>
+              <Badge className="bg-violet-100 text-violet-800 border border-violet-300">Task due</Badge>
             </div>
           </div>
 
@@ -176,6 +283,7 @@ export default function OperatorCalendar() {
                         )}
                       </div>
                       <SalePills day={day} compact={view === 'month'} />
+                      <TaskPills day={day} compact={view === 'month'} />
                     </div>
                   );
                 })}
@@ -186,8 +294,8 @@ export default function OperatorCalendar() {
                     <h3 className="text-sm font-semibold text-slate-800">{format(selectedDay, 'EEEE, MMMM d, yyyy')}</h3>
                     <button className="text-xs text-slate-500 hover:text-slate-800" onClick={() => setSelectedDay(null)}>Close</button>
                   </div>
-                  {eventsFor(selectedDay).length === 0 ? (
-                    <p className="text-sm text-slate-500 py-2">No sales scheduled for this day.</p>
+                  {eventsFor(selectedDay).length === 0 && tasksFor(selectedDay).length === 0 ? (
+                    <p className="text-sm text-slate-500 py-2">No sales or tasks scheduled for this day.</p>
                   ) : (
                     <div className="space-y-2 mt-2">
                       {eventsFor(selectedDay).map(s => (
@@ -199,6 +307,20 @@ export default function OperatorCalendar() {
                           {s.title || 'Untitled sale'} · <span className="capitalize">{s.status}</span>
                         </button>
                       ))}
+                      {tasksFor(selectedDay).length > 0 && (
+                        <div className="space-y-2">
+                          {tasksFor(selectedDay).map(t => (
+                            <CalendarTaskItem
+                              key={t.id}
+                              task={t}
+                              saleTitle={saleById[t.sale_id]?.title || 'Sale'}
+                              assigneeOptions={assigneeOptionsFor(t)}
+                              onToggleComplete={() => toggleTaskComplete(t)}
+                              onAssign={v => assignTask(t, v)}
+                            />
+                          ))}
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
@@ -214,7 +336,7 @@ export default function OperatorCalendar() {
       </Card>
 
       <p className="text-xs text-slate-400">
-        This calendar reads your sale dates — it never creates or duplicates scheduling records. Tap a day to see its sales; tap a sale to open it.
+        This calendar reads your sale dates and task due dates — it never creates or duplicates scheduling records. Tap a day to see its sales and tasks; assign or complete a task right there.
       </p>
     </div>
   );
