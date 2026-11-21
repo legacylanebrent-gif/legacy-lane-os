@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { ArrowLeft, Truck, PackageMinus, ClipboardList, Loader2 } from 'lucide-react';
 import AssignmentCard from '@/components/equipment/AssignmentCard';
 import AiChecklistPanel from '@/components/equipment/AiChecklistPanel';
+import DefaultEquipmentList from '@/components/equipment/DefaultEquipmentList';
 import { CHECKLIST_TEMPLATES } from '@/components/equipment/checklistTemplates';
 import { ENTRY_TYPES, ENTRY_TYPE_LABELS, KIT_CATEGORY_OPTIONS, PACKOUT_ASSET_STATUS, asList } from '@/components/equipment/equipmentModel';
 
@@ -23,7 +24,7 @@ export default function SaleEquipment() {
   const [template, setTemplate] = useState(null);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
-  const [addForm, setAddForm] = useState({ name: '', entry_type: 'REQUIREMENT', category: 'STAGING', equipment_asset_id: '' });
+  const [addForm, setAddForm] = useState({ name: '', quantity: 1, entry_type: 'REQUIREMENT', category: 'STAGING', equipment_asset_id: '' });
   const [taskMsg, setTaskMsg] = useState('');
 
   useEffect(() => { load(); }, []);
@@ -109,6 +110,32 @@ export default function SaleEquipment() {
     }
   };
 
+  const addDefaultItems = async (items) => {
+    if (!items?.length) return;
+    setBusy(true);
+    try {
+      const created = await base44.entities.SaleEquipmentAssignment.bulkCreate(items.map(it => ({
+        sale_id: sale.id,
+        operator_id: sale.operator_id,
+        company_id: sale.company_id || '',
+        sale_team_ids: sale.sale_team || [],
+        source: 'standard_list',
+        entry_type: it.entry_type,
+        name: it.name,
+        quantity: it.quantity || 1,
+        category: it.category || 'OTHER',
+        packed: false,
+        packout_state: 'PENDING',
+        restock_needed: false,
+      })));
+      setAssignments(prev => [...prev, ...asList(created)]);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setBusy(false);
+    }
+  };
+
   const addSaleSpecific = async () => {
     if (!addForm.name.trim()) return;
     setBusy(true);
@@ -121,11 +148,12 @@ export default function SaleEquipment() {
         source: 'sale_specific',
         entry_type: addForm.entry_type,
         name: addForm.name.trim(),
+        quantity: parseInt(addForm.quantity, 10) || 1,
         category: addForm.category,
         equipment_asset_id: addForm.entry_type === 'REUSABLE_EQUIPMENT' ? (addForm.equipment_asset_id || null) : null,
       });
       setAssignments(prev => [...prev, created]);
-      setAddForm({ name: '', entry_type: 'REQUIREMENT', category: 'STAGING', equipment_asset_id: '' });
+      setAddForm({ name: '', quantity: 1, entry_type: 'REQUIREMENT', category: 'STAGING', equipment_asset_id: '' });
     } catch (e) {
       console.error(e);
     } finally {
@@ -230,10 +258,23 @@ export default function SaleEquipment() {
         </Card>
       )}
 
+      {/* The always-needed list, added with a quantity in one tap */}
+      <DefaultEquipmentList
+        assignments={assignments}
+        busy={busy}
+        onAddItems={addDefaultItems}
+        onSetQuantity={(id, quantity) => patchAssignment(id, { quantity })}
+      />
+
       {/* Kit projection / sale-specific additions */}
       <Card>
         <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 space-y-0">
           <CardTitle className="flex items-center gap-2"><Truck className="w-4 h-4 text-orange-600" />Sale Equipment List</CardTitle>
+          {assignments.length > 0 && (
+            <Badge variant="outline" className={stats.packed === stats.expected ? 'bg-green-50 border-green-300 text-green-700' : 'bg-amber-50 border-amber-300 text-amber-800'}>
+              {stats.packed} of {stats.expected} loaded &amp; delivered
+            </Badge>
+          )}
           {assignments.length === 0 && template && (
             <Button onClick={projectKit} disabled={busy} className="bg-orange-600 hover:bg-orange-700">
               {busy ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : null}Project "{template.name}"
@@ -264,8 +305,9 @@ export default function SaleEquipment() {
           {/* Sale-specific addition (never mutates the standard kit) */}
           <div className="border-t border-slate-100 pt-3 space-y-2">
             <p className="text-sm font-medium text-slate-700 flex items-center gap-1.5"><PackageMinus className="w-4 h-4 text-purple-600" />Add a sale-specific requirement</p>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-2">
               <Input placeholder="e.g. Two extra clothing racks" value={addForm.name} onChange={e => setAddForm(s => ({ ...s, name: e.target.value }))} />
+              <Input type="number" min="1" placeholder="Qty" value={addForm.quantity} onChange={e => setAddForm(s => ({ ...s, quantity: e.target.value }))} />
               <Select value={addForm.entry_type} onValueChange={v => setAddForm(s => ({ ...s, entry_type: v }))}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>{ENTRY_TYPES.map(t => <SelectItem key={t} value={t}>{ENTRY_TYPE_LABELS[t]}</SelectItem>)}</SelectContent>

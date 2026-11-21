@@ -1,7 +1,7 @@
 {
   "name": "SaleEquipmentAssignment",
   "type": "object",
-  "description": "Chapter 8 P1 \u2014 the sale-specific projection of the operator's kit: WHAT WAS EXPECTED, WHAT WAS PACKED (load-out), and WHAT CAME BACK (pack-out). Created by projecting a SaleKitTemplate and/or sale-specific additions; the SAME record serves load-out and pack-out (no separate PackOut entity). Pack-out terminal states are exhaustive for reusable equipment: RETURNED / DAMAGED / MISSING / LEFT_INTENTIONALLY \u2014 every company asset that leaves should have an ending, and a MISSING asset never silently returns to AVAILABLE. Consumable entries carry only a lightweight restock flag (OK / RESTOCK NEEDED) \u2014 no quantity inventory. Execution of load-out/pack-out work stays in SaleTask; this record is equipment truth, not a second checklist engine.",
+  "description": "Chapter 8 P1 \u2014 the sale-specific projection of the operator's kit: WHAT WAS EXPECTED, WHAT WAS PACKED (load-out), and WHAT CAME BACK (pack-out). Created by projecting a SaleKitTemplate and/or sale-specific additions; the SAME record serves load-out and pack-out (no separate PackOut entity). Pack-out terminal states are exhaustive for reusable equipment: RETURNED / DAMAGED / MISSING / LEFT_INTENTIONALLY \u2014 every company asset that leaves should have an ending, and a MISSING asset never silently returns to AVAILABLE. Consumable entries carry only a lightweight restock flag (OK / RESTOCK NEEDED) \u2014 no quantity inventory. Execution of load-out/pack-out work stays in SaleTask; this record is equipment truth, not a second checklist engine. source 'standard_list' marks an entry added from the built-in every-sale equipment list, so the operator never retypes the same equipment sale after sale.",
   "properties": {
     "sale_id": {
       "type": "string",
@@ -31,10 +31,11 @@
       "type": "string",
       "enum": [
         "kit",
-        "sale_specific"
+        "sale_specific",
+        "standard_list"
       ],
       "default": "kit",
-      "description": "kit = projected from the operator's standard SaleKitTemplate. sale_specific = added for this one sale only; it never mutates the permanent template."
+      "description": "kit = projected from the operator's standard SaleKitTemplate. sale_specific = added for this one sale only; it never mutates the permanent template. standard_list = added from the built-in every-sale equipment list."
     },
     "entry_type": {
       "type": "string",
@@ -49,6 +50,11 @@
     "name": {
       "type": "string",
       "description": "What this entry is (e.g. 'Folding table', 'Price labels', 'Extension cord')."
+    },
+    "quantity": {
+      "type": "integer",
+      "default": 1,
+      "description": "How many of this entry this sale needs (e.g. 4 folding tables). A count of the physical units needed \u2014 never a per-unit price or inventory valuation."
     },
     "category": {
       "type": "string",
@@ -65,7 +71,7 @@
     "packed": {
       "type": "boolean",
       "default": false,
-      "description": "LOAD-OUT state: true once this entry is packed/confirmed for the sale. Packing a linked EquipmentAsset deterministically sets the asset AT_SALE."
+      "description": "LOAD-OUT state: true once this entry is loaded and delivered to the sale site (packed/confirmed). Packing a linked EquipmentAsset deterministically sets the asset AT_SALE."
     },
     "packout_state": {
       "type": "string",
