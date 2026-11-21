@@ -69,6 +69,17 @@ export default function EstateSaleDetail() {
     loadSaleData();
   }, []);
 
+  // A shopper who scanned this sale's early sign in QR lands here, so the sign in
+  // button is brought into view instead of leaving them to hunt for it.
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('signin') !== '1') return;
+    const timer = setTimeout(() => {
+      document.getElementById('early-signin')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 900);
+    return () => clearTimeout(timer);
+  }, [loading]);
+
   const loadSaleData = async () => {
     try {
       const urlParams = new URLSearchParams(window.location.search);
@@ -1049,7 +1060,7 @@ export default function EstateSaleDetail() {
                   )}
                 </div>
 
-                <div className="space-y-2 mt-4">
+                <div className="space-y-2 mt-4" id="early-signin">
                   <SignTheListButton
                     saleId={sale.id}
                     operatorId={sale.operator_id}

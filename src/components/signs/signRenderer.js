@@ -98,7 +98,7 @@ const cardsBlockHtml = (cards, scale) => {
 };
 
 // One sign face. Used for a full letter page and, scaled down, for each 4 up cell.
-const signFaceHtml = (template, { width, pad, maxTitle, scale, logoUrl, payment }) => {
+const signFaceHtml = (template, { width, pad, maxTitle, scale, logoUrl, payment, qrDataUrl }) => {
   const text = tidySignText(template.signText || template.name);
   const usable = width - pad * 2;
   const size = fitFontSize(text, usable, maxTitle);
@@ -119,6 +119,10 @@ const signFaceHtml = (template, { width, pad, maxTitle, scale, logoUrl, payment 
     ? qrKeys.map((key) => qrBlockHtml(key, payment[key], scale)).filter(Boolean).join('')
     : '';
   const qrWrap = qrs ? `<div class="payqrs">${qrs}</div>` : '';
+  // A sale specific QR (early sign in) prints only when this sale's code exists.
+  const saleQr = template.saleQr && qrDataUrl
+    ? `<div class="saleqr"><img src="${esc(qrDataUrl)}" alt="QR code" style="width:${Math.round(330 * scale)}px;height:${Math.round(330 * scale)}px" /></div>`
+    : '';
   const cards = template.paymentCards && payment ? cardsBlockHtml(payment.cards, scale) : '';
   const arrow = template.arrow ? arrowHtml(template.arrow, Math.round(usable * 0.4)) : '';
   const priceLine = template.priceLine
@@ -128,24 +132,24 @@ const signFaceHtml = (template, { width, pad, maxTitle, scale, logoUrl, payment 
     ? `<div class="logofoot"><img src="${esc(logoUrl)}" alt="Logo" style="max-height:${Math.round(96 * scale)}px;max-width:${Math.round(320 * scale)}px" /></div>`
     : '';
 
-  return `<div class="cardbody">${titleHtml(text, size)}${body}${qrWrap}${cards}${arrow}${priceLine}</div>${logo}`;
+  return `<div class="cardbody">${titleHtml(text, size)}${body}${saleQr}${qrWrap}${cards}${arrow}${priceLine}</div>${logo}`;
 };
 
-const singlePageHtml = (template, logoUrl, payment) => {
+const singlePageHtml = (template, logoUrl, payment, qrDataUrl) => {
   const width = LETTER_W - BORDER * 2 - 96;
   return `<div class="sheet">
-    <div class="card">${signFaceHtml(template, { width, pad: 0, maxTitle: 118, scale: 1, logoUrl, payment })}</div>
+    <div class="card">${signFaceHtml(template, { width, pad: 0, maxTitle: 118, scale: 1, logoUrl, payment, qrDataUrl })}</div>
   </div>`;
 };
 
 // The full one page sign, shrunk and duplicated four times on one sheet.
-const fourUpPageHtml = (template, logoUrl) => {
+const fourUpPageHtml = (template, logoUrl, qrDataUrl) => {
   const pad = 27;
   const gap = 12;
   const cellW = Math.floor((LETTER_W - BORDER * 2 - pad * 2 - gap) / 2);
   const cellPad = 20;
   const cell = `<div class="cell">${signFaceHtml(template, {
-    width: cellW, pad: cellPad, maxTitle: 62, scale: 0.5, logoUrl,
+    width: cellW, pad: cellPad, maxTitle: 62, scale: 0.5, logoUrl, qrDataUrl,
   })}</div>`;
   return `<div class="quad">${cell}${cell}${cell}${cell}</div>`;
 };
@@ -192,6 +196,8 @@ const baseCss = `
   .payqrs{display:flex;flex-wrap:wrap;justify-content:center;align-items:flex-start;gap:30px;width:100%}
   .payqr{display:flex;flex-direction:column;align-items:center;gap:8px}
   .payqr img{object-fit:contain;background:#fff}
+  .saleqr{display:flex;justify-content:center;width:100%}
+  .saleqr img{object-fit:contain;background:#fff}
   .payqr .lbl{font-family:'Arial Black',Gadget,sans-serif;font-weight:900;letter-spacing:2px;
     text-transform:uppercase;color:#1e293b;line-height:1}
   .payqr .handle{font-weight:700;color:#334155;letter-spacing:.5px}
@@ -245,12 +251,12 @@ const viewCss = `
  *   payment: resolvePaymentSignData(user, salePaymentOptions) — drives the
  *   Zelle / Venmo QR panels and the accepted / not accepted card lists.
  */
-export function renderSignDocument(template, { forView = false, logoUrl = '', payment = null } = {}) {
+export function renderSignDocument(template, { forView = false, logoUrl = '', payment = null, qrDataUrl = '' } = {}) {
   const body = template.layout === 'price-pages' && (template.pages || []).length
     ? pricePagesHtml(template, logoUrl)
     : template.layout === 'fourup'
-      ? fourUpPageHtml(template, logoUrl)
-      : singlePageHtml(template, logoUrl, payment);
+      ? fourUpPageHtml(template, logoUrl, qrDataUrl)
+      : singlePageHtml(template, logoUrl, payment, qrDataUrl);
 
   return `<html><head><title>${esc(template.name)}</title><style>${baseCss}${forView ? viewCss : ''}</style></head>
     <body>${body}${forView ? '' : '<script>window.onload=()=>window.print();<\/script>'}</body></html>`;

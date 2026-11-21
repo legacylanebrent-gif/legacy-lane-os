@@ -19,6 +19,7 @@ import CustomSignsSection from '@/components/signs/CustomSignsSection';
 import SignEditDialog from '@/components/signs/SignEditDialog';
 import { customSignToTemplate } from '@/components/signs/pricingSignModel';
 import { loadBusinessIdentity } from '@/lib/businessIdentity';
+import { earlySignInUrl } from '@/components/signs/earlySignInPrint';
 
 export default function PrintSigns() {
   const navigate = useNavigate();
@@ -36,6 +37,7 @@ export default function PrintSigns() {
   const [paymentOptions, setPaymentOptions] = useState(null); // SalePaymentOptions — Zelle/Venmo QRs
   const [customSigns, setCustomSigns] = useState([]); // SaleSignTemplate — this sale's edited pricing signs
   const [editingSign, setEditingSign] = useState(null); // { template, record }
+  const [earlySignInQr, setEarlySignInQr] = useState(''); // this sale's early sign in QR
 
   useEffect(() => {
     loadSale();
@@ -81,6 +83,10 @@ export default function PrintSigns() {
       const s = saleData[0];
       setSale(s);
       setItems(itemsData);
+      // This sale's own early sign in QR — different from the check in QR.
+      QRCode.toDataURL(earlySignInUrl(s.id), { width: 400, margin: 1 })
+        .then(setEarlySignInQr)
+        .catch(() => setEarlySignInQr(''));
       // Fire-and-forget: the page renders immediately; QR generation streams in
       // with yields so the UI never blocks on a large image set.
       generateQRCodes(s, itemsData);
@@ -292,7 +298,12 @@ export default function PrintSigns() {
   // Shared sign renderer: hyphen free text, word by word titles that fit one
   // row, real SVG arrows, 4 up sheets and multi page category guides.
   const generateSignHtml = (template, forView = false) =>
-    renderSignDocument(template, { forView, logoUrl: getOperatorLogo(), payment: paymentSignData });
+    renderSignDocument(template, {
+      forView,
+      logoUrl: getOperatorLogo(),
+      payment: paymentSignData,
+      qrDataUrl: earlySignInQr,
+    });
 
   const handlePrintSign = (template) => {
     const printWindow = window.open('', '', 'width=850,height=1100');

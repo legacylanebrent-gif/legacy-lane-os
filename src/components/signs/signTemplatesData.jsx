@@ -47,6 +47,10 @@ export const SIGN_TEMPLATES = [
   { id: 'sale-in-barn', name: 'Sale in Barn', category: 'general', content: '' },
   { id: 'sale-starts-10am', name: 'Sale Starts 10 am', category: 'general', content: 'SALE STARTS AT 10 AM' },
   { id: 'sign-in-sheet', name: 'Sign in Sheet', category: 'general', content: '' },
+  // This sale's own early sign in QR. It is NOT the check in code: an early sign
+  // in is a shopper saying they intend to come, and signing in needs a free
+  // EstateSalen account. Hung at the door it makes the electronic list the only list.
+  { id: 'early-sign-in-qr', name: 'Early Sign In QR', category: 'general', signText: 'SIGN IN HERE', saleQr: true, content: 'SCAN WITH YOUR PHONE CAMERA' },
   { id: 'single-brand-group', name: 'Single Brand Group Product', category: 'general', content: '' },
   { id: 'starting-time', name: 'Starting Time', category: 'general', content: 'SALE HOURS: CHECK ENTRANCE SIGN' },
   { id: 'vera', name: 'Vera', category: 'general', content: '' },

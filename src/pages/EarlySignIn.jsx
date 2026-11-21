@@ -4,9 +4,11 @@ import { useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowLeft, Users, Download, Loader2, ClipboardList, Trash2, Calendar, ChevronDown, ChevronUp } from 'lucide-react';
+import { ArrowLeft, Users, Download, Loader2, ClipboardList, Trash2, Calendar, ChevronDown, ChevronUp, Printer, QrCode } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';
+import QRCode from 'qrcode';
+import { earlySignInUrl, printEarlySignInSheet, printEarlySignInDoorSign } from '@/components/signs/earlySignInPrint';
 
 export default function EarlySignIn() {
   const navigate = useNavigate();
@@ -14,6 +16,7 @@ export default function EarlySignIn() {
   const [signers, setSigners] = useState([]);
   const [loading, setLoading] = useState(true);
   const [expandedDays, setExpandedDays] = useState({});
+  const [signInQr, setSignInQr] = useState('');
 
   useEffect(() => {
     loadData();
@@ -38,6 +41,11 @@ export default function EarlySignIn() {
       }
 
       setSale(saleData[0]);
+
+      // This sale's own early sign in QR — deliberately not the check in QR.
+      QRCode.toDataURL(earlySignInUrl(saleId), { width: 400, margin: 1, color: { dark: '#0f172a', light: '#ffffff' } })
+        .then(setSignInQr)
+        .catch(() => setSignInQr(''));
 
       const signInData = await base44.entities.EarlySignIn.filter({ sale_id: saleId }, '-signed_at', 500);
       setSigners(signInData);
@@ -90,6 +98,10 @@ export default function EarlySignIn() {
   const toggleDay = (date) => {
     setExpandedDays(prev => ({ ...prev, [date]: !prev[date] }));
   };
+
+  // The paper sheet and the door sign both print for the morning of the sale.
+  const handlePrintSignInSheet = () => printEarlySignInSheet({ sale, qrDataUrl: signInQr });
+  const handlePrintDoorSign = () => printEarlySignInDoorSign({ sale, qrDataUrl: signInQr });
 
   if (loading) {
     return (
@@ -169,6 +181,48 @@ export default function EarlySignIn() {
         </Card>
       </div>
 
+      {/* Early sign in QR — this sale's own code, not the check in code */}
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="flex items-center gap-2 text-base">
+            <QrCode className="w-5 h-5 text-cyan-600" />
+            Early Sign In Door Sign
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="flex flex-col sm:flex-row gap-4">
+          {signInQr ? (
+            <img
+              src={signInQr}
+              alt="Early sign in QR code for this sale"
+              className="w-40 h-40 border border-slate-200 rounded flex-shrink-0"
+            />
+          ) : (
+            <div className="w-40 h-40 border border-dashed border-slate-300 rounded flex items-center justify-center text-slate-400 flex-shrink-0">
+              <Loader2 className="w-6 h-6 animate-spin" />
+            </div>
+          )}
+          <div className="flex-1 min-w-0 space-y-2">
+            <p className="text-sm text-slate-600">
+              This code is unique to this sale and is not the check in code. Hang the sign on the front door and
+              shoppers sign in themselves, which also brings them onto EstateSalen with their own account.
+            </p>
+            <div className="flex flex-wrap gap-2">
+              <Button onClick={handlePrintDoorSign} className="bg-cyan-600 hover:bg-cyan-700">
+                <Printer className="w-4 h-4 mr-2" />
+                Print Door Sign
+              </Button>
+              <Button variant="outline" onClick={handlePrintSignInSheet}>
+                <Printer className="w-4 h-4 mr-2" />
+                Print Sign In Sheet
+              </Button>
+            </div>
+            {sale?.id && (
+              <p className="text-[11px] text-slate-400 break-all">{earlySignInUrl(sale.id)}</p>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Legacy signers without a date */}
       {noDateSigners.length > 0 && (
         <Card className="border-amber-300">
@@ -247,15 +301,17 @@ export default function EarlySignIn() {
         );
       })}
 
-      {/* Export button */}
-      {signers.length > 0 && (
-        <div className="flex justify-end">
-          <Button variant="outline" onClick={handleExportCSV}>
-            <Download className="w-4 h-4 mr-2" />
-            Export All to CSV
-          </Button>
-        </div>
-      )}
+      {/* Print sheet and export */}
+      <div className="flex flex-wrap justify-end gap-2">
+        <Button variant="outline" onClick={handlePrintSignInSheet}>
+          <Printer className="w-4 h-4 mr-2" />
+          Print Sign In Sheet
+        </Button>
+        <Button variant="outline" onClick={handleExportCSV}>
+          <Download className="w-4 h-4 mr-2" />
+          Export All to CSV
+        </Button>
+      </div>
     </div>
   );
 }
