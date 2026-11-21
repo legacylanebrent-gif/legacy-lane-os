@@ -5,6 +5,7 @@ import {
   FEATURED_PLACEMENTS,
   claimableEntitlement,
   pendingEntitlement,
+  appendAudit,
   nowIso,
   loadSale,
   canActForSale,
@@ -612,16 +613,42 @@ Deno.serve(async (req) => {
         );
       }
 
+      // An abandoned attempt must never lock a sale out of ever being featured.
+      // A pending attempt whose payment page was closed without paying is retired
+      // as expired (history kept, nothing granted) so a new attempt can start. An
+      // attempt started seconds ago is still protected, so a double click cannot
+      // open two payable sessions.
       const awaiting = await base44.asServiceRole.entities.SaleEntitlement.filter({
         bound_sale_id: sale.id,
         kind: placement.kind,
         status: 'pending',
       });
-      if ((awaiting || []).length > 0) {
+      const justStarted = (awaiting || []).find((row) => {
+        const started = new Date(row.created_date || 0).getTime();
+        return isFinite(started) && Date.now() - started < 20000;
+      });
+      if (justStarted) {
         return Response.json(
-          { error: 'A placement payment for this sale is already in progress. Finish that checkout first.', code: 'payment_pending' },
+          {
+            error: 'The payment page for this placement just opened. Finish or close that tab, then try again.',
+            code: 'payment_pending',
+          },
           { status: 409 },
         );
+      }
+      for (const stale of awaiting || []) {
+        await base44.asServiceRole.entities.SaleEntitlement.update(stale.id, {
+          status: 'expired',
+          audit: appendAudit(stale, {
+            action: 'checkout_superseded',
+            status_from: 'pending',
+            status_to: 'expired',
+            actor_id: user.id,
+            actor_name: user.full_name || user.email,
+            sale_id: sale.id,
+            note: 'Placement checkout was closed without payment; a new attempt replaced it.',
+          }),
+        });
       }
 
       const appUrl = appUrlBase;

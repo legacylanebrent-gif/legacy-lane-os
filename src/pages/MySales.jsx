@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Link, useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
@@ -145,8 +145,25 @@ export default function MySales() {
   // A featured placement is a paid product, never a free switch. It is switched on
   // by the payment webhook after the charge is verified, and it ends with the sale
   // weekend. Nothing here writes the placement flags itself.
+  const awaitingPlacement = useRef(false);
+
+  // A payment happens in its own tab, so the sale list picks up the placement as
+  // soon as the operator comes back to it.
+  useEffect(() => {
+    const refreshAfterCheckout = () => {
+      if (!awaitingPlacement.current) return;
+      awaitingPlacement.current = false;
+      loadData();
+    };
+    window.addEventListener('focus', refreshAfterCheckout);
+    return () => window.removeEventListener('focus', refreshAfterCheckout);
+  }, []);
+
   const handleBuyPlacement = async (sale, placement) => {
     setFeaturingId(sale.id);
+    // The payment page opens in a new tab so closing it never closes EstateSalen.
+    // Opening it inside the click keeps the browser from blocking the tab.
+    const payWindow = window.open('', '_blank');
     try {
       const res = await base44.functions.invoke('create-checkout', {
         product: 'featured_placement',
@@ -154,11 +171,19 @@ export default function MySales() {
         placement,
       });
       if (res.data?.redirectUrl) {
-        window.location.href = res.data.redirectUrl;
+        awaitingPlacement.current = true;
+        if (payWindow) {
+          payWindow.opener = null;
+          payWindow.location.href = res.data.redirectUrl;
+        } else {
+          window.location.href = res.data.redirectUrl;
+        }
+        setFeaturingId(null);
         return;
       }
       throw new Error(res.data?.error || 'Checkout did not return a payment page.');
     } catch (e) {
+      if (payWindow && !payWindow.closed) payWindow.close();
       alert(e?.response?.data?.error || e?.message || 'Could not start the placement checkout.');
       setFeaturingId(null);
     }

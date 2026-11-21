@@ -79,8 +79,11 @@ Deno.serve(async (req) => {
         const entitlement = entitlementRows[0];
 
         // Idempotency: the checkout id is kept forever and the status is the lock,
-        // so concurrent or repeated deliveries grant exactly once.
-        if (entitlement.status !== 'pending') {
+        // so concurrent or repeated deliveries grant exactly once. An attempt the
+        // operator closed and later replaced is retired as expired locally — if it
+        // was in fact paid, that verified order still grants. The amount, currency
+        // and weekend checks below decide; anything already granted stays a no-op.
+        if (!['pending', 'expired'].includes(entitlement.status)) {
           console.log(`[webhook] SaleEntitlement ${entitlement.id} already ${entitlement.status} — no-op`);
           return new Response('OK', { status: 200 });
         }
