@@ -512,7 +512,7 @@ Return as a JSON array.`,
                     </div>
                     <div className="flex gap-2 flex-shrink-0">
                       <Button variant="outline" size="sm" disabled={task.stale} className="h-8 text-xs" onClick={() => openDepDialog(task)}>
-                        <Link2 className="w-3 h-3 mr-1" />Deps
+                        <Link2 className="w-3 h-3 mr-1" />Waiting On
                       </Button>
                       <Button variant="outline" size="sm" disabled={task.stale} className={`h-8 text-xs ${task.blocked ? 'border-red-400 bg-red-50 text-red-700' : ''}`} onClick={() => toggleBlocked(task)}>
                         {task.blocked ? 'Unblock' : 'Block'}
