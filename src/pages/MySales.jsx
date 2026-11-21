@@ -471,7 +471,7 @@ export default function MySales() {
             className="border-slate-300 text-slate-700 hover:bg-slate-50"
           >
             <ClipboardList className="w-4 h-4 mr-2" />
-            Workload
+            This Weeks Plan
           </Button>
           <Button
             variant="outline"
