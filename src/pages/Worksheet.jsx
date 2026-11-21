@@ -12,6 +12,7 @@ import TransactionImportModal from '@/components/worksheet/TransactionImportModa
 import SaleOffersTab from '@/components/worksheet/SaleOffersTab';
 import SaleSummaryTab from '@/components/worksheet/SaleSummaryTab';
 import { getSalePhotoOptions, filterSalePhotoOptions } from '@/components/worksheet/salePhotoOptions';
+import { bundleNameFromItems } from '@/components/worksheet/bundleModel';
 import { Html5QrcodeScanner } from 'html5-qrcode';
 
 export default function Worksheet() {
@@ -32,8 +33,7 @@ export default function Worksheet() {
   const [paymentMethod, setPaymentMethod] = useState('cash');
   const [notes, setNotes] = useState('');
   
-  // Bundle state
-  const [bundleName, setBundleName] = useState('');
+  // Bundle state — the bundle name is derived from its items, never typed
   const [bundleItems, setBundleItems] = useState([]);
   const [bundleItemInput, setBundleItemInput] = useState('');
   const [bundleItemPrice, setBundleItemPrice] = useState('');
@@ -108,6 +108,7 @@ export default function Worksheet() {
         sale_team_ids: sale?.sale_team || [],
         item_name: itemName,
         quantity: quantity,
+        price: parseFloat(price),
         total: parseFloat(price) * quantity,
         payment_method: paymentMethod,
         notes: notes
@@ -135,8 +136,9 @@ export default function Worksheet() {
   };
 
   const handleSaveBundle = async () => {
-    if (!bundleName || !bundlePrice || bundleItems.length === 0) {
-      alert('Please fill in all bundle fields');
+    const summaryName = bundleNameFromItems(bundleItems);
+    if (!summaryName || !bundlePrice || bundleItems.length === 0) {
+      alert('Add at least one bundle item and enter the bundle price');
       return;
     }
 
@@ -149,8 +151,9 @@ export default function Worksheet() {
         sale_id: saleId,
         operator_id: sale?.operator_id,
         sale_team_ids: sale?.sale_team || [],
-        item_name: bundleName,
+        item_name: summaryName,
         quantity: 1,
+        price: parseFloat(bundlePrice),
         total: parseFloat(bundlePrice),
         payment_method: paymentMethod,
         notes: `Bundle: ${bundleItems.map(i => i.name).join(', ')}`
@@ -159,7 +162,6 @@ export default function Worksheet() {
       await base44.entities.Transaction.create(bundleTransaction);
       
       // Reset form
-      setBundleName('');
       setBundleItems([]);
       setBundleItemInput('');
       setBundleItemPrice('');
@@ -243,6 +245,7 @@ export default function Worksheet() {
                 sale_team_ids: sale?.sale_team || [],
                 item_name: item.item_title || item.name || 'Cart Item',
                 quantity: item.quantity || 1,
+                price: item.price || 0,
                 total: (item.price || 0) * (item.quantity || 1),
                 payment_method: paymentMethod,
                 notes: 'Imported from customer cart QR scan',
@@ -453,8 +456,6 @@ export default function Worksheet() {
             submitting={submitting}
             handleAddTransaction={handleAddTransaction}
             handleSaveBundle={handleSaveBundle}
-            bundleName={bundleName}
-            setBundleName={setBundleName}
             bundleItems={bundleItems}
             bundleItemInput={bundleItemInput}
             setBundleItemInput={setBundleItemInput}

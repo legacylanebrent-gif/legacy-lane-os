@@ -5,6 +5,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Camera, Plus, X, QrCode, FileSpreadsheet } from 'lucide-react';
+import { bundleNameFromItems, bundleSuggestedTotal } from './bundleModel';
 
 export default function TransactionForm({
   photoMode, setPhotoMode,
@@ -18,7 +19,6 @@ export default function TransactionForm({
   submitting,
   handleAddTransaction,
   handleSaveBundle,
-  bundleName, setBundleName,
   bundleItems, bundleItemInput, setBundleItemInput,
   bundleItemPrice, setBundleItemPrice,
   bundlePrice, setBundlePrice,
@@ -205,8 +205,15 @@ export default function TransactionForm({
         ) : bundleMode ? (
           <div className="space-y-4 border-2 border-purple-200 rounded-lg p-4 bg-purple-50">
             <div>
-              <Label>Bundle Name <span className="text-red-500">*</span></Label>
-              <Input placeholder="e.g., Kitchen Bundle, Living Room Set..." value={bundleName} onChange={(e) => setBundleName(e.target.value)} />
+              <Label>Bundle Name</Label>
+              <Input
+                value={bundleNameFromItems(bundleItems)}
+                placeholder="Build the bundle below — the name fills in from its items"
+                disabled
+                readOnly
+                className="bg-slate-100 text-slate-600 cursor-not-allowed"
+              />
+              <p className="text-xs text-slate-600 mt-1">Used for checkout — built automatically from the bundle items.</p>
             </div>
 
             <div>
@@ -232,9 +239,15 @@ export default function TransactionForm({
             </div>
 
             <div>
+              <div className="flex items-center justify-between bg-purple-100 border border-purple-200 rounded-lg px-3 py-2 mb-2">
+                <span className="text-sm font-medium text-purple-800">Suggested bundle total</span>
+                <span className="text-lg font-bold text-purple-900">
+                  ${bundleSuggestedTotal(bundleItems).toFixed(2)}
+                </span>
+              </div>
               <Label>Bundle Price <span className="text-red-500">*</span></Label>
               <Input type="number" step="0.01" min="0" placeholder="0.00" value={bundlePrice} onChange={(e) => setBundlePrice(e.target.value)} className="font-semibold text-lg" />
-              <p className="text-xs text-slate-600 mt-1">Auto-calculated from items, or enter manually</p>
+              <p className="text-xs text-slate-600 mt-1">Enter the single price for the entire bundle</p>
             </div>
 
             <div>
