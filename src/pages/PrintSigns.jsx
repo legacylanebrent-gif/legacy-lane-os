@@ -11,7 +11,9 @@ import { Input } from '@/components/ui/input';
 import QRCode from 'qrcode';
 import { SIGN_TEMPLATES, SIGN_CATEGORIES } from '@/components/signs/signTemplatesData';
 import SignTemplateCard from '@/components/signs/SignTemplateCard';
+import PaymentSignSetupCard from '@/components/signs/PaymentSignSetupCard';
 import { renderSignDocument } from '@/components/signs/signRenderer';
+import { resolvePaymentSignData } from '@/components/signs/paymentSignData';
 import SaleFloorSigns from '@/components/signs/SaleFloorSigns';
 import { loadBusinessIdentity } from '@/lib/businessIdentity';
 
@@ -28,6 +30,7 @@ export default function PrintSigns() {
   const [signCategoryFilter, setSignCategoryFilter] = useState('all');
   const [zoneQrs, setZoneQrs] = useState({}); // Chapter 14 — prep-zone QR signs
   const [items, setItems] = useState([]); // Chapter 17 — for item-tied floor signs
+  const [paymentOptions, setPaymentOptions] = useState(null); // SalePaymentOptions — Zelle/Venmo QRs
 
   useEffect(() => {
     loadSale();
@@ -45,11 +48,15 @@ export default function PrintSigns() {
         return;
       }
 
-      const [userData, saleData, itemsData] = await Promise.all([
+      const [userData, saleData, itemsData, paymentData] = await Promise.all([
         base44.auth.me(),
         base44.entities.EstateSale.filter({ id: saleId }),
-        base44.entities.Item.filter({ estate_sale_id: saleId })
+        base44.entities.Item.filter({ estate_sale_id: saleId }),
+        // Optional: a sale can carry its own Zelle/Venmo QRs; otherwise the
+        // business profile's are used on the payment signs.
+        base44.entities.SalePaymentOptions.filter({ sale_id: saleId }).catch(() => [])
       ]);
+      setPaymentOptions(paymentData?.[0] || null);
 
       setCurrentUser(userData);
       // Chapter 7 P1 — canonical business identity (Company first, documented
@@ -447,6 +454,25 @@ export default function PrintSigns() {
             </div>
           </div>
 
+          {/* Payment signs read the business profile — show what they will print */}
+          {(signCategoryFilter === 'payment' || signCategoryFilter === 'all') && (
+            <PaymentSignSetupCard
+              payment={resolvePaymentSignData(currentUser, paymentOptions)}
+              cardBrands={currentUser?.accepted_card_brands || []}
+              onToggleBrand={async (value) => {
+                const current = currentUser?.accepted_card_brands || [];
+                const next = current.includes(value) ? current.filter(v => v !== value) : [...current, value];
+                setCurrentUser(prev => ({ ...prev, accepted_card_brands: next }));
+                try {
+                  await base44.auth.updateMe({ accepted_card_brands: next });
+                } catch (e) {
+                  console.error('Could not save accepted cards:', e);
+                  setCurrentUser(prev => ({ ...prev, accepted_card_brands: current }));
+                }
+              }}
+            />
+          )}
+
           {/* Signs Grid */}
           {(() => {
             const q = signSearch.toLowerCase();
@@ -462,10 +488,14 @@ export default function PrintSigns() {
               return brandIdentity?.logoUrl || currentUser?.logo_dark || currentUser?.logo_light || currentUser?.company_logo_url || currentUser?.company_logo || '';
             };
 
+            // Payment signs: accepted methods, the profile's Zelle / Venmo QR
+            // codes and the accepted / not accepted card brands.
+            const paymentSignData = resolvePaymentSignData(currentUser, paymentOptions);
+
             // Shared sign renderer: hyphen free text, word by word titles that fit
             // one row, real SVG arrows, 4 up sheets and multi page category guides.
             const generateSignHtml = (template, forView = false) =>
-              renderSignDocument(template, { forView, logoUrl: getOperatorLogo() });
+              renderSignDocument(template, { forView, logoUrl: getOperatorLogo(), payment: paymentSignData });
 
 
             const handlePrintSign = (template) => {

@@ -71,11 +71,15 @@ export const SIGN_TEMPLATES = [
   { id: 'master-furniture', name: 'Master Furniture', category: 'room', content: '' },
 
   // ── Payment Signs ──
-  { id: 'payment-cash-credit-zelle-venmo', name: 'Cash Credit Zelle Venmo', category: 'payment', content: 'WE ACCEPT: CASH · CREDIT CARD · ZELLE · VENMO' },
+  // Payment signs print what the operator actually accepts (business profile,
+  // or this sale's own payment settings) plus the profile's Zelle / Venmo QR
+  // codes, and which cards are and are not accepted.
+  { id: 'payment-cash-credit-zelle-venmo', name: 'Cash Credit Zelle Venmo', category: 'payment', signText: 'WE ACCEPT', paymentSummary: true, paymentQr: 'both', content: '' },
   { id: 'payment-cash-only', name: 'Cash Only', category: 'payment', content: 'CASH ONLY' },
-  { id: 'payment-cash-zelle-venmo', name: 'Cash Zelle Venmo', category: 'payment', content: 'WE ACCEPT: CASH · ZELLE · VENMO' },
-  { id: 'payment-venmo-qr', name: 'Venmo QR Code', category: 'payment', content: '' },
-  { id: 'payment-zelle-qr', name: 'Zelle QR Code', category: 'payment', content: '' },
+  { id: 'payment-cash-zelle-venmo', name: 'Cash Zelle Venmo', category: 'payment', signText: 'WE ACCEPT', paymentSummary: true, paymentQr: 'both', content: '' },
+  { id: 'payment-venmo-qr', name: 'Venmo QR Code', category: 'payment', signText: 'VENMO', paymentQr: 'venmo', content: 'SCAN TO PAY' },
+  { id: 'payment-zelle-qr', name: 'Zelle QR Code', category: 'payment', signText: 'ZELLE', paymentQr: 'zelle', content: 'SCAN TO PAY' },
+  { id: 'payment-cards-accepted', name: 'Credit Cards Accepted', category: 'payment', signText: 'CREDIT CARDS', paymentCards: true, content: '' },
 
   // ── DOT Pricing Signs ──
   { id: 'dot-pricing-day1-alt', name: 'DOT Pricing Day 1 Alt', category: 'dot-pricing', content: '' },

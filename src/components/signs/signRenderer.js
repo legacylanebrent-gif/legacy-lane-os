@@ -13,6 +13,8 @@
 //    kitchen, tools, video games, CDs and DVDs), each listing category price
 //    ranges. A printed range is a guide only; the item record stays the price.
 
+import { methodLabel } from './paymentSignData';
+
 const esc = (value) =>
   String(value ?? '').replace(/[&<>"']/g, (c) => ({
     '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
@@ -55,14 +57,65 @@ const arrowHtml = (direction = 'right', size = 220) => {
   return `<svg class="arrow" viewBox="0 0 120 100" width="${size}" height="${Math.round(size * 0.83)}" aria-hidden="true"><polygon points="0,38 68,38 68,10 120,50 68,90 68,62 0,62" fill="#1e293b"${flip}${spin}/></svg>`;
 };
 
+// Zelle / Venmo QR panel. The image and handle come from the operator's
+// business profile (or the sale's own payment settings); a handle without an
+// uploaded QR still prints so the sign is never blank.
+const qrBlockHtml = (key, data, scale) => {
+  if (!data) return '';
+  const label = key === 'zelle' ? 'Zelle' : 'Venmo';
+  const img = data.qrUrl
+    ? `<img src="${esc(data.qrUrl)}" alt="${esc(label)} QR code" style="width:${Math.round(205 * scale)}px;height:${Math.round(205 * scale)}px" />`
+    : '';
+  const handle = data.handle
+    ? `<div class="handle" style="font-size:${Math.round(20 * scale)}px">${esc(data.handle)}</div>`
+    : '';
+  if (!img && !handle) return '';
+  return `<div class="payqr">
+    <div class="lbl" style="font-size:${Math.round(23 * scale)}px">${esc(label)}</div>
+    ${img}${handle}
+  </div>`;
+};
+
+// Which cards are accepted and which are not — two printed columns, never a guess.
+const cardsBlockHtml = (cards, scale) => {
+  if (!cards) return '';
+  const col = (title, items, cls) => (items.length
+    ? `<div class="cardcol ${cls}">
+        <div class="cardhead" style="font-size:${Math.round(20 * scale)}px">${title}</div>
+        <ul>${items.map((i) => `<li style="font-size:${Math.round(21 * scale)}px">${esc(i)}</li>`).join('')}</ul>
+      </div>`
+    : '');
+  const yes = col('Accepted', cards.accepted || [], 'yes');
+  const no = col('Not Accepted', cards.declined || [], 'no');
+  if (!yes && !no) {
+    // No card brands chosen on the profile yet — never guess which are accepted.
+    return `<div class="body" style="font-size:${Math.round(26 * scale)}px">Ask staff which cards are accepted</div>`;
+  }
+  return `<div class="cards">${yes}${no}</div>`;
+};
+
 // One sign face. Used for a full letter page and, scaled down, for each 4 up cell.
-const signFaceHtml = (template, { width, pad, maxTitle, scale, logoUrl }) => {
+const signFaceHtml = (template, { width, pad, maxTitle, scale, logoUrl, payment }) => {
   const text = tidySignText(template.signText || template.name);
   const usable = width - pad * 2;
   const size = fitFontSize(text, usable, maxTitle);
-  const body = template.content
-    ? `<div class="body" style="font-size:${Math.round(26 * scale)}px">${esc(tidySignText(template.content))}</div>`
+  const summary = template.paymentSummary && payment
+    ? (payment.methods || []).map(methodLabel).filter(Boolean).join(' · ')
     : '';
+  const bodyText = summary || (template.content ? tidySignText(template.content) : '');
+  const body = bodyText
+    ? `<div class="body" style="font-size:${Math.round(26 * scale)}px">${esc(bodyText)}</div>`
+    : '';
+  const qrKeys = template.paymentQr === 'both'
+    ? ['zelle', 'venmo']
+    : template.paymentQr
+      ? [template.paymentQr]
+      : [];
+  const qrs = payment
+    ? qrKeys.map((key) => qrBlockHtml(key, payment[key], scale)).filter(Boolean).join('')
+    : '';
+  const qrWrap = qrs ? `<div class="payqrs">${qrs}</div>` : '';
+  const cards = template.paymentCards && payment ? cardsBlockHtml(payment.cards, scale) : '';
   const arrow = template.arrow ? arrowHtml(template.arrow, Math.round(usable * 0.4)) : '';
   const priceLine = template.priceLine
     ? `<div class="priceline" style="height:${Math.round(120 * scale)}px;border-bottom-width:${Math.max(3, Math.round(6 * scale))}px"><span style="font-size:${Math.round(34 * scale)}px">$</span></div>`
@@ -71,13 +124,13 @@ const signFaceHtml = (template, { width, pad, maxTitle, scale, logoUrl }) => {
     ? `<div class="logofoot"><img src="${esc(logoUrl)}" alt="Logo" style="max-height:${Math.round(96 * scale)}px;max-width:${Math.round(320 * scale)}px" /></div>`
     : '';
 
-  return `<div class="cardbody">${titleHtml(text, size)}${body}${arrow}${priceLine}</div>${logo}`;
+  return `<div class="cardbody">${titleHtml(text, size)}${body}${qrWrap}${cards}${arrow}${priceLine}</div>${logo}`;
 };
 
-const singlePageHtml = (template, logoUrl) => {
+const singlePageHtml = (template, logoUrl, payment) => {
   const width = LETTER_W - BORDER * 2 - 96;
   return `<div class="sheet">
-    <div class="card">${signFaceHtml(template, { width, pad: 0, maxTitle: 118, scale: 1, logoUrl })}</div>
+    <div class="card">${signFaceHtml(template, { width, pad: 0, maxTitle: 118, scale: 1, logoUrl, payment })}</div>
   </div>`;
 };
 
@@ -132,6 +185,21 @@ const baseCss = `
     letter-spacing:3px;line-height:1.12;text-transform:uppercase;color:#1e293b}
   .body{font-weight:700;color:#334155;letter-spacing:1px;text-transform:uppercase;line-height:1.35;max-width:100%}
   .arrow{display:block;margin:4px auto 0}
+  .payqrs{display:flex;flex-wrap:wrap;justify-content:center;align-items:flex-start;gap:30px;width:100%}
+  .payqr{display:flex;flex-direction:column;align-items:center;gap:8px}
+  .payqr img{object-fit:contain;background:#fff}
+  .payqr .lbl{font-family:'Arial Black',Gadget,sans-serif;font-weight:900;letter-spacing:2px;
+    text-transform:uppercase;color:#1e293b;line-height:1}
+  .payqr .handle{font-weight:700;color:#334155;letter-spacing:.5px}
+  .cards{display:flex;justify-content:center;align-items:flex-start;gap:24px;width:100%}
+  .cardcol{flex:1;max-width:47%;border:3px solid #1e293b;padding:12px 16px;text-align:left}
+  .cardcol.no{border-style:dashed;border-color:#64748b}
+  .cardhead{font-family:'Arial Black',Gadget,sans-serif;font-weight:900;letter-spacing:2px;
+    text-transform:uppercase;line-height:1.1;margin-bottom:6px}
+  .cardcol.yes .cardhead{color:#166534}
+  .cardcol.no .cardhead{color:#991b1b}
+  .cardcol ul{list-style:none}
+  .cardcol li{font-weight:700;color:#1e293b;line-height:1.4}
   .priceline{width:78%;border-bottom:6px solid #1e293b;display:flex;align-items:flex-end;padding:0 0 6px 4px}
   .priceline span{font-weight:900;line-height:1}
   .logofoot{display:flex;justify-content:flex-end;padding-top:12px}
@@ -169,14 +237,16 @@ const viewCss = `
 /**
  * Build the printable document for one sign template.
  * @param {object} template  an entry from SIGN_TEMPLATES
- * @param {{forView?: boolean, logoUrl?: string}} options
+ * @param {{forView?: boolean, logoUrl?: string, payment?: object}} options
+ *   payment: resolvePaymentSignData(user, salePaymentOptions) — drives the
+ *   Zelle / Venmo QR panels and the accepted / not accepted card lists.
  */
-export function renderSignDocument(template, { forView = false, logoUrl = '' } = {}) {
+export function renderSignDocument(template, { forView = false, logoUrl = '', payment = null } = {}) {
   const body = template.layout === 'price-pages' && (template.pages || []).length
     ? pricePagesHtml(template, logoUrl)
     : template.layout === 'fourup'
       ? fourUpPageHtml(template, logoUrl)
-      : singlePageHtml(template, logoUrl);
+      : singlePageHtml(template, logoUrl, payment);
 
   return `<html><head><title>${esc(template.name)}</title><style>${baseCss}${forView ? viewCss : ''}</style></head>
     <body>${body}${forView ? '' : '<script>window.onload=()=>window.print();<\/script>'}</body></html>`;
