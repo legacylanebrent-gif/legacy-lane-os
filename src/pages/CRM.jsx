@@ -24,7 +24,7 @@ import {
 } from '@/components/ui/select';
 import { 
   Users, Plus, Search, Mail, Phone, Tag, MessageSquare, 
-  Star, TrendingUp, Archive, UserPlus, Send, AlertCircle, Trash2, Lock
+  Star, TrendingUp, Archive, UserPlus, Send, AlertCircle, Trash2
 } from 'lucide-react';
 import { format } from 'date-fns';
 
@@ -59,11 +59,17 @@ export default function CRM() {
       if (ADMIN_ROLES.includes(userData.primary_account_type) || userData.role === 'admin') {
         setHasCrmAccess(true);
       } else {
-        // Check subscription tier — Starter does NOT include CRM; Growth and above do
-        const subs = await base44.entities.Subscription.filter({ user_id: userData.id, status: 'active' });
-        const tier = subs.length > 0 ? subs[0].tier : null;
+        // The account's own tier decides — a trial or still-pending package counts.
+        // Adding a client requires a CRM contact, so a plan row that is not yet
+        // marked "active" must never deactivate the CRM.
         const CRM_TIERS = ['growth', 'pro', 'professional', 'premium', 'enterprise', 'elite'];
-        setHasCrmAccess(CRM_TIERS.includes(tier));
+        const DEAD_STATUSES = ['cancelled', 'canceled', 'expired', 'refunded'];
+        let access = CRM_TIERS.includes(userData.subscription_tier || '');
+        if (!access) {
+          const subs = await base44.entities.Subscription.filter({ user_id: userData.id });
+          access = subs.some((sub) => CRM_TIERS.includes(sub.tier) && !DEAD_STATUSES.includes(sub.status || ''));
+        }
+        setHasCrmAccess(access);
       }
 
       const connectionsData = await base44.entities.Connection.filter({
@@ -158,28 +164,21 @@ export default function CRM() {
     );
   }
 
-  if (hasCrmAccess === false) {
-    return (
-      <div className="p-6 lg:p-8">
-        <div className="max-w-lg mx-auto text-center mt-12">
-          <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <Lock className="w-8 h-8 text-slate-400" />
-          </div>
-          <h1 className="text-2xl font-serif font-bold text-slate-900 mb-2">CRM Not Included in Your Plan</h1>
-          <p className="text-slate-600 mb-6">
-            The CRM is available starting with the <span className="font-semibold">Growth</span> package.
-            Upgrade your subscription to manage connections, track leads, and build client relationships.
-          </p>
-          <Button asChild className="bg-orange-600 hover:bg-orange-700">
-            <a href={createPageUrl('OperatorPackages')}>View Subscription Packages</a>
-          </Button>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="p-4 md:p-6 space-y-5 md:space-y-6">
+      {hasCrmAccess === false && (
+        <div className="flex flex-col gap-3 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 sm:flex-row sm:items-center">
+          <AlertCircle className="w-5 h-5 text-amber-600 shrink-0" />
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-semibold text-amber-900">Your plan does not include the full CRM suite yet</p>
+            <p className="text-sm text-amber-800">You can still add and manage clients and contacts here. Upgrade to Growth or higher for the full CRM.</p>
+          </div>
+          <Button asChild size="sm" className="bg-orange-600 hover:bg-orange-700 shrink-0">
+            <a href={createPageUrl('OperatorPackages')}>View packages</a>
+          </Button>
+        </div>
+      )}
+
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
           <h1 className="text-2xl md:text-3xl font-serif font-bold text-slate-900">CRM</h1>
