@@ -102,28 +102,30 @@ export default function PhotoAnalysisCard({ photo, index, state, busy, selected,
 
           {photo?.description && <p className="text-[11px] text-slate-600 line-clamp-2">{photo.description}</p>}
 
-          {suggested != null ? (
+          {photo?.price > 0 ? (
+            <p className="text-[11px] text-slate-700">
+              <span className="font-semibold text-slate-900">Your price ${photo.price}</span>
+              {suggested != null && <span className="text-slate-500"> · suggested ${suggested}</span>}
+              {suggested != null && research?.price_low != null && research?.price_high != null && <span className="text-slate-500"> · range ${research.price_low}–${research.price_high}</span>}
+              {suggested == null && compsAvg > 0 && <span className="text-slate-500"> · comps avg ${Math.round(compsAvg)}</span>}
+            </p>
+          ) : suggested != null ? (
             <p className="text-[11px] text-slate-700">
               <span className="font-semibold text-indigo-700">
                 Suggested ${suggested}
               </span>
               {research?.price_low != null && research?.price_high != null && <span className="text-slate-500"> · range ${research.price_low}–${research.price_high}</span>}
-              {photo?.price > 0 && <span className="text-slate-500"> · listed ${photo.price}</span>}
+              <span className="text-slate-400"> · no price set</span>
             </p>
           ) : compsAvg > 0 ? (
             <p className="text-[11px] text-slate-700">
               <span className="font-semibold text-slate-700">Comps average ${Math.round(compsAvg)}</span>
-              <span className="text-slate-500"> · no suggested price yet</span>
-              {photo?.price > 0 && <span className="text-slate-500"> · listed ${photo.price}</span>}
-            </p>
-          ) : photo?.price > 0 ? (
-            <p className="text-[11px] text-slate-700">
-              <span className="font-semibold text-slate-700">Listed ${photo.price}</span>
+              <span className="text-slate-400"> · no price set</span>
             </p>
           ) : job && classification === 'single' ? (
             <p className="text-[11px] text-slate-400">No price yet — the search found no usable comps.</p>
           ) : null}
-          {research?.price_basis && <p className="text-[10px] text-slate-500 line-clamp-2">{research.price_basis}</p>}
+          {research?.price_basis && <p className="text-[10px] text-slate-500 line-clamp-2"><span className="font-medium text-slate-400">Suggestion: </span>{research.price_basis}</p>}
 
           {job?.focus?.url && (
             <p className="text-[10px] font-medium text-cyan-800 flex items-center gap-1">
