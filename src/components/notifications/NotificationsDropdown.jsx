@@ -26,6 +26,7 @@ export default function NotificationsDropdown() {
   };
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [markingAll, setMarkingAll] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -55,6 +56,23 @@ export default function NotificationsDropdown() {
       loadNotifications();
     } catch (error) {
       console.error('Error marking notification as read:', error);
+    }
+  };
+
+  const markAllAsRead = async () => {
+    if (unreadCount === 0) return;
+    setMarkingAll(true);
+    try {
+      await base44.entities.Notification.updateMany(
+        { user_id: user.id, read: false },
+        { $set: { read: true } }
+      );
+      setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+      setUnreadCount(0);
+    } catch (error) {
+      console.error('Error marking all notifications as read:', error);
+    } finally {
+      setMarkingAll(false);
     }
   };
 
@@ -105,6 +123,18 @@ export default function NotificationsDropdown() {
         subtitle={`${unreadCount} unread`}
         widthClass="sm:w-96"
       >
+        {unreadCount > 0 && (
+          <div className="sticky top-0 z-10 flex items-center justify-end border-b border-slate-100 bg-white/95 px-4 py-2 backdrop-blur">
+            <button
+              type="button"
+              onClick={markAllAsRead}
+              disabled={markingAll}
+              className="text-xs font-semibold text-cyan-700 hover:text-cyan-900 disabled:opacity-50"
+            >
+              {markingAll ? 'Marking…' : 'Mark all read'}
+            </button>
+          </div>
+        )}
         {notifications.length === 0 ? (
           <div className="p-8 text-center text-slate-500 text-sm">
             No notifications yet
