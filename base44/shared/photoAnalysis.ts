@@ -711,6 +711,14 @@ export async function runPhotoAnalysis(ctx) {
 
       // retry / reanalyze / release_hold: clear the failure, keep every completed checkpoint.
       const fresh = action === 'reanalyze' || releasing;
+      // Re-analyze is the operator asking for a fresh read of this one photo, so a
+      // title or description saved earlier (by them or by taking a search result)
+      // may be replaced. The operator's own listing price is never touched by any
+      // analysis run, so it stays theirs.
+      if (action === 'reanalyze') {
+        photo.pipeline.operator_fields = (photo.pipeline.operator_fields || [])
+          .filter(field => !['name', 'description', 'synopsis'].includes(field));
+      }
       photo.pipeline.jobs = {
         ...photo.pipeline.jobs,
         [JOB_KEY]: {

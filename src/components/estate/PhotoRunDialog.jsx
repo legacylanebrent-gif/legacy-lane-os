@@ -33,7 +33,11 @@ export default function PhotoRunDialog({ open, mode, progress, analyzed, total, 
         </DialogHeader>
 
         <div className="space-y-2">
-          {hasBar ? (
+          {mode === 'single' ? (
+            <p className="text-[11px] text-slate-600">
+              Only this one item is being worked on, so this takes a few seconds.
+            </p>
+          ) : hasBar ? (
             <>
               <div className="h-1.5 w-full overflow-hidden rounded-full bg-slate-200">
                 <div
