@@ -3,20 +3,6 @@ import { Loader2, RotateCcw, Search, RefreshCw, Check, AlertTriangle, ImageOff, 
 import PhotoOperatorEditor from '@/components/estate/PhotoOperatorEditor';
 import PhotoSerpMatches from '@/components/estate/PhotoSerpMatches';
 
-/** Takes the analysis suggestion on this photo and makes it the item's own title, description and price. */
-function UseThisButton({ used, onClick, disabled }) {
-  return (
-    <button
-      type="button"
-      disabled={disabled}
-      onClick={onClick}
-      className={`flex-shrink-0 inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded border text-[10px] font-semibold disabled:opacity-50 ${used ? 'border-green-300 bg-green-50 text-green-700' : 'border-indigo-300 bg-indigo-50 text-indigo-800'}`}
-    >
-      {used ? <><Check className="w-2.5 h-2.5" /> Used</> : 'Use This'}
-    </button>
-  );
-}
-
 const TONE = {
   ready: 'bg-green-50 border-green-200 text-green-700',
   needs_review: 'bg-amber-50 border-amber-200 text-amber-800',
@@ -39,9 +25,8 @@ const LABEL = {
 
 const reasonList = job => (job?.review_flags || []).filter(Boolean);
 
-export default function PhotoAnalysisCard({ photo, index, state, busy, selected, canSelect = true, inventoryItem, brand, onSelect, onRetry, onReanalyze, onResearch, onClassify, onRelease, onSaveFields, onUseSuggestion, onDelete }) {
+export default function PhotoAnalysisCard({ photo, index, state, busy, selected, canSelect = true, inventoryItem, brand, onSelect, onRetry, onReanalyze, onResearch, onClassify, onRelease, onSaveFields, onDelete }) {
   const [editing, setEditing] = useState(false);
-  const [usedSuggestion, setUsedSuggestion] = useState(false);
   const job = photo?.pipeline?.jobs?.analysis;
   const research = job?.research;
   const suggested = research?.suggested_price;
@@ -58,10 +43,16 @@ export default function PhotoAnalysisCard({ photo, index, state, busy, selected,
   const lensUrl = photo?.url
     ? `https://lens.google.com/uploadbyurl?url=${encodeURIComponent(photo.url)}`
     : null;
-  const canUseSuggestion = canOperate && !!onUseSuggestion;
-  const applySuggestion = async () => {
-    const saved = await onUseSuggestion?.(photo);
-    if (saved !== false) setUsedSuggestion(true);
+  // Take one saved search result — its suggested item title and its asking price —
+  // and make them this item's own title and price.
+  const useMatch = match => {
+    const fields = {};
+    const title = String(match?.title || '').trim();
+    const price = Number(match?.price);
+    if (title) fields.name = title;
+    if (price > 0) fields.price = price;
+    if (!Object.keys(fields).length) return;
+    return onSaveFields(photo, fields);
   };
 
   return (
@@ -107,24 +98,16 @@ export default function PhotoAnalysisCard({ photo, index, state, busy, selected,
             </p>
           )}
 
-          {photo?.description && (
-            <div className="flex items-start gap-1.5">
-              <p className="flex-1 min-w-0 text-[11px] text-slate-600 line-clamp-2">{photo.description}</p>
-              {canUseSuggestion && <UseThisButton used={usedSuggestion} onClick={applySuggestion} disabled={busy} />}
-            </div>
-          )}
+          {photo?.description && <p className="text-[11px] text-slate-600 line-clamp-2">{photo.description}</p>}
 
           {suggested != null ? (
-            <div className="flex items-start gap-1.5">
-              <p className="flex-1 min-w-0 text-[11px] text-slate-700">
-                <span className="font-semibold text-indigo-700">
-                  Suggested ${suggested}
-                </span>
-                {research?.price_low != null && research?.price_high != null && <span className="text-slate-500"> · range ${research.price_low}–${research.price_high}</span>}
-                {photo?.price > 0 && <span className="text-slate-500"> · listed ${photo.price}</span>}
-              </p>
-              {canUseSuggestion && <UseThisButton used={usedSuggestion} onClick={applySuggestion} disabled={busy} />}
-            </div>
+            <p className="text-[11px] text-slate-700">
+              <span className="font-semibold text-indigo-700">
+                Suggested ${suggested}
+              </span>
+              {research?.price_low != null && research?.price_high != null && <span className="text-slate-500"> · range ${research.price_low}–${research.price_high}</span>}
+              {photo?.price > 0 && <span className="text-slate-500"> · listed ${photo.price}</span>}
+            </p>
           ) : compsAvg > 0 ? (
             <p className="text-[11px] text-slate-700">
               <span className="font-semibold text-slate-700">Comps average ${Math.round(compsAvg)}</span>
@@ -150,7 +133,7 @@ export default function PhotoAnalysisCard({ photo, index, state, busy, selected,
       </div>
 
       <div className="px-2.5">
-        <PhotoSerpMatches research={research} />
+        <PhotoSerpMatches research={research} photo={photo} busy={busy} onUse={canOperate ? useMatch : null} />
       </div>
 
       {editing && (

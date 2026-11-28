@@ -70,16 +70,6 @@ export default function SalePhotoAnalysisPanel({ saleId, analysis, photos = [], 
     return done;
   };
 
-  // One press takes the suggestion on this photo — its title, description and
-  // suggested price — and saves it as the operator's own, so the item created in the
-  // lower section carries it and no later analysis run overwrites it.
-  const useSuggestion = photo => {
-    const price = photo?.pipeline?.jobs?.analysis?.research?.suggested_price;
-    const fields = { name: photo?.name || '', description: photo?.description || '' };
-    if (price != null) fields.price = price;
-    return saveFieldsAndBrands(photo, fields);
-  };
-
   // Photos already turned into inventory items, so a photo can never create two.
   const [promoted, setPromoted] = useState({});
   const [selected, setSelected] = useState(() => new Set());
@@ -381,7 +371,6 @@ export default function SalePhotoAnalysisPanel({ saleId, analysis, photos = [], 
               onClassify={analysis.classify}
               onRelease={analysis.releaseHold}
               onSaveFields={saveFieldsAndBrands}
-              onUseSuggestion={useSuggestion}
               onDelete={removePhoto}
             />
           ))}
