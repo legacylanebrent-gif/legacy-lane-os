@@ -62,10 +62,13 @@ export default function useSalePhotoAnalysis({ saleId, onPhoto, onRunComplete })
   };
 
   const drain = async scope => {
+    // Only a plain lane name may travel to the server. A click handler hands us the
+    // browser event, which can never be serialized into the request.
+    const lane = typeof scope === 'string' ? scope : null;
     let exhausted = false;
     await Promise.all(Array.from({ length: LANES }, async () => {
       for (;;) {
-        const result = await call({ action: 'next', credits_exhausted: exhausted, ...(scope ? { scope } : {}) });
+        const result = await call({ action: 'next', credits_exhausted: exhausted, ...(lane ? { scope: lane } : {}) });
         if (result.exhausted) exhausted = true;
         settle(result);
         if (result.done) return;
@@ -86,7 +89,7 @@ export default function useSalePhotoAnalysis({ saleId, onPhoto, onRunComplete })
   };
 
   /** Analyze every photo that still needs work, then stop. */
-  const start = guard(drain, 'step1');
+  const start = guard(() => drain(), 'step1');
 
   /** Requeue failed / interrupted / credit-blocked photos, then run them. */
   const retryFailed = guard(async () => {
