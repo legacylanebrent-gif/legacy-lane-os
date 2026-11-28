@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { Loader2, RotateCcw, Search, RefreshCw, Check, AlertTriangle, ImageOff, ExternalLink, Pencil, Trash2, Tag } from 'lucide-react';
+import { Loader2, RotateCcw, Search, RefreshCw, Check, AlertTriangle, ImageOff, ExternalLink, Pencil, Trash2, Tag, Crop } from 'lucide-react';
 import PhotoOperatorEditor from '@/components/estate/PhotoOperatorEditor';
 import PhotoSerpMatches from '@/components/estate/PhotoSerpMatches';
+import PhotoFocusCropDialog from '@/components/estate/PhotoFocusCropDialog';
 
 const TONE = {
   ready: 'bg-green-50 border-green-200 text-green-700',
@@ -27,6 +28,7 @@ const reasonList = job => (job?.review_flags || []).filter(Boolean);
 
 export default function PhotoAnalysisCard({ photo, index, state, busy, selected, canSelect = true, inventoryItem, brand, onSelect, onRetry, onReanalyze, onResearch, onClassify, onRelease, onSaveFields, onDelete }) {
   const [editing, setEditing] = useState(false);
+  const [cropping, setCropping] = useState(false);
   const job = photo?.pipeline?.jobs?.analysis;
   const research = job?.research;
   const suggested = research?.suggested_price;
@@ -123,6 +125,12 @@ export default function PhotoAnalysisCard({ photo, index, state, busy, selected,
           ) : null}
           {research?.price_basis && <p className="text-[10px] text-slate-500 line-clamp-2">{research.price_basis}</p>}
 
+          {job?.focus?.url && (
+            <p className="text-[10px] font-medium text-cyan-800 flex items-center gap-1">
+              <Crop className="w-3 h-3" /> Reading the isolated area you picked
+            </p>
+          )}
+
           {reasons.length > 0 && (
             <p className="text-[10px] text-amber-700 flex items-start gap-1">
               <AlertTriangle className="w-3 h-3 flex-shrink-0 mt-px" />
@@ -194,7 +202,7 @@ export default function PhotoAnalysisCard({ photo, index, state, busy, selected,
           </button>
         )}
         {!held && state !== 'inflight' && (
-          <button type="button" disabled={busy} onClick={() => onReanalyze(photo)}
+          <button type="button" disabled={busy} onClick={() => setCropping(true)}
             className="inline-flex items-center gap-1 px-2 py-1 rounded border border-slate-300 bg-white text-[11px] font-medium text-slate-700 disabled:opacity-50">
             <RefreshCw className="w-3 h-3" /> {state === 'pending' ? 'Analyze' : 'Re-analyze'}
           </button>
@@ -224,6 +232,14 @@ export default function PhotoAnalysisCard({ photo, index, state, busy, selected,
           </button>
         )}
       </div>
+
+      <PhotoFocusCropDialog
+        open={cropping}
+        photo={photo}
+        busy={busy}
+        onClose={() => setCropping(false)}
+        onConfirm={focus => { setCropping(false); onReanalyze(photo, focus); }}
+      />
     </div>
   );
 }

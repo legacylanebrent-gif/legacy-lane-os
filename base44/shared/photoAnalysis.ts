@@ -307,6 +307,19 @@ function reviewFlags(basic, research) {
   return [...new Set(flags)].slice(0, 5);
 }
 
+/**
+ * The area of the photo the operator isolated before re-analyzing it. The crop is
+ * uploaded by the browser and the numbers are fractions of the whole photo, so
+ * nothing here is trusted beyond being a real https image with sane bounds.
+ */
+function cleanFocus(value) {
+  if (!value || typeof value !== 'object') return null;
+  const url = String(value.url || '').trim();
+  if (!/^https:\/\/\S+$/i.test(url) || url.length > 600) return null;
+  const share = v => (typeof v === 'number' && Number.isFinite(v) && v >= 0 && v <= 1 ? Math.round(v * 1000) / 1000 : null);
+  return { url, x: share(value.x), y: share(value.y), w: share(value.w), h: share(value.h), at: new Date().toISOString() };
+}
+
 /* ─────────────────────────── claim ─────────────────────────── */
 
 function claimNext(images, now, scope = null) {
@@ -352,6 +365,8 @@ function claimNext(images, now, scope = null) {
       research: base.research || null,
       research_kind: base.research_kind || null,
       lens_cache: base.lens_cache || null,
+      // The isolated area the operator picked stays the image this run reads.
+      focus: base.focus || null,
       review_flags: base.review_flags || [],
       error: null,
       retryable: false,
@@ -393,6 +408,9 @@ async function processClaimed(ctx) {
   const meta = { service, user, saleId };
   const started = Date.now();
   let job = target.job;
+  // Every read of this photo — the description, the visual search and the pricing
+  // synthesis — uses the area the operator isolated, when they picked one.
+  const image = () => (job?.focus?.url ? { ...target.photo, url: job.focus.url } : target.photo);
 
   const settle = async patch => {
     const value = await patchJob(meta, ref, job.id, patch);
@@ -419,7 +437,7 @@ async function processClaimed(ctx) {
 
   try {
     if (job.stage === 'claimed') {
-      const basic = await describe(target.photo);
+      const basic = await describe(image());
       job.classification = basic.photo_type === SINGLE ? SINGLE : GROUP;
       job.classification_source = 'ai';
       await settle(j => ({ ...j, stage: 'described', basic, classification: basic.photo_type === SINGLE ? SINGLE : GROUP, classification_source: 'ai' }));
@@ -459,8 +477,8 @@ async function processClaimed(ctx) {
       // instead of a fresh visual search, reusing the visual matches Step 1 already
       // paid for (they cost nothing to read again).
       const search = job.research_kind === 'keyword'
-        ? await ctx.shopping(target.photo, job.basic)
-        : await ctx.lens(target.photo);
+        ? await ctx.shopping(image(), job.basic)
+        : await ctx.lens(image());
       const evidence = job.research_kind === 'keyword'
         ? {
             matches: [...(search.matches || []), ...(job.lens_cache || [])],
@@ -469,7 +487,7 @@ async function processClaimed(ctx) {
             source: 'serpapi_google_shopping',
           }
         : search;
-      const researched = await research(target.photo, job.basic, evidence);
+      const researched = await research(image(), job.basic, evidence);
       await settle(j => ({ ...j, stage: 'researched', research: researched, review_flags: reviewFlags(j.basic, researched) }));
     }
 
@@ -711,6 +729,9 @@ export async function runPhotoAnalysis(ctx) {
 
       // retry / reanalyze / release_hold: clear the failure, keep every completed checkpoint.
       const fresh = action === 'reanalyze' || releasing;
+      // The image this run reads. A re-analyze may name a newly isolated area, or
+      // pass null to go back to the whole photo; without a choice the last one holds.
+      const focus = action === 'reanalyze' && 'focus' in body ? cleanFocus(body.focus) : (job.focus || null);
       // Re-analyze is the operator asking for a fresh read of this one photo, so a
       // title or description saved earlier (by them or by taking a search result)
       // may be replaced. The operator's own listing price is never touched by any
@@ -723,6 +744,7 @@ export async function runPhotoAnalysis(ctx) {
         ...photo.pipeline.jobs,
         [JOB_KEY]: {
           ...(fresh ? { id: crypto.randomUUID(), revision: photo.pipeline.revision } : job),
+          focus,
           state: 'pending',
           stage: fresh ? 'claimed' : (job.stage === 'final' ? 'described' : job.stage || 'claimed'),
           basic: fresh ? null : job.basic || null,

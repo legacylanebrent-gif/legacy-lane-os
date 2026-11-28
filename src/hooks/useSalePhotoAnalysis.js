@@ -124,7 +124,8 @@ export default function useSalePhotoAnalysis({ saleId, onPhoto, onRunComplete })
     stop: () => { runningRef.current = false; },
     retryFailed,
     retry: photo => single(photo, { action: 'retry' }),
-    reanalyze: photo => single(photo, { action: 'reanalyze' }),
+    /** Re-read one photo. A cropped focus area is the image this run reads; null returns to the whole photo. */
+    reanalyze: (photo, focus = null) => single(photo, { action: 'reanalyze', focus: focus || null }),
     /** Take the operator's own skip / do-not-scan marker off one photo, then analyze it. */
     releaseHold: photo => single(photo, { action: 'release_hold' }),
     research: photo => single(photo, { action: 'research' }),
